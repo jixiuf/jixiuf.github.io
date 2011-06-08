@@ -1,0 +1,151 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     golang 变量倒底是在堆上还是栈上分配的分析
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2014-05-06 Tue
+#+DESCRIPTION:golang 变量倒底是在堆上还是栈上分配的分析
+#+KEYWORDS: golang heap stack
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Golang:
+下面一段代码 ，附上行号， 主要用来分析 stu ,stu2,stu3 3个变量 究竟是在堆上分配，
+还 是在栈上分配,
+主要使用 gdb 调试， 来查看3个变量的地址
+#+BEGIN_SRC go
+   1 package main
+   2
+   3 import (
+   4  "fmt"
+   5 )
+   6
+   7 type Stu struct {
+   8  age int
+   9 }
+  10
+  11 func (stu *Stu) test() {
+  12  var i int
+  13  fmt.Println(i)
+  14 }
+  15 func test(stu *Stu) {
+  16  var i int
+  17  fmt.Println(i)
+  18
+  19 }
+  20 func main() {
+  21  var stu Stu
+  22  stu2 := Stu{1}
+  23  stu3 := &Stu{1}
+  24  stu.test()
+  25  stu2.test()
+  26  stu3.test()
+  27  test(&stu)
+  28  test(&stu2)
+  29  test(stu3)
+  30  fmt.Println(stu, stu2, stu3)
+  31
+  32 }
+  33
+#+END_SRC
+#+BEGIN_SRC sh
+ GNU gdb (GDB) 7.7
+ Copyright (C) 2014 Free Software Foundation, Inc.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ This is free software: you are free to change and redistribute it.
+ There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+ and "show warranty" for details.
+ This GDB was configured as "x86_64-apple-darwin13.1.0".
+ Type "show configuration" for configuration details.
+ For bug reporting instructions, please see:
+ <http://www.gnu.org/software/gdb/bugs/>.
+ Find the GDB manual and other documentation resources online at:
+ <http://www.gnu.org/software/gdb/documentation/>.
+ For help, type "help".
+ Type "apropos word" to search for commands related to "word"...
+ Reading symbols from c...done.
+ Loading Go Runtime support.
+ (gdb) l
+ 11	func (stu *Stu) test() {
+ 12		var i int
+ 13		fmt.Println(i)
+ 14	}
+ 15	func test(stu *Stu) {
+ 16		var i int
+ 17		fmt.Println(i)
+ 18
+ 19	}
+ 20	func main() {
+ (gdb) b 12  (在12行 打上断点
+ Breakpoint 1 at 0x2019: file /private/tmp/c.go, line 12.
+ (gdb) b 16 (在16行  打上断点
+ Breakpoint 2 at 0x20a9: file /private/tmp/c.go, line 16.
+ (gdb) r   启动调试
+ Starting program: /private/tmp/c
+ [New Thread 0x1a0b of process 28719]
+ [New Thread 0x1b03 of process 28719]
+ [New Thread 0x1c03 of process 28719]
+
+ Breakpoint 1, main.(*Stu).test (stu=0x2210361ed8) at /private/tmp/c.go:12
+ 12		var i int
+ (gdb) p stu   (启动调试后 在第一个断点处（12行） 停住， 打印stu 的当前地址
+ $1 = (main.Stu *) 0x2210361ed8
+ (gdb) c
+ Continuing.
+ 0
+
+ Breakpoint 1, main.(*Stu).test (stu=0x2210361ee0) at /private/tmp/c.go:12
+ 12		var i int
+ (gdb) p stu  (启动调试后  第2次在12行停住， 打印stu 的当前地址，实际是stu2 变量的地址,stu2,与stu 的地址，很接近， 说明分配在同一处（ 要么都在堆在 要么都在栈上)
+ $2 = (main.Stu *) 0x2210361ee0
+ (gdb) c
+ Continuing.
+ 0
+
+ Breakpoint 1, main.(*Stu).test (stu=0x2101f0018) at /private/tmp/c.go:12
+ 12		var i int
+ (gdb) p stu  (启动调试后  第3次在12行停住， 打印stu 的当前地址，实际是stu3 变
+ 量的地址,stu3的地址,与stu的地址差距很大， 说明不是分配在同一处，在main 函数中，
+ 定义stu3时使用过& 操作符， 所以可以基本肯定 stu3 是分配在堆上 ，而 stu stu2是分配在栈
+ 上
+ 我还有一个疑问 ， 就是 （是不是所有&取地址都会导致变量在椎上分配?），比如在27 28 行
+ 的调用，也对stu ,stu2进行了取址址操作，
+ 下面继续跟踪16行处的代码，stu,stu2 的地址，并没有因为对变量取地址操作，而导致与
+  stu3 一样都分配在堆上，
+  结论     &Stu{1} 定义的变量是在堆上，
+          s:=Stu{} 定义的变量在栈上，即使以后&s, 取s 的地址， 也不会导致s 分配在堆上
+
+ $3 = (main.Stu *) 0x2101f0018
+ (gdb) c
+ Continuing.
+ 0
+
+ Breakpoint 2, main.test (stu=0x2210361ed8) at /private/tmp/c.go:16
+ 16		var i int
+ (gdb) p stu
+ $4 = (main.Stu *) 0x2210361ed8
+ (gdb) c
+ Continuing.
+ 0
+
+ Breakpoint 2, main.test (stu=0x2210361ee0) at /private/tmp/c.go:16
+ 16		var i int
+ (gdb) p stu
+ $5 = (main.Stu *) 0x2210361ee0
+ (gdb) c
+ Continuing.
+ 0
+ [Switching to Thread 0x1b03 of process 28719]
+
+ Breakpoint 2, main.test (stu=0x2101f0018) at /private/tmp/c.go:16
+ 16		var i int
+ (gdb) p stu
+ $6 = (main.Stu *) 0x2101f0018
+ (gdb) c
+ Continuing.
+ 0
+ {0} {1} &{1}
+ [Inferior 1 (process 28719) exited normally]
+ (gdb) q
+
+
+#+END_SRC

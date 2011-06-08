@@ -1,0 +1,45 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     kill所有连接到某库的连接
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-09-27 星期二
+#+DESCRIPTION:kill所有连接到某库的连接
+#+KEYWORDS: sqlserver sql 
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil 
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :SQL: :Windows: 
+
+在进行sqlserver数据库恢复时，需要关闭所有连接到此数据库的连接。
+下面这个存储过程，可以做到，
+#+begin_src sql
+use   master
+go
+
+create   proc   p_killspid
+@dbname   sysname --要关闭进程的数据库名
+as    
+declare   @s   nvarchar(1000)
+declare   tb   cursor   local   for
+select   s= 'kill   '+cast(spid   as   varchar)
+from   master..sysprocesses  
+where   dbid=db_id(@dbname)
+
+open   tb  
+fetch   next   from   tb   into   @s
+while   @@fetch_status=0
+begin
+exec(@s)
+fetch   next   from   tb   into   @s
+end
+close   tb
+deallocate   tb
+go
+#+end_src
+#+begin_src sql
+--用法    
+exec   p_killspid     'dbname' 
+#+end_src

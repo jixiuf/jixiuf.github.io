@@ -1,0 +1,35 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     动态内在分配
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-10-23 日
+#+DESCRIPTION:动态内在分配
+#+KEYWORDS: c malloc
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil 
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :C: 
+#+begin_src c
+#include <malloc.h>
+#include <stdio.h>
+#include <string.h>
+
+int main(int argc, char *argv[])
+{
+  char * src ="abcde";
+  char *p =malloc(2); //分配2个单位
+  strcpy(p ,"a");
+  printf ("%p\n",p); //打印当前p 的地址
+
+  p=realloc(p,1026000);//重新对p进行分配,分配6个单位
+  printf ("%p\n",p) ;//打印当前p 的地址
+  /* realloc() 函数要求第一个参数必须是 malloc()或 calloc()的返回值    */
+  /* realloc现在原地获取指定大小的内存，如果不能，那么需要另外分配，再free原来的内存； */
+  strcpy(p ,src);
+  puts(p);
+  return 0;
+}
+#+end_src

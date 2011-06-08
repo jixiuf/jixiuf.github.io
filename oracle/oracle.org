@@ -1,0 +1,35 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     oracle拾遗
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-29 日
+#+DESCRIPTION:oracle拾遗
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :DB: :Oracle: :SQL:
+* 查看表空间信息
+#+BEGIN_SRC sql
+SELECT tbs  表空间名,
+sum(totalM) 总共大小M,
+sum(usedM) 已使用空间M,
+sum(remainedM) 剩余空间M,
+sum(usedM)/sum(totalM)*100 已使用百分比,
+sum(remainedM)/sum(totalM)*100 剩余百分比
+FROM (
+   SELECT b.file_id　　ID,
+   b.Tablespace_name　　tbs,
+   b.file_name　　　　　name,
+   b.bytes/1024/1024　　　　　　　totalM,
+   (b.bytes-sum(nvl(a.bytes,0)))/1024/1024　　　usedM,
+   sum(nvl(a.bytes,0))/1024/1024　　　　　　　　remainedM,
+   sum(nvl(a.bytes,0))/(b.bytes)*100　剩余百分比 ,
+   (100 - (sum(nvl(a.bytes,0))/(b.bytes)*100))　已使用百分比
+   FROM dba_free_space a,dba_data_files b
+   WHERE a.file_id=b.file_id
+   GROUP BY b.Tablespace_name,b.file_name,b.file_id,b.bytes
+   ORDER BY b.Tablespace_name
+)
+GROUP BY tbs;
+#+END_SRC

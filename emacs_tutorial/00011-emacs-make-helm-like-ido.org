@@ -1,0 +1,94 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     让helm表现的更像ido
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@qq.com
+#+DATE:     2017-03-13 一
+#+DESCRIPTION:让helm表现的更像ido
+#+KEYWORDS:Emacs
+#+TAGS:Emacs
+#+FILETAGS:Emacs
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \setmainfont{PingFang SC}
+* helm 像 ido 一样 在目录上return 则进入目录而不是打开dired,并且忽略开头的"." 和 ".."
+  可以解决这个问题
+  http://stackoverflow.com/questions/27652371/how-can-i-change-emacs-helm-find-file-default-action-on-directory-to-be-go-insid
+
+  In Ido, I could hit ret to go down the selected directory, but I have
+  to hit right or c-j in helm. Also, helm-find-files would list . and
+  .. at the very top for every directory. This means in ido, I can
+  just hit ret ret ret until I get to the final destination if there
+  aren't many directories along the path.
+
+#+BEGIN_SRC emacs-lisp
+  ;;;###autoload
+  (defun vmacs-helm-ido-exit-minibuffer()
+    (interactive)
+    ;; 如果选中的是..或.则认为选中的是第一个非. 或..项目, 即跳过.. 与.
+    (let ((selection (helm-get-selection)))
+      (when (string-match-p "/\\.$" selection)
+        (helm-move-selection-common :where 'line :direction 'next)
+        (helm-move-selection-common :where 'line :direction 'next))
+      (when (string-match-p "/\\.\\.$" selection)
+        (helm-move-selection-common :where 'line :direction 'next))
+      (when (string-match-p "\\.DS_Store" (helm-get-selection))
+        (helm-move-selection-common :where 'line :direction 'next))
+
+      (if (file-directory-p (helm-get-selection))
+          (call-interactively 'helm-execute-persistent-action)
+        (call-interactively 'helm-maybe-exit-minibuffer ))))
+    (define-key helm-find-files-map (kbd "<return>") 'vmacs-helm-ido-exit-minibuffer)
+    (define-key helm-find-files-map (kbd "<RET>")      'vmacs-helm-ido-exit-minibuffer)
+#+END_SRC
+* helm 像 ido 一样C-d打开dired
+  C-d 可以删除光标后的内容,当光标后无内容时则用dired打开当前项
+#+BEGIN_SRC emacs-lisp
+  ;;;###autoload
+  (defun vmacs-helm-magic-delete-char( arg)
+    "ido like `C-d' for helm."
+    (interactive "P")
+    (if (eobp)
+        (helm-select-nth-action 0)
+      (delete-char (min (prefix-numeric-value arg)
+                        (- (point-max) (point))))))
+
+  (define-key helm-generic-files-map (kbd "C-d") 'vmacs-helm-magic-delete-char) ;;
+  (define-key helm-find-files-map (kbd "C-d") 'vmacs-helm-magic-delete-char) ;;
+#+END_SRC
+
+* helm 像 ido 一样C-j直接用输入的内容创建文件或buffer,而不是用选中的那个
+  helm-multi-files helm-find-file 都可以用这个功能
+
+
+#+BEGIN_SRC emacs-lisp
+;;;###autoload
+(defun vmacs-helm-find-file-select-text()
+  "like `C-j' in ido."
+  (interactive)
+  (let ((file (find-file-noselect helm-pattern)))
+    (helm-run-after-exit 'switch-to-buffer file)
+    (helm-exit-minibuffer)))
+
+  (define-key helm-find-files-map (kbd "C-j") 'vmacs-helm-find-file-select-text) ;;
+  (define-key helm-generic-files-map (kbd "C-j") 'vmacs-helm-find-file-select-text) ;;
+  (define-key helm-buffer-map (kbd "C-j")       'vmacs-helm-find-file-select-text) ;make it like C-j in ido
+  (define-key helm-buffers-ido-virtual-map (kbd "C-j") 'vmacs-helm-find-file-select-text)
+#+END_SRC
+
+这样会导致C-j无法执行 helm-execute-persistent-action,当然也可用用C-z,但C-z不太好按
+决定把它绑定到C-e上,实现在光标到行末时执行helm-execute-persistent-action,否则C-e执行end-of-line
+
+
+#+BEGIN_SRC emacs-lisp
+  ;;;###autoload
+  (defun vmacs-helm-magic-eol( arg)
+    "C-e move to end of line or execute helm-execute-persistent-action"
+    (interactive "P")
+    (if (eobp)
+        (call-interactively 'helm-execute-persistent-action)
+      (call-interactively 'end-of-line)))
+
+  (define-key helm-map (kbd "C-e")        'vmacs-helm-magic-eol)
+#+END_SRC

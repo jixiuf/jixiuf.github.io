@@ -1,0 +1,106 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     数值转换
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-23 一
+#+DESCRIPTION:数值转换
+#+KEYWORDS: :C:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :C:
+#+BEGIN_SRC c
+  int atoi(const char *nptr);
+  double atof(const char *nptr);
+   /* 返回值：转换结果 */
+#+END_SRC
+
+atoi把一个字符串开头可以识别成十进制整数的部分转换成int型，相当于下面要讲的
+strtol(nptr, (char **) NULL, 10);。例如atoi("123abc")的返回值是123，字符串开头
+可以有若干空格，例如atoi(" -90.6-")的返回值是-90。如果字符串开头没有可识别的整
+数，例如atoi("asdf")，则返回0，而atoi("0***")也返回0，根据返回值并不能区分这两
+种情况，所以使用atoi函数不能检查出错的情况。下面要讲的strtol函数可以设置errno，
+因此可以检查出错的情况，在严格的场合下应该用strtol，而atoi用起来更简便，所以也
+很常用。
+
+atof把一个字符串开头可以识别成浮点数的部分转换成double型，相当于下面要讲的
+strtod(nptr, (char **) NULL);。字符串开头可以识别的浮点数格式和C语言的浮点数常
+量相同，例如atof("31.4 ")的返回值是31.4，atof("3.14e+1AB")的返回值也是31.4。
+atof也不能检查出错的情况，而strtod可以。
+
+#+BEGIN_SRC c
+  #include <stdlib.h>
+
+  long int strtol(const char *nptr, char **endptr, int base);
+  double strtod(const char *nptr, char **endptr);
+  /* 返回值：转换结果，出错时设置errno */
+#+END_SRC
+strtol是atoi的增强版，主要体现在这几方面：
+
+    + 不仅可以识别十进制整数，还可以识别其它进制的整数，取决于base参数，比如
+      strtol("0XDEADbeE~~", NULL, 16)返回0xdeadbee的值，strtol("0777~~", NULL,
+      8)返回0777的值。
+
+    + endptr是一个传出参数，函数返回时指向后面未被识别的第一个字符。例如char
+      *pos; strtol("123abc", &pos, 10);，strtol返回123，pos指向字符串中的字母a。
+      如果字符串开头没有可识别的整数，例如char *pos; strtol("ABCabc", &pos,
+      10);，则strtol返回0，pos指向字符串开头，可以据此判断这种出错的情况，而这
+      是atoi处理不了的。
+
+    + 如果字符串中的整数值超出long int的表示范围（上溢或下溢），则strtol返回它
+      所能表示的最大（或最小）整数，并设置errno为ERANGE，例如
+      strtol("0XDEADbeef~~", NULL, 16)返回0x7fffffff并设置errno为ERANGE。
+
+回想一下使用fopen的套路
+#+BEGIN_SRC c
+if ( (fp = fopen(...)) == NULL) { 读取errno }，
+#+END_SRC
+fopen在出错时会返回NULL，因此我们知道需要读errno，但strtol在成功调用时也可能返
+回0x7fffffff，我们如何知道需要读errno呢？最严谨的做法是首先把errno置0，再调用
+strtol，再查看errno是否变成了错误码。Man Page上有一个很好的例子：
+#+BEGIN_SRC c
+  #include <stdlib.h>
+  #include <limits.h>
+  #include <stdio.h>
+  #include <errno.h>
+
+  int main(int argc, char *argv[])
+  {
+      int base;
+      char *endptr, *str;
+      long val;
+
+      if (argc < 2) {
+          fprintf(stderr, "Usage: %s str [base]\n", argv[0]);
+          exit(EXIT_FAILURE);
+      }
+
+      str = argv[1];
+      base = (argc > 2) ? atoi(argv[2]) : 10;
+
+      errno = 0;    /* To distinguish success/failure after call */
+      val = strtol(str, &endptr, base);
+
+      /* Check for various possible errors */
+
+      if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN))
+          || (errno != 0 && val == 0)) {
+          perror("strtol");
+          exit(EXIT_FAILURE);
+      }
+
+      if (endptr == str) {
+          fprintf(stderr, "No digits were found\n");
+          exit(EXIT_FAILURE);
+      }
+
+      /* If we got here, strtol() successfully parsed a number */
+
+      printf("strtol() returned %ld\n", val);
+
+      if (*endptr != '\0')        /* Not necessarily an error... */
+          printf("Further characters after number: %s\n", endptr);
+
+      exit(EXIT_SUCCESS);
+  }
+#+END_SRC

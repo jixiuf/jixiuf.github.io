@@ -1,0 +1,163 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     x86.汇编的一些知识
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-21 六
+#+DESCRIPTION:x86.汇编的一些知识
+#+KEYWORDS: x86 as c
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :C:
+参考 http://learn.akae.cn/media/ch18s01.html
+* 寻址方式
+
+通过上一节的例子我们了解到，访问内存时在指令中可以用多种方式表示内存地址，比如
+可以用数组基地址、元素长度和下标三个量来表示，增加了寻址的灵活性。本节介绍x86常
+用的几种寻址方式（Addressing Mode）。内存寻址在指令中可以表示成如下的通用格式：
+#+BEGIN_SRC sh
+ADDRESS_OR_OFFSET(%BASE_OR_OFFSET,%INDEX,MULTIPLIER)
+#+END_SRC
+它所表示的地址可以这样计算出来：
+#+BEGIN_SRC sh
+FINAL ADDRESS = ADDRESS_OR_OFFSET + BASE_OR_OFFSET + MULTIPLIER * INDEX
+#+END_SRC
+其中ADDRESS_OR_OFFSET和MULTIPLIER必须是常数，BASE_OR_OFFSET和INDEX必须是寄存器。
+在有些寻址方式中会省略这4项中的某些项，相当于这些项是0。
+
+如
+#+BEGIN_SRC asm
+data_items(,%edi,4)
+#+END_SRC
+data_items是一个数组 ，
+data_items表示数组的基地址ADDRESS_OR_OFFSET
+%BASE_OR_OFFSET,空着为0
+%edi寄存器中存着数组的当前索引位置，
+数组每个元素大小为4,MULTIPLIER 表示每个数组元素占用的字节大小（可能单位不是字节）
+
+
+    + 直接寻址（Direct Addressing Mode）。只使用ADDRESS_OR_OFFSET寻址，例如movl ADDRESS, %eax把ADDRESS地址处的32位数传送到eax寄存器。
+    + 变址寻址（Indexed Addressing Mode） 。上一节的movl data_items(,%edi,4), %eax就属于这种寻址方式，用于访问数组元素比较方便。
+    + 间接寻址（Indirect Addressing Mode）。只使用BASE_OR_OFFSET寻址，例如movl (%eax), %ebx，把eax寄存器的值看作地址，把内存中这个地址处的32位数传送到ebx寄存器。注意和movl %eax, %ebx区分开。
+    + 基址寻址（Base Pointer Addressing Mode）。只使用ADDRESS_OR_OFFSET和BASE_OR_OFFSET寻址，例如movl 4(%eax), %ebx，用于访问结构体成员比较方便，例如一个结构体的基地址保存在eax寄存器中，其中一个成员在结构体内的偏移量是4字节，要把这个成员读上来就可以用这条指令。
+    + 立即数寻址（Immediate Mode）。就是指令中有一个操作数是立即数，例如movl $12, %eax中的$12，这其实跟寻址没什么关系，但也算作一种寻址方式。
+    + 寄存器寻址（Register Addressing Mode）。就是指令中有一个操作数是寄存器，例如movl $12, %eax中的%eax，这跟内存寻址没什么关系，但也算作一种寻址方式。在汇编程序中寄存器用助记符来表示，在机器指令中则要用几个Bit表示寄存器的编号，这几个Bit也可以看作寄存器的地址，但是和内存地址不在一个地址空间。
+* 代码示例
+#+BEGIN_SRC asm
+      #PURPOSE: This program finds the maximum number of a
+      #     set of data items.
+      #
+      #VARIABLES: The registers have the following uses:
+      #
+      # %edi - Holds the index of the data item being examined
+      # %ebx - Largest data item found
+      # %eax - Current data item
+      #
+      # The following memory locations are used:
+      #
+      # data_items - contains the item data. A 0 is used
+      # to terminate the data
+      #
+       .section .data
+      data_items:         #These are the data items
+       .long 3,67,34,222,45,75,54,34,44,33,22,11,66,0
+
+       .section .text
+       .globl _start
+      _start:
+       movl $0, %edi      # move 0 into the index register
+       movl data_items(,%edi,4), %eax # load the first byte of data
+       movl %eax, %ebx    # since this is the first item, %eax is
+                  # the biggest
+
+      start_loop:         # start loop
+       cmpl $0, %eax      # check to see if we've hit the end
+       je loop_exit
+       incl %edi      # load next value
+       movl data_items(,%edi,4), %eax
+       cmpl %ebx, %eax    # compare values
+       jle start_loop     # jump to loop beginning if the new
+                  # one isn't bigger
+       movl %eax, %ebx    # move the value as the largest
+       jmp start_loop     # jump to loop beginning
+
+      loop_exit:
+       # %ebx is the status code for the _exit system call
+       # and it already has the maximum number
+       movl $1, %eax      #1 is the _exit() syscall
+       int $0x80
+#+END_SRC
+#+BEGIN_SRC sh
+汇编、链接、运行
+$ as max.s -o max.o
+$ ld max.o -o max
+$ ./max
+$ echo $? # shell中查看上一个程序的返回状态
+这个程序在一组数中找到一个最大的数，并把它作为程序的退出状态。这组数在.data段给出：
+#+END_SRC
+#+BEGIN_QUOTE
+data_items:         #These are the data items
+ .long 3,67,34,222,45,75,54,34,44,33,22,11,66,0
+#+END_QUOTE
+.long指示声明一组数，每个数占32位，相当于C语言中的数组。这个数组开头定义了一个
+符号data_items，汇编器会把数组的首地址作为data_items符号所代表的地址，
+data_items类似于C语言中的数组名。data_items这个标号没有用.globl声明，因为它只在
+这个汇编程序内部使用，链接器不需要用到这个名字。
+
+除了.long之外，常用的数据声明还有：
+    + .byte，也是声明一组数，每个数占8位
+    + .ascii，例如.ascii "Hello world"，声明11个数，取值为相应字符的ASCII码。注
+      意，和C语言不同，这样声明的字符串末尾是没有'\0'字符的，如果需要以'\0'结尾
+      可以声明为.ascii "Hello world\0"。
+
+data_items数组的最后一个数是0，我们在一个循环中依次比较每个数，碰到0的时候让循环终止。在这个循环中：
+    edi寄存器保存数组中的当前位置，每次比较完一个数就把edi的值加1，指向数组中的下一个数。
+    ebx寄存器保存到目前为止找到的最大值，如果发现有更大的数就更新ebx的值。
+    eax寄存器保存当前要比较的数，每次更新edi之后，就把下一个数读到eax中。
+    #+BEGIN_SRC asm
+     _start:
+      movl $0, %edi                        #    初始化edi，指向数组的第0个元素
+      movl data_items(,%edi,4), %eax
+    #+END_SRC
+这条指令把数组的第0个元素传送到eax寄存器中。data_items是数组的首地址，edi的值是
+数组的下标，4表示数组的每个元素占4字节，那么数组中第edi个元素的地址应该是
+data_items + edi * 4，写在指令中就是data_items(,%edi,4)，
+
+
+#+BEGIN_SRC asm
+start_loop:
+ cmpl $0, %eax
+ je loop_exit
+#+END_SRC
+在循环中比较%eax中的值是不是0
+
+cmpl指令将两个操作数相减，但计算结果并不保存，只是根据计算结果改变eflags寄存器
+中的标志位。如果两个操作数相等，则计算结果为0，eflags中的ZF位置1。je是一个条件
+跳转指令，它检查eflags中的ZF位，ZF位为1则发生跳转，ZF位为0则不跳转，继续执行下
+一条指令。可见比较指令和条件跳转指令是配合使用的，前者改变标志位，后者根据标志
+位决定是否跳转。je可以理解成“jump if equal”，如果参与比较的两数相等则跳转。
+
+#+BEGIN_SRC asm
+ incl %edi
+ movl data_items(,%edi,4), %eax
+ 将edi的值加1，把数组中的下一个数传送到eax寄存器中。
+#+END_SRC
+#+BEGIN_SRC asm
+ cmpl %ebx, %eax
+ jle start_loop
+#+END_SRC
+把当前数组元素eax和目前为止找到的最大值ebx做比较，如果前者小于等于后者，则最大
+值没有变，跳转到循环开头比较下一个数，否则继续执行下一条指令。jle表示“jump if
+less than or equal”。
+* x86寄存器
+x86的通用寄存器有eax、ebx、ecx、edx、edi、esi。这些寄存器在大多数指令中是可以任
+意选用的，比如movl指令可以把一个立即数传送到eax中，也可传送到ebx中。但也有一些
+指令规定只能用其中某个寄存器做某种用途，例如除法指令idivl要求被除数在eax寄存器
+中，edx寄存器必须是0，而除数可以在任意寄存器中，计算结果的商数保存在eax寄存器中
+（覆盖原来的被除数），余数保存在edx寄存器中。也就是说，通用寄存器对于某些特殊指
+令来说也不是通用的。
+
+x86的特殊寄存器有ebp、esp、eip、eflags。eip是程序计数器，eflags保存着计算过程中
+产生的标志位，其中包括第 3 节 “整数的加减运算”讲过的进位标志、溢出标志、零标
+志和负数标志，在intel的手册中这几个标志位分别称为CF、OF、ZF、SF。ebp和esp用于维
+护函数调用的栈帧，在第 1 节 “函数调用”详细讨论。

@@ -1,0 +1,57 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     emacs画文本图
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2013-01-17 四
+#+DESCRIPTION:emacs画文本图
+#+KEYWORDS:@Emacs artist-mode
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Emacs:
+* emacs 自带artist-mode
+  在一个新buffer ,或者 `C-xnn'后的buffer中 M-x:artist-mode
+  Shift+中键 选择画什么图形
+  Shift+ 右键  删除一个区域
+  | 操作       | 无shift                                                                                     | shift                                                                             |
+  | pen        | 单击，在鼠标点填充一个“填充符号”，默认为”.”；按下左键，拖动，抬起，绘制填充符号组成的线 | 单击，在鼠标点填充一个“o”；按下左键，拖动，抬起，绘制一条从初始点到最终点的直线 |
+  | Line       | 任意方向的线                                                                                | 直线                                                                              |
+  | Rectangle  | 矩形                                                                                        | 正方形1                                                                           |
+  | Poly-line  | 任意方向的多边形                                                                            | 每条线都是直线的多边形                                                            |
+  | Ellipses   | 椭圆                                                                                        | 圆2                                                                               |
+  | Text       | 文本                                                                                        | 覆盖式文本                                                                        |
+  | Spray-can  | 喷雾器3                                                                                     | 设置喷雾器的大小                                                                  |
+  | Erase      | 橡皮，擦掉一个字符                                                                          | 擦掉矩形内字符                                                                    |
+  | Vaporize   | 擦除一行                                                                                    | 擦除所有相连的行                                                                  |
+  | Cut        | 剪切矩形                                                                                    | 剪切正方形                                                                        |
+  | copy       | 复制矩形                                                                                    | 复制正方形                                                                        |
+  | paste      | 粘贴                                                                                        | 粘贴                                                                              |
+  | Flood-fill | 填充工具，填充                                                                              | 填充                                                                              |
+  |            |                                                                                             |                                                                                   |
+* org 整合
+  #+BEGIN_SRC ditaa :file ../img/blue.png   :cmdline -r -S
+  +---------+
+  | cBLU    |
+  |         |
+  |    +----+
+  |    |cPNK|
+  |    |    |
+  +----+----+
+
+  #+END_SRC
+
+  #+BEGIN_HTML
+  <pre>
+  +---------+
+  | cBLU    |
+  |         |
+  |    +----+
+  |    |cPNK|
+  |    |    |
+  +----+----+
+
+  </pre>
+  #+END_HTML
+* Link
+  http://www.udpwork.com/item/1464.html
+  http://orgmode.org/worg/org-contrib/org-exp-blocks.html

@@ -1,0 +1,56 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     mnesia拾遗
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2013-01-21 一
+#+DESCRIPTION:mnesia.org
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS::Erlang:
+* Mnesia 的几个参数
+  mnesia有 LATEST.LOG 日志文件 及 *.DAT, *.DCD *.DCL 等数据文件
+  mnesia是先向 LATEST.LOG写日志，当日志达到dump_log_write_threshold参数(默认
+  100条)或时间到dump_log_time_threshold(默认3min)时，会将这100条日志操作apply到数据文件上，
+  dump操作应该就是 LOG->DAT转移的过程
+**  dc_dump_limit
+    This variable controls how often disc_copies tables are dumped from memory.
+    The default value is 4, which means if the size of the log is greater than
+    the size of table / 4, then a dump occurs. To make table dumps happen more
+    often, increase the value. I've found setting this to 40 works well for my
+    purposes.
+** dump_log_write_threshold
+   默认每执行100次write ,才会dump 到硬盘一次,
+   调大这个值,即增大dump的间隔,即，如果你write很频繁，可以试着调大此值，
+   同时也需要更大的内存支持
+   This variable defines the maximum number of writes to the transaction log
+   before a new dump is performed. The default value is 100, so a new
+   transaction log dump is performed after every 100 writes. If you're doing
+   hundreds or thousands of writes in a short period of time, then there's no
+   way mnesia can keep up. I set this value to 50000, which is a huge
+   increase, but I have enough RAM to handle it. If you're worried that this
+   high value means the transaction log will rarely get dumped when there's
+   very few writes occuring, there's also a dump_log_time_threshold
+   configuration variable, which by default dumps the log every 3 minutes.
+** dump_log_time_threshold 默认3min
+   跟dump_log_write_threshold配合的一个参数，
+   每3min执行一次dump操作,主要是当write数据很不频繁，达不到
+   dump_log_write_threshold的值，到了时间仍然进行dump操作，
+** WARNING ** Mnesia is overloaded: {dump_log,time_threshold}
+   连续多次收到这样一条消息的原因，这里有说明 
+   http://erlang.2086793.n4.nabble.com/my-mnesia-is-lazy-td2114608.html
+   you start mnesia and then you put your laptop to sleeep or do nothing.
+   
+   you come back the next day, open your laptop and you find mnesia
+   complains about being overloaded.
+   
+   It basically is because you didn't do any transactions for a day.
+   
+   It has nothing to do with being overloaded and mnesia should
+   differentiate this case. 
+
+* Link
+http://streamhacker.com/2008/12/10/how-to-eliminate-mnesia-overload-events/
+http://www.erlang.org/doc/apps/mnesia/Mnesia_chap7.html
+http://erlang.2086793.n4.nabble.com/my-mnesia-is-lazy-td2114608.html

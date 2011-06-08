@@ -1,0 +1,51 @@
+# -*- coding:utf-8-unix -*-
+#+TITLE:     一些有用的链接
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:      2011-06-03 星期五
+#+DESCRIPTION: 我收集的一些链接地址
+#+KEYWORDS:  link url emacs
+#+LANGUAGE:  zh
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:{} -:t f:t *:t <:t timestamp:t
+
++ http://blog.solrex.org/
++ [[http://www.serveridol.com/2009/11/02/mysql-server-optimization/][mysql相关博文]]
++ [[http://rdc.taobao.com/blog/cs/][淘宝核心团队]]
++ [[http://learn.akae.cn/media/index.html][Linux C编程一站式学习]]
++ [[http://blog.yufeng.info/archives/category/erlang][Erlang非业余研究]]
++ [[http://blog.ec-ae.com/][zhangwei Denny (Emacs Erlang)]]
++ [[http://www.cnblogs.com/me-sa/category/304370.html][erlang blog]]
++ http://iany.me/
++ http://plantuml.sourceforge.net/emacs.html
++ [[http://emacser.com/][Emacs中文网，不知是哪位老兄建的站.还算不错]]
++ [[http://emacser.com/about.htm][Emacs中文网众多牛人的信息]]
++ [[http://emacser.com/to-emacs-beginner.htm][致Emacs初学者]]
++ [[http://emacser.com/emacs-beginner-must-know.htm][Emacs中文网初学者必知]] ahei
++ [[http://www.caole.net/diary/index.html][曹乐]]的个人主页(org-mode制作)
++ [[http://tumashu.github.com/][org-mode  user:tomashu]]
++ [[http://home.ustc.edu.cn/~bobye/index.html][bobye org-mode user]]
++ [[http://lifegoo.pluskid.org/][浙大pluskid ，yasnippet的作者]]
++ [[http://www.6test.edu.cn/~huxw/][RobinH.ood的个人网站]]
++ [[http://learn.tsinghua.edu.cn:8080/2002315162/index.html][Brep]]
++ [[http://rcir.sjtu.edu.cn/~cgliu/webwiki/index.html][刘成刚 博士研究生上海交通大学]]
++ [[http://emacser.com/emacs-beginner-must-know.htm][emacser 初学者必知必会]]
++ [[http://www.pconline.com.cn/pcedu/soft/gj/photo/0609/865628.html][Emacs是一种信仰！世界最强编辑器介绍 作者：王垠 ]]
++ [[http://docs.huihoo.com/homepage/shredderyin/][王垠,那个有名的辍学博士，我估计他不喜欢别人这样称呼他]]
++ [[http://lisie.hdu.edu.cn/passionke/tag/emacs/][柯激情]]Vim Emacs 对战
++ [[http://grid.tsinghua.edu.cn/home/liulk/][liulk org-mode]]
++ [[http://grid.tsinghua.edu.cn/home/liulk/wiki/emacs/WelcomePage.html][liulk wiki]]
++ [[http://www.fengyj.net/][冯雅杰]]
++ [[http://blog.zhuli.name/archives/category/emacs][隐清堂]]
++ [[http://space.uibe.edu.cn/u1/ryang/start.html][杨立强]]
++ [[http://waterlin.blog.35.cn/][细节之锤]]博客
++ http://danamlund.dk/
++ [[http://thenybble.de/projects/orgsite.html][pthenybble.de org-mode user]]
++ [[http://danamlund.dk/emacs/orgsite.html][他介绍自已如何用org-mode发布他的网站的网页(英文）]]
++ [[http://coolshell.cn/featured_posts][陈皓的博客]]
++ [[http://stackoverflow.com/questions/tagged/emacs][一个英文网站，分很多模块，比如Emacs ,好像很活跃.]]
++ [[http://alpha.gnu.org/gnu/emacs/windows/][ Emacs最新的编译版本（一周一更新,windows上使用)]]
++ [[http://www.emacswiki.org][Emacswiki 主页]]
++ [[http://www.emacswiki.org/emacs/Joseph][Emacswiki上我的主页(呵呵，用了个洋名)]]
++ [[https://github.com/jixiuf][我的许多代码都托管在github]]
++ [[http://blog.csdn.net/jixiuffff][csdn 上我的博客主页]]
++ [[http://www.baidupcs.com/file/4d672faaa0f820cff195cc9308b22879?fid=2181393914-250528-647736722&time=1363243362&sign=FDTA-DCb740ccc5511e5e8fedcff06b081203-yUm07JXClRem%2F0D0cTYjYZG%2BUSs%3D&expires=8h&sh=1&response-cache-control=private][Mac 镜像]]

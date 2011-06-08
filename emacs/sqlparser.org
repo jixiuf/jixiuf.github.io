@@ -1,0 +1,178 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     为mysql、sqlserver、oracle编写sql脚本时补全表名、列名
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-07-21 四
+#+DESCRIPTION:为mysql及oracle编写sql脚本时补全表名、列名
+#+KEYWORDS: emacs sql mysql oracle complete anything
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Emacs: :SQL:
+* 链接
+演示视频screencast [[http://screencast-repos.googlecode.com/files/emacs-sqlparse-mysql-complete.mkv.bz2][screencast]] mkv格式 ，用bzip 进行压缩
+文件上传到了 [[http://emacswiki.org/Joseph]],
+同时源代码用git 进行管理，地址在这里[[https://github.com/jixiuf/sqlparser][github.com/sqlparser]].
+* 简介
+  最近新写了一个以mysql 为后端，当编写sql 脚本时，能适时地从mysql 数据库中查询
+  适时插入到当前光标下的表名列名等内容的扩展. 即进行表名列名的补全。(现在也相应
+  的提供了 oracle sqlserver 版本的)
+  emacswiki上有[[http://www.emacswiki.org/emacs/SqlComplete][SqlComplete]] 的介绍，用了一下，发现并不好用。不够智能，比如它不
+  清楚什么时候该插入表名，什么时候该插入列名。所以只好自已动手。
+
+  相初用这个sqlparser名字是因为 在emacs 中对sql 语句进行编写时，想写一些解析当前sql
+  语句的相关函数，所以用了sqlparser这个名，后来陆续添加了一些与sql相关的功能
+  用这个名字，似乎不太合适，但也懒得改了。
++  oracle-query.el
++  sqlserver-query.el
++  mysql-query.el
+   这三个提供最基本的连接数据库的功能
+
++ sqlparser-mysql-complete.el
++ sqlparser-oracle-complete.el
++ sqlparser-sqlserver-complete.el
+  这三个文件 分别提供编写 sql脚本时补全 表名、列名的功能。
+  比如在from 之后，补全表名，在select ,where 之后补全列名等.
+
+- sqlserver-table2entity-4csharp.el
+- sqlserver-table2entity-4java.el
+- oracle-table2entity-4csharp.el
+- oracle-table2entity-4java.el
+- mysql-table2entity-4csharp.el
+- mysql-table2entity-4java.el
+- mysql-table2record-erlang.el
+  这几个文件分别提供了将sqlserver mysql oracle的某个schema中所有的表导出成java
+  csharp 实体类的功能。
+  #+BEGIN_SRC sh
+M-x: sqlserver-table2entity-4csharp-interactively
+M-x: sqlserver-table2entity-4java-interactively
+M-x: oracle-table2entity-4java-interactively
+M-x: oracle-table2entity-4csharp-interactively
+M-x: mysql-table2entity-4csharp-interactively
+M-x: mysql-table2entity-4java-interactively
+M-x: erlang-mysql-generate-records
+  #+END_SRC
+  分别提供这样几个函数
+  + mysql-query.el
+    #+BEGIN_SRC emacs-lisp
+      ;; the normal way to use mysql-query.el is :
+      ;; 1:
+      (defvar mysql-connection (mysql-query-create-connection connection-info))
+      or
+      (defvar mysql-connection nil)
+      (unless (mysql-query-connection-alive-p  mysql-connection)
+        (setq mysql-connection (call-interactively 'mysql-query-create-connection)))
+
+      ;; 2:
+        (mysql-query              "select user from mysql.user" mysql-connection)
+        (mysql-query-with-heading "select user from mysql.user" mysql-connection)
+    #+END_SRC
+  + oracle-query.el
+    #+BEGIN_SRC emacs-lisp
+      ;; execute sql using sqlplus and return as list .
+      (oracle-query "select empno,ename from emp where empno<=7499")
+      ;; got :     (("7369" "SMITH") ("7499" "ALLEN"))
+      ;; or
+      (oracle-query-with-heading "select empno,ename from emp where empno<=7499")
+      ;; got :     (("EMPNO" "ENAME") ("7369" "SMITH") ("7499" "ALLEN"))
+      ;; using default connection ,not recommended.
+      (defvar connection (oracle-query-create-connection "scott/tiger"))
+      (oracle-query "select empno from emp" connection)
+      ;; recommended
+      ;; the normal way to use oracle-query.el is :
+      ;; 1:
+      (defvar sqlplus-connection nil)
+      (unless (oracle-query-connection-alive-p c)
+        (setq sqlplus-connection (call-interactively 'oracle-query-create-connection)))
+      ;; 2:
+      (oracle-query "select empno from emp" sqlplus-connection)
+      ;; 3:
+      (oracle-query-close-connection sqlplus-connection)
+    #+END_SRC
+  + sqlserver-query.el
+    #+BEGIN_SRC emacs-lisp
+        ;; the normal way to use sqlserver-query.el is :
+      ;; 1:
+      (defvar c nil)
+      (unless (sqlserver-query-connection-alive-p c)
+        (setq c (call-interactively 'sqlserver-query-create-connection)))
+      ;; 2:
+        (sqlserver-query "select empno from emp" c)
+        ;; or
+        (sqlserver-query-with-heading "select empno from emp" c)
+      ;; 3:
+        (sqlserver-query-close-connection c)
+    #+END_SRC
+* 如何使用进行mysql 的表名列名补全：
+#+BEGIN_SRC emacs-lisp
+  (require 'sqlparser-mysql-complete)
+  (define-key sql-mode-map (quote [M-return]) 'sqlparser-mysql-complete)
+  (define-key sql-interactive-mode-map  (quote [M-return]) 'sqlparser-mysql-complete)
+  ;; or
+  (defadvice sql-mysql (around start-mysql-complete-minor-mode activate)
+    "enable `mysql-complete-minor-mode' minor mode."
+    ad-do-it
+    (mysql-complete-minor-mode))
+  (define-derived-mode mysql-mode sql-mode "mysql"
+    "mysql mode"
+    (mysql-complete-minor-mode))
+
+  ;; `sqlparser-mysql-complete' default  bind on `TAB' in
+  ;; with `C-u' you can change the dbname
+  ;; with `C-uC-u' you can use another new mysql connection
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+  (require 'sqlparser-oracle-complete)
+  (add-hook 'sql-mode-hook 'oracle-complete-minor-mode)
+  (add-hook 'sqlplus-mode-hook 'oracle-complete-minor-mode)
+  ;; or you can call M-x: oracle-complete-minor-mode
+  ;; and complete command is binded on `TAB' .
+  ;; with `C-u' you can complete with new connection string.
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+   ;; there is a minor mode defined here
+        (sqlserver-complete-minor-mode)
+  ;; you can add it to sql-mode-hook
+  (add-hook  'sql-mode-hook 'sqlserver-complete-minor-mode)
+  ;; or call M-x sqlserver-complete-minor-mode
+
+   ;; and complete command is binded on `TAB' .
+
+  ;; 1. you should custom these variable
+  ;; `sqlserver-connection-info'
+   ;; `sqlserver-cmd' ;sqlcmd or osql
+  ;; for example
+  (setq sqlserver-connection-info
+        '((username . "sa")
+          (password . "sa")
+          (server-instance . "localhost\\SQLEXPRESS")
+          (dbname . "master"))
+        )
+  ;; or sometimes
+  (setq sqlserver-connection-info
+        '((username . "sa")
+          (password . "sa")
+          (server-instance . "localhost")
+          (dbname . "master")))
+
+  (setq sqlserver-cmd' 'sqlcmd) or (setq sqlserver-cmd' 'osql)
+
+
+  ;; my config file about sqlserver-complete-minor-mode looks like this .
+  (require 'sql)
+  (require 'sqlparser-sqlserver-complete)
+  (add-hook  'sql-mode-hook 'sqlserver-complete-minor-mode)
+  (add-hook  'sqlserver-complete-minor-mode-hook 'sqlserver-complete-minor-mode-setup)
+  (defun sqlserver-complete-minor-mode-setup()
+    (setq sqlserver-connection-info
+      '((username . "sa")
+        (password . "sa")
+        (server-instance . "localhost")
+        (dbname . "HAIHUA"))
+      )
+    (setq sqlserver-cmd 'sqlcmd)
+    )
+#+END_SRC

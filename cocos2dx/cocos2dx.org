@@ -1,0 +1,113 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     cocos2dx HelloWorld
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2016-05-03 二
+#+DESCRIPTION:cocos2dx HelloWorld
+#+KEYWORDS: Cocos2dx
+#+TAGS:Cocos2dx
+#+FILETAGS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+* mac 上安装
+  git clone https://github.com/cocos2d/cocos2d-x.git
+  用下面两个命令 可以查看当前git 有哪些分支 ，与tag ,然后 决定用哪个版本
+  git branch -v -a
+  git tag
+  当前官网最新版是3.10，
+  所以 决定用 cocos2d-x-3.10 这个tag 内的代码
+  git checkout  cocos2d-x-3.10
+
+  # 执行
+  python download-deps.py
+  似乎 官方要求python 版本是2.7.   3.x似乎不行。
+  会下载一些依赖的第3方库
+  git submodule update --init
+  然后执行
+  python setup.py
+  执行此脚本后 会修改 .bash_profile 或 .zshrc ,在其中加入一些变量
+  如果进行android 开发，  ，需要安装好相应的
+
+
+** 如果要进行android 开发，
+   执行python setup.py 之前  需要安装android sdk 与ndk
+   使用brew 安装即可
+   brew install android-sdk
+   brew install android-ndk
+   进行 android 开发 最好下载 android studio
+
+    并配置相应的变量
+    #+BEGIN_SRC sh
+      # appendPath(newPath)
+      # 如果newPath 已经在PATH下了， 则不添加
+      appendPath(){
+          addPath="$1"
+          if [ -d $addPath ]; then
+              PATH="${PATH/:$addPath}"     # remove if already there (包括分隔符，)
+              PATH="${PATH/$addPath}"      # remove if already there (不包括分隔符,主要在行首时)
+              export PATH=$PATH:$addPath
+          fi
+      }
+      prependPath(){
+          addPath="$1"
+          if [ -d $addPath ]; then
+              PATH="${PATH/:$addPath}"     # remove if already there (包括分隔符，)
+              PATH="${PATH/$addPath}"      # remove if already there (不包括分隔符,主要在行首时)
+              export PATH=$addPath:$PATH
+          fi
+      }
+
+      if [ "$HOME/Library/Android/sdk" ]; then
+          export ANDROID_HOME=$HOME/Library/Android/sdk
+          appendPath "$HOME/Library/Android/sdk/platform-tools"
+          appendPath "$HOME/Library/Android/sdk/tools"
+      fi
+      if [ -d /usr/local/opt/android-sdk ]; then
+          export ANDROID_HOME=/usr/local/opt/android-sdk
+          export ANDROID_SDK_ROOT=/usr/local/opt/android-sdk
+          prependPath "$ANDROID_HOME/bin"
+          prependPath "$ANDROID_HOME/tools"
+          prependPath "$ANDROID_HOME/platform-tools"
+      fi
+      if [ -d /usr/local/opt/android-ndk ]; then
+          export NDK_ROOT=/usr/local/opt/android-ndk
+          export ANDROID_NDK_ROOT=/usr/local/opt/android-ndk
+          prependPath "$NDK_ROOT/bin"
+      fi
+
+    #+END_SRC
+** HelloWorld
+   创建一个helloworld 项目
+
+执行完 python setup.py 后， 重新打开一个terminal ,或者按其提示 执行相应的source ~/.bash_profile 或source ~/.zshrc
+后 可以使用cocos 这个命令来创建项目
+
+#+BEGIN_SRC sh
+cocos new MyGame -p com.your_company.mygame -l cpp -d NEW_PROJECTS_DIR
+-p package
+-l language cpp or lua
+-d directory
+#+END_SRC
+在-d 指定的目录下 ，会创建一个完整的项目
+如
+cocos new hellocpp -p org.jf.hellocpp -l cpp -d /tmp/hellocpp
+#+BEGIN_QUOTE
+目录结构基本如下
+jixiuf@jixiuf-mac-home /tmp/hellocpp $ tree -L 2 .
+.
+└── hellocpp
+    ├── CMakeLists.txt
+    ├── Classes
+    ├── Resources
+    ├── cocos2d
+    ├── proj.android
+    ├── proj.android-studio
+    ├── proj.ios_mac
+    ├── proj.linux
+    ├── proj.win10
+    ├── proj.win32
+    └── proj.win8.1-universal
+#+END_QUOTE
+
+用xcode 打开 proj.ios_mac 项目 即可运行此helloworld

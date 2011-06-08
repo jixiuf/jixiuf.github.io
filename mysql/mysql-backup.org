@@ -1,0 +1,69 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     mysql 备份相关
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2016-03-07 一
+#+DESCRIPTION:mysql 备份相关
+#+KEYWORDS:
+#+TAGS:Mysql
+#+FILETAGS: Mysql
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:* f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+
+http://www.percona.com/software/percona-xtrabackup
+percona-xtrabackup-2.2.8-5059.el6.x86_64.rpm
+how to install
+http://www.phperz.com/article/14/1221/42263.html
+deps
+#+BEGIN_SRC sh
+  sudo yum install -y perl-DBI
+  sudo yum install -y perl-DBD-MySQL
+  sudo yum install -y perl-Time-HiRes
+  sudo yum install -y perl-IO-Socket-SSL
+#+END_SRC
+#https://www.percona.com/doc/percona-xtrabackup/2.2/installation/yum_repo.html
+yum install http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
+yum list | grep percona|grep back
+yum install percona-xtrabackup-22
+
+http://devliangel.blog.51cto.com/469347/1374232
+http://blog.csdn.net/yongsheng0550/article/details/6682162
+https://www.tekovic.com/mysql-hot-backup-with-xtrabackup-on-centos
+crontab 定时运行
+#+BEGIN_SRC sh
+  0 3 * * * innobackupex --defaults-file=/etc/mysql/my.cnf --host=127.0.0.1  -port=3306 --user=root --password='rootpass' /udisk/mysqlback/base
+  0 3 * * * innobackupex --defaults-file=/etc/my.cnf  --user=root --password='rootpass' --port=3306 --socket=/tmp/mysql.sock  /data/backup/mysql/
+  0 0 * * *   python /root/script/daily_backup.py
+  # 奖 修改时间是10天前的目录都删除，即只保留最后10天的数据
+  10 3 * * * find /udisk/mysqlback/base/ -maxdepth 1 -mtime +10 -exec rm  -rf {} \;
+#+END_SRC
+
+demo
+全量备份
+#+BEGIN_SRC sh
+  innobackupex --defaults-file=/etc/my.cnf  --user=root --password='rootpass' --host=127.0.0.1 --port=3306 --socket=/tmp/mysql.sock --no-timestamp /data/mysql_backup/2016-06-21_18-18-55  2>/data/mysql_backup/log/2016-06-21_18-18-55.log
+  innobackupex --defaults-file=/etc/my.cnf  --user=root --password='rootpass' --host=127.0.0.1 --port=3306 --socket=/tmp/mysql.sock  /data/backup/mysql/
+#+END_SRC
+* 针对全量备份的恢复过程
+  比如创建的备份在 /data/backup/mysql/2016-06-21_18-18-55/下
+  原mysql 数据文件在 /data/mysql/data/目录
+  1. 停mysql 服务
+     #+BEGIN_SRC sh
+       service mysqld stop
+     #+END_SRC
+  2. 删除 mysql 现有的数据文件(删除前最好备份下)
+     #+BEGIN_SRC sh
+     copy /data/mysql/data /data/mysql/data.bak
+     rm -rf /data/mysql/data/*
+     #+END_SRC
+  3. apply-log，为了加快速度，一般建议设置--use-memory，这个步骤完成之后，目录/data/backup/mysql/2016-06-21_18-18-55/下的备份文件已经准备就绪。
+     #+BEGIN_SRC sh
+       # --use-memory=100M default
+       innobackupex --use-memory=500M  --user=root --password='rootpass' --apply-log /data/mysql_backup/2016-06-21_18-18-55
+     #+END_SRC
+  4. copy-back
+     #+BEGIN_SRC sh
+       sudo innobackupex --defaults-file=/etc/my.cnf  --user=root --password='rootpass'  --copy-back  /data/mysql_backup/2016-06-21_18-18-55
+       sudo chown mysql:mysql -R /data/mysql/data/
+     #+END_SRC

@@ -1,0 +1,468 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     nginx拾遗
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2016-05-09 一
+#+DESCRIPTION:nginx.org
+#+KEYWORDS: nginx
+#+TAGS: Nginx
+#+FILETAGS: Nginx
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+* nginx 做反向代理配置示例
+  /etc/nginx/conf.d/your.dns.com.conf
+  比如 tomcat 兼听127.0.1:10080端口，
+  当通过域名 your.dns.com 访问 此机器的 80端口时 ，访问会被转到到tomcat 上
+  #+BEGIN_SRC sh
+      upstream your.dns.com{
+            server 127.0.0.1:10080;
+    }
+
+    server {
+      listen  80;
+
+      server_name your.dns.com;
+
+      access_log  /data/logs/nginx/your.dns.com.http.log;
+
+      location / {
+
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Scheme $scheme;
+        proxy_pass http://your.dns.com;
+      }
+    }
+  #+END_SRC
+  #+BEGIN_SRC sh
+    upstream your.dns.com{
+            server 127.0.0.1:8888;
+    }
+    server {
+      listen  80;
+
+      server_name your.dns.com;
+
+      access_log  /var/log/nginx/yourdns.com.http.log  main;
+
+      location ~ /.*\.(gif|jpg|png|htm|html|css|js|flv|ico|swf|mp4)$ {
+      root /data/deployer/apache-tomcat-8.0.21/webapps/ROOT;
+      break;
+      }
+      #location /{
+       # root /data/deployer/apache-tomcat-8.0.21/webapps/ROOT;
+        #index  html/index.html html/index.htm;
+      #}
+      location / {
+            proxy_pass http://your.dns.com/;
+            proxy_pass_header Server;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Scheme $scheme;
+            index html/index.html html/index.htm;
+     }
+
+      # /usr/share/nginx/html/404.html
+      error_page   500 502 503 504  /50x.html;
+      error_page   404  /404.html;
+      location = /50x.html {
+        root   html;
+      }
+
+    }
+  #+END_SRC
+* 利用nginx 做简单的认证
+  开发了简单的网站 ，但是没有 认证功能。 又不想不加认证 暴露在外网环境下
+  可以用此方法进行 用户名密码认证
+
+  使用nignx反向代理kibana
+  nginx配置Http Basic Auth账号密码登陆
+  http://trac.edgewall.org/export/10770/trunk/contrib/htpasswd.py （nginx wiki里推荐的）
+  运行示例
+  chmod 755 htpasswd.py
+  ./htpasswd.py -c -b htpasswd username password
+  这个脚本会生成一个htpasswd 文件，里面存username 及加密后的password, nginx 配置中 会引用这个文件
+  #-c为生成文件 htpasswd为文件名
+
+  比如 /etc/nginx/conf.d/elk.dev.yourdns.com.conf
+  #+BEGIN_SRC sh
+    server {
+        listen 80;
+        #listen [::]:80;
+        server_name elk.dev.yourdns.com;
+            location / {
+            auth_basic "Password please";
+            auth_basic_user_file /etc/nginx/conf.d/htpasswd;  # 指向你刚生成的 htpasswd 文件
+            proxy_pass http://127.0.0.1:5601/;   # 认证之后 可以访问此内容
+            proxy_redirect off;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            }
+
+    }
+  #+END_SRC
+* 利用nginx 404错误 下载某个文件
+  随便访问一个不存在的路么， 会下载/tmp/static.txt 这个文件，
+  用于快速搭建一个web 服务器 传文件
+  # 当然也可以用python 来实现此功能
+  python -m SimpleHTTPServer 8888
+
+  #+BEGIN_SRC sh
+    server {
+        listen 80 default;
+
+        location /test {
+            root /;
+            try_files /tmp/static.txt =404;
+        }
+    }
+  #+END_SRC
+* nginx init.d script
+
+  #+BEGIN_SRC sh
+    #!/bin/sh
+    #
+    # nginx - this script starts and stops the nginx daemon
+    #
+    # chkconfig:   - 85 15
+    # description:  Nginx is an HTTP(S) server, HTTP(S) reverse \
+    #               proxy and IMAP/POP3 proxy server
+    # processname: nginx
+    # config:      /etc/nginx/nginx.conf
+    # config:      /etc/sysconfig/nginx
+    # pidfile:     /var/run/nginx.pid
+
+    # Source function library.
+    . /etc/rc.d/init.d/functions
+
+    # Source networking configuration.
+    . /etc/sysconfig/network
+
+    # Check that networking is up.
+    [ "$NETWORKING" = "no" ] && exit 0
+
+    nginx="/usr/sbin/nginx"
+    prog=$(basename $nginx)
+
+    sysconfig="/etc/sysconfig/$prog"
+    lockfile="/var/lock/subsys/nginx"
+    pidfile="/var/run/${prog}.pid"
+
+    NGINX_CONF_FILE="/etc/nginx/nginx.conf"
+
+    [ -f $sysconfig ] && . $sysconfig
+
+
+    start() {
+        [ -x $nginx ] || exit 5
+        [ -f $NGINX_CONF_FILE ] || exit 6
+        echo -n $"Starting $prog: "
+        daemon $nginx -c $NGINX_CONF_FILE
+        retval=$?
+        echo
+        [ $retval -eq 0 ] && touch $lockfile
+        return $retval
+    }
+
+    stop() {
+        echo -n $"Stopping $prog: "
+        killproc -p $pidfile $prog
+        retval=$?
+        echo
+        [ $retval -eq 0 ] && rm -f $lockfile
+        return $retval
+    }
+
+    restart() {
+        configtest_q || return 6
+        stop
+        start
+    }
+
+    reload() {
+        configtest_q || return 6
+        echo -n $"Reloading $prog: "
+        killproc -p $pidfile $prog -HUP
+        echo
+    }
+
+    configtest() {
+        $nginx -t -c $NGINX_CONF_FILE
+    }
+
+    configtest_q() {
+        $nginx -t -q -c $NGINX_CONF_FILE
+    }
+
+    rh_status() {
+        status $prog
+    }
+
+    rh_status_q() {
+        rh_status >/dev/null 2>&1
+    }
+
+    # Upgrade the binary with no downtime.
+    upgrade() {
+        local oldbin_pidfile="${pidfile}.oldbin"
+
+        configtest_q || return 6
+        echo -n $"Upgrading $prog: "
+        killproc -p $pidfile $prog -USR2
+        retval=$?
+        sleep 1
+        if [[ -f ${oldbin_pidfile} && -f ${pidfile} ]];  then
+            killproc -p $oldbin_pidfile $prog -QUIT
+            success $"$prog online upgrade"
+            echo
+            return 0
+        else
+            failure $"$prog online upgrade"
+            echo
+            return 1
+        fi
+    }
+
+    # Tell nginx to reopen logs
+    reopen_logs() {
+        configtest_q || return 6
+        echo -n $"Reopening $prog logs: "
+        killproc -p $pidfile $prog -USR1
+        retval=$?
+        echo
+        return $retval
+    }
+
+    case "$1" in
+        start)
+            rh_status_q && exit 0
+            $1
+            ;;
+        stop)
+            rh_status_q || exit 0
+            $1
+            ;;
+        restart|configtest|reopen_logs)
+            $1
+            ;;
+        force-reload|upgrade)
+            rh_status_q || exit 7
+            upgrade
+            ;;
+        reload)
+            rh_status_q || exit 7
+            $1
+            ;;
+        status|status_q)
+            rh_$1
+            ;;
+        condrestart|try-restart)
+            rh_status_q || exit 7
+            restart
+            ;;
+        ,*)
+            echo $"Usage: $0 {start|stop|reload|configtest|status|force-reload|upgrade|restart|reopen_logs}"
+            exit 2
+    esac
+  #+END_SRC
+* nginx 编译安装支持https(ssl)
+  #+BEGIN_SRC sh
+    # yum install -y zsh
+    yum install -y gcc gcc-c++
+    yum install -y zip unzip
+    yum install -y gcc zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel
+    yum install -y libtool
+
+    #nginx
+    mkdir -p /path/to
+    mkdir packages && cd packages
+    # 大小写转换第三方module
+    wget -c https://github.com/replay/ngx_http_lower_upper_case/archive/master.zip -O ngx_http_lower_upper_case.zip
+    unzip ngx_http_lower_upper_case.zip -d /path/to
+    # 打印第三方module
+    wget -c https://github.com/openresty/echo-nginx-module/archive/v0.59.tar.gz -O echo-nginx-module-0.59.tar.gz
+    tar -zxvf echo-nginx-module-0.59.tar.gz -C /path/to
+    # pcre包 用来实现rewrite
+    wget http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz
+    tar -zxvf pcre-8.35.tar.gz
+    mv pcre-8.35 /usr/local/src/.
+    cd /usr/local/src/pcre-8.35
+    ./configure && make && make install
+    make clean
+
+    cd ~/packages
+    wget -c http://nginx.org/download/nginx-1.11.1.tar.gz
+    tar -zxvf nginx-1.11.1.tar.gz -C /usr/local/
+    ln -s /usr/local/nginx-1.11.1 /usr/local/nginx
+    mkdir -p /etc/nginx/conf
+    cd /usr/local/nginx
+    ./configure --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_ssl_module --with-pcre=/usr/local/src/pcre-8.35 --add-module=/path/to/echo-nginx-module-0.59 --add-module=/path/to/ngx_http_lower_upper_case-master --conf-path=/etc/nginx/conf
+    make && make install
+    ln -s /usr/local/nginx/sbin/nginx /usr/sbin/nginx
+  #+END_SRC
+** 自己颁发证书给自己
+#+BEGIN_SRC sh
+  cd /usr/local/nginx/conf
+  openssl genrsa -des3 -out server.key 1024
+  openssl req -new -key server.key -out server.csr
+  openssl rsa -in server.key -out server_nopwd.key
+  openssl x509 -req -days 365 -in server.csr -signkey server_nopwd.key -out server.crt
+#+END_SRC
+#+BEGIN_QUOTE
+server {
+    listen 443;
+    ssl on;
+    ssl_certificate  /usr/local/nginx/conf/server.crt;
+    ssl_certificate_key  /usr/local/nginx/conf/server_nopwd.key;
+}
+#+END_QUOTE
+  #+BEGIN_QUOTE
+    upstream login{
+    server 127.0.0.1:8080;
+    }
+
+    map $http_accept_language $language {
+    default  zh_tw;
+    ~*^zh-cn zh_cn;
+    ~*^en    en;
+    ~*^zh,   zh_cn;
+    }
+
+    server {
+    listen  443;
+    server_name login.casino.najaplus.com;
+
+    ssl_certificate     /data/casino/nginx/login.crt;
+    ssl_certificate_key /data/casino/nginx/login.key;
+
+    ssl on;
+    ssl_session_cache  builtin:1000  shared:SSL:10m;
+    ssl_protocols  TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4;
+    ssl_prefer_server_ciphers on;
+
+    gzip on;
+    gzip_min_length  100;
+    gzip_buffers  8 32k;
+    gzip_types  text/plain text/css application/x-javascript text/xml application/xml text/javascript;
+    gzip_vary on;
+
+    set $root_dir /data/webgame;
+
+    location = /casino.html {
+        if ( $query_string ~* ^(.*)language=([\w|_]*)(&|$) ) {
+        set $language $2;
+        }
+        lower $suffix $language;
+        # rewrite '(.*)\.html$' $1_$suffix.html;   # 加入map后 参数取不到
+        rewrite /casino.html /casino_$suffix.html; # permanent 用于重定向
+    }
+
+    location ~* (.*\.html)$ {
+        root $root_dir;
+        add_header Cache-Control 'no-store';
+        error_page 405 =200 $1; # 支持静态网页POST
+    }
+
+    location  ~* \.(proto|json|gif|jpg|jpeg|bmp|png|ico|txt|js|css)$ {
+        root $root_dir;
+        expires 30d;
+        access_log off;
+    }
+
+    rewrite_log on;
+    access_log  /data/logs/nginx/login.http.log;
+    error_log   /data/logs/nginx/login.http.log;
+
+    location / {
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Scheme $scheme;
+        proxy_pass http://login;
+    }
+    }
+  #+END_QUOTE
+  #+BEGIN_QUOTE
+    server {
+        listen 443;
+        server_name www.demo2.com;
+
+        ssl on;
+        ssl_certificate      /data/nginx/server.crt;
+        ssl_certificate_key  /data/nginx/server.key;
+
+        ssl_session_timeout  5m;
+
+        ssl_protocols  SSLv2 SSLv3 TLSv1;
+        ssl_ciphers  ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
+        ssl_prefer_server_ciphers   on;
+
+        access_log  /data/logs/nginx/demo2.log;
+
+        location / {
+            proxy_pass http://127.0.0.1:8080;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+        }
+    }
+   #+END_QUOTE
+
+  #+BEGIN_QUOTE
+   upstream ssl{
+            server 127.0.0.1:8080;
+    }
+
+    server {
+    listen 443;
+    server_name www.demo3.com;
+
+    ssl_certificate /data/nginx/server.crt;
+    ssl_certificate_key /data/nginx/server.key;
+
+    # https支持
+    # ssl on;
+    ssl_session_cache  builtin:1000  shared:SSL:10m;
+    ssl_protocols  TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4;
+    ssl_prefer_server_ciphers on;
+
+    # gzip网页压缩
+    gzip on;
+    gzip_min_length  100;
+    gzip_buffers  8 32k;
+    gzip_types  text/plain text/css application/x-javascript text/xml application/xml text/javascript;
+    gzip_vary on;
+
+    # 不需要缓存的文件
+    location ~* \.(html)$ {
+        root /data/webserver;
+        add_header Cache-Control 'no-store';
+    }
+
+    location  ~* \.(proto|json|gif|jpg|jpeg|bmp|png|ico|txt|js|css)$ {
+        root /data/webserver;
+        expires 7d;
+        # access_log off;
+    }
+
+    # 支持post
+    error_page 405 =200 @405;
+    location @405
+    {
+        root  /data/webserver;
+    }
+
+    error_log  /data/logs/nginx/ssl.http.log;
+    access_log  /data/logs/nginx/ssl.http.log;
+
+    location / {
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Scheme $scheme;
+        proxy_pass http://ssl;
+    }
+    }
+  #+END_QUOTE

@@ -1,0 +1,330 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     LVS负载均衡
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@qq.com
+#+DATE:     2017-07-29 六
+#+DESCRIPTION:LVS负载均衡
+#+KEYWORDS:
+#+TAGS: :Linux:Mysql
+#+FILETAGS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \setmainfont{PingFang SC}
+* 前言
+  参考
+  https://my.oschina.net/leeypp1/blog/294807
+  http://lansgg.blog.51cto.com/5675165/1229421
+  基本属于转载自leeypp@gmail.com
+  记录下以备忘。渐渐的有种感觉，东西不记下来慢慢就会遗忘。
+* LVS (linux virtual server) 什么是LVS？
+
+  首先简单介绍一下LVS (Linux Virtual Server)到底是什么东西，其实它是一
+种集群(Cluster)技术，基于IP的负载均衡技术。
+
+调度器具有很好的吞吐率，将请求均衡地转移到不同的服务器上执行，且调度器
+自动屏蔽掉服务器的故障，从而将一组服务器构成一个高性能的、高可用的虚拟
+服务器。整个服务器集群的结构对客户是透明的，而且无需修改客户端和服务器
+端的程序。为此，在设计时需要考虑系统的透明性、可伸缩性、高可用性和易管
+理性。
+* 安装
+  #+BEGIN_SRC
+  yum install ipvsadm
+  #+END_SRC
+
+* LVS的组成
+   1. 负载调度器（load balancer/ Director）
+
+    它是整个集群对外面的前端机，负责将客户的请求发送到一组服务器上执行，
+    而客户认为服务是来自一个IP地址（我们可称之为虚拟IP地址或VIP(Virtal
+    IP)）上的。
+
+   2. 服务器池(RealServer)
+      一组真正执行客户请求的服务器，执行的服务一般有WEB、MAIL、FTP和DNS等
+Load balancer 将客户真实的请求通过一定的负载均衡策略从 RealServer池中选出一个
+将客户请求转发到RealServer进行处理
+
+* LVS负载均衡方式
+** Virtual Server via Network Address Translation NAT（VS/NAT）
+        VS/NAT是一种最简单的方式，所有的RealServer只需要将自己的网关指向
+        Director即可。客户端可以是任意操作系统，但此方式下，一个Director
+        能够带动的RealServer比较有限。在VS/NAT的方式下，Director也可以兼
+        为一台RealServer。
+
+        NAT模型:地址转换类型，主要是做地址转换，类似于iptables的DNAT类型，
+        它通过多目标地址转换，来实现负载均衡；
+        1. LVS（Director）上面需要双网卡：DIP(内网)和VIP（外网）
+
+        2. 内网的Real Server主机的IP必须和DIP在同一个网络中，并且要求其网关都需要指向DIP的地址
+            #+BEGIN_SRC sh
+                #centos 上配置gateway 网关的方式
+                cat /etc/sysconfig/network
+            #+END_SRC
+            #+BEGIN_QUOTE
+                PEERNTP=no
+                NETWORKING_IPV6=no
+                GATEWAY=101.200.147.247
+            #+END_QUOTE
+            #+BEGIN_SRC sh
+            #centos 上配置gateway 网关的方式
+            或这样指定具体某个网卡 cat /etc/sysconfig/network-scripts/ifcfg-eth0
+            #+END_SRC
+            #+BEGIN_QUOTE
+                DEVICE=eth0
+                ONBOOT=yes
+                BOOTPROTO=static
+                IPADDR=10.44.37.249
+                NETMASK=255.255.248.0
+                GATEWAY=10.44.37.247 # add this line 指向Director的内网ip
+            #+END_QUOTE
+            举例 192.168.244.132为VIP (挡在前面)
+            192.168.27.131 192.168.27.130( RIP ) 为两台提供真实服务的内网机
+            以下对VIP
+            #+BEGIN_SRC sh
+                echo 1 > /proc/sys/net/ipv4/ip_forward # 或者修改 /etc/sysctl.conf
+                ipvsadm -A -t 192.168.244.132:80 -s rr  # -s rr 表示使用轮询算法 见下文8种调度算法
+                ipvsadm -a -t 192.168.244.132:80 -r 192.168.27.131 -m
+                ipvsadm -a -t 192.168.244.132:80 -r 192.168.27.130 -m
+            #+END_SRC
+            或者 使用加权轮询调度
+            #+BEGIN_SRC sh
+                ipvsadm -E -t 192.168.244.132:80 -s wrr
+                ipvsadm -e -t 192.168.244.132:80 -r 192.168.27.130 -m -w 2
+                ipvsadm -e -t 192.168.244.132:80 -r 192.168.27.131 -m -w 1
+            #+END_SRC
+
+
+        3.  RIP 都是私有IP地址，仅用于各个节点之间的通信(不需要外网ip)
+
+        4. Director位于client和Real Server之间，负载处理所有的进站、出站的通信
+
+        5. 支持端口映射
+
+        6. 通常应用在较大规模的应用场景中，但Director易成为整个架构的瓶颈！(是3种模式中最差的)
+
+** Virtual Server via IP Tunneling(VS/TUN)
+        IP隧道（IP tunneling）是将一个IP报文封装在另一个IP报文的技术，这可以
+        使得目标为一个IP地址的数据报文能被封装和转发到另一个IP地址。IP隧道技术
+        亦称为IP封装技术（IP encapsulation）。IP隧道主要用于移动主机和虚拟私有
+        网络（Virtual Private Network），在其中隧道都是静态建立的，隧道一端有
+        一个IP地址，另一端也有唯一的IP地址。它的连接调度和管理与VS/NAT中的一样，
+        只是它的报文转发方法不同。调度器根据各个服务器的负载情况，动态地选择一
+        台服务器，将请求报文封装在另一个IP报文中，再将封装后的IP报文转发给选出
+        的服务器；服务器收到报文后，先将报文解封获得原来目标地址为 VIP 的报文，
+        服务器发现VIP地址被配置在本地的IP隧道设备上，所以就处理这个请求，然后
+        根据路由表将响应报文直接返回给客户。
+
+        其实数据转发原理和DR模式是一样的，不过这个我个人认为主要是位于不同位置
+        （不同机房）；LB是通过隧道进行了信息传输，虽然增加了负载，可是因为地理
+        位置不同的优势，还是可以参考的一种方案
+
+        优点：负载均衡器只负责将请求包分发给物理服务器，而物理服务器将应答包直
+        接发给用户。所以，负载均衡器能处理很巨大的请求量，这种方式，一台负载均
+        衡能为超过100台的物理服务器服务，负载均衡器不再是系统的瓶颈。使用
+        VS-TUN方式，如果你的负载均衡器拥有100M的全双工网卡的话，就能使得整个
+        Virtual Server能达到1G的吞吐量。
+        而且跑在公网上就能进行不同地域的分发。
+
+        不足：这种方式需要所有的服务器内核支持"IP Tunneling"(IP Encapsulation)协议；
+              服务器可能只局限在部分Linux系统上。
+
+
+    举例
+    #+BEGIN_QUOTE
+        LB1: eth0: 192.168.182.132
+             vip(tunl0）: 192.168.182.200
+        RS1: eth0:192.168.27.130
+              tunl0(vip)  :192.168.182.200
+        RS2: eth0:192.168.138.131
+             tunl0(vip) :192.168.182.200
+    #+END_QUOTE
+
+    LB1操作
+    #+BEGIN_SRC sh
+        yum install ipvsadm -y
+        ifconfig tunl0 192.168.182.200 broadcast 192.168.182.200 netmask 255.255.255.0 up
+        route add -host $VIP dev tunl0 #VIP 这里可能应该是192.168.182.200
+        ipvsadm -A -t 192.168.182.200:80 -s rr
+        ipvsadm -a -t 192.168.182.200:80 -r 192.168.27.130 -i
+        ipvsadm -a -t 192.168.182.200:80 -r 192.168.138.131 -i
+
+    #+END_SRC
+
+
+    RS1操作：(RS2的操作类似)
+    #+BEGIN_SRC sh
+    ifconfig tunl0 192.168.182.200 netmask 255.255.255.0 broadcast 192.168.182.200 up
+    route add -host 192.168.182.200 dev tunl0
+     #关于这几个参数的含义，见下文稿 DR模式讲解
+    echo "1" >/proc/sys/net/ipv4/conf/tunl0/arp_ignore
+    echo "2" >/proc/sys/net/ipv4/conf/tunl0/arp_announce
+    echo "1" >/proc/sys/net/ipv4/conf/all/arp_ignore
+    echo "2" >/proc/sys/net/ipv4/conf/all/arp_announce
+
+    #+END_SRC
+
+
+** Virtual Server via Direct Routing(VS/DR) 推荐使用的
+
+    VS/DR方式是通过改写请求报文中的MAC地址部分来实现的。Director和
+    RealServer必需在物理上有一个网卡通过不间断的局域网相连。
+
+      DR模型：直接路由模型，每个Real Server上都有两个IP：VIP和RIP，但
+     是VIP是隐藏的，就是不能提供解析等功能，只是用来做请求回复的源IP的，
+     Director上只需要一个网卡，然后利用别名来配置两个IP：VIP和DIP
+     Director在接受到外部主机的请求的时候转发给Real Server的时候并不更
+     改目标地址，只是通过arp解析的MAC地址进行封装然后转给Real Server，
+     Real Server在接受到信息以后拆除MAC帧封装，然后直接回复给CIP
+
+    负载均衡器和RS都使用同一个IP对外服务｡但只有DR对ARP请求进行响应,所有RS
+    对本身这个IP的ARP请求保持静默｡也就是说,网关会把对这个服务IP的请求全部
+    定向给DR,而DR收到数据包后根据调度算法,找出对应的RS,把目的MAC地址改为RS
+    的MAC（因为IP一致）并将请求分发给这台RS｡这时RS收到这个数据包,处理完成
+    之后，由于IP一致，可以直接将数据返给客户，则等于直接从客户端收到这个数
+    据包无异,处理后直接返回给客户端｡由于负载均衡器要对二层包头进行改换,所
+    以负载均衡器和RS之间必须在一个广播域,也可以简单的理解为在同一台交换机
+    上｡
+
+    优点：和TUN（隧道模式）一样，负载均衡器也只是分发请求，应答包通过单独
+    的路由方法返回给客户端。与VS-TUN相比，VS-DR这种实现方式不需要隧道结构，
+    因此可以使用大多数操作系统做为物理服务器。
+    不足: 要求负载均衡器的网卡必须与物理网卡在一个物理段上。
+
+     1. 各个集群节点必须和Director在同一个物理网络中
+
+     2. RIP 地址不能为私有地址，可以实现便捷的远程管理和监控(后面真实提供服务的机器要有外网ip,如果服务是对外的话)
+
+     3. Director仅仅负责处理入站请求，响应报文则由Real Server直接发往客户端
+        (所以 RealServer 于Load banlance 需要都有外网ip,如果内外网提供服务的话，假如只是局域网内提供服务，可以都不用外网ip)
+
+     4. 集群节点Real Server 的网关一定不能指向DIP，而是指向外部路由(原因见上条,需要直接发回客户端)
+
+     5. Director不支持端口映射
+
+     6. Director能够支持比NAT多很多的Real Server (请求来的时候经过Director,去的时候不用经过,更高效)
+
+    举例
+    #+BEGIN_QUOTE
+    LB1: eth0: 192.168.182.133
+        vip（eth0:0）: 192.168.182.200
+    RS1: eth0:192.168.182.130
+        lo:0(vip)  :192.168.182.200
+    RS2: eth0:192.168.182.129
+        lo:0(vip)  192.168.182.200
+    #+END_QUOTE
+    你会发现3台机器都有一个 192.168.182.200的身份
+
+    通信原理：
+
+        每个Real Server上都有两个IP：VIP和RIP，但是VIP是隐藏的，就是不
+        能提供解析等功能，只是用来做请求回复的源IP的，Director上只需要
+        一个网卡，然后利用别名来配置两个IP：VIP和DIP
+
+         Director在接受到外部主机的请求的时候转发给Real Server的时候并
+        不更改目标地址，只是通过arp解析的MAC地址进行封装然后转给Real
+        Server，Real Server在接受到信息以后拆除MAC帧封装，然后直接回复
+        给CIP。
+
+    而此时需要关闭RS上的基于VIP的arp解析，在linux内核2.4以后，内核
+    中都内置了这种功能，通过一些设置可以关闭其arp的功能：
+
+    arp_ignore:定义接收到ARP请求时的响应级别
+            0：默认，只用本地配置的有响应地址都给予响应
+            1：仅仅在目标IP是本地地址，并且是配置在请求进来的接口上的时候才给予响应(仅在请求的目标地址配置请求到达的接口上的时候，才给予响应)
+        arp_announce：定义将自己的地址向外通告时的级别
+            0：默认，表示使用配置在任何接口的任何地址向外通告
+            1：试图仅向目标网络通告与其网络匹配的地址
+            2：仅向与本地接口上地址匹配的网络进行通告
+        Ps：要想让其功能生效，必须先设置相关设置，然后在配置IP地址等信息
+
+    1. 开始在RS1操作：
+        #+BEGIN_SRC sh
+            echo 2 > /proc/sys/net/ipv4/conf/all/arp_announce
+            echo 2 > /proc/sys/net/ipv4/conf/eth0/arp_announce
+            echo 1 > /proc/sys/net/ipv4/conf/all/arp_ignore
+            echo 1 > /proc/sys/net/ipv4/conf/eth0/arp_ignore
+            service network restart
+            ifconfig lo:0 192.168.182.200 netmask 255.255.255.255 broadcast 182.168.182.200
+            route add -host 192.168.182.200 dev lo:0
+            #上面的就是定义了arp响应的级别；还有就是VIP的请求数据，从rs1的本地ip进行了回复
+        #+END_SRC
+    2. 在RS2上执行上面同样的操作
+    3. 在LB上操作:
+       #+BEGIN_SRC sh
+            ifconfig eth0:0 192.168.182.200/24  #在eth0:0配置vip
+       #+END_SRC
+    4.  确保 RS1 RS2 上的80端口能正常提供服务后（以80端口为例）
+        在LB
+        #+BEGIN_SRC sh
+            yum install ipvsadm -y
+            ipvsadm -A -t 192.168.182.200:80 -s rr
+            ipvsadm -a -t 192.168.182.200:80 -r 192.168.182.130 -g
+            ipvsadm -a -t 192.168.182.200:80 -r 192.168.182.129 -g
+        #+END_SRC
+        #+BEGIN_SRC sh
+            ipvsadm -L -n 可查看具体的规则，感觉类似iptables
+        #+END_SRC
+        此时 访问 http://192.168.182.200 即可感觉到其实质内容是 RS1 RS2 轮流处理的结果
+
+
+* 8种调度算法
+  1. 轮叫调度（Round Robin Scheduling）
+    算法就是以轮叫的方式依次将请求调度不同的服务器，即每次调度执行i=(i+1)mod n，并选出第i台服务器。算法的优点是其简洁性，它无需记录当前所有连接的状态，所以它是一种无状态调度。
+  2. 加权轮叫调度（Weighted Round Robin Scheduling   ）
+     解决服务器间性能不一的情况，它用相应的权值表示服务器的处理性能，服务器的缺省权值为1
+  3. 最小连接调度（Least Connection Schedul ing   ）
+     把新的连接请求分配到当前连接数最小的服务器,调度器需要记录各个服务器已建立连接的数目
+  4. 加权最小连接调度（Weighted Least Connection Scheduling）
+  5. 基于局部性的最少链接（Locality Based Least Connections Scheduling ）简称为LBLC
+
+     目前主要用于Cache集群系统，因为在Cache集群中客户请求报文的目标IP
+     地址是变化的。这里假设任何后端服务器都可以处理任一请求，算法的设
+     计目标是在服务器的负载基本平衡情况下，将相同目标IP地址的请求调度
+     到同一台服务器，来提供各台服务器的访问局部性和主存Cache命中率
+
+   LBLC调度算法先根据请求的目标IP 地址 找出该目标IP地址最近使用的服务器，
+   若该服务器是可用的且没有超载，将请求发送到该服务器；若服务器不存在，或
+   者该服务器超载且有服务器处于其一半的工 作负载，则用“最少链接”的原则
+   选出一个可用的服务器，将请求发送到该服务器。
+  6. 带复制的基于局部性最少链接（Locality Based Least Connections with Replication Scheduling）
+
+    带复制的基于局部性最少链接调度（Locality Based Least Connectio
+    ns with Replication Scheduling，以下简称为LBLCR）算法也是针对目标IP
+    地址的负载均衡，目前主要用于Cache集群系统。它与LBLC算法的不同之处是
+    它要 维护从一个目标IP地址到一组服务器的映射，而LBLC算法维护从一个目
+    标IP地址到一台服务器的映射。对于一个“热门”站点的服务请求，一台
+    Cache 服务器可能会忙不过来处理这些请求。这时，LBLC调度算法会从所有的
+    Cache服务器中按“最小连接”原则选出一台Cache服务器，映射该“热门”站
+    点到这台Cache服务器，很快这台Cache服务器也会超载，就会重复上述过程选
+    出新的Cache服务器。这样，可能会导致该“热门”站点的映像会出现 在所有
+    的Cache服务器上，降低了Cache服务器的使用效率。LBLCR调度算法将“门站”点
+    映射到一组Cache服务器（服务器集合），当该“热门”站点的请求负载增加
+    时，会增加集合里的Cache服务器，来处理不断增长的负载；当该“热门”站
+    点的请求负载降低时，会减少集合里的Cache服务器 数目。这样，该热门站点
+    的映像不可能出现在所有的Cache服务器上，从而提供Cache集群系统的使用效
+    率。LBLCR算法先根据请求的目标IP 地址找出该目标IP地址对应的服务器组；
+    按“最小连接”原则从该服务器组中选出一台服务器，若服务器没有超载，将
+    请求发送到该服务器；若服务器超载；则按“最小连接”原则从整个集群中选
+    出一台服务器，将该服务器加入到服务器组中，将请求发送到该服务器。同时，
+    当该服务器组有一段时间没有被修改，将最忙的服 务器从服务器组中删除，
+    以降低复制的程度。
+  7. 目标地址散列调度（Destination Hashing Scheduling   ）
+
+    目标地址散列调度 （Destination Hashing Scheduling）算法也是针对目标IP
+    地址的负载均衡，但它是一种静态映射算法，通过一个散列（Hash）函数将一个
+    目标IP地址映射到一台服务器。目标地址散列调度算法先根据请求的目标IP地址，
+    作为散列键（Hash Key）从静态分配的散列表找出对应的服务器，若该服务器是
+    可用的且未超载，将请求发送到该服务器，否则返回空。
+  8.  源地址散列调度（Source Hashing Scheduling）
+
+    源地址散列调度（Source Hashing Scheduling）算法正好与目标地址散列调
+    度算法相反，它根据请求的源IP地址，作为散列键（Hash Key）从静态分配的
+    散列表找出对应的服务器，若该服务器是可用的且未超载，将请求发送到该服
+    务器，否则返回空。它采用的散列函数与目标地址散列调度算法 的相同。它
+    的算法流程与目标地址散列调度算法的基本相似，除了将请求的目标IP地址换
+    成请求的源IP 地址，所以这里不一一叙述。在实际应用中，源地址散列 调度
+    和目标地址散列调度可以结合使用在防火墙集群中，它们可以保证整个系统的
+    唯一出入口。
+
+

@@ -1,0 +1,221 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     vitess 代码阅读之Context
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2016-03-29 二
+#+DESCRIPTION:vitess 代码阅读之Context
+#+KEYWORDS: vitess mysql golang
+#+TAGS:Vitess:Mysql:Golang
+#+FILETAGS:Vitess:Mysql:Golang
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+* context之.context中.WithValue(ctx,key,value) 数据的存储与传递
+  vitess 代码中到处充斥着它的身影,初读时颇为不解，
+  仔细看了下context 的代码 ，大概明白Context 设计的用意。
+  作一简短的记录
+  学golang 之前， 有过一年多的erlang 开发经验，erlang 中也存在类似的
+  轻量级进程，等同于golang 中的goroutine,erlang 中的进程有各自的进程字典
+  进程字典只可以在本进程中访问，而golang 没有进程字典，要想存储，一般是放到map
+  中 ，对map 的访问需要加锁，速度自然会慢上一些。vitess 没有采用map 来存储这类信息
+  而是把数据作为参数在各个函数间传递，此种方式缺点是每
+  个函数都需要多一个参数用来,传递数据，翻一下vitess 的代码 就会发现好多函数的第一个参数
+  都是Context ,Context 中存储了各种类型的数据
+  至于Context 一个参数是如何来存储各种数据的 ，下面简单说明一下
+  先说一下 如何使用：
+
+  使用Context  ,需要使用golang 的package 来配合， 基本上一个package 里定义一种Struct
+  此package 需要存储的信息都在这个Struct里， 然后Context 会存储Struct内的信息
+
+  假设有 package user
+  #+BEGIN_SRC go
+    type User struct {...}
+
+    // 定义一种类型key ,注意这里是小写的 ，即在package 外部是无法访问到key
+    // 这样就可以保证对只能在package user 中使用key类型
+    // 每个package 中都定义一个相应的key ,
+    type key int
+
+    // Context 中会有各种类型的数据，每种数据有一个key
+    // 以userKey 为user.User对应的key,userKey 未导出， 即在package user
+    // 外部无法访问到userKey,对它的访问，使用下面提供的user.NewContext
+    // 和 user.FromContext 来存储和访问
+    // 不要直接使用这个变量
+    var userKey key = 0
+
+    // 把u 存储到Context 中， (使用上面定义的userKey变量作为key)
+    func NewContext(ctx context.Context, u *User) context.Context {
+        return context.WithValue(ctx, userKey, u)
+    }
+
+    // 从Context 中 取回userKey 对应的user.User
+    func FromContext(ctx context.Context) (*User, bool) {
+        u, ok := ctx.Value(userKey).(*User)
+        return u, ok
+    }
+  #+END_SRC
+
+  # 下面 代码介绍如何使用Context
+ #+BEGIN_SRC go
+   package main
+
+   import (
+
+       "golang.org/x/net/context"
+   )
+
+   func main() {
+       ctx := context.Background() // 最基础的一个Context ，里面什么都没存储
+       u := user.User{}
+       ctx = ctx.NewContext(ctx, &u) // 把 *user.User 类型的u  存一ctx 中
+       // 假如 还有另一个package 叫， group
+
+       g := group.Group{}
+       ctx = ctx.NewContext(ctx, &g) // 把 *group.Group 类型的g  存一ctx 中
+       // 现在 ctx 中存了user 和group 的数据，
+       // ctx 会做为参数在 各个函数中进行传递
+       // 例如在某个函数用， 你需要访问里面的user
+       // 通过下面这种方式来获得
+       u, ok := user.FromContext(ctx)
+       g, ok := group.Fromcontext(ctx)
+       // 注意到存到context 中的数据基本都是指针类型， 即需要修改数据时，只需要修改即可
+       // 不需要把指针重新存到context 中，似乎 若不存指针而是存struct结构的话， 反复的NewContext
+       // 会导致context 中的数据无限增大
+   }
+ #+END_SRC
+context中 如何存储数据的，看下代码， 其实很简单
+#+BEGIN_SRC go
+  // Use context Values only for request-scoped data that transits processes and
+  // APIs, not for passing optional parameters to functions.
+  func WithValue(parent Context, key interface{}, val interface{}) Context {
+      return &valueCtx{parent, key, val}
+  }
+
+  // A valueCtx carries a key-value pair.  It implements Value for that key and
+  // delegates all other calls to the embedded Context.
+  type valueCtx struct {
+      Context
+      key, val interface{}
+  }
+
+  func (c *valueCtx) String() string {
+      return fmt.Sprintf("%v.WithValue(%#v, %#v)", c.Context, c.key, c.val)
+  }
+
+  func (c *valueCtx) Value(key interface{}) interface{} {
+      if c.key == key {
+          return c.val
+      }
+      return c.Context.Value(key)
+  }
+#+END_SRC
+* context 之 WithCancel 与 Done()
+  提供一个如何使用 WithCancel() 与Done()的示例
+  当某个goroutine A 等待别的goroutine B返回结果给他的时候
+  C 调cancel() 可以让A 不再继续等待，继续往下走
+  当然 cancel() 并不影响B 继续执行,只是给了b 提前退出的机会
+  下面的示例 访问 http://127.0.0.1:8080
+  后，等2秒钟会看到 cancel()被调用后的效果
+
+  #+BEGIN_SRC go
+    package main
+
+    import (
+        "fmt"
+        "net/http"
+        "time"
+
+        "golang.org/x/net/context"
+    )
+
+    func doALongJob(r chan string) {
+        time.Sleep(time.Second * 5)
+        fmt.Println("job is done")
+        r <- "经历了漫长的过程，用户等到了想要的数据"
+        fmt.Println("doALongJob is end")
+    }
+    func handleTest(w http.ResponseWriter, req *http.Request) {
+        defer req.Body.Close()
+        ctx := context.Background()
+        var cancel context.CancelFunc
+        ctx, cancel = context.WithCancel(ctx)
+        defer cancel()
+        go func() {
+            // 我 （别的进程 ） 可以让本进程取消等待数据的返回
+            time.Sleep(2 * time.Second)
+            fmt.Println("等不及了， 不再等待")
+            // 如果此处没有调用cancel() ,浏览器上会一直等到 想过的结果
+            cancel()
+        }()
+
+        // 这里缓冲1个， 即 ，就算我放弃从resultChan 读数据，doALongJob处依然可以往里面写入一个数据，从而正常退出
+        var reusultChan chan string = make(chan string, 1)
+        go doALongJob(reusultChan)
+        select {
+        case <-ctx.Done():
+            fmt.Println("走到ctx.Done()，分支，说明用户不愿意继续等待了 with err:", ctx.Err())
+            w.Write([]byte("走到ctx.Done()，分支，说明用户不愿意继续等待了 with err:" + ctx.Err().Error()))
+        case result := <-reusultChan:
+            w.Write([]byte(result))
+            fmt.Println(result)
+        }
+
+    }
+    func main() {
+        http.HandleFunc("/", handleTest)
+        http.ListenAndServe(":8080", nil)
+    }
+  #+END_SRC
+* withTimeout
+#+BEGIN_SRC go
+  package main
+
+  import (
+      "fmt"
+      "net/http"
+      "time"
+
+      "context"
+      "math/rand"
+  )
+
+  func doALongJob(ctx context.Context, r chan string) {
+      time.Sleep(time.Second + time.Second*time.Duration(rand.Intn(5))) // 模拟做一个很费时的操作
+      fmt.Println("job is done")
+      select {
+      case <-ctx.Done(): // job done 后，发现已经超时，不必再将结果仍给r
+          close(r)
+          fmt.Println("doALongJob found that it already timeout")
+      case r <- "经历了漫长的过程，用户等到了想要的数据":
+          // 将结果扔给r,等对方接收
+      }
+      fmt.Println("doALongJob is end")
+
+  }
+
+  func handleTest(w http.ResponseWriter, req *http.Request) {
+      defer req.Body.Close()
+      ctx := context.Background()
+      var cancel context.CancelFunc
+      ctx, cancel = context.WithTimeout(ctx, time.Second*3)
+      defer cancel()
+
+      // 这里缓冲1个， 即 ，就算我放弃从resultChan 读数据，doALongJob处依然可以往里面写入一个数据，从而正常退出
+      var reusultChan chan string = make(chan string)
+      go doALongJob(ctx, reusultChan)
+      select {
+      case <-ctx.Done(): // 超时
+          fmt.Println("走到ctx.Done()，分支，说明用户不愿意继续等待了 with err:", ctx.Err())
+          w.Write([]byte("走到ctx.Done()，分支，说明用户不愿意继续等待了 with err:" + ctx.Err().Error()))
+      case result := <-reusultChan:
+          w.Write([]byte(result))
+          fmt.Println(result)
+      }
+
+  }
+
+  func main() {
+      http.HandleFunc("/", handleTest)
+      http.ListenAndServe(":8080", nil)
+  }
+#+END_SRC

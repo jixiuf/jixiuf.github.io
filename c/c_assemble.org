@@ -1,0 +1,403 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     c与汇编
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-29 日
+#+DESCRIPTION:c与汇编
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :C:
+* 参考
+  http://learn.akae.cn/media/ch19s01.html
+#+BEGIN_SRC c
+int bar(int c, int d)
+{
+    int e = c + d;
+    return e;
+}
+
+int foo(int a, int b)
+{
+    return bar(a, b);
+}
+
+int main(void)
+{
+    foo(2, 3);
+    return 0;
+}
+#+END_SRC
+
+如果在编译时加上-g选项（在第 10 章 gdb讲过-g选项），那么用objdump反汇编时可以把
+C代码和汇编代码穿插起来显示，这样C代码和汇编代码的对应关系看得更清楚。反汇编的
+结果很长，以下只列出我们关心的部分。
+#+BEGIN_SRC sh
+gcc -g main.c
+objdump -dS a.out
+#+END_SRC
+输出结果如下:
+#+BEGIN_SRC c
+main:     file format elf32-i386
+
+
+Disassembly of section .init:
+
+08048294 <_init>:
+ 8048294:    55                       push   %ebp
+ 8048295:    89 e5                    mov    %esp,%ebp
+ 8048297:    83 ec 08                 sub    $0x8,%esp
+ 804829a:    e8 65 00 00 00           call   8048304 <_start+0x24>
+ 804829f:    e8 ec 00 00 00           call   8048390 <_start+0xb0>
+ 80482a4:    e8 d7 01 00 00           call   8048480 <__libc_csu_fini+0x10>
+ 80482a9:    c9                       leave
+ 80482aa:    c3                       ret
+
+Disassembly of section .plt:
+
+080482ac <__gmon_start__@plt-0x10>:
+ 80482ac:    ff 35 f8 9f 04 08        pushl  0x8049ff8
+ 80482b2:    ff 25 fc 9f 04 08        jmp    *0x8049ffc
+ 80482b8:    00 00                    add    %al,(%eax)
+    ...
+
+080482bc <__gmon_start__@plt>:
+ 80482bc:    ff 25 00 a0 04 08        jmp    *0x804a000
+ 80482c2:    68 00 00 00 00           push   $0x0
+ 80482c7:    e9 e0 ff ff ff           jmp    80482ac <_init+0x18>
+
+080482cc <__libc_start_main@plt>:
+ 80482cc:    ff 25 04 a0 04 08        jmp    *0x804a004
+ 80482d2:    68 08 00 00 00           push   $0x8
+ 80482d7:    e9 d0 ff ff ff           jmp    80482ac <_init+0x18>
+
+Disassembly of section .text:
+
+080482e0 <_start>:
+ 80482e0:    31 ed                    xor    %ebp,%ebp
+ 80482e2:    5e                       pop    %esi
+ 80482e3:    89 e1                    mov    %esp,%ecx
+ 80482e5:    83 e4 f0                 and    $0xfffffff0,%esp
+ 80482e8:    50                       push   %eax
+ 80482e9:    54                       push   %esp
+ 80482ea:    52                       push   %edx
+ 80482eb:    68 70 84 04 08           push   $0x8048470
+ 80482f0:    68 10 84 04 08           push   $0x8048410
+ 80482f5:    51                       push   %ecx
+ 80482f6:    56                       push   %esi
+ 80482f7:    68 e5 83 04 08           push   $0x80483e5
+ 80482fc:    e8 cb ff ff ff           call   80482cc <__libc_start_main@plt>
+ 8048301:    f4                       hlt
+ 8048302:    90                       nop
+ 8048303:    90                       nop
+ 8048304:    55                       push   %ebp
+ 8048305:    89 e5                    mov    %esp,%ebp
+ 8048307:    53                       push   %ebx
+ 8048308:    83 ec 04                 sub    $0x4,%esp
+ 804830b:    e8 00 00 00 00           call   8048310 <_start+0x30>
+ 8048310:    5b                       pop    %ebx
+ 8048311:    81 c3 e4 1c 00 00        add    $0x1ce4,%ebx
+ 8048317:    8b 93 fc ff ff ff        mov    -0x4(%ebx),%edx
+ 804831d:    85 d2                    test   %edx,%edx
+ 804831f:    74 05                    je     8048326 <_start+0x46>
+ 8048321:    e8 96 ff ff ff           call   80482bc <__gmon_start__@plt>
+ 8048326:    58                       pop    %eax
+ 8048327:    5b                       pop    %ebx
+ 8048328:    c9                       leave
+ 8048329:    c3                       ret
+ 804832a:    90                       nop
+ 804832b:    90                       nop
+ 804832c:    90                       nop
+ 804832d:    90                       nop
+ 804832e:    90                       nop
+ 804832f:    90                       nop
+ 8048330:    55                       push   %ebp
+ 8048331:    89 e5                    mov    %esp,%ebp
+ 8048333:    53                       push   %ebx
+ 8048334:    83 ec 04                 sub    $0x4,%esp
+ 8048337:    80 3d 10 a0 04 08 00     cmpb   $0x0,0x804a010
+ 804833e:    75 3d                    jne    804837d <_start+0x9d>
+ 8048340:    a1 14 a0 04 08           mov    0x804a014,%eax
+ 8048345:    bb 18 9f 04 08           mov    $0x8049f18,%ebx
+ 804834a:    81 eb 14 9f 04 08        sub    $0x8049f14,%ebx
+ 8048350:    c1 fb 02                 sar    $0x2,%ebx
+ 8048353:    4b                       dec    %ebx
+ 8048354:    39 d8                    cmp    %ebx,%eax
+ 8048356:    73 1e                    jae    8048376 <_start+0x96>
+ 8048358:    90                       nop
+ 8048359:    8d b4 26 00 00 00 00     lea    0x0(%esi,%eiz,1),%esi
+ 8048360:    40                       inc    %eax
+ 8048361:    a3 14 a0 04 08           mov    %eax,0x804a014
+ 8048366:    ff 14 85 14 9f 04 08     call   *0x8049f14(,%eax,4)
+ 804836d:    a1 14 a0 04 08           mov    0x804a014,%eax
+ 8048372:    39 d8                    cmp    %ebx,%eax
+ 8048374:    72 ea                    jb     8048360 <_start+0x80>
+ 8048376:    c6 05 10 a0 04 08 01     movb   $0x1,0x804a010
+ 804837d:    83 c4 04                 add    $0x4,%esp
+ 8048380:    5b                       pop    %ebx
+ 8048381:    c9                       leave
+ 8048382:    c3                       ret
+ 8048383:    8d b6 00 00 00 00        lea    0x0(%esi),%esi
+ 8048389:    8d bc 27 00 00 00 00     lea    0x0(%edi,%eiz,1),%edi
+ 8048390:    55                       push   %ebp
+ 8048391:    89 e5                    mov    %esp,%ebp
+ 8048393:    83 ec 18                 sub    $0x18,%esp
+ 8048396:    a1 1c 9f 04 08           mov    0x8049f1c,%eax
+ 804839b:    85 c0                    test   %eax,%eax
+ 804839d:    74 12                    je     80483b1 <_start+0xd1>
+ 804839f:    b8 00 00 00 00           mov    $0x0,%eax
+ 80483a4:    85 c0                    test   %eax,%eax
+ 80483a6:    74 09                    je     80483b1 <_start+0xd1>
+ 80483a8:    c7 04 24 1c 9f 04 08     movl   $0x8049f1c,(%esp)
+ 80483af:    ff d0                    call   *%eax
+ 80483b1:    c9                       leave
+ 80483b2:    c3                       ret
+ 80483b3:    90                       nop
+
+080483b4 <bar>:
+int bar(int c, int d)
+{
+ 80483b4:    55                       push   %ebp
+ 80483b5:    89 e5                    mov    %esp,%ebp
+ 80483b7:    83 ec 10                 sub    $0x10,%esp
+    int e = c + d;
+ 80483ba:    8b 45 0c                 mov    0xc(%ebp),%eax
+ 80483bd:    8b 55 08                 mov    0x8(%ebp),%edx
+ 80483c0:    8d 04 02                 lea    (%edx,%eax,1),%eax
+ 80483c3:    89 45 fc                 mov    %eax,-0x4(%ebp)
+    return e;
+ 80483c6:    8b 45 fc                 mov    -0x4(%ebp),%eax
+}
+ 80483c9:    c9                       leave
+ 80483ca:    c3                       ret
+
+080483cb <foo>:
+
+int foo(int a, int b)
+{
+ 80483cb:    55                       push   %ebp
+ 80483cc:    89 e5                    mov    %esp,%ebp
+ 80483ce:    83 ec 08                 sub    $0x8,%esp
+    return bar(a, b);
+ 80483d1:    8b 45 0c                 mov    0xc(%ebp),%eax
+ 80483d4:    89 44 24 04              mov    %eax,0x4(%esp)
+ 80483d8:    8b 45 08                 mov    0x8(%ebp),%eax
+ 80483db:    89 04 24                 mov    %eax,(%esp)
+ 80483de:    e8 d1 ff ff ff           call   80483b4 <bar>
+}
+ 80483e3:    c9                       leave
+ 80483e4:    c3                       ret
+
+080483e5 <main>:
+
+int main(void)
+{
+ 80483e5:    55                       push   %ebp
+ 80483e6:    89 e5                    mov    %esp,%ebp
+ 80483e8:    83 ec 08                 sub    $0x8,%esp
+    foo(2, 3);
+ 80483eb:    c7 44 24 04 03 00 00     movl   $0x3,0x4(%esp)
+ 80483f2:    00
+ 80483f3:    c7 04 24 02 00 00 00     movl   $0x2,(%esp)
+ 80483fa:    e8 cc ff ff ff           call   80483cb <foo>
+    return 0;
+ 80483ff:    b8 00 00 00 00           mov    $0x0,%eax
+}
+ 8048404:    c9                       leave
+ 8048405:    c3                       ret
+ 8048406:    90                       nop
+ 8048407:    90                       nop
+ 8048408:    90                       nop
+ 8048409:    90                       nop
+ 804840a:    90                       nop
+ 804840b:    90                       nop
+ 804840c:    90                       nop
+ 804840d:    90                       nop
+ 804840e:    90                       nop
+ 804840f:    90                       nop
+
+08048410 <__libc_csu_init>:
+ 8048410:    55                       push   %ebp
+ 8048411:    89 e5                    mov    %esp,%ebp
+ 8048413:    57                       push   %edi
+ 8048414:    56                       push   %esi
+ 8048415:    53                       push   %ebx
+ 8048416:    e8 00 00 00 00           call   804841b <__libc_csu_init+0xb>
+ 804841b:    5b                       pop    %ebx
+ 804841c:    81 c3 d9 1b 00 00        add    $0x1bd9,%ebx
+ 8048422:    83 ec 1c                 sub    $0x1c,%esp
+ 8048425:    8d bb 18 ff ff ff        lea    -0xe8(%ebx),%edi
+ 804842b:    e8 64 fe ff ff           call   8048294 <_init>
+ 8048430:    8d 83 18 ff ff ff        lea    -0xe8(%ebx),%eax
+ 8048436:    29 c7                    sub    %eax,%edi
+ 8048438:    c1 ff 02                 sar    $0x2,%edi
+ 804843b:    85 ff                    test   %edi,%edi
+ 804843d:    74 29                    je     8048468 <__libc_csu_init+0x58>
+ 804843f:    31 f6                    xor    %esi,%esi
+ 8048441:    8d b4 26 00 00 00 00     lea    0x0(%esi,%eiz,1),%esi
+ 8048448:    8b 45 10                 mov    0x10(%ebp),%eax
+ 804844b:    89 44 24 08              mov    %eax,0x8(%esp)
+ 804844f:    8b 45 0c                 mov    0xc(%ebp),%eax
+ 8048452:    89 44 24 04              mov    %eax,0x4(%esp)
+ 8048456:    8b 45 08                 mov    0x8(%ebp),%eax
+ 8048459:    89 04 24                 mov    %eax,(%esp)
+ 804845c:    ff 94 b3 18 ff ff ff     call   *-0xe8(%ebx,%esi,4)
+ 8048463:    46                       inc    %esi
+ 8048464:    39 fe                    cmp    %edi,%esi
+ 8048466:    72 e0                    jb     8048448 <__libc_csu_init+0x38>
+ 8048468:    83 c4 1c                 add    $0x1c,%esp
+ 804846b:    5b                       pop    %ebx
+ 804846c:    5e                       pop    %esi
+ 804846d:    5f                       pop    %edi
+ 804846e:    c9                       leave
+ 804846f:    c3                       ret
+
+08048470 <__libc_csu_fini>:
+ 8048470:    55                       push   %ebp
+ 8048471:    89 e5                    mov    %esp,%ebp
+ 8048473:    c9                       leave
+ 8048474:    c3                       ret
+ 8048475:    90                       nop
+ 8048476:    90                       nop
+ 8048477:    90                       nop
+ 8048478:    90                       nop
+ 8048479:    90                       nop
+ 804847a:    90                       nop
+ 804847b:    90                       nop
+ 804847c:    90                       nop
+ 804847d:    90                       nop
+ 804847e:    90                       nop
+ 804847f:    90                       nop
+ 8048480:    55                       push   %ebp
+ 8048481:    89 e5                    mov    %esp,%ebp
+ 8048483:    53                       push   %ebx
+ 8048484:    83 ec 04                 sub    $0x4,%esp
+ 8048487:    a1 0c 9f 04 08           mov    0x8049f0c,%eax
+ 804848c:    83 f8 ff                 cmp    $0xffffffff,%eax
+ 804848f:    74 1b                    je     80484ac <__libc_csu_fini+0x3c>
+ 8048491:    bb 0c 9f 04 08           mov    $0x8049f0c,%ebx
+ 8048496:    8d 76 00                 lea    0x0(%esi),%esi
+ 8048499:    8d bc 27 00 00 00 00     lea    0x0(%edi,%eiz,1),%edi
+ 80484a0:    ff d0                    call   *%eax
+ 80484a2:    83 eb 04                 sub    $0x4,%ebx
+ 80484a5:    8b 03                    mov    (%ebx),%eax
+ 80484a7:    83 f8 ff                 cmp    $0xffffffff,%eax
+ 80484aa:    75 f4                    jne    80484a0 <__libc_csu_fini+0x30>
+ 80484ac:    83 c4 04                 add    $0x4,%esp
+ 80484af:    5b                       pop    %ebx
+ 80484b0:    c9                       leave
+ 80484b1:    c3                       ret
+ 80484b2:    90                       nop
+ 80484b3:    90                       nop
+
+Disassembly of section .fini:
+
+080484b4 <_fini>:
+ 80484b4:    55                       push   %ebp
+ 80484b5:    89 e5                    mov    %esp,%ebp
+ 80484b7:    53                       push   %ebx
+ 80484b8:    83 ec 04                 sub    $0x4,%esp
+ 80484bb:    e8 00 00 00 00           call   80484c0 <_fini+0xc>
+ 80484c0:    5b                       pop    %ebx
+ 80484c1:    81 c3 34 1b 00 00        add    $0x1b34,%ebx
+ 80484c7:    e8 64 fe ff ff           call   8048330 <_start+0x50>
+ 80484cc:    59                       pop    %ecx
+ 80484cd:    5b                       pop    %ebx
+ 80484ce:    c9                       leave
+ 80484cf:    c3                       ret
+#+END_SRC
+
+一段一段的理解,从main 开始:
+首先 栈的分配 是从高地址向低地址扩展的，所以入栈会导致栈顶地址变小。
+在 _每个函数_ 的 _栈帧_ 中，ebp指向栈底，而esp指向栈顶，在 _某一个函数_ 执行过
+程中esp随着压栈和出栈操作随时变化，而ebp是不动的，函数的参数和局部变量都是通过ebp的值加上一个偏
+移量来访问
+
+#+BEGIN_SRC c
+int main(void)
+{
+关于这两个操作在foo函数中进行讲解
+ 80483e5:    55                       push   %ebp
+ 80483e6:    89 e5                    mov    %esp,%ebp
+
+将栈顶指针地址减8byte(两个int的长度),在栈上开辟两个int字节的长度
+ 80483e8:    83 ec 08                 sub    $0x8,%esp
+    foo(2, 3);
+
+ 依次将 参数3 、2入 栈 ,0x4(%esp)表示的地址是 :4+ esp中所指地址
+ 80483eb:    c7 44 24 04 03 00 00     movl   $0x3,0x4(%esp)
+ 80483f2:    00
+ 80483f3:    c7 04 24 02 00 00 00     movl   $0x2,(%esp)
+跳到foo()函数的首地址进行执行
+ 80483fa:    e8 cc ff ff ff           call   80483cb <foo>
+    return 0;
+这行move不理解
+ 80483ff:    b8 00 00 00 00           mov    $0x0,%eax
+}
+#+END_SRC
+foo函数的调用
+#+BEGIN_SRC c
+int foo(int a, int b)
+{
+首先经过main的调用，栈上元素依次是 3,2,
+经过此步push   %ebp ,栈变成了，3 ,2 ,%ebp ,注意，此时，%ebp中的地址是main 函数
+的首地址,即将main 函数的首地址压栈，（保存main的首地址，以便调用完foo函数，继
+续执行main函数时恢复ebp的值）(push操作在入栈时，会自动将esp的值减4)
+80483cb:    55                       push   %ebp
+%esp 始终指向栈顶元素
+经mov    %esp,%ebp ，此时ebp所指的地址跟当下 esp所指的栈顶地址相同
+即将ebp指向新的 foo函数栈帧的首地址
+ 80483cc:    89 e5                    mov    %esp,%ebp
+准备向栈上压入两个元素，
+此时栈上元素为: 3,2,main_ebp,空,空
+此时ebp与esp之间有两个空元素
+ 80483ce:    83 ec 08                 sub    $0x8,%esp
+    return bar(a, b);
+经此操作 栈变成 3,2,main_ebp,3,空
+0xc+%ebp的地址中的内容是3,
+ 80483d1:    8b 45 0c                 mov    0xc(%ebp),%eax
+ 80483d4:    89 44 24 04              mov    %eax,0x4(%esp)
+
+经此操作 栈变成 3,2,main_ebp,3,2
+ 80483d8:    8b 45 08                 mov    0x8(%ebp),%eax
+ 80483db:    89 04 24                 mov    %eax,(%esp)
+
+跳到80483b4处执行bar()函数
+ 80483de:    e8 d1 ff ff ff           call   80483b4 <bar>
+}
+#+END_SRC
+P.S.关于地址的表示方式 0xc(%ebp)内容见 [[file:x86.org][寻址方式]]
+#+BEGIN_SRC c
+080483b4 <bar>:
+int bar(int c, int d)
+{
+ 80483b4:    55                       push   %ebp
+ 80483b5:    89 e5                    mov    %esp,%ebp
+# 这个sub 命令，我不太明白 ，参数为什么是10,而不是0xc,或者8
+#如果算上局部变量e 的究竟应该是8+4,如果不算，则为8,为什么是10呢
+ 80483b7:    83 ec 10                 sub    $0x10,%esp
+    int e = c + d;
+# 这是将foo函数中最后压栈的两个参数取出放到eax edx中，
+ 80483ba:    8b 45 0c                 mov    0xc(%ebp),%eax
+ 80483bd:    8b 55 08                 mov    0x8(%ebp),%edx
+#这个利用 寻址(%dex,%eax,1)= %edx+%eax+1 ,即做加法运算，
+#难道没有add指令？ lea是将运算后的结果存到%eax中
+ 80483c0:    8d 04 02                 lea    (%edx,%eax,1),%eax
+#将运算结果存到局部变量e中
+ 80483c3:    89 45 fc                 mov    %eax,-0x4(%ebp)
+    return e;
+ 把e的值放到%eax中，返加
+ 80483c6:    8b 45 fc                 mov    -0x4(%ebp),%eax
+}
+ 80483c9:    c9                       leave
+ 80483ca:    c3                       ret
+#+END_SRC
+bar函数有一个int型的返回值，这个返回值是通过eax寄存器传递的，所以首先把e的值读
+到eax寄存器中。然后执行leave指令，这个指令是函数开头的push %ebp和mov %esp,%ebp
+的逆操作：
+最后是ret指令，它是call指令的逆操作：
+
++ 参数压栈传递，并且是从右向左依次压栈。
++ ebp总是指向当前栈帧的栈底。
++ 返回值通过eax寄存器传递

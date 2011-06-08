@@ -1,0 +1,58 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+
+#+TITLE:     emacs 的帮助系统
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:      2011-06-09 星期四
+#+DESCRIPTION: emacs 的帮助系统
+#+TAGS: :Emacs: 
+#+KEYWORDS:  emacs help system
+
+Emacs的帮助系统的按键前缀是C-h, 和F1
+*** 首先是关于帮助系统的帮助系统
+C-h ?  实际是C-h S-/,它会列出C-h 前缀下可用的命令，如b ,列出当前可用的键绑定，完整的按键
+是C-h b
+
+
+***   查看变量的值和文档
+    C-h v (describe-variable) 
+***     查看函数的文档
+    C-h f (describe-function)
+    查看face的文档
+***     M-x describe-face
+    查看某个mode的文档
+***     C-h m (describe-mode)
+    刚开始学习某个mode的时候, 可以用C-h m看看当前buffer对应的主mode和副mode的文档, 这个文档一般都会包括mode中的命令和快捷键列表.
+    查看某个快捷键对应的命令
+***    C-h k (describe-key)
+    查看某个命令对应的快捷键
+***     C-h w (where-is)
+    查看当前buffer所有的快捷键列表
+***    C-h b (describe-bindings)
+    查看当前buffer中以某个快捷键序列开头的快捷键列表
+    <待查看的快捷键序列> C-h，比如你想查看当前buffer中所有以C-c开头的快捷键列表，按C-c C-h就可以了。
+    查看函数的代码
+***    find-function
+    查看变量的代码
+***    find-variable
+    查看face的代码
+***    find-face-definition
+***    M-x apropos
+    查看包含某个关键词的函数,变量,face
+
+*** 会些简单的配置
+
+    执行Elisp代码
+        在某条语句后面按C-x C-e (eval-last-sexp)可以执行那条语句
+        M-x eval-buffer 可以执行当前buffer内的Elisp代码
+        选中一个region后, M-x eval-region可以执行这个region内的代码
+    Emacs的插件一般都是一个以el为后缀名的文件, 把这个文件下载下来后放到一个目录, 比如~/emacs/lisps, 然后执行下面这两条语句:
+#+begin_src emacs-lisp
+    (add-to-list 'load-path "~/emacs/lisps")
+    (require 'pluginname)
+#+end_src
+***    快捷键定制
+       建议看[[http://docs.huihoo.com/homepage/shredderyin/wiki/KeyBinding.html][王垠的键盘绑定技巧]]
+*** 参考文献
+[[http://emacser.com/emacs-beginner-must-know.htm][emacser中文网ahei Emacs初学者必会]]

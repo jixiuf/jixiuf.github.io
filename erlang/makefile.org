@@ -1,0 +1,19 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     makefile for erlang 示例
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-12 四
+#+DESCRIPTION:makefile for erlang 示例
+#+KEYWORDS:Erlang Makefile
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Erlang:
+[[file:Makefile.Makefile][Makefile]]
+[[file:Makefile2.Makefile][Makefile]]
+目录实现的功能
+ + make compile  编译本application
+ + make compile-deps 编译 application/deps/*
+ + make compile-all
+ + make install-deps  copy applications in  deps/ to /usr/lib/erlang/lib/目录下
+ + make install     copy 本applicatoin to /usr/lib/erlang/lib/目录下

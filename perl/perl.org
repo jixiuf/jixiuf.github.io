@@ -1,0 +1,892 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     perl 一的些总结
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-08-25 四
+#+DESCRIPTION:perl 一的些总结
+#+KEYWORDS: perl 
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil 
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :perl: :Linux:
+* perl 中变量以$开头，数组以@开头,关联数组(map) 以%开头;
+#+begin_src perl
+# variable 
+$var="abcab";
+
+#array
+@array=("a","b" );
+print($array[0]);
+$array[2]="c";
+# .数组间拷贝
+ @result = @original;
+
+@list1 = (2, 3, 4);
+@list2 = (1, @list1, 5); # @list2 = (1, 2, 3, 4, 5);
+($v1,$v2)=@list1;
+
+(1..10) = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+("aaa".."aad") = ("aaa","aab", "aac", "aad")
+
+#+end_src
+  #+begin_src perl
+#4、数组的输出：
+ @array = (1, 2, 3);
+    print (@array, "\n");
+#  结果为： 123
+
+@array = (1, 2, 3);
+ print ("@array\n");
+#  结果为： 1 2 3
+#+end_src
+*** 数组长度
+    #+begin_src perl
+    @array=("a","b","c")
+    $length=@array
+    #+end_src
+*** 子数组
+    @array = (1 ,2,3 ,4,5);
+    @subarr=@array[0,1];
+    @subarr2=@array[1..4];
+*** 数组 函数    sort() ,reverse() join() ,split
+#+begin_src perl
+join("," ,"a","b","c") ; #= "a,b,c"
+
+#+end_src    
+    
+#+begin_src perl
+# map
+%map=("key","value","key2", "value2");
+ 注：用列表给关联数组赋值时，Perl5允许使用"=>"或","来分隔下标与值，用"=>"可读性更好些，上面语句等效于：
+ %fruit = ("apples"=>17,"bananas"=>9,"oranges"=>"none");
+##取map 的值
+$map{"key"} =value;
+
+## add
+$map{"key3"}="v3";
+
+## delete
+delete ($map{"key"});
+  
+  #+end_src
+数组,map 可以相互转换,如
+#+begin_src  perl
+%a=@a;
+@a=%a;
+#+end_src
+与map 相关的函数:
+#+begin_src perl
+keys(%map) #取所有keys 值
+
+#+end_src
+#+begin_src perl
+each 取出map中每个键值对， 这种方式比foreach与keys()合作 快
+%map=("a","b", "c","d" );
+while (($k,$v) = each(%map)){
+    print("$k:$v\n");
+}
+#+end_src
+**** split 返回数组 与返回匹配的次数
+#+begin_src perl
+$line='abcabcde';
+@result =split(/c/ , $line); #result= ("ab" ,"ab" ,"de")
+foreach $ele (@result){
+    print($ele ,"\n");
+}
+$result =split(/c/ , $line);
+print($result); # result =3
+#+end_src
+    
+* Regexp :处在//之间
+  缺省的，模式定界符为反斜线/，但其可用字母m自行指定，如：
+   m!/u/jqpublic/perl/prog1! 等价于/\/u\/jqpublic\/perl\/prog1/
+  例1:
+  #+begin_src perl
+    $pattern = "[\\t ]+";
+     @words = split(/$pattern/, $line);
+  #+end_src
+   在模式匹配后调用重用部分的结果可用变量$n，全部的结果用变量$&。
+   #+begin_src perl
+     $string = "This string contains the number 25.11.";
+     $string =~ /-?(\d+)\.?(\d+)/; # 匹配结果为25.11
+     $integerpart = $1; # now $integerpart = 25
+     $decimalpart = $2; # now $decimalpart = 11
+     $totalpart = $&; # now totalpart = 25.11
+   #+end_src
+** 模式匹配选项
+   | g | global，匹配所有                                           |
+   | i | 忽略大小写                                                 |
+   | m | multiply ,将串视为多行，即$ ,匹配\n,而不是整个字符串的末尾 |
+   | s | single 与m反                                                 |
+   | o | 只赋值一次                                                      |
+   | x | 忽略regexp中的空白                                               | 
+*** g
+#+begin_src perl
+匹配所有可能的模式(g选项)
+   @matches = "balata" =~ /.a/g; # now @matches = ("ba", "la", "ta")
+   匹配的循环：
+   while ("balata" =~ /.a/g) {
+     $match = $&;
+     print ("$match\n");
+   }
+#+end_src
+   结果为：
+     ba
+     la
+     ta
+*** s
+    /a.*bc/s匹配字符串axxxxx \nxxxxbc，但/a.*bc/则不匹配该字符串。
+* 替换 s/// 与tr/// 的区别
+  两者都是进行替换操作,区别是前者用正则表达示，后者：
+  tr/searchment/repalcement/;是把searchment的第一个字符换成replacement的第一
+  个字符，searchment的第二个字符换成replacement的第二个字符，类推
+举例
+#+begin_src perl
+$line="abcab";
+$line =~ s/ab/d/ ;
+print($line);
+#+end_src
+结果为: dcab
+#+begin_src perl
+$line="abcab";
+$line =~ s/ab/d/g ;
+print($line);
+#+end_src
+结果为 : dcd
+
+区别是正则表达式后加一个g ，表示global ,即不仅仅进行一次替换，如果字符串中
+出现多处匹配正则的，所有匹配均予考虑
+
+  tr/searchment/repalcement/;是把searchment的第一个字符换成replacement的第一
+  个字符，searchment的第二个字符换成replacement的第二个字符，类推
+#+begin_src perl
+$line='abcDeF';
+$line =~ tr/abc/ABC/;
+print($line);
+#+end_src
+结果：ABCDeF
+* 子程序，函数
+  #+begin_src perl
+  sub subname{
+    print("hello");
+  }
+# 调用方法 ，用&
+#如
+$subname;
+
+#如果调用在子程序定义之后，可以省略&
+subname;
+
+# 可以用关键字do 调用
+do subname;
+  #+end_src
+** 局部变量 my ,与local
+   my 只在此子程序中有效，local 在子程序及此子程序所调用的子程序中有效
+   #+begin_src perl
+   local ($localVar) =43;
+   my ($my_var)="abc";
+   #+end_src
+   
+** 参数传递 @_
+*** 普通参数   
+   #+begin_src perl
+&subname(1 ,2 ,3 );
+sub subname{
+  my($v1 ,$v2,$v3)=@_;
+}
+   #+end_src
+*** array param
+    &addlist(@mylist);
+    &addlist($v1,$v2,$v3);
+sub addlist{
+  my (@list)=@_;
+}    
+参数为数组时，子程序只将它赋给一个数组变量。如
+#+begin_src perl
+sub twolists {
+    my (@list1, @list2) = @_;
+  }
+# 中@list2必然为空。但简单变量和数组变量可以同时传递：
+#+end_src
+** 别名传参（指针）
+3、用别名的方法可以传递多个数组，如：
+  #+begin_src perl
+    @array1 = (1, 2, 3);
+    @array2 = (4, 5, 6);
+    &two_array_sub (*array1, *array2);
+    sub two_array_sub {
+      my (*subarray1, *subarray2) = @_;
+    }   
+  #+end_src
+* Filesystem
+  
+** 打开文件，一行行读取.
+  #+begin_src perl
+    open (VERSION , "/proc/version");
+    while ($line = <VERSION>){
+        print($line ,"\n");
+    }
+  #+end_src
+** linux相关特性， 管道 "|"
+   #+begin_src perl
+     open(pipo,"cat /proc/swaps |");
+     while( $line = <pipo> ){
+         print($line,"\n");
+     }
+# 此处cat 读取/proc/swaps文件的内容，然后通过管道输出，open()打开这个管道里
+# 的内容
+   #+end_src
+** 写文件 > 与>> 重定向
+缺省地，open打开文件用以读取其内容，若想打开文件以写入内容，则在文件名前加个
+大于号：open(MYVAR, ">/u/file",)向已有的文件末尾添加内容用两个大于号
+   #+begin_src perl
+     open (STDOUT, ">file1") || die ("open STDOUT failed");
+     open (STDERR, ">&STDOUT") || die ("open STDERR failed");
+     print STDOUT ("line 1\n");
+     print STDERR ("line 2\n");
+     close (STDOUT);
+     close (STDERR); 
+   #+end_src
+#+begin_src perl
+open (a, ">file1") || die ("open STDOUT failed");
+open (b, ">&a") || die ("open STDERR failed");
+print a ("line 1\n");
+print b ("line 2\n");
+close (a);
+close (b); 
+#+end_src
+** 是否使用缓冲区(写文件时)
+   把值1赋给系统变量"$|"
+   系统变量"$|"指定文件是否进行缓冲而不管其是否应该使用缓冲。
+    如果$|为非零值则不使用缓冲。$|与系统变量$~和$^协同工作，当未调用select函
+    数时，$|影响当前缺省文件
+#+begin_src perl
+ open (STDOUT, ">file1") || die ("open STDOUT failed");
+ open (STDERR, ">&STDOUT") || die ("open STDERR failed");
+ $| = 1; # 因未调用select（），当前的缺省文件为重定向到文件file1的STDOUT ,
+# 此将$|=1 , 意为stdout不用缓冲区
+
+ select (STDERR);
+ $| = 1;
+
+ print STDOUT ("line 1\n");
+ print STDERR ("line 2\n");
+ close (STDOUT);
+ close (STDERR); 
+#+end_src    
+** 4)指定读写权限
+    打开一个既可读又可写的文件方法是在文件名前加上"+>"，如下：
+     open (READWRITE, "+>file1");
+    此语句打开既可读又可写的文件file1，即可以重写其中的内容。文件读写操作最好与库函数seek和tell一起使用，这样可以跳到文件任何一点。
+    注：也可用前缀"+<"指定可读写权限
+** 5)close函数
+    用于关闭打开的文件。当用close关闭管道，即重定向的命令时，程序等待重定向的命令结束，如：
+     open (MYPIPE, "cat file*|");
+     close (MYPIPE);    
+** 6)print, printf和write函数
+    print是这三个函数中最简单的，它向指定的文件输出，如果未指定，则输出到当前缺省文件中，如：
+     print ("Hello, there!\n");
+     print OUTFILE ("Hello, there!\n");
+    第一句输出到当前缺省文件中，若未调用select，则为STDOUT。第二句输出到由文件变量OUTFILE指定的文件中。
+    printf函数先格式化字符串再输出到指定文件或当前缺省文件中，如：
+     printf OUTFILE (“You owe me %8.2f", $owing);
+    此语句取出变量$owing的值并替换掉串中的%8.2f，%8.2f是域格式的例子，把$owing的值看作浮点数。
+    write函数使用输出格式把信息输出到文件中，如：
+     select (OUTFILE);
+     $~ = "MYFORMAT";
+     write;
+** 7)select函数
+    select函数将通过参数传递的文件变量指定为新的当前缺省文件，如：
+     select (MYFILE);
+** 8)eof函数 (endoffile)
+    eof函数查看最后一次读文件操作是否为文件最后一个记录，如果是，则返回非零
+    值，如果文件还有内容，返回零。一般情况下，对eof的调用不加括号，因为eof和
+    eof()是等效的，但与<>操作符一起使用时，eof和eof()就不同了。现在我们来创
+    建两个文件，分别叫做file1和file2。file1的内容为
+#+begin_src perl
+while ($line = <STDIN>) {
+   print ($line);
+   if (eof) {
+     print ("-- end of current file --\n");
+   }
+ }
+ 
+#+end_src
+#+begin_src perl
+while ($line = <STDIN>) {
+   print ($line);
+   if (eof()) {
+     print ("-- end of current file --\n");
+   }
+ } 
+#+end_src    
+如此运行上面两程序:
+#+begin_src sh
+root@localhost$>   test.pl file1 file2
+#+end_src
+只有所有文件都读过了，eof()才返回真，如果只是多个文件中前几个的末尾，返回值为假，因为还有要读取的输入
+** 间接文件变量
+   可以用简单变量来代替文件变量，这时，简单变量中所存贮的字符串就被看作文件变量名
+#+begin_src perl
+&open_file("INFILE", "", "file1");
+&open_file("OUTFILE", ">", "file2");
+while ($line = &read_from_file("INFILE")) {
+  &print_to_file("OUTFILE", $line);
+}
+
+sub open_file {
+   local ($filevar, $filemode, $filename) = @_;
+
+   open ($filevar, $filemode . $filename) ||
+     die ("Can't open $filename");
+ }
+ sub read_from_file {
+   local ($filevar) = @_;
+
+   <$filevar>;
+ }
+ sub print_to_file {
+   local ($filevar, $line) = @_;
+
+   print $filevar ($line);
+ } 
+#+end_src
+** 跳过和重读数据 seek tell
+***    seek(filevar,distance,relative_to);
+     在文件中向前/后移动，有三个参数：
+    + 1、filevar，文件变量
+    + 2、distance，移动的字节数，正数向前移动，负数往回移动
+    + 3、reletive_to，值可为0、1或2。为0时，从文件头开始移动，为1时，相对于当
+      前位置（将要读的下一行）移动，为2时，相对于文件末尾移动。运行成功返回真
+      （非零值），失败则返回零，常与tell函数合用。
+*** tell (filevar);
+    返回从文件头到当前位置的距离。
+    1. seek和tell不能用于指向管道的文件变量。
+    2. seek和tell中文件变量参数可使用表达式。
+** read (filevar, result, length, skipval);
+      解说 read函数设计得与UNIX的fread函数等效，可以读取任意长度的字符（字节）存入一个简单变量。其参数有四个：
+    + 1、filevar：文件变量
+    + 2、result：存贮结果的简单变量（或数组元素）
+    + 3、length：读取的字节数
+    + 4、skipval：可选项，指定读文件之前跳过的字节数。 返回值为实际读取的字
+      节数，如果已到了文件末尾，则返回零，如果出错，则返回空串。
+** sysread (filevar, result, length, skipval);
+ 	更快的读取数据，与UNIX函数read等效，参数与read相同
+** 	syswrite (filevar, data, length, skipval);
+   更快的写入数据，与UNIX函数write等效，参数：
+   + 1、filevar：将要写入的文件
+   + 2、data：存贮要写入数据的变量
+   + 3、length：要写入的字节数
+   + 4、skipval写操作之前跳过的字节数。
+** $char = getc (infile); 	#从文件中读取单个字符。
+** binmode (filevar);
+   当你的系统（如类DOS系统）对文本文件和二进制文件有所区别时使用。必须在打
+   开文件后、读取文件前使用
+** mkdir (dirname, permissions);
+   1、dirname：将要创建的目录名，可以为字符串或表达式
+   2、permissions：8进制数，指定目录的访问权限，其值和意义见下表，权限的组
+   合方法为将相应的值相加
+   值 | 权限             |
+ 4000 | 运行时设置用户ID |
+ 2000 | 运行时设置组ID   |
+ 1000 | 粘贴位           |
+ 0400 | 拥有者读权限     |
+ 0200 | 拥有者写权限     |
+ 0100 | 拥有者执行权限   |
+ 0040 | 组读权限         |
+ 0020 | 组写权限         |
+ 0010 | 组执行权限       |
+ 0004 | 所有人读权限     |
+ 0002 | 所有人写权限     |
+ 0001 | 所有人执行权限   |
+** chdir (dirname); #改变当前工作目录。参数dirname可以为字符串，也可以为表达式
+** opendir (dirvar, dirname);    
+开目录，与下面几个函数合用，可查看某目录中文件列表。参数为：
+、dirvar：目录变量，与文件变量类似
+、dirname：目录名，可为字符串或表达式
+功返回真值，失败返回假。
+：程序中可用同名的目录变量和文件变量，根据环境确定取成分
+#+begin_src perl
+  opendir (tmpdir, "/tmp/") ||print "die";
+  @fs=readdir (tmpdir);
+  foreach my $f ( @fs){
+      print $f ,"\n" ;    
+  }
+#+end_src
+** closedir (mydir)
+
+** readdir (mydir);
+给简单变量时，每次赋予一个文件或子目录名，对数组则赋予全部文件和子目录名
+** location = telldir (mydir);
+   象在文件中前后移动一样，telldir和下面的seekdir用于在目录列表中前后移动
+** seekdir(mydir, location);
+   location必须为telldir返回的值
+** rewinddir (mydir);
+   将读取目录的位置重置回开头，从而可以重读目录列表
+** rmdir (dirname);
+   删除空目录。成功则返回真（非零值），失败返回假（零值）
+** rename (oldname, newname);
+** num = unlink (filelist);
+   删除文件。参数为文件名列表，返回值为实际删除的文件数目。此函数之所以叫
+nlink而不叫delete是因为它实际所做的是删除文件的链接
+** link (newlink, file);
+   创建现有文件的链接--硬链接，file是被链接的文件，newlink是被创建的链接。
+功返回真，失败返回假。当删除这两个链接中的一个时，还可以用另一个来访问该文
+。
+** symlink (newlink, file);
+建现有文件的符号链接，即指向文件名，而不是指向文件本身。参数和返回值同上。
+原文件被删除（如：被unlinke函数删除），则被创建链接不可用，除非再创建一个与原被链接的文件同名的文件。
+** filename = readlink (linkname);
+   如果linkname为符号链接文件，返回其实际指向的文件。否则返回空串
+** chmod (permissions, filelist);
+   改变文件的访问权限。参数为：
+、permissions为将要设置的权限，其含义见上述mkdir中权限表
+、filelist为欲改变权限的文件列表
+** chown (userid, groupid, filelist);
+** oldmaskval = umask (maskval);
+   设置文件访问权限掩码，返回值为当前掩码。
+** truncate (filename, length);
+   将文件的长度减少到length字节。如果文件长度已经小于length，则不做任何事。
+   其中filename可以为文件名，也可以为文件变量
+** 	stat (file);
+       获取文件状态。参数file可为文件名也可为文件变量。返回列表元素依次为：
+      + 文件所在设备
+      + 内部参考号(inode)
+      + 访问权限
+      + 硬链接数
+      + 属主的(数字)ID
+      + 所属组的(数字)ID
+      + 设备类型（如果file是设备的话）
+      + 文件大小（字节数）
+      + 最后访问时间
+      + 最后修改时间
+      + 最后改变状态时间
+      + I/O操作最佳块大小
+      + 分配给该文件的块数
+** lstat (file); #与stat类似，区别是将file看作是符号链接
+** currtime = time();
+   返回从1970年1月1日起累计秒数。
+** timelist = gmtime (timeval);
+   将由time, stat 或 -A 和 -M 文件测试操作符返回的时间转换成格林威治时间。返回列表元素依次为：
+      + 秒
+      + 分钟
+      + 小时，0~23
+      + 日期
+      + 月份，0~11(一月~十二月)
+      + 年份
+      + 星期，0~6(周日~周六)
+      + 一年中的日期，0~364
+      + 是否夏令时的标志
+** 	timelist = localtime (timeval);#与gmtime类似，区别为将时间值转换为本地时间
+** utime (acctime, modtime, filelist);
+   变文件的最后访问时间和最后更改时间。例如：
+   #+begin_src perl
+acctime = -A "file1";
+modtime = -M "file1";
+filelist = ("file2", "file3");
+time ($acctime, $modtime, @filelist);
+   #+end_src
+** filedesc = fileno (filevar);#返回文件的内部UNIX文件描述。参数filevar为文件变量。
+** 	fcntl (filevar, fcntlrtn, value); #	详见同名UNIX函数帮助。
+    flock (filevar, flockop);
+** -e -r 测试文件、目录是否存在，是否可读
+   #+begin_src perl
+     $x="abc.txt";
+     if(-e $x) { #abc.txt是否存在？
+         　　# 存在操作
+     } else {
+         　　printf "文件不存在。\n";
+     }
+   #+end_src
+#+begin_quote
+-r 文件或目录可读
+-w 文件或目录可写
+-x 文件或目录执行
+-o 文件或目录归用户所有
+-R 文件或目录对真正用户可读
+-W 文件或目录对真正用户可写
+-X 文件或目录对真正用户执行
+-O 文件或目录归真正用户所有
+-e 文件或目录存在
+-z 文件存在且大小为0
+-s 文件或目录存在且不为0(返回字节数)
+-f 文件为普通文件
+-d 文件为目录
+-l 文件为符号链接
+-p 文件为命名管道(FIFO)
+-S 文件为一个套口(socket)
+-b 文件为块特殊文件
+-c 文件为字符特殊文件
+-t 打开tty控制台的文件句柄
+-u 文件或目录是设置用户ID号
+-g 文件或目录是设置用户组ID号
+-k 文件或目录的sticky位置位
+-T 文件是文本文件
+-B 文件是二进制文件
+-M 以天为单位的存在时间
+-A 以天为单位访问时间
+-C 以天为单位同代码更改时间
+#+end_quote   
+   
+* pointer 引用，指针
+   如果$pointer的值为一个数组的指针，则通过形式@$pointer来访问数组中的元素。
+   形式@$pointer的意义为“取出$pointer中的地址值当作数组使用”。类似的，
+   %$pointer为指向哈希表中第一个元素的引用
+** 使用反斜线(\)操作符
+    反斜线操作符与C语言中传递地址的操作符&功能类似。一般是用\创建变量又一个
+    新的引用。下面为创建简单变量的引用的例子
+    #+begin_src perl
+        $var="abc";
+       $pointer=\$var;
+       print($$pointer);
+      
+      @array = ("a","b","c");
+      $p =\@array;
+      print(@$p);
+      
+      %map=("a","aaa","b","bbbe");
+      $p=\%map;
+      print(%$p);
+    #+end_src
+
+** 不仅变量、数组、Map 可以用指针引用之，子程序（函数）也可以
+    $pointer_to_sub = sub {... declaration of sub ...};
+    调用方法
+    &$pointer_to_sub(param)
+    
+** 子程序的返回值不仅限于数据，还可以返回子程序的引用。返回的子程序在调用处执行
+   #+begin_src perl
+     sub errorMsg {
+         my $lvl = shift;
+     #
+     # define the subroutine to run when called.
+     #
+         return sub {
+             my $msg = shift; # Define the error type now.
+             print "Err Level $lvl:$msg\n"; }; # print later.
+     }
+     $severe = errorMsg("Severe");
+     $fatal = errorMsg("Fatal");
+     $annoy = errorMsg("Annoying");
+     
+     &$severe("Divide by zero");
+     &$fatal("Did you forget to use a semi-colon?");
+     &$annoy("Uninitialized variable in use"); 
+     
+   #+end_src
+
+** 子程序，多数组参数传递
+   #+begin_src perl
+     @a1=("a" ,"b","c");
+     @a2= ("1","2","3");
+     sub sub1{
+         my ($p1,$p2)=@_;
+         print(@$p1,"\n");
+         print(@$p2,"\n");
+     }
+     &sub1(\@a1,\@a2);
+     
+   #+end_src
+** 文件句柄的引用 \*
+   #+begin_src perl
+     # 文件句柄的传递 \* 
+     &spitOut(\*STDOUT);
+     
+     open(file1,">/tmp/file1");
+     &spitOut(\*file1);
+     
+     #这样似乎也可以
+     open($file2,">/tmp/file2");
+     &spitOut($file2);
+     
+     sub spitOut {
+         my $filehandle=shift;
+         print $filehandle "Gee Wilbur, I like this lettuce\n";
+     } 
+   #+end_src
+* 多维数组
+  #+begin_src perl
+    $line = ['solid', 'black', ['1','2','3'] , ['4', '5', '6']];
+    print "\$line->[0] = $line->[0] \n";
+    print "\$line->[2][0] = $line->[2][0] \n";
+    
+  #+end_src
+   使用哈希表和数组时，用$和用->是类似的，对数组而言下面两个语句等效：
+    $$names[ 0] = "kamran";
+    $names->[ 0] = "kamran";
+    对哈希表而言下面两个语句等效：
+    $$lastnames{"kamran"} = "Husain";
+    $lastnames->{"kamran"} = "Husain";
+
+* OO 面向对象
+   模块(module)就是Perl包(pachage)   扩展名pm是包的缺省扩展名，意为Perl Module
+   一个Perl类是仅是一个包而已。当你看到Perl文档中提到“类”时，把它看作
+   “包”就行了
+   保留“1;”为最后一行。这是Perl包的必需条件
+   
+   可以用单引号(')操作符来定位类中的变量，类中成员的定位形式如：
+   Perl5中，可用双冒号替代单引号
+   #+begin_src perl
+   $class'$member
+   $class::$member
+   #+end_src
+   
+创建建一个 Cocoa.pm
+ + 构造方法为new
+   构造函数是类的子程序，它返回与类名相关的一个引用。将类名与引用相结合称为
+   “祝福”一个对象，因为建立该结合的函数名为bless()
+   #+begin_src perl
+    bless YeReference [,classname]
+    YeReference是对被“祝福”的对象的引用，classname是可选项，指定对象获取方法的包名，其缺省值为当前包名。
+   #+end_src
+   将下文存为Cocoa.pm
+#+begin_src perl
+# 1、一定要在构造函数中初始化变量；
+# 2、一定要用my函数在方法中创建变量；
+# 3、一定不要在方法中使用local，除非真的想把变量传递给其它子程序；
+# 4、一定不要在类模块中使用全局变量。 
+  sub new {
+      my  $this= {} Create an anonymous hash, and #self points to it.
+          bless $this  # bless($this) # Connect the hash to the package Cocoa.
+          return $this; # Return the reference to the hash.
+  }
+    
+    ;1 #这一行必须为放在最后一行
+#+end_src
+创建一个Cocoa 对象
+#+begin_src perl
+  push (@INC,'pwd'); # 将当行路径加到include 下
+  use Cocoa;  #在@INC 下搜寻Cocoa.pm 并include 之
+  # 三种创建对象的方法
+  $cup = new Cocoa;  创建一个对象
+  $cup = Cocoa->new(); 
+  $cup = Cocoa::new(); #    如果你是C程序员，可以用双冒号强制使用Cocoa包中的new()函数，如：
+  
+#+end_src
+
+* q qq qw qr qx 等的含义
+** q 与qq
+   q~~是对对'号转义的方式而提倡用的，，这样写的时候就可以不用\'
+   qq~~是对对"号转义的方式而提倡用的，这样写的时候就可以不用\"   
+*** q 是对单引号的转义
+   q~~是对对'号转义的方式而提倡用的，，这样写的时候就可以不用\'
+   q{abc'd},或者
+   q<abc'c>
+   q[abc'd]等
+*** qq  
+  #+begin_src perl
+  qq{hello}
+”hello“
+# 同义 ,即相当于把一段内容引起来
+
+  #+end_src
+   
+** qw 代表用空格来分元素
+   qw{foo bar}的意思为用空格分解字符串，得到列表，相当于如下语句
+   split(' ','foo bar') 得到的结果是'foo','bar'
+   #+begin_src perl
+     @list = ("perl","Regular","network","web");
+     #可以等价于:
+     @list = qw(perl Regular network web);
+     @list = qw{perl Regular network web};
+
+   #+end_src
+** qr 代表创建正则
+   #+begin_src perl
+     $myword = "cnangel";
+     $replaceword = qr(cnangel);
+     $finalword = "ok" if ($myword =~ $replaceword);
+# qr{whatever} 与qr(whaterver) 与/whatever/同
+   #+end_src
+   
+#+begin_src perl
+  $v = "abc";
+  $r=  qr{b};
+  $match =  $v =~ $r;
+  print "match" if $match==1 ;
+#+end_src   
+** qx
+   #+begin_src perl
+   qx {cat /proc/version >/tmp/c}
+   #+end_src
+* @_ $_ $, $. $$ ,$& 等几个符号的含义
+**  @_ 表示函数传参时，放置参数的数组
+  #+begin_src perl
+    sub sub1{
+        my ($var1 ,$var2)=@_;
+# 也可以写成
+my var1 = $_[0];
+my var2 = $_[1];
+#可以理解为参数存放在数组@_ 中，可以
+#用$_加下标 取其中某个元素
+    }
+  #+end_src
+
+** 匹配时 各部分 $& $` $' $1 ,$2
+   $& 用来存放匹配的值
+   $` 用来存放匹配内容之前的串
+   $' 用来存放匹配内容之后的串
+   #+begin_src perl
+     $var ="beforehelloafter";
+     $var =~ /h(el)lo/ ;
+     print ($& ,"\n"); # print  "hello"
+     print ($`, "\n"); # print "before"
+     print ($', "\n"); # print 'after'
+     print ($1, "\n"); # print "el"
+   #+end_src
+   
+   
+** $^o 表示操作系统
+
+** $. 表示在读取文件时，当前行是第几行
+   #+begin_src perl
+     open(file , "/tmp/b.pl");
+     while($line = <file>){
+         print ( "当前是第" , $. , "行,内容是:", $line,"\n"); 
+     }
+     
+   #+end_src
+   
+** $$ 表示当前进程号
+** $_
+   $_ is known as the "default input and pattern matching space". In other words, if you read in
+   from a file handle at the top of a while loop, or run a foreach loop and don't name a loop
+   variable, $_ is set up for you. Then any regular expression matches, chops (and lcs and many
+   more) without a parameter, and even prints assume you want to work on $_. 就是说如果从一个文件用
+   while 或foreach 读取一行内容， 而你没用一个变量存变读取到的这一行，那么，默认把它放到$_ 变量中。
+   不仅如此，任何像match chos print 等操作的函数，默认以它作参数，如果你没指定的话因此
+#+begin_src perl
+  open(file , "/tmp/b.pl");
+  while($line = <file>){
+      print ( "当前是第" , $. , "行,内容是:", $line,"\n"); 
+  }
+  
+#+end_src
+
+#+begin_src perl
+   open(file , "/tmp/b.pl");
+   while( <file>){
+    print ( "当前是第" , $. , "行,内容是:", $_,"\n"); 
+   }
+#+end_src
+两段代码等价
+
+再给一个例子
+#+begin_src perl
+open(file , "/tmp/b.pl");
+while( <file>){
+    print ; 
+}
+#+end_src
+
+
+** $/ $\
+*** $/    
+   “$/” 和 “$\”分别是输入输出记录分隔符。当你在读或者写数据时，他们主要控制用什么来定义一个“记
+   录”。
+   <STDIN>
+   <file>
+   表示从stdin 或一个文件读入一“行”数据，注意，被引号引起来的行。之所以称为行是因为我们把变量
+   $/ 设成了\n ,如果把它设成其他的值，如
+   #+begin_quote
+     This is the definition of my life
+  %%
+  We are far too young and clever
+  %%
+  Stab a sorry heart
+  With your favorite finger
+   #+end_quote
+   有这样一段内容,把们把$/ 设成 %%\n时，如此从此文件读数据时<file> 读的不再是一行，而是靠%%分隔的内
+   家
+   而chmop()函数，要从一个字符串删除的内容，也是这个变量里指定的内容
+   但是当你修改了这些特殊变量的值后，你会得到一个警告
+   因为你有可能忘记把它恢复原值，而使其他部分的程序可能产生bug
+   好的做法是local 化之
+   #+begin_src perl
+   { # 注意到没，可以把一段代码放在{} 块中，而其中的local变量，在外不起作用
+    local $/ = "%%\n";
+
+    open(QUOTE, "/tmp/a.java");)
+    while (<QUOTE>) {
+     chomp;
+     print;
+    }
+    }
+   #+end_src
+   另外如果将$/ 置空的话，则从一个文件中读取内容时则一次读取整个文件
+   #+begin_src perl
+       my $file = do { local $/; <FILE> };
+   #+end_src
+   又如果，$/ 值是一个数字的指针时，则一次读取这个数字的大小的字节数
+   #+begin_src perl
+     {
+    local $/ = \2048; # 一次读取2k
+ 
+    while (<FILE>) {
+     # $_ contains the next 2048 bytes from FILE
+    }
+    }
+   #+end_src
+*** $\
+    $\而与输出有关，即print 打印一个字符串时默认在其末尾添加此字符串
+    默认$\为空串什么也不打印
+    #+begin_src perl
+       sub println{
+       local $\="\n";
+       print @_ ;
+      }
+#比如，可以定义一个println()函数
+ println("hello");
+ println("world");
+    #+end_src
+    
+
+** $,
+   #+begin_src perl
+   my @arr = (1, 2, 3);
+ 
+    print @arr;  # 打印123 
+    print "@arr"; # 打印 “1 2 3" ,分隔符默认是空格，由$, 变量指定
+   #+end_src
+* 关于 .. 两点
+** 最简单的用法是表示一个数组
+   #+begin_src perl
+   @v = 1 .. 10;
+   print (@v);
+# 定义从1到10的数组
+   #+end_src
+  
+** 这两个点前后的内容，不仅仅可以是数字，字符串，也可以是一个表达式
+   如果是表达式：
+   第一个操作数（“..“左侧的表达式）将被求值，如果得出的值为假，此次操作将什么也不做并
+   返回假值。
+   如果得出的值为真，操作返回真值并继续依次返回下面的值直到第二个操作数（“..”操作符右面
+   的表达式）返回真值 .注意到 “直到” 这两个字没有
+
+   也就是说可以把它用作if 后的括号中做真假判断
+   比如java 中的代码注释以 /* 为开头 */为结束
+   我现在想取出这种代码中的这种注释。
+   我可以把判断 当前行中包不包括 /* 作为第一个操作数，而把判断当前行包不包括*/ 作为第二个操作数
+   就是说，如果遇到/* 就满足了if 条件，开始作if 里的操作，做完一次操作就判断一下第二个操作数满不满
+   足，如果满足的话，停止，否则，继续
+   #+begin_src perl
+     open(FILE,"/tmp/a.java");
+     while (<FILE>) {
+         if  ( m!/\*! .. m!\*/!){
+             print  $_ ;
+          }
+     }
+   #+end_src
+   
+* shift unshift push pop
+   +  shift 头部插入
+   +  unshift 头部删除
+   +  push 末尾插入
+
+* last ===break
+  next === continue;
+
+* 

@@ -1,0 +1,77 @@
+#+TITLE:  mochiweb 的使用 及 可开tcp连接数的(http长连接) 测试
+#+DATE:     2011-06-26 星期日
+#+TAGS: :Erlang:
+* 测试代码位置
+  https://github.com/jixiuf/helloerlang/tree/master/mochiweb_test
+* mochiweb 的使用
+  1. 先得到源码
+   #+begin_src sh
+   git clone git://github.com/mochi/mochiweb.git
+   #+end_src
+  2. 在根目录下make 进行编译
+  3.
+    #+begin_src sh
+      make app PROJECT=mochiweb_test
+    #+end_src
+    然后在mochiweb 同级目录下会生成mochiweb_test目录
+    在这个目录下，运行make
+    对这个项目进行一定的准备工作，比如得到它depend 的项目mochiweb(会上网继续下载mochiweb)
+    启动mochiweb ,
+    #+begin_src sh
+        ./start-dev.sh
+    #+end_src
+    然后在浏览器里访问http://localhost:8080/
+  mochiweb_test_web.erl 模块是处理具体业务 的模块。
+  比如:
+  #+begin_src erlang
+....
+                case Path of
+                    "time" ->%% 新增了 /timer 这个 URL，它是一个 HTTP Chunked 的例子
+                    Response = Req:ok({"text/plain", chunked}),
+                    time(Response);
+                    _ ->
+                        Req:serve_file(Path, DocRoot)
+                end;
+...
+
+
+%% 打印当前时间，间隔一秒，再在已经打开的 http 连接之上，再次打印，这也就是所谓 HTTP长连接/ServerPush 的一种
+time(Resp)->
+    Resp:write_chunk(io_lib:format("The time is: ~p~n",
+                                   [calendar:local_time()])),
+    timer:sleep(1000),
+    time(Resp)        .
+  #+end_src
+  当访问http://localhost:8080/time 时,调用 time(Resp )方法进行处理,变是一种长
+  连接
+在对 src/目录下的erl 文件进行编辑后，运行make 命令，在
+        ./start-dev.sh启动模式下，会自动加载编译的文件，只需要在浏览器中刷新即
+        可
+
+
+* 可开tcp连接数的(http长连接) 测试
+  参考了http://www.metabrew.com/article/a-million-user-comet-application-with-mochiweb-part-1
+  tcp_load_test.erl
+  #+begin_src erlang
+    %% tcp_load_test:start(10000).
+    %%或
+    %% tcp_load_test:start("http://localhost:8080/time",10000).
+    %% 实是际访问
+    %% http://localhost:8080/time?id=1
+    %% ...
+    %% http://localhost:8080/time?id=10000
+  #+end_src
+  结果似乎是连接达到4000的时候，cpu 占用率已经极大，响应变慢
+  达到4900时，测试用的客户端，因
+  #+begin_src sh
+  eheap_alloc: Cannot allocate 583848200 bytes of memory (of type "heap").
+  #+end_src
+  退出,
+  客户端的cpu 似乎比mochiweb服务器的占用率大，故，若非单机测试，结果或许会好一
+  些.
+结果以下面格式在客户端显示出来
+#+begin_src sh
+ {Active, Closed, Chunks}
+{活动连接数，关闭的连接数(测试过程中始终为0),由服务端端发送的chunks总数}
+
+#+end_src

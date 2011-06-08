@@ -1,0 +1,249 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     emacs字体 配色相关的配置
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2015-10-19 一
+#+DESCRIPTION:emacs字体 配色相关的配置
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Emacs:
+* 字体相关配置
+  #+BEGIN_QUOTE
+   如果配置好了， 下面20个汉字与40个英文字母应该等长
+   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa|
+   你你你你你你你你你你你你你你你你你你你你|
+   ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,|
+   。。。。。。。。。。。。。。。。。。。。|
+   1111111111111111111111111111111111111111|
+   東東東東東東東東東東東東東東東東東東東東|
+   ここここここここここここここここここここ|
+   ｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺ|
+   까까까까까까까까까까까까까까까까까까까까|
+  #+END_QUOTE
+  默认mac 下的emacs 字体设置已经非常好了， 不需要额外的配置
+  http://zhuoqiang.me/torture-emacs.html 这里有关于如何配字体的一篇文件
+  感觉还不错 可以参考下
+  [[file:../img/emacs-font.jpg]]
+* 我的emacs 配色(暗色系)
+  [[file:../img/emacs-color.jpg]]
+  具体的配置可以参见https://github.com/jixiuf/emacs_conf/blob/master/site-lisp/joseph/custom-file.el
+  #+BEGIN_SRC emacs-lisp
+    (setq-default window-system-default-frame-alist
+                  '( (x ;; if frame created on x display
+                      (alpha . 93)
+                      (cursor-color . "green")
+                      )
+                     (ns ;; if frame created on mac
+                      ;; (border-color . "black")
+                      ;; (cursor-color . "green")
+                      (alpha . 93)
+                      (height . 55)
+                      (width . 150)
+                      (left . 200)
+                      (top . 20)
+                      ;; (foreground-color . "green")
+                      ;;  (background-color . "black") ;;
+                      ;;  ;; (background-color . "#263111")
+                      ;;  (cursor-color . "green")
+                      ;;  (mouse-color ."gold")
+                      ;;  (mouse-color . "Gainsboro")
+                      ;;         (font . "-unknown-DejaVu Sans Mono-normal-normal-normal-*-15-*-*-*-m-0-iso10646-1")
+                      ;; (font . "fontset-mymac")
+                      ;;(font . "Menlo-14")
+                      )
+                     (w32
+                      ;; (font . "fontset-w32")
+                      ;; (background-color . "#0C1021")
+                      ;; (background-mode . dark)
+                      ;; (border-color . "black")
+                      (alpha . 95)
+                      ;; (cursor-color . "#A7A7A7")
+                      (cursor-color . "green")
+                      ;; (foreground-color . "#F8F8F8")
+                      ;; (mouse-color . "sienna1")
+
+                      (height . 30)
+                      (width . 100)
+                      (left . 200)
+                      (top . 20)
+                      ;; (visibility . nil)
+                      ;;         (font . "fontset-gbk")
+                      )
+                     (nil ;; if on term
+                      ;; (background-color . "#0C1021")
+                      ;; (background-mode . dark)
+                      ;; (border-color . "black")
+                      ;; (cursor-color . "#A7A7A7")
+                      ;; (cursor-color . "green")
+                      ;; (foreground-color . "#F8F8F8")
+                      ;; (mouse-color . "sienna1")
+                      ;; (font . "fontset-mymac")
+                      )))
+
+    (custom-set-faces
+     ;; custom-set-faces was added by Custom.
+     ;; If you edit it by hand, you could mess it up, so be careful.
+     ;; Your init file should contain only one such instance.
+     ;; If there is more than one, they won't work right.
+     '(default ((t (:inherit nil :stipple nil :background "#222" :foreground "#eeeeec" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 1 :width normal :foundry "default" :family "default"))))
+     '(buffers-tab ((t (:background "#0C1021" :foreground "#F8F8F8"))))
+     '(completions-common-part ((t (:inherit default :foreground "Cyan"))))
+     '(completions-first-difference ((t (:background "black" :foreground "Gold2" :weight extra-bold :height 1.3))))
+     '(cursor ((t (:background "tomato"))))
+     '(custom-comment-tag ((t (:inherit default))))
+     '(custom-face-tag ((t (:inherit default))))
+     '(custom-group-tag ((t (:inherit variable-pitch :weight bold :height 1.2))))
+     '(custom-variable-tag ((t (:inherit default :weight bold))))
+     '(diff-added ((t (:foreground "OliveDrab1"))))
+     '(diff-changed ((t (:foreground "yellow"))))
+     '(diff-context ((t (:inherit default))))
+     '(diff-file-header ((t (:foreground "tan1"))))
+     '(diff-function ((t (:inherit diff-header :inverse-video t))))
+     '(diff-header ((t (:foreground "light steel blue"))))
+     '(diff-hunk-header ((t (:inherit diff-header :inverse-video t))))
+     '(diff-index ((t (:foreground "Magenta"))))
+     '(diff-nonexistent ((t (:foreground "yellow"))))
+     '(diff-refine-added ((t (:background "gray26"))))
+     '(diff-refine-changed ((t (:background "gray26"))))
+     '(diff-refine-removed ((t (:background "gray26"))))
+     '(diff-removed ((t (:inherit font-lock-comment-face :slant italic))))
+     '(dired-directory ((t (:background "Blue4" :foreground "gray"))))
+     '(ediff-current-diff-A ((t (:background "dark cyan"))))
+     '(ediff-current-diff-Ancestor ((t (:background "dark red"))))
+     '(ediff-current-diff-B ((t (:background "chocolate4"))))
+     '(ediff-current-diff-C ((t (:background "sea green"))))
+     '(ediff-even-diff-A ((t (:background "gray33"))))
+     '(ediff-even-diff-Ancestor ((t (:background "gray40"))))
+     '(ediff-even-diff-B ((t (:background "gray35"))))
+     '(ediff-even-diff-C ((t (:background "gray49"))))
+     '(ediff-fine-diff-A ((t (:background "cadet blue"))))
+     '(ediff-fine-diff-Ancestor ((t (:background "sienna1"))))
+     '(ediff-fine-diff-B ((t (:background "SlateGray4"))))
+     '(ediff-fine-diff-C ((t (:background "saddle brown"))))
+     '(ediff-odd-diff-A ((t (:background "gray49"))))
+     '(ediff-odd-diff-B ((t (:background "gray50"))))
+     '(ediff-odd-diff-C ((t (:background "gray30"))))
+     '(erc-command-indicator-face ((t (:background "Purple" :weight bold))))
+     '(erc-direct-msg-face ((t (:foreground "Yellow"))))
+     '(erc-header-line ((t (:background "GreenYellow" :foreground "Gold"))))
+     '(erc-input-face ((t (:foreground "Cyan2"))))
+     '(erc-my-nick-face ((t (:foreground "Goldenrod" :weight bold))))
+     '(erc-nick-default-face ((t (:foreground "Chartreuse" :weight bold))))
+     '(erl-fdoc-name-face ((t (:foreground "green" :weight bold))))
+     '(error ((t (:foreground "red" :weight bold))))
+     '(flymake-errline ((t (:inherit error :foreground "red"))))
+     '(font-lock-builtin-face ((t (:foreground "#F8F8F8"))))
+     '(font-lock-comment-face ((t (:foreground "#AEAEAE"))))
+     '(font-lock-constant-face ((t (:foreground "#D8FA3C"))))
+     '(font-lock-doc-string-face ((t (:foreground "DarkOrange"))))
+     '(font-lock-done-face ((t (:foreground "Green" :box (:line-width 2 :color "grey75" :style released-button) :height 1.2))) t)
+     '(font-lock-function-name-face ((t (:foreground "#FF6400"))))
+     '(font-lock-keyword-face ((t (:foreground "#FBDE2D"))))
+     '(font-lock-preprocessor-face ((t (:foreground "Aquamarine"))))
+     '(font-lock-reference-face ((t (:foreground "SlateBlue"))))
+     '(font-lock-regexp-grouping-backslash ((t (:foreground "#E9C062"))))
+     '(font-lock-regexp-grouping-construct ((t (:foreground "red"))))
+     '(font-lock-string-face ((t (:foreground "light salmon"))))
+     '(font-lock-todo-face ((t (:foreground "Red" :box (:line-width 2 :color "grey75" :style released-button) :height 1.2))) t)
+     '(font-lock-type-face ((t (:foreground "#8DA6CE"))))
+     '(font-lock-variable-name-face ((t (:foreground "#40E0D0"))))
+     '(font-lock-warning-face ((t (:foreground "Pink"))))
+     '(gui-element ((t (:background "#D4D0C8" :foreground "black"))))
+     '(helm-grep-file ((t (:foreground "cyan1" :underline t))))
+     '(helm-match ((t (:foreground "gold1"))))
+     '(helm-selection ((t (:background "gray26" :underline t))))
+     '(helm-source-header ((t (:background "gray46" :foreground "yellow" :weight bold :height 1.3 :family "Sans Serif"))))
+     '(helm-visible-mark ((t (:background "gray43" :foreground "orange1"))))
+     '(highlight ((t (:background "darkolivegreen"))))
+     '(highline-face ((t (:background "SeaGreen"))))
+     '(hl-paren-face ((t (:overline t :underline t :weight extra-bold))) t)
+     '(isearch ((t (:background "seashell4" :foreground "green1"))))
+     '(joseph-scroll-highlight-line-face ((t (:background "cadetblue4" :foreground "white" :weight bold))))
+     '(linum ((t (:inherit (shadow default) :foreground "green"))))
+     '(linum-relative-current-face ((t (:inherit linum :foreground "#FBDE2D" :weight bold))))
+     '(linum-relative-face ((t (:inherit linum :foreground "dark gray"))))
+     '(log-view-file ((t (:foreground "DodgerBlue" :weight bold))))
+     '(log-view-message ((t (:foreground "Goldenrod" :weight bold))))
+     '(magit-branch ((t (:foreground "Green" :weight bold))))
+     '(magit-branch-local ((t (:foreground "coral1"))))
+     '(magit-branch-remote ((t (:foreground "green1"))))
+     '(magit-diff-added ((t (:inherit diff-added))))
+     '(magit-diff-added-highlight ((t (:background "gray26" :foreground "green4"))))
+     '(magit-diff-context ((t (:inherit diff-context))))
+     '(magit-diff-file-heading ((t (:inherit diff-file-header))))
+     '(magit-diff-hunk-heading ((t (:inherit diff-hunk-header :inverse-video t))))
+     '(magit-diff-removed ((t (:inherit diff-removed))))
+     '(magit-header ((t (:foreground "DodgerBlue"))))
+     '(magit-log-author ((t (:foreground "Green"))))
+     '(magit-log-date ((t (:foreground "cyan"))))
+     '(magit-section-heading ((t (:background "gray29" :weight bold))))
+     '(minibuffer-prompt ((t (:foreground "salmon1"))))
+     '(mode-line ((t (:background "grey75" :foreground "black"))))
+     '(mode-line-buffer-id ((t (:background "dark olive green" :foreground "beige"))))
+     '(mode-line-highlight ((((class color) (min-colors 88)) nil)))
+     '(mode-line-inactive ((t (:background "dark olive green" :foreground "dark khaki" :weight light))))
+     '(org-agenda-date ((t (:inherit org-agenda-structure))) t)
+     '(org-agenda-date-today ((t (:inherit org-agenda-date :underline t))) t)
+     '(org-agenda-date-weekend ((t (:inherit org-agenda-date :foreground "green"))) t)
+     '(org-agenda-done ((t (:foreground "#269926"))))
+     '(org-agenda-restriction-lock ((t (:background "#FFB273"))))
+     '(org-agenda-structure ((t (:foreground "#4671D5" :weight bold))))
+     '(org-date ((t (:foreground "medium sea green" :underline t))))
+     '(org-document-info ((t (:foreground "tomato1"))))
+     '(org-document-title ((t (:foreground "orchid1" :weight bold))))
+     '(org-done ((t (:foreground "#008500" :weight bold))))
+     '(org-drawer ((t (:foreground "purple1"))))
+     '(org-ellipsis ((t (:foreground "#FF7400" :underline t))))
+     '(org-footnote ((t (:foreground "#1240AB" :underline t))))
+     '(org-hide ((t (:foreground "gray20"))))
+     '(org-level-1 ((t (:inherit outline-1 :box nil))))
+     '(org-level-2 ((t (:inherit outline-2 :box nil))))
+     '(org-level-3 ((t (:inherit outline-3 :box nil))))
+     '(org-level-4 ((t (:inherit outline-4 :box nil))))
+     '(org-level-5 ((t (:inherit outline-5 :box nil))))
+     '(org-level-6 ((t (:inherit outline-6 :box nil))))
+     '(org-level-7 ((t (:inherit outline-7 :box nil))))
+     '(org-level-8 ((t (:inherit outline-8 :box nil))))
+     '(org-scheduled-previously ((t (:foreground "#FF7400"))))
+     '(org-tag ((t (:weight bold))))
+     '(org-todo ((t (:foreground "#FF6961" :weight bold))))
+     '(region ((t (:background "DarkSlateGray"))))
+     '(text-cursor ((t (:background "yellow" :foreground "black"))))
+     '(tooltip ((t (:inherit variable-pitch :background "systeminfowindow" :foreground "DarkGreen" :height 2.5))))
+     '(underline ((nil (:underline nil))))
+     '(vhl/default-face ((t (:background "DarkSlateGray"))))
+     '(warning ((t (:foreground "Salmon" :weight bold))))
+     '(web-mode-html-tag-bracket-face ((t (:inherit web-mode-html-tag-face))))
+     '(woman-addition ((t (:inherit font-lock-builtin-face :foreground "Tan2"))))
+     '(woman-bold ((t (:inherit bold :foreground "yellow2"))))
+     '(woman-italic ((t (:inherit italic :foreground "green"))))
+     '(woman-unknown ((t (:inherit font-lock-warning-face :foreground "Firebrick")))))
+  #+END_SRC
+* 查看当前字体信息
+  把光标移动到某个字上,C-uC-x=
+ 会显示出此文字的详细信息,包括它的text-property
+比如
+#+begin_src sh
+             position: 51 of 6777 (1%), column: 0
+            character: a (displayed as a) (codepoint 97, #o141, #x61)
+    preferred charset: ascii (ASCII (ISO646 IRV))
+code point in charset: 0x61
+               syntax: w 	which means: word
+             category: .:Base, L:Left-to-right (strong), a:ASCII, l:Latin, r:Roman
+          buffer code: #x61
+            file code: #x61 (encoded by coding system utf-8)
+              display: by this font (glyph code)
+    xft:-unknown-DejaVu Sans Mono-normal-normal-normal-*-15-*-*-*-m-0-iso10646-1 (#x44)
+
+Character code properties: customize what to show
+  name: LATIN SMALL LETTER A
+  general-category: Ll (Letter, Lowercase)
+  decomposition: (97) ('a')
+
+There are text properties here:
+  fontified            t
+  helm-realvalue       [Show]
+  help-echo            "/home/jixiuf/documents/org/src/emacs/auto-insert-and-yasnippet.org"
+#+end_src

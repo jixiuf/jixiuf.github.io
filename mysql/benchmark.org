@@ -1,0 +1,85 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     mysql压力测试
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-21 六
+#+DESCRIPTION:mysql压力测试
+#+KEYWORDS: mysql db
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Mysql:
+
+MySQL从5.1.4版开始带有一个压力测试工具mysqlslap，通过模拟多个并发客户端访问
+mysql来执行测试。 "man mysqlslap" 可以看到有下面一条示例
+
+#+BEGIN_SRC sh
+mysqlslap --delimiter=";" --create="CREATE TABLE a (b int);INSERT INTO a VALUES (23)"  --query="SELECT * FROM a" --concurrency=50 --iterations=200 -uroot -p
+#+END_SRC
+--create ="用于生成一个表，"后绪的查询
+--query 用这个表做测试,这里一般是insert ,或select 或update 语句
+--create 可以是几条sql语句 ，也可以是一个文件名，里面写满sql语句
+
+
+指定并发数： —concurrency ,可以多个值，逗号分开
+#+BEGIN_SRC sh
+mysqlslap -a --concurrency=50,100 --number-of-queries 1000 --debug-info -uroot -proot
+#+END_SRC
+指定查询总次数： —number-of-queries
+-a, --auto-generate-sql 自动生成一条测试用的语句， 不用你写sql进行测试
+比如这句的结果是(分别测试了并发为50,和100时，总共进行1000次访问花费的时间 )
+这里列出了最大、最小、平均值。均为相同的值，因为 只进行了一次测试 ，
+重复多次（迭代多次）： —iterations
+#+BEGIN_SRC sh
+进行5 次测试 可显示为最大 最小 平均值
+mysqlslap -a --concurrency=50,100 --number-of-queries 1000 --iterations=5 --debug-info  -uroot -proot
+#+END_SRC
+#+BEGIN_QUOTE
+Benchmark
+    Average number of seconds to run all queries: 0.204 seconds
+    Minimum number of seconds to run all queries: 0.204 seconds
+    Maximum number of seconds to run all queries: 0.204 seconds
+    Number of clients running queries: 50
+    Average number of queries per client: 20
+
+Benchmark
+    Average number of seconds to run all queries: 0.260 seconds
+    Minimum number of seconds to run all queries: 0.260 seconds
+    Maximum number of seconds to run all queries: 0.260 seconds
+    Number of clients running queries: 100
+    Average number of queries per client: 10
+
+
+User time 0.13, System time 0.07
+Maximum resident set size 5640, Integral resident set size 0
+Non-physical pagefaults 2371, Physical pagefaults 0, Swaps 0
+Blocks in 0 out 0, Messages in 0 out 0, Signals 0
+Voluntary context switches 8661, Involuntary context switches 19
+#+END_QUOTE
+
+指定引擎： —engine
+#+BEGIN_SRC sh
+mysqlslap -a --concurrency=50,100 --number-of-queries 1000 --iterations=5 --engine=myisam,innodb --debug-info
+#+END_SRC
+其他参数 --help
+#+BEGIN_SRC sh
+-auto-generate-sql, -a
+自动生成测试表和数据（用系统自己生成的SQL语句来测试）
+
+-auto-generate-sql-load-type=type
+测试语句的类型。取值包括：read，key，write，update和mixed(多种混合，默认)。
+
+-number-char-cols=N, -x N
+自动生成的测试表中包含多少个字符类型的列，默认1
+
+-number-int-cols=N, -y N
+自动生成的测试表中包含多少个数字类型的列，默认1
+
+-number-of-queries=N
+总的测试查询次数(并发客户数×每客户查询次数)
+#+END_SRC
+
+
+另外
+select benchmark( 5000000, md5( 'test' ) );
+可以做压力测试 ，如执行5000000 次md5()

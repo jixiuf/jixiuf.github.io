@@ -1,0 +1,39 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     在Windows 下让Emacs 支持打开jpeg png 图片
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-09-09 星期五
+#+DESCRIPTION:在Windows 下让Emacs 支持打开jpeg png 图片
+#+KEYWORDS: windows Emacs jpeg jpg png gif 
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Emacs: :Windows:
+
+首先查看一下这个变量
+#+begin_src emacs-lisp
+(print image-library-alist) 
+#+end_src
+它的值记录了，打开相应格式的图片格式需要用到的dll 文件，你需要下载这些dll
+文件，放到emacs 安装目录 的bin 目录下，
+比如： 我的
+#+begin_src eamcs-lisp
+(print image-library-alist) 
+((xpm "libxpm.dll" "xpm4.dll" "libXpm-nox4.dll")
+ (png "libpng14-14.dll" "libpng14.dll")
+ (jpeg "jpeg62.dll" "libjpeg.dll" "jpeg-62.dll" "jpeg.dll")
+ (tiff "libtiff3.dll" "libtiff.dll")
+ (gif "giflib4.dll" "libungif4.dll" "libungif.dll")
+ (svg "librsvg-2-2.dll")
+ (gdk-pixbuf "libgdk_pixbuf-2.0-0.dll")
+ (glib "libglib-2.0-0.dll")
+ (gobject "libgobject-2.0-0.dll")
+ (gnutls "libgnutls-26.dll"))
+#+end_src
+就是说要查看png 格式的文件，需要  "libpng14-14.dll"或 "libpng14.dll"
+http://www.gtk.org/download/win32.php 网页上有libpng 的下载链接
+http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/libpng_1.4.3-1_win32.zip
+

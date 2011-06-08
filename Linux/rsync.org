@@ -1,0 +1,150 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     rsync.org
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-11-01 四
+#+DESCRIPTION:rsync.org
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS::Linux:
+
+rsyncd.conf
+#+BEGIN_SRC sh
+  # /etc/rsyncd.conf
+
+  # Minimal configuration file for rsync daemon
+  # See rsync(1) and rsyncd.conf(5) man pages for help
+
+  # This line is required by the /etc/init.d/rsyncd script
+  pid file = /var/run/rsyncd.pid
+  use chroot = yes
+  read only = yes
+
+  [sql_remote]
+     path = /tmp/sql_remote
+      read only = no
+      write only= yes
+      auth users= root jixiuf
+      secrets file=/etc/rsyncd_pass.conf
+      strict modes=no
+     comment = sql remote
+      uid=0
+      gid=0
+     # exclude = /distfiles /packages
+
+  # Simple example for enabling your own local rsync server
+  #[gentoo-portage]
+  #  path = /usr/portage
+  #  comment = Gentoo Portage tree
+  #  exclude = /distfiles /packages
+#+END_SRC
+/etc/rsyncd_pass.conf
+#+BEGIN_SRC sh
+  jixiuf:jixiuf
+  root:root
+#+END_SRC
+#+BEGIN_SRC sh
+rsync  -ahqzt  /home/jixiuf/Linux-C.pdf jixiuf@127.0.0.1::sql_remote  --password-file=/home/jixiuf/passwd
+-a 存档模式
+-h 保存硬连接
+-q 制止非错误信息
+-z 压缩文件数据在传输
+-t 维护修改时间
+-delete 删除于多余文件
+#+END_SRC
+#+BEGIN_SRC sh
+cat /home/jixiuf/passwd
+jixiuf
+#+END_SRC
+inotify监控目录 inotify-tools
+#+BEGIN_SRC sh
+  #/bin/sh
+  # REMOTE_IP=192.168.1.202
+  REMOTE_IP=127.0.0.1
+  # 以下目录要以 /结尾,
+
+  # 相对路径 可以包含本地ip作为目录名的一部分以便区分不同服务器
+  REMOTE_DEST_DIR=tmp/
+  # 绝对路径
+  LOCAL_SRC_DIR=/home/jixiuf/lszm2/server/game_server/sql_dest/
+  # 以上目录要以/结尾
+  USER_NAME=jixiuf
+  RSYNC_PASSWORD=jixiuf
+  # --password-file=FILE
+  # DST=rsync@$REMOTE_IP:$REMOTE_DEST_DIR
+  DST=$USER_NAME@$REMOTE_IP::sql_remote/$REMOTE_DEST_DIR
+  # rsync /home/jixiuf/notes.org $REMOTE_IP::$REMOTE_DIR
+
+  # 在对目录进行监控之前，先把已经存在的文件　上传到服务器
+  FileCnt=`find $LOCAL_SRC_DIR  -maxdepth 2 -type f  -name "*.sql"|wc -l`
+  if ! [ $FileCnt == 0 ] ; then
+      for i in `find $LOCAL_SRC_DIR -maxdepth 2 -type f  -name "*.sql"`
+      do
+          relativePath=${i:${#LOCAL_SRC_DIR}}
+          echo $relativePath
+          cd $LOCAL_SRC_DIR && RSYNC_PASSWORD=$RSYNC_PASSWORD rsync  -ahqztR   --exclude '*~' --exclude '.#*'    $relativePath$File $DST
+          exit_status=$?
+      # 如果成功传到服务器，则删除本地的文件
+          if [ $exit_status==0 ]  ; then
+              echo rm $i
+              rm -f $i
+          fi
+      done
+  fi
+
+  # rsync
+  # -a 存档模式
+  # -h 保存硬连接
+  # -q 制止非错误信息
+  # -z 压缩文件数据在传输
+  # -t 维护修改时间
+  # -delete 删除于多余文件
+  inotifywait -mrq --exclude '.#.*' -e moved_to,create ${LOCAL_SRC_DIR} | while read Dir Type File
+  # -m 是保持一直监听
+  # -r 是递归查看目录
+  # -q 是打印出事件
+  do
+      # echo $File , $Dir,$Type
+      # ${#变量名}得到字符串长度
+      # ${变量名:起始}得到子字符串
+      relativePath=${Dir:${#LOCAL_SRC_DIR}}
+      # -R 使用相对路径，　所以先cd到根目录
+      cd $LOCAL_SRC_DIR && RSYNC_PASSWORD=$RSYNC_PASSWORD rsync  -ahqztR   --exclude '*~' --exclude '.#*'    $relativePath$File $DST
+      exit_status=$?
+      # 如果成功传到服务器，则删除本地的文件
+      if [ $exit_status==0 ]  ; then
+          echo rm $Dir$File
+          rm -f $Dir$File
+      fi
+      # 为了以防万一有漏网之鱼，每次有新的文件创建时也进行一次全目录扫描
+      FileCnt=`find $LOCAL_SRC_DIR  -maxdepth 2 -type f  -name "*.sql"|wc -l`
+      if ! [ $FileCnt == 0 ] ; then
+          for i in `find $LOCAL_SRC_DIR -maxdepth 2 -type f  -name "*.sql"`
+          do
+              relativePath=${i:${#LOCAL_SRC_DIR}}
+              echo $relativePath
+              cd $LOCAL_SRC_DIR && RSYNC_PASSWORD=$RSYNC_PASSWORD rsync  -ahqztR   --exclude '*~' --exclude '.#*'    $relativePath$File $DST
+              exit_status=$?
+      # 如果成功传到服务器，则删除本地的文件
+              if [ $exit_status==0 ]  ; then
+                  echo rm $i
+                  rm -f $i
+              fi
+          done
+      fi
+      # end 为了以防万一有漏网之鱼，每次有新的文件创建时也进行一次全目录扫描
+  done
+  #
+  # rsync  -ahqzt  /home/jixiuf/Linux-C.pdf jixiuf@127.0.0.1::sql_remote  --password-file=/home/jixiuf/passwd
+
+#+END_SRC
+
+
+#+BEGIN_SRC sh
+  /usr/local/bin/inotifywait -mrq -e modify,delete,create,attrib ${src}
+  -m 是保持一直监听
+  -r 是递归查看目录
+  -q 是打印出事件
+#+END_SRC

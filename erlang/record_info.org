@@ -1,0 +1,129 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     record_info.org
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-05-30 星期三
+#+DESCRIPTION:record_info.org
+#+KEYWORDS: erlang record
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Erlang:
+
+* record_info(fields,yourrecordname), record_info(size,yourrecordname),
+  这两个宏不像宏，函数不像函数的东西，可以在编译期进行展开，但是我如果想写一个
+  record到json 格式的转换函数的话，是没法实现的，因为它只在编译期有限，在运行
+  其一个 record 实际就是一个tuple,其中是取不到record 的field的名字的。
+  所以参照网上的资料写了下面一个工具，
+  作用是根据某个erlang头文件，提取出其中的record ,然后为其生成一个module
+  提供get_key get_value get_index ,fields_info等函数 ，可以得到record的相应信
+  息
+  https://github.com/jixiuf/helloerlang/blob/master/record_field/src/record_util.erl
+  比如有这样一个头文件myhead.hrl
+  #+BEGIN_SRC erlang
+    -record(user,{id,name,age}).
+    -record(classes,{name,id,nums}).
+  #+END_SRC
+  我修改record_util.hrl中头部的几个宏，记其生成关于myhead.hrl的一个工具模块myhead_util.erl
+  #+BEGIN_SRC erlang
+    -define(HEAD_FILE_PATH,"../include/myhead.hrl").%relative to ebin/
+    %% save ?MODULENAME.erl in this dir
+    -define(DEST_DIR,"../src"). %relative to ebin/
+    -define(MODULENAME,"myhead_util").
+    -define(INCLUDE_CMD_IN_DEST_MODULE,"-include(\"myhead.hrl\").").
+  #+END_SRC
+  自动生成的模块如下
+#+BEGIN_SRC erlang
+  %% This module automatically generated - do not edit
+
+  %%% This module provides utilities for getting info about records
+  %% suppose there is a record in myhead.erl
+
+  %% -record(user,[id,name,age]).
+  %% U=#user{id=100,name=joseph,age=11}.
+
+  %% get_index(user,id)==1
+  %% get_index(U,id)==1
+
+  %% get_value(U,id)==100
+  %% get_value(U,1)==100
+
+  %% get_key(U,1)==key
+  %% get_key(user,1)==key
+
+  %% fields_info(user)==[id,name,age]
+  %% fields_info(U)==[id,name,age]
+
+  %% length(user)==3
+  %% length(U)==3
+
+  -module(myhead_util).
+
+  -include("myhead.hrl").
+  -export([get_index/2,get_key/2,get_value/2,length/1,fields_info/1]).
+
+  %% get the filed index (1 based ) of a record
+  get_index(user,id)-> #user.id-1 ;
+  get_index(Record,id) when is_record(Record,user)-> #user.id-1 ;
+  get_index(user,name)-> #user.name-1 ;
+  get_index(Record,name) when is_record(Record,user)-> #user.name-1 ;
+  get_index(user,age)-> #user.age-1 ;
+  get_index(Record,age) when is_record(Record,user)-> #user.age-1 ;
+  get_index(user,F) -> exit({error,"Record: user has no field called "++atom_to_list(F)});
+  get_index(classes,name)-> #classes.name-1 ;
+  get_index(Record,name) when is_record(Record,classes)-> #classes.name-1 ;
+  get_index(classes,id)-> #classes.id-1 ;
+  get_index(Record,id) when is_record(Record,classes)-> #classes.id-1 ;
+  get_index(classes,nums)-> #classes.nums-1 ;
+  get_index(Record,nums) when is_record(Record,classes)-> #classes.nums-1 ;
+  get_index(classes,F) -> exit({error,"Record: classes has no field called "++atom_to_list(F)});
+  get_index(Record,_Field) -> exit({error,"Invalid Record Name: "++Record}).
+
+  %% get field value of a record by index(1 based) or field name
+  get_value(Record,id) when  is_record(Record,user)->Record#user.id;
+  get_value(Record,1) when  is_record(Record,user)->Record#user.id;
+  get_value(Record,name) when  is_record(Record,user)->Record#user.name;
+  get_value(Record,2) when  is_record(Record,user)->Record#user.name;
+  get_value(Record,age) when  is_record(Record,user)->Record#user.age;
+  get_value(Record,3) when  is_record(Record,user)->Record#user.age;
+  get_value(user,Index) -> exit({error,"Record: user has no field index "++integer_to_list(Index)});
+  get_value(Record,name) when  is_record(Record,classes)->Record#classes.name;
+  get_value(Record,1) when  is_record(Record,classes)->Record#classes.name;
+  get_value(Record,id) when  is_record(Record,classes)->Record#classes.id;
+  get_value(Record,2) when  is_record(Record,classes)->Record#classes.id;
+  get_value(Record,nums) when  is_record(Record,classes)->Record#classes.nums;
+  get_value(Record,3) when  is_record(Record,classes)->Record#classes.nums;
+  get_value(classes,Index) -> exit({error,"Record: classes has no field index "++integer_to_list(Index)});
+  get_value(Record,_KeyIndex) -> exit({error,"Invalid Record Name: "++Record}).
+
+  %% get field name by index
+  get_key(user,1)-> id;
+  get_key(Record,1) when is_record(Record,user) ->id;
+  get_key(user,2)-> name;
+  get_key(Record,2) when is_record(Record,user) ->name;
+  get_key(user,3)-> age;
+  get_key(Record,3) when is_record(Record,user) ->age;
+  get_key(user,Index) -> exit({error,"Record: user has no field index "++integer_to_list(Index)});
+  get_key(classes,1)-> name;
+  get_key(Record,1) when is_record(Record,classes) ->name;
+  get_key(classes,2)-> id;
+  get_key(Record,2) when is_record(Record,classes) ->id;
+  get_key(classes,3)-> nums;
+  get_key(Record,3) when is_record(Record,classes) ->nums;
+  get_key(classes,Index) -> exit({error,"Record: classes has no field index "++integer_to_list(Index)});
+  get_key(Record,_Index) -> exit({error,"Invalid  Record Name or Index out of bound : "++lists:flatten(io_lib:format("~p",[Record]))}).
+
+  %% get all field name of a record
+  fields_info(classes) -> [name,id,nums];
+  fields_info(Record ) when is_record(Record,classes)->[name,id,nums];
+  fields_info(user) -> [id,name,age];
+  fields_info(Record ) when is_record(Record,user)->[id,name,age];
+  fields_info(Other) -> exit({error,"Invalid Record Name: "++Other}).
+
+  %% get count of fields of a record
+  length(classes) -> 3;
+  length(Record ) when is_record(Record,classes)->3;
+  length(user) -> 3;
+  length(Record ) when is_record(Record,user)->3;
+  length(Other) -> exit({error,"Invalid Record Name: "++Other}).
+#+END_SRC

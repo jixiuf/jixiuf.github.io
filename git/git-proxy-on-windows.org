@@ -1,0 +1,98 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     在windows上通过代理访问github.com
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-11-24 星期四
+#+DESCRIPTION:在windows上通过代理访问github.com
+#+KEYWORDS: git windows proxy github
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Git: :Windows:
+公司上网用代理，但是git 与ssh似乎没开代理。导致无没访问github.com 来更新我
+的配置文件。下面是解法。
+github.com 的git 提供了三种方式： http:// git:// 与ssh 方式
+* git://
+  需要用到socat这个软件，有windows 版的，它用cygwin 进行编译的，放心你不必
+  安装cygwin ,socat它自带了cygwin.dll可以单独运行
+  到这里下载
+  http://www.dest-unreach.org/socat/
+  http://www.gentilkiwi.com/telechargements-s43-t-socat.htm#englishversion
+  把socat 解压开后的目录加入到path路径下
+  然后需要写一个脚本
+  #+begin_src sh
+  #!/bin/bash
+#这里是你对应的代理ip 及端口
+_proxy=172.20.65.51
+_proxyport=12080
+exec socat STDIO PROXY:$_proxy:$1:$2,proxyport=$_proxyport
+  #+end_src
+把这个脚本命名为git-proxy,加入到Path路径下
+然后修改~/.gitconfig
+在里面加入这样一条
+#+begin_quote
+[core]
+	gitproxy = git-proxy
+
+#+end_quote
+或者运行
+#+begin_src sh
+# git-proxy已经加入到path目录下
+ git config --global core.gitproxy "git-proxy"
+
+# git-proxy没有加入到path目录下
+ git config --global core.gitproxy "/local/path/to/git-proxy"
+#+end_src
+此时对于git:/协议就支持了
+#+begin_src sh
+例如 git clone git://github.com/jixiuf/anything-etags-plus.git
+#+end_src
+但是即使你费劲的配置好git://协议之后，却仍然没办法向github提交你的代码，因
+为它需要ssh 的支持，
+要想git push 命令可用，还需要继续做一些工作
+参考了http://skim.la/2010/02/22/how-to-make-github-and-proxy-play-nicely-with-ssh/
+但是不要费劲去找文中提到的connect.c 编译后的connect.exe了，因为现在的
+[[file:~/documents/org/src/download/connect.c][connect.c]] [[file:~/documents/org/src/download/connect][connect_compile_on_linux]] 本站保存
+msysGit bin目录下已经提供了这个文件。
+只需要在~/.ssh/config文件中加入以下代码即可以了
+注意我用的密钥是dsa 的而不是rsa 另外文件中的和种路径 及代理ip端口，你需要改
+成你自已的
+#+begin_src sh
+  # 此行要改路径 代理ip 及port
+  ProxyCommand d:/usr/Git/bin/connect.exe -H 172.20.65.51:12080 %h %p
+
+  Host github.com
+  User git
+  Port 22
+  Hostname github.com
+
+  #此行要改路径及id_dsa 或id_rsa
+  IdentityFile "d:\.ssh\id_dsa"
+
+  TCPKeepAlive yes
+  IdentitiesOnly yes
+
+  Host ssh.github.com
+  User git
+  Port 443
+  Hostname ssh.github.com
+
+  #此行要改路径及id_dsa 或id_rsa
+  IdentityFile "d:\.ssh\id_dsa"
+
+  TCPKeepAlive yes
+  IdentitiesOnly yes
+
+#+end_src
+
+* http(s) 协议
+  这种解法最简单:在~/.bashrc中加入以下代码
+  #+begin_src sh
+export http_proxy='http://myproxy.example.com:1080/'
+export https_proxy='https://myproxy.example.com:1080/'
+export ftp_proxy='http://myproxy.example.com:1080/'
+export no_proxy = '.example.com'
+  #+end_src

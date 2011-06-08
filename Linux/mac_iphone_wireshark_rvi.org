@@ -1,0 +1,21 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     mac 上利用rvi抓iphone的包
+#+AUTHOR:    jixiuf
+#+EMAIL:     jixiuf@qq.com
+#+DATE:     2017-09-07 四
+#+DESCRIPTION:mac 上利用rvi抓iphone的包
+#+KEYWORDS:
+#+TAGS:
+#+FILETAGS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \setmainfont{PingFang SC}
+* 参考
+  http://home.bdqn.cn/thread-8453-1-1.html
+使用方法很简单iphone 用数据线连到mac上
+ 在mac 上运行此命令 rvictl -s udid
+ 这个命令可以用xcode->window->devices查看，也可以用itune连上后查看
+iphone 上不用做任何操作，正常联网就可以
+

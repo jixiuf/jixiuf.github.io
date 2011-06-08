@@ -1,0 +1,143 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     Windows 下使用Emacs的 Ediff 进行文件的比较、合并
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:      2011-06-04 星期六
+#+DESCRIPTION:
+#+KEYWORDS:ediff Emacs windows exe
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+LANGUAGE:  zh
+#+TAGS: :Emacs:  :Windows:
+
+* link 关于几种diff tool 的比较 KDiff3, Diffuse, and VimDiff  Meld Emacs-Ediff(有图有真相)
+  http://rvb.mytanet.de/comparing-latex-files-with-latexdiff.shtml (此链接已失效)
+  以下几张图 可以显示出 几种diff tool 在比较时的不同，可以明显看出 ediff 能够清
+  晰的显示 添加了什么，修改了什么，而其他几种工具， 简直一团糟
+  [[file:../img/ediff.png]]
+  [[file:../img/meld.png]]
+  [[file:../img/vimdiff.png]]
+  [[file:../img/diffuse.png]]
+  [[file:../img/kdiff3.png]]
+
+* 一些配置
+值得一提的一点Emacs中的ediff进行文件比较及合并的工具,
+#+begin_src sh
+emacsclientw -eval "(ediff-files \"文件1.txt\" \"文件2.txt\")"
+# 这个测试了一下好像不行，报找不着文件1.txt的错
+emacs -eval "(ediff-files \"文件1.txt\" \"文件2.txt\")"
+#+end_src
+这样就可以对文件1.txt 文件2.txt进行比较了不过要让它与其他工具进行集成,还真有点麻烦.
+1是路径文件 对d:\asd\1sda\a.txt这样的路径它不理解d:/asd/1sda/a.txt它理解 .
+但与其他工具进行集成的时候,它是不知道该用"/"而不是"\"
+[[http://www.emacswiki.org/emacs/EdiffOnWThirtyTwo][EdiffOnEmacsWiki]] 上找到
+这样一段程序，它使用gcc 编译之后生成一个程序，这个程序接收两个参数，即两个文件名
+然后emacs就会调用ediff 对这文件进行比较
+#+begin_src c
+#include <stdio.h>
+#include <stdlib.h>
+
+/*
+ * call-ediff is used to call ediff from Perforce.
+ * gcc -o call-ediff call-ediff.c && call-ediff y:/Source/find_audio_xmls.sh y:/Source/find_audio_xmls.sh~
+ */
+
+void hackPathSeparator(char *windozePath) {
+    char *c;
+
+    for (c = windozePath; *c; c++) {
+	if ('\\' == *c)
+	    *c = '/';
+    }
+}
+
+int main(int argc, char *argv[], char *envp[]) {
+    char *param1 = argv[1];
+    char *param2 = argv[2];
+
+    /* We get \ part separators from Perforce; hack these to / */
+
+    hackPathSeparator(param1);
+    hackPathSeparator(param2);
+
+    /* hack the arg list (ugh) */
+
+    argv[1] = "-e";
+    /* Sample usage: argv[2] = "(progn (message \"foo\") (raise-frame))"; */
+
+    char *command = (char *)malloc(4096);
+    sprintf(command, "(progn (raise-frame) (ediff \"%s\" \"%s\"))", param1, param2);
+
+    argv[2] = command;
+
+    execvp("gnuclientw.exe", argv);
+    return 0;
+}
+
+
+#+end_src
+
+将文件命名为call-ediff.c
+然后在Windows上的cygwin 或mingw上,用gcc进行编译,编译后生成的文件接收两个参数,两个文件名,它会自动将路径进行转换.
+#+begin_src sh
+gcc -Wl,--subsystem,windows -o call-ediff call-ediff.c
+#+end_src
+不过有个问题我用emacsclient.exe 而不是gnuclientw.exe 所以编译前需要对代码进行一下修改
+我用cygwin下的gcc 编译了生成了三个文件,分别是用
+runemacs.exe emacsclientw.exe gnuclientw.exe
+运行(ediff)函数的结果 ，不过要想使用它们，你得安装cygwin
+[[file:../download/runemacs-ediff.exe][emacs-ediff.exe]]
+[[file:../download/emacsclientw-ediff.exe][emacsclientw-ediff.exe]]
+[[file:../download/gnuclientw-ediff.exe][gnuclinet-ediff.exe]]
+你可以直接下载使用使用它们,只需emacsclientw-ediff c:\a.txt c:\b.txt即可,不必担心路径的问题.
+
+
+
+但是用gcc 编译有个问题，那就是你必须有个gcc 编译器，且离了gcc编译器后这个程序就没用了
+我试图用VC 编译它，发现编译不了，做了一些修改，修改后的内容如下
+修改后，我是调用 emacsclientw.exe 来调用 ediff 的，所以你必须配置好让 emacs 启动server
+关于emacsclient 的另一篇文章在[[file:emacs-on-windows.org][这里]] 有介绍。
+有这样一段程序
+#+begin_src sh
+//start here.
+#include <stdio.h>
+#include <stdlib.h>
+
+/*
+ * call-ediff is used to call ediff from Perforce.
+ *  call-ediff c:\a\b\a.txt c:\a\b\b.txt
+ *  or
+ *  call-ediff c:/a/b/a.txt :/a/b/b.txt
+ */
+
+void hackPathSeparator(char *windozePath) {
+  char *c;
+
+  for (c = windozePath; *c; c++) {
+	if ('\\' == *c)
+      *c = '/';
+  }
+}
+
+int main(int argc, char *argv[], char *envp[]) {
+  char *param1 = argv[1];
+  char *param2 = argv[2];
+  char *command;
+  /* We get \ part separators from Perforce; hack these to / */
+
+  hackPathSeparator(param1);
+  hackPathSeparator(param2);
+
+
+  /* /\* hack the arg list (ugh) *\/ */
+  command= (char*) malloc(4096);
+
+   sprintf(command, "emacsclientw -eval \"(progn (raise-frame) (ediff \\\"%s\\\" \\\"%s\\\"))\"", param1, param2);
+   system( command);
+  return 0;
+}
+//ends here.
+#+end_src
+用VC编译的[[file:../download/call-ediff-by-emacsclientw-compiled-by-vc.exe][run-ediff-compiled-by-vc.exe]]
+

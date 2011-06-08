@@ -1,0 +1,208 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     erlang的二进制数据处理，binnary,及bit Syntax(语法)
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-01-07 六
+#+DESCRIPTION:erlang的二进制数据处理，binnary,及bit Syntax(语法)
+#+KEYWORDS: erlang binary bit byte
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Erlang:
+
+erlang 对于二进制的数据处理提供了非常强大的语法，而一般语言对于二进制数据的处
+理多用移位操作来完成。
+* 首先补充点基础知识，免得一会混乱了。
+#+begin_src sh
+1 byte = 8 bit (1字节 === 8位)
+1 int =4 byte = 32 bit(其他语言中 一般情况下int 类型为4字节，32位)
+2^8 =256 (2 的八次方是256,)
+似乎erlang 不区分int float ,
+#+end_src
+
+|---------+------+------+------+------+------+------+------+------+------+------+------+------+------+------+------+------|
+| hex     |    0 |    1 |    2 |    3 |    4 |    5 |    6 |    7 |    8 |    9 |    a |    b |    c |    d |    e |    f |
+|---------+------+------+------+------+------+------+------+------+------+------+------+------+------+------+------+------|
+| binnary | 0000 | 0001 | 0010 | 0011 | 0100 | 0101 | 0110 | 0111 | 1000 | 1001 | 1010 | 1011 | 1100 | 1101 | 1110 | 1111 |
+|---------+------+------+------+------+------+------+------+------+------+------+------+------+------+------+------+------|
+所以一个十六进制字符需要4位(4bit)来表示,故一字节(byte)可以容纳2个十六进制字符,
+故 16#ffffff 占3字节，24位，就不难理解了.
+* 二进制，八进制，十六进制数的表示方法举例
+  | 二进制     | 八进制     | 十六进制  |
+  | 2#00001111 | 8#12345670 | 16#ff     |
+  | 2#0010     | 8#123      | 16#ff0011 |
+  |            |            |           |
+* erlang 几个取size 的BIF(build in functions)
+  + size/1 返回字节数(byte为单位)
+  + bit_size/1 (返回位数,bit为单位)
+* bit syntax 重头戏
+** 整数，
+   对于字母，数字转化成binary,可以进行这样的操作
+   #+begin_src erlang
+     (emacs@jf.org)77> A = <<12>>.
+     <<"\f">>
+     (emacs@jf.org)78> B = <<23>>.
+     <<23>>
+     (emacs@jf.org)79> C = <<257>>. % 大于256
+     <<1>>
+     (emacs@jf.org)80> bit_size(A).
+     8
+     (emacs@jf.org)81> bit_size(C).
+     8
+     (emacs@jf.org)82>
+   #+end_src
+   |                  decimal |           binary |
+   |                       12 |         00001100 |
+   |                       23 |         00010111 |
+   | 257(只取前8bit 00000001) | 0000000100000001 |
+以上可见: 对于数字的情况：数字只能接受8bit 的数字，即小于256的数字(不包括256)
+
+#+begin_src erlang
+     (emacs@jf.org)63> B= <<1,2,3,4>>. %B是二进制数据，32bit
+     <<1,2,3,4>>
+     (emacs@jf.org)64> <<C:32>> = B.  %给整数C赋值
+     <<1,2,3,4>>
+     (emacs@jf.org)65> C.
+     16909060
+     (emacs@jf.org)66>F = <<C:32>>.    % int -->binary ,F是二进制
+     <<1,2,3,4>>
+#+end_src
+|  decimal |                              binary |
+|        1 |                            00000001 |
+|        2 |                            00000010 |
+|        3 |                            00000011 |
+|        4 |                            00000100 |
+| 16909060 | 00000001 00000010 00000011 00000100 |
+对以上代码进行分析,可以得知如何从一个二进制数中截取出一个int 来，
+及如何将一个int 值写到二进制数据中
+
+** 字符,每个字符以其ascii 值来处理
+#+begin_src erlang
+     (emacs@jf.org)110> A = <<"a">>. % 等效于 A = <<97>>.
+     <<"a">>
+     (emacs@jf.org)111> A. % A是二进制数据
+     <<"a">>
+     (emacs@jf.org)112> <<B:8>> = A.
+     <<"a">>
+     (emacs@jf.org)113> B. % B是整数，8bit
+     97
+     (emacs@jf.org)114> bit_size(A).
+     8
+     (emacs@jf.org)115> size(A).
+     1
+     (emacs@jf.org)116> E = <<"ab">>. %等效于 E = <<97,98>>.
+     <<"ab">>
+       % 另外字符还可以这样表示   $a,$b,$c
+      (emacs@jf.org)132>  C = <<$a>>.
+        <<"a">>
+#+end_src
+** 其他示例
+   #+begin_src erlang
+     (emacs@jf.org)127> A = <<1,2,3>>.
+     <<1,2,3>>
+     (emacs@jf.org)128> bit_size(A).
+     24
+     (emacs@jf.org)129> B = <<1,2,3:16>>.
+     <<1,2,0,3>>
+     (emacs@jf.org)130> bit_size(B).
+     32
+     (emacs@jf.org)131>
+   #+end_src
+   关于位数的控制
+   | 3:16 | ,16位的数字3 | 00000000 00000011 |
+   |    3 | 8位的数字3   |          00000011 |
+** 二进制的表示方法，完全语法
+    + Value
+	+ Value:Size
+	+ Value/TypeSpecifierList
+	+ Value:Size/TypeSpecifierList
+*** 其中TypeSpecifierList可以是以下几种类型及其组合，组合以 - 相连
+**** Type(类型)
+        integer | float | binary | bytes | bitstring | bits | utf8 | utf16 | utf32
+        bytes == binary
+        bits == bitstring
+**** Signedness (是否为有符号整数 + /-)
+        signed  | unsigned
+        只有当Type 为integer 时有效，默认为unsigned
+
+**** Endianness(字节序) (default big)
+       big | little | native
+       哪个字节存储在低地址(内存地址)
+       网络传输一般采用大端序big，也被称之为网络字节序，或网络序
+比如对于一个32位的整数 72 ,这32位是如何安排的
+|     72 | little-endian                       | big-endian                          |
+|     72 | <<72,0,0,0>>                        | <<0,0,0,72>>                        |
+| binary | 01001000 00000000 00000000 00000000 | 00000000 01001000 00000000 00000000 |
+#+begin_src erlang
+(emacs@jf.org)1> A = <<72:32>>. % big-endian
+<<0,0,0,72>>
+#+end_src
+**** Unit
+     语法 unit:Integer ,如unit:1
+     取值范围1..257
+     | integer,float,bitstring |            1 |
+     | binary                  |            8 |
+     | utf8 ,utf16,utf32,      | 不需要此属性 |
+        #+begin_src erlang
+        10> <<X1/unsigned>> =  <<-44>>.
+        <<"Ô">>
+        11> X1.
+        212
+        12> <<X2/signed>> =  <<-44>>.
+        <<"Ô">>
+        13> X2.
+        -44
+        14> <<X2/integer-signed-little>> =  <<-44>>.
+        <<"Ô">>
+        15> X2.
+        -44
+        16> <<N:8/unit:1>> = <<72>>.
+        <<"H">>
+        17> N.
+        72
+        18> <<N/integer>> = <<72>>.
+        <<"H">>
+        19> <<Y:4/little-unit:8>> = <<72,0,0,0>>.
+        <<72,0,0,0>>
+        20> Y.
+        72
+        #+end_src
+* 移位 and or 等传统操作
+  + bsl (Bit Shift Left),
+  + bsr (Bit Shift Right),
+  + band,
+  + bor,
+  + bxor,
+  + bnot.
+* 示例 int32-->binary binary-->int32
+  将int32转换成binary ,从binary 头部读取32位，转成int32
+#+begin_src erlang
+-module(aaa).
+-export([int32_2_binary/1,read_int32_from_binary/1]).
+
+
+%%int按网络字节流 转成binary
+%%网络传输一般采用大端序big，也被称之为网络字节序，或网络序
+%%而erlang 默认就是big
+int32_2_binary(Int) when is_integer(Int)->
+    <<Int:32>> ;
+int32_2_binary(Bin) when is_binary(Bin) ->                          %若本就Bin ,直接返回
+    Bin.
+
+%%默认binary 长度大于32
+read_int32_from_binary(Bin) when is_binary(Bin)->
+    <<Int:32,_/bits>> = Bin,
+    Int
+        ;
+read_int32_from_binary(Int) when is_integer(Int) ->
+    Int.
+%% aaa:read_int32_from_binary(<<"abcdefghijk">>).
+%% 1633837924
+%% 1100001 01100010 01100011 01100100
+%% 97      98       99          100
+%% a       b         c          d
+#+end_src
+* 参考链接
+ + [[http://learnyousomeerlang.com/starting-out-for-real#bit-syntax][learnyousomeerlang.com/bit syntax]]
+ + http://www.erlang.org/euc/00/bit_syntax.html
+ + [[http://zh.wikipedia.org/wiki/%25E5%25AD%2597%25E8%258A%2582%25E5%25BA%258F][字节序wiki]]

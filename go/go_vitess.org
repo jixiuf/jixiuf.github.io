@@ -1,0 +1,175 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     vitess介绍
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2016-02-02 二
+#+DESCRIPTION:vitess介绍
+#+KEYWORDS: Vitess Golang Mysql
+#+TAGS: Vitess:Golang:Mysql
+#+FILETAGS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+* 几种mysql 水平扩展架构比较
+  http://songwie.com/articlelist/44
+  http://www.tuicool.com/articles/miuq63E
+  http://www.guokr.com/blog/475765/
+  http://m.open-open.com/m/news/view/f948e2
+  http://ju.outofmemory.cn/entry/221124
+* 架构
+  [[file:../download/VitessOverview.png]]
+  vtgate 可以认为是网关,client 只需要与vtgate 连接即可
+  vtgate 会把相应的sql 路由到相应的vttablet 进行查询 执行等
+  vtgate 可以启动多个，来做负载均衡
+  vttablet 可以认为是在mysql 前面挡了一层，一个vttablet 对应一个mysql 实例
+  主要提供连接池、查询重写、查询去重、以及相应的管理操作
+  vtctl 命令行， 提供管理vitess 的命令等，包括查询master-slave关系，sharding 信息
+  建表，执行sharding resharding ，执行failover(切换主从关系等)等操作。
+  vtworker
+
+  vtworker 执行一些需要长时间运行的进程。它支持一个插件式的架构并提供
+  了第三方库，这样你可以轻易选择要使用的 tablet。该插件可以用于以下类
+  型的工作：
+  resharding differ：在水平分片的分割以及合并时核查数据完整性的工作
+  vertical split differ：在垂直分割以及合并时核查数据完整性的工作
+  vtworker 还允许您轻松地添加其他验证程序。你可以进行 in-tablet 完整
+  性检查以验证外键之类的关联关系或者跨片完整性检查，例如，一个密钥空
+  间里的索引表所指向的数据在另一个密钥空间里。
+
+  mysqlctl: Manage MySQL instances
+  zk zkctl 管理zookeeper 的工具等
+
+* vitess 与mysql 的对比
+  |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  | mysql                                                                                                                                                                                                                                                        | vitess                                                                                                                                                                                                        |
+  |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  | 每个 MySql 连接都有一个内存开销，其范围介于 256KB 到几乎 3MB 之间，这取决于你所使用的 MySql 版本。随着你的用户群的增长，你需要增加内存以支撑增加的那些连接，但增加内存无助于提高查询速度。此外，在获取这些连接的时候还有大量的 CPU 开销。                    | Vitess 所用的 SQL 解析器使用了一组可配置的规则对可能会降低数据库性能的查询进行重写。                                                                                                                          |
+  | 低效的写查询，比如一些没有设置一个限制的写查询，将会对所有用户的数据库性能产生负面影响。                                                                                                                                                                     | Vitess 所用的 SQL 解析器使用了一组可配置的规则对可能会降低数据库性能的查询进行重写。                                                                                                                          |
+  | 分片是一个对你的数据进行分区来提高可扩展性和性能的过程。MySql 不支持分片，要求你自己去编写分片代码并在你自己的应用程序中嵌入分片逻辑。                                                                                                                       | Vitess 使用基于范围的分片。它同时支持水平和垂直的重新切分，完成大多数数据的转换只需要仅仅几秒钟的只读的停机时间。Vitess 甚至可以适应你现有的一个自定义分片方案。                                              |
+  | MySql 集群为保证可用性采用的是主从复制，有一个主数据库和几个副本数据库。主库宕机，某台从库将成为新的主库。这个要求你去管理数据库的生命周期并将当前的系统状态传达给你自己的应用程序。                                                                         | Vitess 帮你管理数据库的生命周期。它支持并自动应对各种场景，包括主库故障转移以及数据备份。                                                                                                                     |
+  | 一个 MySQL 集群可以为不同的工作负载自定义数据库配置，比如一个只写的主库，满足 web 客户端快只读的副本库，可用于批处理作业的慢只读副本库，诸如此类。如果数据库已经水平切分，需要为每个分片重复安装过程，而且应用程序中需要内置如何才能找到合适的库的相关逻辑。 | Vitess 使用一个数据存储一致性的拓扑支持，比如 etcd 或者 ZooKeeper。这也就意味着集群视图始终是最新的而且对于不同的客户端也能始终保证其一致性。Vitess 还提供了一个高效地将查询路由给最适合的 MySql 实例的代理。 |
+  |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+* vitess 与nosql对比
+  | NoSql                                                                 | Vitess                                                                                           |
+  | NoSQL 数据库不定义数据库表之间的关系，并且仅支持 SQL 语言的一个子集。 | Vitess 并不是一个简单的键值存储。它支持复杂的查询语句，比如 where 子句、联接查询、聚集功能等等。 |
+  | NoSQL 数据库不支持事务。                                              | Vitess 支持单个分片内的事务。Vitess 团队也正在探索使用两阶段提交支持跨分片事务的可行性。         |
+  | NoSQL 解决方案拥有定制的 API，这将导致定制的架构、应用程序和工具。    | Vitess 仅添加了极小的变化到 MySql，一个绝大多数的人们都已经习惯使用的数据库。                    |
+  | 相比 MySql 来讲，NoSQL 提供的数据库索引支持是有限的                   | Vitess 允许你使用 MySql 的所有索引功能来优化查询性能。                                           |
+
+* Keyspace
+  一个keyspace 就是一个逻辑上的 mysql database 直接对应一个或多个mysql database名。
+  从一个keyspace 读取数据 就像从一个mysql database 一样，
+  不同的是vitess会来决定读取操作是从主库读,还是从库读，
+  vitess 使你的代码简化到似乎跟从一个mysql database读取数据一样简单。
+  如果做了sharding ,一个keyspace 会对应多个mysql database ,
+  这种情况一个读操作可能仅仅是从其中一个mysql database 读。
+* Keyspace Id
+  keyspace_id 是一个keyspace 的id列，它可以标志一个user,produce等。keyspace_id的类型有多种。
+  做sharding 时， 一个keyspace 的所有表都要包含keyspace_id列，vitess 根据keyspace_id做sharding
+  且同一个keyspace_id 只会出现个一个分片上.
+  keyspace_id 可以不是主键 ，可以不是索引
+  如果不打算对database 做sharding ，可以不定义keyspace_id
+  一个keyspace_id 可以是unsigned 数字或 binary character column,对mysql 来说就是
+  (unsigned bigint or varbinary in MySQL tables),似乎其他类型不能做keyspace_id
+  不太确定 unsigned int 等可不可以
+  vitess 用memcache作row cache 来提升查询命中率，往memcache存的时候应该会与keyspace_id有关
+  这一卓越特性可以将在应用程序层自定义的缓存层实现给替换掉了。
+  之前在某篇文章中看到说同一个database 不同的表之间keyspace_id也不能相同，否则往memcache取数据会乱
+  后来翻看 vitess/go/vt/tabletserver/rowcache.go源码有这样一段,应该能证明这种说法不对。
+  #+BEGIN_SRC go
+    type RowCache struct {
+        tableInfo *TableInfo
+        prefix    string
+        cachePool *CachePool
+    }
+    func NewRowCache(tableInfo *TableInfo, cachePool *CachePool) *RowCache {
+        prefix := strconv.FormatInt(cachePool.maxPrefix.Add(1), 36) + "."
+        return &RowCache{tableInfo, prefix, cachePool}
+    }
+    // Get fetches the values for the specified keys.
+    func (rc *RowCache) Get(ctx context.Context, keys []string) (results map[string]RCResult) {
+        mkeys := make([]string, 0, len(keys))
+        for _, key := range keys {
+            if len(key) > maxKeyLen {
+                continue
+            }
+            mkeys = append(mkeys, rc.prefix+key) // 看这里有加prefix
+        }
+        // ...
+    }
+  #+END_SRC
+
+
+* Shard
+  一个Shard 就是一个分片， 某个keyspace的一部分，一个典型的shard ,包含一个master 和多个slaves.
+  同一个Shard里的mysql 实例包含的数据应该是相同的，除了有延迟从库，slave 从库可以分担一部分只读流量
+  （需要保证最终一致性），或者执行一些耗时的分析工作或者执行backup 恢复等操作。
+
+  一个无shard 的space 可以认为是只有一个shard ,vitess 命名为shard 0,通过分片时N 取2^n
+  vitess 支持动态resharding,即将一个shard 分成多个shard,这个过程中 源shard里的数据会被分成多份，
+  最终源shard会被删掉
+* Tablet
+  一个tablet 包含
+  1. 一个mysql instance
+  2. 一个 vttablet instance
+  3. 一个可选的row cache  instance (memcache)
+  4. 其他一些特定的database 相关进程
+
+  类型
+  1. master 主库
+  2. replica 低延迟的从库
+  3. rdonly 延迟相对较高的只读库，主要执行一些后台耗时操作
+  4. spare 暂时不工作的slave
+* Shard graph
+  Shard graph 的作用是 将keyspace_id map 到指定的shard 上。
+  vitess 使用 range-based sharding 策略。vitess 在内存中通过一个查询表（lookup）来定位shard
+  当keyspace_id 是均匀分布的时候最高效，最好使用hash 还不是自增的值作为keyspace_id
+* Replication graph
+  作用是 定位master 与相应slave 。如果master 当掉能够及时找到一个slave 来作为master
+* Serving graph
+  作用是 列出所有可用的server ,主要从Shard graph 与Replication graph 中获取相应的信息
+  VTGate 从Serving graph来决定从哪个server 执行相应的查询
+* Topology Service(拓扑结构) etcd or zookeeper
+  提供 lockin service ,目前vitess 主要支持 etcd 和zookeeper 来作为Topology Service
+  并在其中存储 整个vitess 的拓扑结构信息
+  可以通过 vtctl 命令行 或 vtctld(web接口) 来查看其中的信息
+  1. 存储 数据放在何处的 规则
+  2. 保证write 操作正确执行。
+  3. 保证vitess 可以透明的数据节点挂掉而不影响整个业务
+  4. 保证 一个数据中心作为一个整个 下线、重建
+
+  vitess有一个global topology service 及每个data center(cell)一个的local topology service
+  vitess client 设计为 只要接触local 即可
+  + global instance
+    存一些基本不怎么变化的信息，包括keyspace_id与shard、以及主从关系
+    主要用于 resharding 等操作。
+    设计之初 global instance 就不常被用到。
+  + local instance
+    存储本cell 内关与tablets 的数据，cell内serving graph信息 ,cell内的mysql 实例的主从关系信息等
+    local instance 必須正常运转，才能保证vitess 提供正常的服务。
+** etcd 相关
+   需要在golbal topology 处注册某个cell 的local topology 在何处，
+   然后启动 vttablets 时 才能正常启动
+   比如example/kubernetes/etcd-controller-template.yaml中用这样一句来初始化
+   #+BEGIN_SRC sh
+    etcdctl -C "http://etcd-global:4001"  set "/vt/cells/{{cell}}" "http://etcd-{{cell}}:4001"
+   #+END_SRC
+   比如cell 名为test 时
+   #+BEGIN_SRC sh
+   etcdctl  set "/vt/cells/test" "http://etcd-cell-test:2379"
+   # 使用以下命令 查看设置的值是否成功
+   etcdctl get /vt/cells/test
+   #  可以加此以娄 指定连哪个etcd ,即global etcd 在可处
+   #-C "http://etcd-global:4001"
+   #+END_SRC
+
+
+* Cell(data center)
+  一般指某一个区域内的 服务与网络基础设施集，
+  vitess 可以优雅的处理某一个cell 挂掉
+
+  每个cell 都有一个local topology server,其中包含了 cell内的tablets 信息，信息足够保证一个cell 停掉并重建
+  vitess 限制跨cell的数据传输（包括数据与元数据信息）,vitess 不支持路由client 到特定节点的功能
+
+
+

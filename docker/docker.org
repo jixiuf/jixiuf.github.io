@@ -1,0 +1,197 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     docker学习过程
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2016-01-19 二
+#+DESCRIPTION:docker学习过程
+#+KEYWORDS: docker Centos
+#+TAGS:Docker:Linux:Centos
+#+FILETAGS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+
+* link
+  [[http://dockerpool.com/static/books/docker_practice/basic_concept/repository.html][教程]]
+  [[http://www.oschina.net/translate/why-you-dont-need-to-run-sshd-in-docker][为什么不需要在 Docker 容器中运行 sshd]]
+  [[http://blog.csdn.net/u010397369/article/details/41045251][如何进入Docker容器]]
+* 安装
+  centos 7 下的安装
+   #+BEGIN_SRC sh
+     sudo yum install docker
+     sudo service start docker
+     sudo chkconfig docker on
+
+     # 这一部 会从网上 pull hello-world 这个镜像
+     sudo docker run hello-world
+   #+END_SRC
+** 安装特定的版本
+   centos8 默认安装的docker是1.8 版本 ，
+   经常出现一个bug (Layer already being pulled by another client)
+   https://github.com/docker/docker/releases
+   比如以docker1.9.1 为例
+  #+BEGIN_SRC sh
+  wget https://get.docker.com/builds/Linux/x86_64/docker-1.9.1
+  sudo mv docker-1.9.1 /usr/local/bin/docker
+   # centos7 上 作为服务启动
+  wget https://github.com/docker/docker/raw/master/contrib/init/systemd/docker.service
+  wget https://raw.githubusercontent.com/docker/docker/master/contrib/init/systemd/docker.socket
+  sudo mv docker.socket /etc/systemd/system
+  sudo mv docker.service  /etc/systemd/system
+  #+END_SRC
+* pull 镜像
+  理论上:
+#+BEGIN_SRC sh
+  sudo docker pull centos
+  sudo docker pull ubuntu:12.04
+  如果能下载下来 则用下面这句就可run 之
+  docker run -t -i centos /bin/bash
+#+END_SRC
+网速的原因，下载太慢。所以国内 使用如下方法
+#+BEGIN_SRC sh
+  sudo docker pull dl.dockerpool.com:5000/ubuntu:12.04
+  sudo docker pull dl.dockerpool.com:5000/centos
+#+END_SRC
+centos7 上 会报类似如下错误
+#+BEGIN_QUOTE
+Error response from daemon: invalid registry endpoint https://dl.dockerpool.com:5000/v0/: unable to ping registry endpoint https://dl.dockerpool.com:5000/v0/
+v2 ping attempt failed with error: Get https://dl.dockerpool.com:5000/v2/: tls: oversized record received with length 28012
+v1 ping attempt failed with error: Get https://dl.dockerpool.com:5000/v1/_ping: tls: oversized record received with length 28012. If this private registry supports only HTTP or HTTPS with an unknown CA certificate, please add `--insecure-registry dl.dockerpool.com:5000` to the daemon's arguments. In the case of HTTPS, if you have access to the registry's CA certificate, no need for the flag; simply place the CA certificate at /etc/docker/certs.d/dl.dockerpool.com:5000/ca.crt IT
+#+END_QUOTE
+解决办法
+修改 /etc/sysconfig/docker
+#+BEGIN_QUOTE
+OPTIONS='--selinux-enabled'
+#+END_QUOTE
+为
+#+BEGIN_QUOTE
+OPTIONS='--selinux-enabled --insecure-registry dl.dockerpool.com:5000'
+#+END_QUOTE
+重启
+#+BEGIN_SRC sh
+  systemctl restart docker.service
+#+END_SRC
+下载完毕后需要这样启动
+#+BEGIN_SRC sh
+  docker run -t -i dl.dockerpool.com:5000/centos /bin/bash
+#+END_SRC
+
+* 列出镜像 docker images
+  #+BEGIN_QUOTE
+  root@localhost ~ # docker images
+  REPOSITORY                      TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+  docker.io/centos                latest              60e65a8e4030        3 weeks ago         196.6 MB
+  docker.io/hello-world           latest              975b84d108f1        3 months ago        960 B
+  dl.dockerpool.com:5000/centos   latest              87e5b6b3ccc1        15 months ago       224 MB
+  #+END_QUOTE
+
+* 删除镜像 docker rmi imageId
+  #+BEGIN_SRC sh
+    docker rmi imageId
+    docker rmi --force=true imageId
+  #+END_SRC
+
+* 创建镜像 docker commit
+  #+BEGIN_SRC sh
+    docker run -t -i centos /bin/bash
+  #+END_SRC
+#+BEGIN_QUOTE
+root@localhost ~ #
+[root@c00aeccfb3a6 /]#
+#+END_QUOTE
+官网上运行后的效果是这样的 提示符 @后面的是CONTAINER ID
+你会发现这个CONTAINER Id 跟 docker images 列出的 docker.io/centos 的imageId 不一样
+你 run 出来之后 对其进行的修改 可以用这个CONTAINER Id 来标志出来
+比如我 yum install zsh 之后
+#+BEGIN_SRC sh
+root@localhost ~ # docker commit -m "install zsh" -p -a "jixiuf" c00aeccfb3a6 docker.io/centos:with-zsh
+ab3fb905f9cfb1de43519cb5975e582761ce4a0a83facd96c786a525a40b2da4
+#+END_SRC
+-p 的意思是如果此container 正在运行中在commit 的过程中会pause 之， 使之暂停
+你会发现 docker images 后 会多出个 docker.io/centos with-zsh
+#+BEGIN_QUOTE
+root@localhost ~ # docker images
+REPOSITORY                      TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+docker.io/centos                with-zsh            ab3fb905f9cf        28 seconds ago      261.7 MB
+docker.io/centos                latest              60e65a8e4030        3 weeks ago         196.6 MB
+docker.io/hello-world           latest              975b84d108f1        3 months ago        960 B
+dl.dockerpool.com:5000/centos   latest              87e5b6b3ccc1        15 months ago       224 MB
+#+END_QUOTE
+#+END_HTML
+随后就可以这样使用with-zsh 这个镜像
+#+BEGIN_SRC sh
+  docker run -t -i centos:with-zsh
+#+END_SRC
+
+查看所有的容器列表的命令是：docker ps -a ，显示最近一个容器的命令是：docker ps -l，
+#+BEGIN_SRC sh
+deployer@bogon ~ $ docker ps -l
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                     PORTS               NAMES
+2ddd2f107676        centos              "bash"              14 minutes ago      Exited (0) 3 seconds ago                       gigantic_meninsky
+#+END_SRC
+
+* 镜像的备份 恢复(save and load)
+  #+BEGIN_SRC sh
+  docker save -o image.tar imageid
+  docker save imageid|gzip >image.tar.gz
+  #+END_SRC
+  #+BEGIN_SRC sh
+  docker load -i image.tar
+  cat image.tar.gz|gunzip|docker load
+  #+END_SRC
+  load 完之后 docker images
+  会发现多出一个无名无姓的imageId
+  需要用docker tag 为之打标签
+  #+BEGIN_SRC sh
+  docker tag iamgeId golang:1.5
+  docker tag iamgeId debian:latest
+  #+END_SRC
+* 容器的备份 恢复 (export and import)
+  #+BEGIN_SRC sh
+  docker export <CONTAINER ID> > /home/export.tar
+  cat /home/export.tar | sudo docker import - reposName:latest
+  #+END_SRC
+*  save 与export 的区别
+导出后再导入(exported-imported)
+的镜像会丢失所有的历史，而保存后再加载（saveed-loaded）的镜像没有丢失
+历史和层(layer)。这意味着使用导出后再导入的方式，你将无法回滚到之前的
+层(layer)，同时，使用保存后再加载的方式持久化整个镜像，就可以做到层回
+滚（可以执行docker tag <LAYER ID> <IMAGE NAME>来回滚之前的层）。
+
+*  DockerFile
+  #+BEGIN_SRC sh
+    docker build  -t tagname .
+    # 不生成镜像，只根据imageid 来找对应的镜像
+    docker build  .
+    docker build --rm=true .
+  #+END_SRC
+  Dockerfile example:
+#+BEGIN_QUOTE
+FROM docker.io/centos:latest
+# 1 install go1.4+
+Run yum install -y go
+#+END_QUOTE
+
+* 把容器放到后面运行 attach
+  #+BEGIN_SRC sh
+    # 这里加了-d 放到后台运行， 同时加-t -i 否则bash 会立即退出
+    sudo docker run -d  -ti --name=mylinux debian:jessie bash
+  #+END_SRC
+  #+BEGIN_SRC sh
+    sudo docker attach mylinux
+    # 似乎要等几秒钟才能等到提示符出现
+  #+END_SRC
+  attach 上之后 Ctrl-p Ctrl-q deattach
+
+  # 能否用Ctrl-p Ctrl-q 是有条件的
+  docker run -t -i → can be detached with ^P^Q and reattached with docker attach
+  docker run -i → cannot be detached with ^P^Q; will disrupt stdin
+  docker run → cannot be detached with ^P^Q; can SIGKILL client; can reattach with docker attach
+  对于 docker run 未加 -t -i 的 可以用 kill -9 pid 一定要加-9
+  或者 启动attach 时加参数   --sig-proxy=false 然后直接用Ctrl-c 退出就可以了
+  意思是 不会把 给attach 进程的信息 发给 daemon 的进程
+  如
+  #+BEGIN_SRC sh
+   d attach --sig-proxy=false centos
+  #+END_SRC
+

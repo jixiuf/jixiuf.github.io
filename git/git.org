@@ -1,0 +1,230 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     git拾遗
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-08-09 二
+#+DESCRIPTION:git拾遗
+#+KEYWORDS: git scm
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Git:
+* git rm
+#+begin_src sh
+git rm --cache filename
+#+end_src
+从库中删除filename ,即不再对它进行管理， 但本地会留一份.
+* 在一个旧库中 建一个新分支（新分支上无任何内容）
+   git checkout --orphan gh-pages
+   git rm -rf .
+
+* git submodule 子模块的删除
+  需要3步
+  + 修改 .gitmodules 文件，删除相应的条目
+    #+begin_src sh
+    [submodule "site-lisp/anything-config"]
+	path = site-lisp/anything-config
+	url = http://repo.or.cz/r/anything-config.git
+    #+end_src
+  + 修改.git/config 文件，删除相应的条目
+    #+begin_src sh
+[submodule "site-lisp/anything-config"]
+	url = http://repo.or.cz/r/anything-config.git
+    #+end_src
+  + 运行git rm --cache 子模块所在路径,如:
+    #+begin_src sh
+    git rm --cache site-lisp/anything-config
+    #+end_src
+    不能写成
+    #+begin_src sh
+    git rm --cache site-lisp/anything-config/
+    #+end_src
+
+* 要查看某个文件的以前的版本,使用 git show 命令
+#+begin_src sh
+git show 0b26bbe907c929ed88f6ba3dfeaaa9a2953b1c56:a.txt
+
+git cat-file blob 0b26bbe907c929ed88f6ba3dfeaaa9a2953b1c56:a.txt
+#+end_src
+
+* 可以checkout 某个文件的以前的版本
+   #+begin_src sh
+ git checkout 0b26bbe907c929ed88f6ba3dfeaaa9a2953b1c56 a.txt
+   #+end_src
+
+* git ls-tree 与git show
+ 不仅仅一次提交后会产生一个sha1 的字符串,其实每一个提交对应的文件也后有一个状态,比后我想杳看
+0b26bbe907c929ed88f6ba3dfeaaa9a2953b1c56这次提交后对应的文件所对应的sha1值
+可以使用git ls-tree命令
+比如
+#+begin_src sh
+root # git ls-tree f7619cab6a71505b23e172f3146adfa750bab71e
+100644 blob 83c4ba189edcc364ca18b0b7d2cd81655d97adc5    a
+100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391    d
+#+end_src
+比如此次提交后文件a与d 分别对应的sha1 值列了出来,然后就可以直接用这个值去查看相应的文件
+#+begin_src sh
+git show 83c4ba189edcc364ca18b0b7d2cd81655d97adc5 后查看文件a的内容
+#+end_src
+#+begin_src  sh
+这与
+git show f7619cab6a71505b23e172f3146adfa750bab71e:a     的效果相同
+#+end_src
+
+* git svn
+  git svn clone svn-url == git clone git-url
+  git svn  fetch == git pull
+  git svn  rebase == git rebase
+  git svn dcommit == git push
+  在运行git svn dcommit 时，必须保证本地没有已修改但未commit 的文件，
+  解决方法是
+  git stash
+  git svn dcommit
+  git stash pop
+  一般做法是
+  git stash
+  git svn fetch
+  git svn rebase
+  git svn dcommit
+  git stash pop
+** svn 的远程分支叫 remotes/git-svn
+如果在当前分支已经有数次提交 ，但是发现有一个bug需要修复，修复后马上提交 ，而
+  当前分支里的commit 并不想push到远程svn上，做法是
+  git co remotes/git-svn -b tmp
+  然后修复bug 提交 即可，当然其中可以使用stash 来暂时保存未commit 的修改
+** git reset version
+   合并commit 。想将最后几次commit 合并成一个commit
+   可以用 git reset version
+   git reset 回退到某一版本后，
+   工作区的文件依然保存着未回退前的状态 ，所以只需再提交一次
+   即将最后几次的commit 合并到一次提交
+* 找回丢失的提交
+  在使用Git的过程中，有时可能会有一些误操作
+  比如：执行checkout -f 或 reset -hard 或 branch -d删除一个分支
+  结果造成本地（远程）的分支或某些commit丢失
+  这时，我们可以通过reflog来进行恢复，前提是丢失的分支或commit信息没有被
+  git gc清除
+  一般情况下，gc对那些无用的object会保留很长时间后才清除的
+  reflog是git提供的一个内部工具，用于记录对git仓库进行的各种操作
+  可以使用git reflog show或git log -g命令来看到所有的操作日志
+  恢复的过程很简单：
+1. 通过git log -g命令来找到我们需要恢复的信息对应的commitid，可以通过提
+   交的时间和日期来辨别
+2. 通过git branch recover_branch commitid 来建立一个新的分支
+  这样，我们就把丢失的东西给恢复到了recover_branch分支上了
+3.  在magit 中`lh'即要吧列出所有的commit
+* 找回库中删除的文件
+  1. 找回库中不再管理的已删除文件(之前git rm 过且git commit 后的文件)
+   git log --all --pretty=format: --name-only --diff-filter=D |grep -v "^$"
+   grep -v 过滤不包含空的行
+  2. 列出  rm 过， 但未git rm 过的文件
+    git ls-files --deleted
+  3. 列出git rm过，但未git commit 的
+     用git status即可
+** grep 历史提交中的内容
+   git grep hello
+   但是如果某文件被删了， 不会grep之
+* 关于换行符 空格
+  Github suggests that you should make sure to only use \n as a newline
+  character in git-handled repos. There's an option to auto-convert:
+  $ git config --global core.autocrlf true
+  Of course, this is said to convert crlf to lf.
+
+** git config --global core.whitespace cr-at-eol
+   This basically tells Git that an end-of-line CR is not an error. As a
+   result, those annoying ^M characters no longer appear at the end of lines
+   in git diff, git show, etc.
+
+** 如果很多文件包含 ^M 这个字符想把它去掉 (未测试 )
+  #+BEGIN_SRC sh
+      # Remove everything from the index
+    $ git rm --cached -r .
+    # Re-add all the deleted files to the index
+    # You should get lots of messages like: "warning: CRLF will be replaced by LF in <file>."
+    $ git diff --cached --name-only -z | xargs -0 git add
+    # Commit
+    $ git commit -m "Fix CRLF"
+  #+END_SRC
+* 总有一些修改的文件你不想提交,比如 连接db的配置文件,你只是想在本机做测试而做的小修改
+  GIT: ignoring changes in tracked files
+  #+BEGIN_SRC sh
+    git update-index --assume-unchanged <file>
+  #+END_SRC
+  #+BEGIN_SRC sh
+    恢复则为
+    git update-index --no-assume-unchanged <file>
+  #+END_SRC
+  #+BEGIN_SRC sh
+  查看有哪些这样的文件
+    git ls-files -v|grep '^h'
+  #+END_SRC
+  #+BEGIN_SRC sh
+  在~/.gitconfig 以方便使用
+  [alias]
+        ignore = !git update-index --assume-unchanged
+        unignore = !git update-index --no-assume-unchanged
+        ignored = !git ls-files -v | grep ^[a-z]
+  #+END_SRC
+
+* 关于修改已经提交的信息 git filter-branch
+** 查找中文件中包含"密码"二字的文件列出来
+--stat告诉 git 我希望看到文件列表，以确定敏感数据在哪个文件里
+#+begin_src sh
+  git log --stat -S密码
+#+end_src
+** 修改历史提交信息
+#+begin_src sh
+  将提交信息中所有oldpass替换为newpasswd
+  git filter-branch --msg-filter  'sed s/oldpass/newpasswd/' -f HEAD --all
+  删除log中所有"git-svn-id:"
+  git filter-branch --msg-filter 'sed -e "/^git-svn-id:/d"'
+#+end_src
+
+** 删除敏感文件
+#+begin_src sh
+  git filter-branch --tree-filter 'rm -rf files_to_remove' --prune-empty -f HEAD --all
+  或者(较快)
+  git filter-branch -f --index-filter 'git rm --cached --ignore-unmatch  filename' --prune-empty HEAD
+#+end_src
+--tree-filter表示修改文件列表。
+--msg-filter表示修改提交信息，原提交信息从标准输入读入，新提交信息输出到标准输出。
+--prune-empty表示如果修改后的提交为空则扔掉不要。在一次试运行中我发现虽然文件被删除了，但是还剩下个空的提交，就查了下 man 文档，找到了这个选项。
+-f是忽略备份。不加这个选项第二次运行这个命令时会出错，意思是 git 上次做了备份，现在再要运行的话得处理掉上次的备份。
+--all是针对所有的分支。
+
+** 修改 commiter 的 name 和 email，
+#+begin_src sh
+  git filter-branch -f --env-filter "GIT_AUTHOR_NAME='Newname'; GIT_AUTHOR_EMAIL='newemail'; GIT_COMMITTER_NAME='Newname'; GIT_COMMITTER_EMAIL='newemail';" HEAD
+#+end_src
+需要注意的是git filter-branch 会修改大量的sha1值,git push 时,可能会冲突,要想好
+怎样处理好这个问题.
+** 把项目中的某个目录当作git 的新的根目录 ,除此目录中的文件都删掉
+   相当于用某个子目录建一个新的git的仓库,不过,要注意,其他的文件都会被删了,
+   注意备份仓库
+   #+begin_src sh
+      git filter-branch --subdirectory-filter w32 -- --all
+   #+end_src
+** 删除两次提交之间的提交log,但是提交的内容还在库里并没有丢失
+   作用仅仅相当于合并了n次提交成为一次提交
+   之前
+#+begin_quote
+  *  (HEAD, master)f5b0f0b..: jixiuf 2013-01-11 4
+  * 22715cb..: jixiuf 2013-01-11 3
+  * 169849d..: jixiuf 2013-01-11 2
+#+end_quote
+   #+begin_src sh
+           删除169849d与f5b0f0b之间的commit
+           echo "f5b0f0bab898d4021dad6c87bfad0140dfb5bb23 169849d727285e6d3b1ff7536a2d22033d2b8b10" >> .git/info/grafts
+           git filter-branch 169849d727285e6d3b1ff7536a2d22033d2b8b10..HEAD
+   #+end_src
+   之后
+#+begin_quote
+  *  (HEAD, master)60b2c23..: jixiuf 2013-01-11 4
+  *  169849d..: jixiuf 2013-01-11 2
+#+end_quote
+* Links
+  很多git的小技巧
+  http://gitready.com/

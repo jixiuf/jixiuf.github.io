@@ -1,0 +1,79 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     concat()可变长度参数的实现
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-10-22 六
+#+DESCRIPTION:concat()可变长度参数的实现
+#+KEYWORDS: c language
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil 
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :C:
+#+begin_src c
+//file name : strcap.c
+//created at: 2011年10月22日 星期六 21时31分35秒
+//author:  纪秀峰
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <malloc.h>
+#include <string.h>
+#include <stdarg.h>
+
+
+char *concat(char *first ,...){
+  size_t len;
+  va_list arg;
+  char *p ,*returnbuf;
+  if (first ==NULL){
+    return NULL;
+  }
+  len= strlen(first);
+  /* 可变参数的调用基本要 */
+  /*   va_start */
+  /*   va_arg (中间可多次调用,以便遍历所有可变参数) */
+  /*   va_end */
+  /* 三个函数调用来完成 */
+  va_start(arg ,first);
+  while (NULL!= (p= va_arg(arg ,char*))){
+    len+=strlen(p);
+  }
+  va_end(arg);
+
+  len= len++;
+  returnbuf=  malloc(len);
+  //以上,只为计算,concat 后的字符长度
+
+  if (returnbuf==NULL) return NULL;
+  strcpy(returnbuf ,first);
+  va_start(arg ,first);
+  while (NULL!=(p = va_arg(arg ,char*))){
+    strcat(returnbuf,p);
+  }
+  va_end(arg );
+  return returnbuf;
+}
+
+int main(int argc, char *argv[])
+{
+  // 虽说是可变长度参数,但c需要知道什么时候结束,故最后一个参数特殊,为一个null,
+  //为何要把null转为char*:
+  //因为 NULL 就是0 ,0有时会被当便数字0,有时会被解析成null pointer
+  //比如 char *p = 0; if(p != 0)
+  //*p 初始化为0,实际是空指针,因为它前面有 char* 的类型声明故编译器,可以知道它是一个char* 类型的空指针,而非数字0
+  //但,在做为函数参数传入时,它并不知道它究竟是数字0还是一个空指什,故将它强转
+  // 为char* 类型的空指什,明确告诉编译器它是一个空指针
+  /* 然而, 传入函数的参数不一定被当作指针环境, 因而编译器可能不能识别未加修饰的 0 ``表示" 指针 */
+  char * hel=  concat ("hello" ",world",(char*)NULL);
+  puts(hel);
+  free(hel);
+
+  hel=  concat ("hello" ",world,","again",(char*)NULL);
+  puts(hel);
+  free(hel);
+  return 0;
+}
+#+end_src

@@ -1,0 +1,258 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:linux IO性能测试    
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2015-01-15 Thu
+#+DESCRIPTION:llinux_benchum.org
+#+KEYWORDS: 
+# #+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:nil <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil 
+#+TAGS: :Linux:
+
+* 使用fio进行I/O性能测试
+  yum install libaio libaio-devel fio
+  
+  fio是一个非常灵活的I/O测试工具,支持多线程或进程模拟等I/O操作来进行压
+  力测试，project官网为fio
+  
+  应用使用IO通常有二种方式：同步和异步。 同步的IO一次只能发出一个IO请
+  求，等待内核完成才返回，这样对于单个线程iodepth总是小于1，但是可以透
+  过多个线程并发执行来解决，通常我们会用16-32根线程同时工作把iodepth塞
+  满。 异步的话就是用类似libaio这样的linux native aio一次提交一批，然
+  后等待一批的完成，减少交互的次数，会更有效率
+
+** fio的命令行参数
+  1. -name=hello
+     运行的job名。例如–name=randread01 这个随便取，
+  2. -filename=/var/data01/test_io
+     测试过程使用的文件，一般指向一个不存在的文件，fio会以随机的数据生成
+     这个文件。也可以直接指向块设备文件。
+  3. readwrite=str或rw=str 指定测试 各种读写性能， 如
+     如-rw=randread,
+     Type of I/O pattern.  Accepted values are:           
+     read   Sequential reads. 序列读
+     write  Sequential writes.序列写
+     randread    Random reads. 随机读
+     randwrite    Random writes. 随机写
+     rw, readwrite    Mixed sequential reads and writes. 混合的序列读
+     randrw Mixed random reads and writes. 混合的随机读写
+
+  4. rwmixwrite=30,当rw=randrw,或rw=readwrite时
+     在混合读写的模式下，写占30%
+     
+  5. -direct=true 或-direct=1(centos 我试了-direct=true不行， )
+     测试过程跳过系统buffer，默认为direct=false。测试过程绕过机器自带
+     的buffer。使测试结果更真实。
+  6. -bs=4k
+     每次I/O操作的块大小，默认为bs=4K。
+  7. -bsrange=4k-16k 同上，每次提交的block size，例如bsrange=4k-16k 指
+     定一个范转
+  8. -runtime =300 测试时间（秒）
+  9. -size=5G 表示io达到5G才结束测试 ，如果有其他测试条件限制，则可能
+     达不到这个大小， 比如-runtime=10,可能测试10s之后读取的大小并没达
+     到5G就结束了
+  10. numjobs =8 并发执行的线程数
+
+  11. -ioengine=libaio   指定使用的engine,默认 -ioengine=sync
+      
+      FIO是测试IOPS的非常好的工具，用来对硬件进行压力测试和验证，支持
+      13种不同的I/O引擎，包括:sync,mmap, libaio, posixaio, SG v3,
+      splice, null, network, syslet, guasi, solarisaio 等等。
+     
+  12. group_reporting 显示进程汇总结果
+  13. zero_buffer 用0初始化系统buffer
+  14. lockmem=4g 限定使用4g的内存进行测试
+*** 和异步I/O相关的几个参数：
+
+1. iodepth_batch=4
+   Number of I/Os to submit at once. Default: iodepth.
+2. iodepth_batch_complete=int
+   This defines how many pieces of IO to retrieve at once. It defaults
+   to 1 which means that we’ll ask for a minimum of 1 IO in the
+   retrieval process from the kernel. The IO retrieval will go on
+   until we hit the limit set by iodepth_low. If this variable is set
+   to 0, then fio will always check for completed events before
+   queuing more IO. This helps reduce IO latency, at the cost of more
+   retrieval system calls.
+3. iodepth_low=int
+    Low watermark indicating when to start filling the queue again. Default: iodepth.
+4. iodepth=4 Number of I/O units to keep in flight against the file.
+   libaio 等异步IO engine中，会调用io_setup准备可以一次提交iodepth个IO
+   的上下文，同时申请个io请求队列用于保持IO。 在压测进行的时候，系统会
+   生成特定的IO请求，往io请求队列里面扔，当队列里面的IO个数达到
+   iodepth_batch值的时候，就调用io_submit批次提交请求，然后开始调用
+   io_getevents开始收割已经完成的IO。 每次收割多少呢？由于收割的时候，
+   超时时间设置为0，所以有多少已完成就算多少，最多可以收割
+   iodepth_batch_complete值个。随着收割，IO队列里面的IO数就少了，那么
+   需要补充新的IO。 什么时候补充呢？当IO数目降到iodepth_low值的时候，
+   就重新填充，保证OS可以看到至少iodepth_low数目的io在电梯口排队着。
+   （摘自参考3)
+* 描述IO性能的几个参数
+  1. IOPS (Input/Output Operations Per Second)，
+     即每秒进行读写（I/O）操作的次数，多用于数据库等场合，衡量随机访问的性能。
+    IOPS是指存储每秒可接受多少次主机发出的访问，主机的一次IO需要多次访问存储才可以完成。
+  2. bw 传输带宽。bw=113672KB/s, 
+  
+
+** fio 测试例子
+  
+   测试序列读， 每次读取大小4k的块，默认的ioengine=sync,运行60s(runtime),-direct=1,跳过buffer
+   下面的测试的结束 每秒读取速度bw=112297KB/s，,112297KB/s*60s=6820320 KB=6660.7MB
+   其中iops=28074
+#+BEGIN_SRC sh
+        fio -filename=/tmp/hello -direct=1 -bs=4k -rw=read -size=5G -numjobs=8 -runtime=60 -group_reporting -name=test_for_sync
+  
+test_for_sync: (g=0): rw=read, bs=4K-4K/4K-4K/4K-4K, ioengine=sync, iodepth=1
+...
+test_for_sync: (g=0): rw=read, bs=4K-4K/4K-4K/4K-4K, ioengine=sync, iodepth=1
+fio-2.0.13
+Starting 8 processes
+Jobs: 8 (f=8): [RRRRRRRR] [100.0% done] [89262K/0K/0K /s] [22.4K/0 /0  iops] [eta 00m:00s]
+test_for_sync: (groupid=0, jobs=8): err= 0: pid=3303: Thu Jan 15 12:59:35 2015
+  read : io=6580.3MB, bw=112297KB/s, iops=28074 , runt= 60001msec
+    clat (usec): min=36 , max=10252 , avg=281.03, stdev=206.24
+     lat (usec): min=36 , max=10253 , avg=281.52, stdev=206.33
+    clat percentiles (usec):
+     |  1.00th=[   69],  5.00th=[   86], 10.00th=[  100], 20.00th=[  123],
+     | 30.00th=[  149], 40.00th=[  187], 50.00th=[  235], 60.00th=[  286],
+     | 70.00th=[  346], 80.00th=[  414], 90.00th=[  516], 95.00th=[  612],
+     | 99.00th=[  892], 99.50th=[ 1096], 99.90th=[ 1960], 99.95th=[ 2384],
+     | 99.99th=[ 4576]
+    bw (KB/s)  : min=10136, max=17056, per=12.52%, avg=14061.48, stdev=1019.32
+    lat (usec) : 50=0.01%, 100=9.80%, 250=43.21%, 500=35.96%, 750=9.00%
+    lat (usec) : 1000=1.37%
+    lat (msec) : 2=0.56%, 4=0.08%, 10=0.01%, 20=0.01%
+  cpu          : usr=1.83%, sys=16.68%, ctx=2984386, majf=0, minf=238
+  IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued    : total=r=1684486/w=0/d=0, short=r=0/w=0/d=0
+
+Run status group 0 (all jobs):
+   READ: io=6580.3MB, aggrb=112297KB/s, minb=112297KB/s, maxb=112297KB/s, mint=60001msec, maxt=60001msec
+
+Disk stats (read/write):
+  vda: ios=1683677/19, merge=32/5, ticks=133192/0, in_queue=130762, util=87.74%
+#+END_SRC
+     
+   测试序列写， 每次写大小4k的块，默认的ioengine=sync,运行60s(runtime),-direct=1,跳过buffer
+     下面的测试的结束 每秒写速bw=12042KB/s,
+     bw=12042KB/s,
+     iops=3010 
+#+BEGIN_SRC  sh
+     fio -filename=/tmp/hello -direct=1 -bs=4k -rw=write -size=5G -numjobs=8 -runtime=60 -group_reporting -name=test_for_sync
+test_for_sync: (g=0): rw=write, bs=4K-4K/4K-4K/4K-4K, ioengine=sync, iodepth=1
+...
+test_for_sync: (g=0): rw=write, bs=4K-4K/4K-4K/4K-4K, ioengine=sync, iodepth=1
+fio-2.0.13
+Starting 8 processes
+Jobs: 8 (f=8): [WWWWWWWW] [100.0% done] [0K/13750K/0K /s] [0 /3437 /0  iops] [eta 00m:00s]
+test_for_sync: (groupid=0, jobs=8): err= 0: pid=3287: Thu Jan 15 12:57:28 2015
+  write: io=722564KB, bw=12042KB/s, iops=3010 , runt= 60005msec
+    clat (usec): min=180 , max=360366 , avg=2565.01, stdev=15235.83
+     lat (usec): min=180 , max=360367 , avg=2565.56, stdev=15235.85
+    clat percentiles (usec):
+     |  1.00th=[  205],  5.00th=[  221], 10.00th=[  229], 20.00th=[  243],
+     | 30.00th=[  255], 40.00th=[  266], 50.00th=[  274], 60.00th=[  286],
+     | 70.00th=[  298], 80.00th=[  318], 90.00th=[  358], 95.00th=[  430],
+     | 99.00th=[83456], 99.50th=[89600], 99.90th=[201728], 99.95th=[238592],
+     | 99.99th=[305152]
+    bw (KB/s)  : min=    1, max=11098, per=12.87%, avg=1549.70, stdev=549.80
+    lat (usec) : 250=25.00%, 500=71.04%, 750=0.74%, 1000=0.25%
+    lat (msec) : 2=0.32%, 4=0.07%, 10=0.02%, 20=0.01%, 50=0.03%
+    lat (msec) : 100=2.23%, 250=0.26%, 500=0.03%
+  cpu          : usr=0.24%, sys=2.92%, ctx=438926, majf=0, minf=223
+  IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued    : total=r=0/w=180641/d=0, short=r=0/w=0/d=0
+
+Run status group 0 (all jobs):
+  WRITE: io=722564KB, aggrb=12041KB/s, minb=12041KB/s, maxb=12041KB/s, mint=60005msec, maxt=60005msec
+
+Disk stats (read/write):
+  vda: ios=291/186942, merge=58/65444, ticks=1083/200563, in_queue=201568, util=93.38%
+
+#+END_SRC
+     
+   测试随机读， 每次读大小4k的块，默认的ioengine=sync,运行60s(runtime),-direct=1,跳过buffer
+     下面的测试的结束 每秒写速bw=4213KB/s,
+     bw=4213KB/s,
+     iops=1053 
+#+BEGIN_SRC  sh
+root@10-9-26-206 /home/deployer # fio -filename=/tmp/hello -direct=1 -bs=4k -rw=randread -size=5G -numjobs=8 -runtime=60 -group_reporting -name=test_for_sync
+test_for_sync: (g=0): rw=randread, bs=4K-4K/4K-4K/4K-4K, ioengine=sync, iodepth=1
+...
+test_for_sync: (g=0): rw=randread, bs=4K-4K/4K-4K/4K-4K, ioengine=sync, iodepth=1
+fio-2.0.13
+Starting 8 processes
+Jobs: 8 (f=8): [rrrrrrrr] [100.0% done] [2517K/0K/0K /s] [629 /0 /0  iops] [eta 00m:00s]
+test_for_sync: (groupid=0, jobs=8): err= 0: pid=3321: Thu Jan 15 13:01:58 2015
+  read : io=252888KB, bw=4213.1KB/s, iops=1053 , runt= 60013msec
+    clat (usec): min=63 , max=541652 , avg=7586.27, stdev=18598.84
+     lat (usec): min=63 , max=541653 , avg=7586.70, stdev=18598.84
+    clat percentiles (usec):
+     |  1.00th=[  100],  5.00th=[  116], 10.00th=[  129], 20.00th=[  151],
+     | 30.00th=[  181], 40.00th=[  278], 50.00th=[ 2896], 60.00th=[ 5344],
+     | 70.00th=[ 7776], 80.00th=[10560], 90.00th=[18816], 95.00th=[28800],
+     | 99.00th=[55040], 99.50th=[75264], 99.90th=[333824], 99.95th=[411648],
+     | 99.99th=[505856]
+    bw (KB/s)  : min=   29, max=  930, per=12.69%, avg=534.74, stdev=148.09
+    lat (usec) : 100=0.87%, 250=37.45%, 500=5.08%, 750=1.51%, 1000=0.49%
+    lat (msec) : 2=1.56%, 4=7.69%, 10=23.95%, 20=12.04%, 50=7.99%
+    lat (msec) : 100=1.04%, 250=0.21%, 500=0.10%, 750=0.01%
+  cpu          : usr=0.13%, sys=0.69%, ctx=63574, majf=0, minf=237
+  IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued    : total=r=63222/w=0/d=0, short=r=0/w=0/d=0
+
+Run status group 0 (all jobs):
+   READ: io=252888KB, aggrb=4213KB/s, minb=4213KB/s, maxb=4213KB/s, mint=60013msec, maxt=60013msec
+
+Disk stats (read/write):
+  vda: ios=63198/20, merge=59/7, ticks=478381/139, in_queue=478588, util=99.96%
+#+END_SRC
+
+   测试随机写， 每次写大小4k的块，默认的ioengine=sync,运行60s(runtime),-direct=1,跳过buffer
+     下面的测试的结束 每秒写速bw=10185KB/s,
+     bw=10185KB/s,
+     iops=2546 
+     
+#+BEGIN_SRC  sh
+root@10-9-26-206 /home/deployer # fio -filename=/tmp/hello -direct=1 -bs=4k -rw=randwrite -size=5G -numjobs=8 -runtime=60 -group_reporting -name=test_for_sync
+test_for_sync: (g=0): rw=randwrite, bs=4K-4K/4K-4K/4K-4K, ioengine=sync, iodepth=1
+...
+test_for_sync: (g=0): rw=randwrite, bs=4K-4K/4K-4K/4K-4K, ioengine=sync, iodepth=1
+fio-2.0.13
+Starting 8 processes
+Jobs: 8 (f=8): [wwwwwwww] [100.0% done] [0K/13066K/0K /s] [0 /3266 /0  iops] [eta 00m:00s]
+test_for_sync: (groupid=0, jobs=8): err= 0: pid=3350: Thu Jan 15 13:04:49 2015
+  write: io=611160KB, bw=10185KB/s, iops=2546 , runt= 60003msec
+    clat (usec): min=178 , max=576922 , avg=814.41, stdev=9221.25
+     lat (usec): min=178 , max=576925 , avg=815.03, stdev=9221.33
+    clat percentiles (usec):
+     |  1.00th=[  207],  5.00th=[  223], 10.00th=[  231], 20.00th=[  247],
+     | 30.00th=[  258], 40.00th=[  270], 50.00th=[  282], 60.00th=[  294],
+     | 70.00th=[  306], 80.00th=[  326], 90.00th=[  362], 95.00th=[  410],
+     | 99.00th=[ 1080], 99.50th=[44288], 99.90th=[89600], 99.95th=[205824],
+     | 99.99th=[403456]
+    bw (KB/s)  : min=   54, max= 2686, per=12.86%, avg=1309.78, stdev=486.44
+    lat (usec) : 250=22.61%, 500=74.73%, 750=1.20%, 1000=0.40%
+    lat (msec) : 2=0.40%, 4=0.07%, 10=0.04%, 20=0.01%, 50=0.07%
+    lat (msec) : 100=0.39%, 250=0.04%, 500=0.04%, 750=0.01%
+  cpu          : usr=0.23%, sys=2.03%, ctx=313192, majf=0, minf=223
+  IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued    : total=r=0/w=152790/d=0, short=r=0/w=0/d=0
+
+Run status group 0 (all jobs):
+  WRITE: io=611160KB, aggrb=10185KB/s, minb=10185KB/s, maxb=10185KB/s, mint=60003msec, maxt=60003msec
+
+Disk stats (read/write):
+  vda: ios=2/152711, merge=0/13, ticks=20/56057, in_queue=56017, util=93.28%
+#+END_SRC     
+* link
+  http://debugo.com/fio-test

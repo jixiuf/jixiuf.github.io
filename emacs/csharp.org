@@ -1,0 +1,201 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     emacs csharp 开发环境配置
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2014-01-03 周五
+#+DESCRIPTION:emacs csharp 开发环境配置
+#+KEYWORDS:csharp emacs
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Emacs: :CSharp:
+* 下载所需的文件
+  https://code.google.com/p/csharpmode/
+  http://www.emacswiki.org/emacs/Powershell.el
+* 配置
+   把csharpmode 整个目录加到你的load-path目录下
+    # (expand-file-name "~/.emacs.d/site-lisp/csharp-mode/") 我是放到这个目录下
+#+BEGIN_SRC emacs-lisp
+    (require 'csharp-mode)
+    (require 'csharp-completion)
+    (require 'csharp-analysis)
+
+    (add-to-list 'auto-mode-alist '("\\.cs$" . csharp-mode))
+    (add-hook  'csharp-mode-hook 'my-csharp-mode-fn t)
+    (eval-after-load 'csharp-mode '(add-csc-2-path-env))
+    (eval-after-load 'csharp-mode '(add-gacutil-2-path-env))
+
+     ;; //用csharp-completion进行补全时，需要用到gacutil.exe 这个程序 ，
+     ;; // 你需要搜索一下gacutil.exe 在你系统的哪个目录 ，然后这个加到你的PATH 目录下，或像我这样，
+    ;;;###autoload
+    (defun add-gacutil-2-path-env()
+      "add gacutil.exe to $PATH, csharp complete 用的到"
+      (when (equal system-type 'windows-nt)
+        (when (file-exists-p "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/Bin")
+          (setenv "PATH" (concat  (getenv "PATH") ";" "C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v7.0A\\Bin"))
+          (setq exec-path (add-to-list 'exec-path   " C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v7.0A\\Bin")))
+        (when (file-exists-p "C:/Program Files/Microsoft SDKs/Windows/v7.0A/Bin")
+          (setenv "PATH" (concat  (getenv "PATH") ";" "C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0A\\Bin"))
+          (setq exec-path (add-to-list 'exec-path   " C:\\Program Files)\\Microsoft SDKs\\Windows\\v7.0A\\Bin")))))
+
+  ;; 命令行下编译cs文件时， 使用csc.exe这个命令，把它也加到PATH路径下
+  ;;
+    ;;;###autoload
+    (defun add-csc-2-path-env()
+      "add csc.exe to $PATH"
+      (when (equal system-type 'windows-nt)
+        (let ((windowsPaht (getenv "SYSTEMROOT")))
+          (cond ((file-directory-p (concat windowsPaht "/Microsoft.NET/Framework/v3.5"))
+                 (setenv "PATH" (concat  (getenv "PATH") ";"  (concat windowsPaht "\\Microsoft.NET\\Framework\\v3.5\\")))
+                 (setq exec-path (add-to-list 'exec-path   (concat windowsPaht "\\Microsoft.NET\\Framework\\v3.5\\")))
+                 )
+                ((file-directory-p (concat windowsPaht "/Microsoft.NET/Framework/v4.0.30319"))
+                 (setenv "PATH" (concat  (getenv "PATH") ";"  (concat windowsPaht "\\Microsoft.NET\\Framework\\v4.0.30319\\")))
+                 (setq exec-path (add-to-list 'exec-path   (concat windowsPaht "\\Microsoft.NET\\Framework\\v4.0.30319\\"))))
+                ((file-directory-p (concat windowsPaht "/Microsoft.NET/Framework/v2.0.50727"))
+                 (setenv "PATH" (concat  (getenv "PATH") ";"  (concat windowsPaht "\\Microsoft.NET\\Framework\\v2.0.50727\\")))
+                 (setq exec-path (add-to-list 'exec-path   (concat windowsPaht "\\Microsoft.NET\\Framework\\v2.0.50727\\"))))))))
+
+
+#+END_SRC
+* csharp 代码补全， (补全类名， 函数名）
+  csharpmode 里提供了CscompUtilities.cs 文件文件， 以及编译好的
+  CscompUtilities.dll
+  首先需要检测 CscompUtilities.dll 在你的系统上能否工作
+  打开powershell (win7 已经自带了powershell) ,winxp 需要网上自己进行下载
+  powershell.exe 是cmd.exe 的增强版
+  按下Win+r 输入 powershell ,会打开一个窗口，  这时在里面输入
+  #+BEGIN_SRC sh
+  [System.Reflection.Assembly]::LoadFrom('d:/.emacs.d/site-lisp/csharp-mode/CscompUtilities.dll')
+  #+END_SRC
+  #+BEGIN_QUOTE
+  // 输出结果 如果如下， 说明 默认的dll文件可以在你的系统里运行，那你就不必重新
+  编译，
+  PS C:\Users\Administrator> [System.Reflection.Assembly]::LoadFrom('d:/.emacs.d/site-lisp/csharp-mode/CscompUtilities.dll')
+
+  GAC    Version        Location
+  ---    -------        --------
+  False  v2.0.50727     d:\.emacs.d\site-lisp\csharp-mode\CscompUtilities.dll
+  #+END_QUOTE
+   如果加载报错 ,则需要重新编译CscompUtilities.cs 生成CscompUtilities.dll
+#+BEGIN_SRC sh
+ 到CscompUtilities.cs 所在目录 ，使用csc.exe编译，生成CscompUtilities.dll
+  // 需要依赖ICSharpCode.NRefactory.dll, 同目录下已经自带
+ // 注意不要用 c:\\windows\Microsoft.NET\\Framework\\v4.0.* 目录下的csc编译， 似乎版本太高， 用3.5 应该可以
+ csc.exe  /target:library /R:ICSharpCode.NRefactory.dll   /debug /out:CscompUtilities.dll  CscompUtilities.cs
+ csc.exe  /target:library /R:ICSharpCode.NRefactory.dll   /platform:anycpu  /out:CscompUtilities.dll  CscompUtilities.cs
+  //或者你自己建一个VS2010 的项目，加入这段代码， 引用ICSharpCode.NRefactory.dll,利用VS2010进行编译，(我用vs2005打开CscompUtilities.cs报错)
+#+END_SRC
+生成之后， 重新用powershell 加载CscompUtilities.dll,
+#+BEGIN_SRC sh
+ [System.Reflection.Assembly]::LoadFrom('d:/.emacs.d/site-lisp/csharp-mode/CscompUtilities.dll')
+ [Ionic.Cscomp.Utilities]::QualifyName("System")
+  如果能运行到这步，外部环境基本已经搞定
+#+END_SRC
+
+
+** 用csharp-completion进行补全时，需要用到gacutil.exe 这个程序，
+   VS带的，
+  你到类似 C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v7.0A\\Bin目录下找
+  下， 或整个c:\盘搜一下， 然后把它加到你的系统PATH下，或者像我
+  在Emacs下 调我写的 (add-gacutil-2-path-env)
+  直到可以在cmd.exe下运行gacutil.exe 为止，
+*  Emacs配置csharp补全
+#+BEGIN_SRC emacs-lisp
+  (setq-default csharp-shell-location-of-util-dll (expand-file-name "~/.emacs.d/site-lisp/csharp-mode/"))
+  (setq-default cscomp-assembly-search-paths
+                (list ;;"c:\\.net3.5ra"    ;; <<- locations of reference assemblies
+                 ;;"c:\\.net3.0ra"    ;; <<-
+                 ;; "C:\\Windows\\Microsoft.NET\\Framework\\v2.0"      ;; <<- location of .NET Framework assemblies
+                 ;; 第一次试着补全这些目录下dll文件里的类里，可能会补不出来， 多试几次就好了
+                 "D:\\usr\\unity\\Data\\Managed\\"  ;; 你自已项目用到的dll所在的路径
+                 ;; "C:\\Windows\\Microsoft.NET\\Framework\\v3.5" ;; 系统路径 似乎不用加入
+                 ))
+  (require 'csharp-completion)
+  (require 'flymake)
+  (add-to-list 'csharp-flymake-csc-arguments (concat "/R:" (expand-file-name "~/.emacs.d/site-lisp/csharp-mode/CscompUtilities.dll")))
+  (add-to-list 'csharp-flymake-csc-arguments (concat "/R:" (expand-file-name "~/.emacs.d/site-lisp/csharp-mode/ICSharpCode.NRefactory.dll")))
+  ;; (defvar is-my-dll-loaded nil)
+  (when (file-exists-p (expand-file-name "D:/usr/unity/Data/Managed/UnityEngine.dll"))
+    (add-to-list 'csharp-flymake-csc-arguments "/R:D:/usr/unity/Data/Managed/UnityEngine.dll")
+    (add-to-list 'csharp-flymake-csc-arguments "/R:D:/usr/unity/Data/Managed/UnityEditor.dll"))
+
+  (defun helm-complete-csharp()
+    (interactive)
+    (setq cscomp-current-list nil)
+    (let ((prefix (thing-at-point 'symbol))
+          (candidates (cscomp-completions-at-point)))
+      (cond
+       ((= 1 (length candidates))
+        (insert (car candidates))
+        (delete-region cscomp-current-beginning cscomp-current-end))
+       ((= 0 (length candidates))
+        (message "not found"))
+       (t
+        (insert (completing-read "complete:" candidates nil t prefix ))
+        (delete-region cscomp-current-beginning cscomp-current-end)))))
+
+      ;;;###autoload
+  (defun my-csharp-mode-fn ()
+    "function that runs when csharp-mode is initialized for a buffer."
+    ;; (turn-on-auto-revert-mode)
+    (setq indent-tabs-mode nil)
+    ;; (set (make-local-variable 'c-basic-offset) 4)
+    ;; (make-local-variable 'c-offsets-alist)
+    ;; (c-set-offset 'substatement-open 0)
+    ;; (modify-syntax-entry ?_ "_" ) ;; 作为symbol 而不是word
+    (flymake-mode 1)
+    (require 'rfringe)
+
+    (csharp-analysis-mode 1)
+    (local-set-key "\M-\\"   'cscomp-complete-at-point)
+    (local-set-key [(control return)] 'helm-complete-csharp)
+    ;; (laod-my-dll)
+    ;; (local-set-key "\C-x\C-e"  'eval-print-last-sexp)
+    ;; (add-to-list 'ac-sources 'ac-source-csharp) ;
+    )
+#+END_SRC
+我这里用了自己写的(helm-complete-csharp)进行补全，
+csharp-completion.el 里提供了
+   cscomp-complete-at-point 类似hippie-expand
+   cscomp-complete-at-point-menu 利用菜单进行补全，
+我写的
+helm-complete-csharp ，并没用，helm ,只是用了completing-read 来补全，
+helm可以受益于此，
+你如果 想用auto-complete 进行补全，csharp-completion.el
+已经提供 ac-source-csharp 这个source,及(ac-complete-csharp) 这个函数，
+
+* 目前尚未实现的补全，
+  #+BEGIN_SRC java
+    using UnityEngine;
+    using System;
+    using System.Collections;
+    [RequireComponent(typeof(AudioSource))]
+    public class cube : MonoBehaviour {
+      public void test()
+      {
+        string s;
+        s. // 这里是可以进行补全的
+      }
+    }
+  #+END_SRC
+ #+BEGIN_SRC java
+    using UnityEngine;
+   using System;
+   using System.Collections;
+   [RequireComponent(typeof(AudioSource))]
+   public class cube : MonoBehaviour {
+     public void test()
+     {
+         if(true){
+             string s;// 声明在if 语句里的变量，似乎在分析语法树的时候 ,分析不到if里面定义的变量
+             s. // 这里不可以进行补全
+         }
+     }
+   }
+ #+END_SRC
+* Links 我关于csharp 的配置
+  https://github.com/jixiuf/emacs_conf/blob/master/site-lisp/joseph/joseph-csharp.el
+  https://github.com/jixiuf/emacs_conf/blob/master/site-lisp/joseph/joseph-program.el
+* 另附截图一张
+  [[file:../img/csharp.png]]

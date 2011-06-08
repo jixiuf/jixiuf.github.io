@@ -1,0 +1,99 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     catch ,throw ,异常处理
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-11-13 日
+#+DESCRIPTION:catch ,throw ,异常处理
+#+KEYWORDS: erlang
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Erlang:
+#+begin_src erlang
+  -module(foo).
+  -export([foo/1,demo/1]).
+
+
+
+  foo(1) ->
+      hello;
+  foo(2) ->
+      throw({myerror, abc});
+  foo(3) ->
+      tuple_to_list(a);
+  foo(4) ->
+      exit({myExit, 222}).
+
+  demo(X)->
+      case  catch foo(X) of
+          {myerror, abc} ->
+              when2error;
+          {'EXIT',What} ->
+              {i_catch_this_error ,What};
+          Other ->
+              Other
+      end.
+
+  %% 24> foo:demo(4).
+  %% {i_catch_this_error,{myExit,222}}
+
+  %% 25> foo:demo(3).
+  %% {i_catch_this_error,{badarg,[{foo,foo,1},
+  %%                              {foo,demo,1},
+  %%                              {erl_eval,do_apply,5},
+  %%                              {shell,exprs,7},
+  %%                              {shell,eval_exprs,7},
+  %%                              {shell,eval_loop,3}]}}
+  %% 26>
+#+end_src
+
+
+#+begin_src erlang
+-module(a).
+-compile([export_all]).
+
+t(F)->
+    try F() of
+        _ -> ok
+    catch
+        T -> {throw,caughted, T};
+        exit:custom_exit -> {exit,caughted ,custom_exit};
+        exit:Exit ->{exit,caughted ,Exit};
+        error:custom_error ->{error, caughted,custom_error};
+        error:Error ->{error, caughted,Error}
+    end.
+
+%% a:t(fun()  -> throw(msg) end).
+%% a:t(fun()  -> error(msg) end).
+%% a:t(fun()  -> exit(custom_exit) end).
+%% a:t(fun()  -> exit(msg) end).
+%% a:t(fun()  -> exit(custom_error) end).
+%% a:t(fun()  -> list:addddddd(ele) end).
+
+%% after == finally in java
+t2(F)->
+    try F() of
+        _ -> ok
+    catch
+        T -> {throw,caughted, T};
+        exit:Exit ->{exit,caughted ,Exit};
+        error:Error ->{error, caughted,Error}
+    after
+        io:format("this will be execute anyway like 'finally' ~n",[])
+    end.
+
+%% of 语句可以省略
+
+t2(F)->
+    try F()
+    catch
+        T -> {throw,caughted, T};
+        exit:Exit ->{exit,caughted ,Exit};
+        error:Error ->{error, caughted,Error}
+    after
+        io:format("this will be execute anyway like 'finally' ~n",[])
+    end.
+#+end_src

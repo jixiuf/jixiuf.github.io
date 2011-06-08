@@ -1,0 +1,206 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     emacs 按键绑定
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2015-10-18 日
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Emacs:
+
+* 全局按键绑定global-set-key
+#+BEGIN_SRC emacs-lisp
+(global-set-key ... 'my-funtion)
+比如
+(global-set-key (kbd "C-f") 'forward-char)
+(global-set-key (kbd "C-x C-f") 'find-file)
+或者
+(define-key global-map (kbd "C-f") 'forward-char)
+(define-key global-map (kbd "C-x C-f") ''find-file)
+#+END_SRC
+常用的 像C-x C-f  ,C-f ,C-c C-f  等按键 很容易写出来
+但是有些按键 包含  f1 f2 backspace,delete return shift 等按键
+这样的按键不好配置。
+有一种方法可以帮你解决这个问题
+
+    1. M-x global-set-key RET 交互式的绑定你的键。
+    2. C-x Esc Esc 调出上一条“复杂命令”。
+    好了，你现在就能在 minibuffer 里看到你应该写在 .emacs 的东西 了。
+比如 我想绑定 Alt-Return 到 forward-char 这个命令
+M-x:global-set-key RET 然后 按下 Alt-Return 按键 ，然后输入forward-char 然后回来
+再然后 按下 C-x Esc Esc 就会在minibuffer 里显示出
+#+BEGIN_SRC emacs-lisp
+(global-set-key [27 13] (quote forward-char))
+#+END_SRC
+* 绑定新的前缀键
+ 其实上面的办法只能让你绑定一个已有的前缀。你有可能想绑定一个
+ save-buffer 到 "C-c C-c C-b a"。上面的办法就不灵了。我们必须 使用另外
+ 的办法：
+
+ #+BEGIN_SRC emacs-lisp
+   (global-set-key (kbd "C-c C-c C-b a") 'save-buffer)
+ #+END_SRC
+  上面的那个 "C-c C-c C-b a" 是自动把 "C-c C-c", "C-c C-c C-b" 都定义
+  成了一个 prefix-command.
+
+* 创建新的 prefix command
+  上面这个办法只对开头的键已经是 prefix command 的键序列起作用， 如果
+  你的第一个键不是一个 prefix，那么就会出错。你可以试试：
+  #+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-z C-c C-w b") 'find-file)
+  #+END_SRC
+  出现错误：(error "Key sequence C-z C-c C-w b uses invalid prefix characters")
+
+  所以你必须事先把第一个键设定为 prefix:
+  #+BEGIN_SRC emacs-lisp
+    (define-prefix-command 'ctl-z-map)
+    (global-set-key (kbd "C-z") 'ctl-z-map)
+    (global-set-key (kbd "C-z C-c C-w b") 'find-file)
+  #+END_SRC
+* 如何查看 某个快捷键绑定了什么命令
+  C-h k 或 F1 k
+  比如我想看 C-x C-s 这个快捷键 绑定了什么命令
+  C-h k 然后按下C-x C-s按键
+  或者
+  F1 k 然后按下C-s C-s按键
+* 如何查看 某个函数或命令的文档
+  C-h f 或F1 f 然后输入相应函数名
+  如查看 forward-char 命令的文档
+  C-h f 然后输入forward-char 回车
+  F1 f 然后输入forward-char 回车
+* 为具体的 major mode 绑定按键
+  #+BEGIN_SRC emacs-lisp
+    (require 'dired)
+    ;;比如在dired mode 下  直接按u  就回到上层目录dired-up-directory
+    (define-key dired-mode-map "u" 'dired-up-directory)
+    ;; 或者
+    (defun my-dired-mode-hook()
+      (local-set-key "u" 'dired-up-directory))
+    (add-hook 'dired-mode-hook 'my-dired-mode-hook)
+  #+END_SRC
+
+* 常用按键总结
+** 光标移动/快速定位相关
+   | 快捷键       | 绑定的函数                              | 解释                                                       |
+   |--------------+-----------------------------------------+------------------------------------------------------------|
+   | C-f, C-b     | forward-char backward-char              | 以字符为单位移动。                                         |
+   | M-f, M-b     | forward-word,backward-word              | 以单词为单位移动。                                         |
+   | C-M-f, C-M-b | forward-sexp backward-sexp              | 以一个语法单元尾单位前后移动                               |
+   |--------------+-----------------------------------------+------------------------------------------------------------|
+   | C-a, C-e     | move-beginning-of-line move-end-of-line | 移动到行首，行末。                                         |
+   | M-a, M-e     | backward-sentence forward-sentence      | 移动到句子头，句子尾。                                     |
+   | C-M-a ,C-M-e | beginning-of-defun end-of-defun         | 到函数头尾                                                 |
+   |--------------+-----------------------------------------+------------------------------------------------------------|
+   | M-{, M-}     | forward-paragraph backward-paragraph    | 移动到段落头，段落尾。                                     |
+   |--------------+-----------------------------------------+------------------------------------------------------------|
+   | C-d          | delete-char                             | 删除光标后的字符                                           |
+   | M-d          | kill-word                               | 删除光标后的单词                                           |
+   | C-backspace  | backward-kill-word                      | 删除光标前的一个单词                                       |
+   | M-backspace  | backward-kill-word                      | 删除光标前的一个单词                                       |
+   |--------------+-----------------------------------------+------------------------------------------------------------|
+   | C-k          | kill-line                               | 删除一行                                                   |
+   | C-M-k        | kill-sexp                               | 删除一个语法单元(比如一对(),[]{})                          |
+   | C-x k        | kill-buffer                             | 关闭打开的文件/buffer                                      |
+   |--------------+-----------------------------------------+------------------------------------------------------------|
+   | M-h          | mark-paragraph                          | 选择一段                                                   |
+   | C-M-h        | mark-defun                              | 选择一个函数                                               |
+   | C-x h        | mark-whole-buffer                       | 全选                                                       |
+   |--------------+-----------------------------------------+------------------------------------------------------------|
+   | C-v, M-v     | scroll-up-command scroll-down-command   | 翻页。                                                     |
+   | M-<, M->     | beginning-of-buffer end-of-buffer       | 到文件头和文件尾。                                         |
+   |--------------+-----------------------------------------+------------------------------------------------------------|
+   | M-r          | move-to-window-line-top-bottom          | 加参数，移动到窗口里的某一行。不加参数缺省移动到窗口中间。 |
+   | M-g c        | goto-char                               | 到文件的第 N 字节。                                        |
+   | M-g g        | goto-line                               | 到文件第 N 行。                                            |
+   |--------------+-----------------------------------------+------------------------------------------------------------|
+   | C-g          | keyboard-quit                           | 取消或放弃一个操作                                         |
+   C-g的详细说明: 比如我想打开一个文件C-x C-f 当我按完C-x 还没按C-f 前，我突然想放弃了，这个时候直接C-g 就可以了
+** 常用操作相关
+| C-x C-f            | find-file                  | open file                                                                         |
+| C-x C-s            | save-buffer                | save file                                                                         |
+| C-x C-w            | write-file                 | save as                                                                           |
+| C-x k              | kill-buffer                | close current file                                                                |
+| C-x C-c            | save-buffers-kill-terminal | exit                                                                              |
+| C-_ 或C-/          | undo                       | undo                                                                              |
+| C-@ or C-<SPC>     | set-mark-command           | 设置起始点，设置完之后移动光标，光标所在位置与C-@时所在位置之前的区域即为选中区域 |
+| C-w                | kill-region                | cut                                                                               |
+| M-w                | kill-ring-save             | copy                                                                              |
+| C-y                | yank                       | paste                                                                             |
+| M-x:truncate-line  | truncate-line              | set word wrap                                                                     |
+| C-s                | isearch-forward            | search forward                                                                    |
+| C-r                | isearch-backward           | search backward                                                                   |
+| C-s C-s            | isearch-repeat-forward     | find next forward                                                                 |
+| C-r C-r            | isearch-repeat-backward    | find next backward                                                                |
+| M-x:replace-string | replace-string             | replace                                                                           |
+对于拷贝粘贴，Emacs 有点不一样。在一般的编辑器中，先鼠标选择一段区域，
+然后 C-c 拷贝。Emacs 中的不是这样的，当前光标位置叫point ， 还有一个
+点是 mark ，可以用 C-@ 设置 mark 的位置，然后移动光标 point 和 mark 之间的内容
+就是 region ， C-w 剪切 , M-w 拷贝都是针对 region 的。 C-@ 的作用就是
+设置一块region的起始位置，point 是光标当前的位 置， region 是 mark 和
+point 之间的区域。
+
+上面有好多命令都是kill-开头的 如kill-line ,kill-word kill-region等这些
+命令执行后被删除的东西都会放到kill-ring 中， 然后 C-y 可以再次把它粘贴
+回来
+
+
+唯一让我觉得不方便的就是 C-@ ，因为 C-<SPC> 一般用来切换输入法了。还好，
+用他的次数也不多， 就算用鼠标，也挺好， 习惯问题。
+#+BEGIN_SRC emacs-lisp
+ C-@ = C-S-2 不好按，所以我设置成 C-2 好按一下，
+(global-set-key  (kbd "C-2") 'set-mark-command)
+#+END_SRC
+
+* 一些常用操作的优化
+比如 C-x k kill-buffer 默认会提示你输入要kill 的buffer 名 ，如果是当前buffer 则直接回车
+我嫌输入回车麻烦， 我想做到输入C-x k 直接把当前buffer 关闭
+#+BEGIN_SRC emacs-lisp
+(autoload 'server-edit "server")
+;;;###autoload
+(defun kill-buffer-or-server-edit()
+  (interactive)
+  (message "kill buffer %s" (buffer-name))
+  (when (equal (buffer-name) "*scratch*")
+    (copy-region-as-kill (point-min)(point-max)))
+  (if (and (featurep 'server) server-buffer-clients)
+      (server-edit)
+    (kill-this-buffer)
+    )
+  )
+(global-set-key (kbd "C-x k") 'kill-buffer-or-server-edit)
+#+END_SRC
+**  C-a smart-beginning-of-line
+   默认情况下C-a 绑定的的函数move-beginning-of-line 。
+   但是我对   move-beginning-of-line这个函数不太满意，我想做到，当我第一次
+   按下C-a时，跳到行首，当已经在行首时，则忽略行首的空白字符，并且C-a 可以在这
+   两个位置来回跳转.于是有了下面的  smart-beginning-of-line
+#+begin_src emacs-lisp
+;;;###autoload
+(defun smart-beginning-of-line ()
+  "Move point to first non-whitespace character or beginning-of-line.
+Move point to beginning-of-line ,if point was already at that position,
+  move point to first non-whitespace character. "
+  (interactive)
+  (let ((oldpos (point)))
+    (beginning-of-line)
+    (and (= oldpos (point))
+         (back-to-indentation) )))
+(global-set-key (kbd "C-a") 'smart-beginning-of-line)
+#+end_src
+**  C-e smart-end-of-line
+C-e对于end-of-line ,也想要同样的效果。
+#+begin_src emacs-lisp
+;;;###autoload
+(defun smart-end-of-line()
+  "Move point to first non-whitespace character or end-of-line.
+Move point to end-of-line ,if point was already at that position,
+  move point to first non-whitespace character."
+  (interactive)
+  (let ((oldpos (point)))
+    (beginning-of-line)
+    (when (re-search-forward "[ \t]*$" (point-at-eol) t)
+      (goto-char (match-beginning 0)))
+    (when (= oldpos (point))
+      (end-of-line))))
+(global-set-key (kbd "C-e") 'smart-end-of-line)
+#+end_src

@@ -1,0 +1,292 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     Emacs可以做什么(功能演示)
+#+DATE:     2016-06-26 星期日
+#+AUTHOR:    纪秀峰
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Emacs:
+
+* Tips: dropbox 里的视频不要用迅雷下载， 似乎下不了(PS. 似乎国内现在封了dropbox，试从微盘vdist.weibo.com下载相应的视频链接)
+  微盘里也上传一份供下载
+  http://vdisk.weibo.com/s/A2UdJFfhA_GG5/1412260686
+  优酷上也上传了一些，供在线观看(清晰度相对差些）
+  http://i.youku.com/u/UMjU4NzMzNDA=/videos
+* AutoComplete
+  http://www.emacswiki.org/emacs/AutoComplete
+  Video Demo:
+  http://v.youku.com/v_show/id_XMzMxMDg0NDIw.html
+  http://youtu.be/rGVVnDxwJYE
+  http://cx4a.org/software/auto-complete/demo.html
+* AutoJavaComplete
+  AutoComplete 的一个插件，基于TAG 用于java补全
+  虽然比Eclipse差些， 但总还可以用，再加上emacs 其他一些补全机制
+  足可以用
+  https://github.com/emacs-java/auto-java-complete
+  Video Demo:
+  https://www.dropbox.com/s/f8dr9utzhh0usay/auto-java-complete.mp4.7z
+  或
+  http://vdisk.weibo.com/s/A2UdJFfhA_GG9
+* auto-complete-clang
+  AutoComplete 用于c c++ 补全的插件
+  Video Demo:
+  https://www.dropbox.com/s/ks3wylqijyapyky/autocomplete-clang.mp4.7z
+  或
+  http://vdisk.weibo.com/s/A2UdJFfhA_GFI
+* yasnippet  模版
+  https://github.com/capitaomorte/yasnippet
+  Video Demo:
+  http://v.youku.com/v_show/id_XMzI0NDYxNDQ=.html
+  http://youtu.be/ZCGmZK4V7Sg
+  http://yasnippet.googlecode.com/files/yas_demo.avi
+* yasnippet and auto-insert
+  yasnippet 与auto-insert 结合，  将新创建文件时自动在文件里插入一定的模版
+  Video Demo:
+  https://www.dropbox.com/s/47d4ujlqao0j6ou/yasnippet-auto-insert.mkv.7z
+  或
+  http://vdisk.weibo.com/s/A2UdJFfhA_GFF
+* hippie-expand
+  emacs 自带的一种补全机制，可以补全 变量名（当从前打开的buffer,所有打开的
+  buffer,剪切板),可以补全文件名
+  Video Demo:
+  https://www.dropbox.com/s/ltheog1cp6quciv/hippie-expand.mkv.7z
+  或
+  http://vdisk.weibo.com/s/A2UdJFfhA_GFM
+* Iedit
+  显示光标下匹配的word或变量
+  同步的更改光标下匹配的word或变量
+  Video Demo:
+  https://www.dropbox.com/s/px380psaksx8277/iedit.mkv.7z
+  或 http://vdisk.weibo.com/s/A2UdJFfhA_GFq
+  演示视频里演示了 如何同时更改本文件里所有hello变量为hello另一个变量
+  及如何只同时更改test()方法里的hello变量为另一个变量的功能(其他区域的hello不受
+  影响）
+  其中主要功能为Iedit实现
+  其中只修改test()函数里的hello变量  使用了emacs 自带的 narrow功能（C-xnn)即只显
+  示选中的部分的文字，隐藏未选中部分
+* bm.el
+  可视化 书签,在书签间快速跳转
+  Video Demo:
+  https://www.dropbox.com/s/z2dqtwq05so4u02/bm-bookmark.mkv.7z
+  或http://vdisk.weibo.com/s/A2UdJFfhA_GFr
+  演示视频展示了  在当前buffer(文件）的三个位置设置书签 ，然后在各个书签间来回跳
+  转的功能， （跳转过去后 会自动把当前行所在位置停留在窗口中间)
+  当然书签也可以在不同的文件上设置 ，在不同文件间跳转
+
+* Helm
+  Helm 的功能很多， 主要实现了通过一个或多个关键字从各种侯选项（可以是buffer,文
+  件，剪切环里的内容,最近打开的文件等）中过滤出某几个，
+  然后执行相应的操作(如 切换到某个buffer ,打开某个文件，将选中的剪切板里的内容插
+  入到光标处等）
+  Video Demo:
+  https://www.dropbox.com/s/45lu4bvrd1zxusx/helm.mkv.7z
+  或http://vdisk.weibo.com/s/A2UdJFfhA_GFB
+  1. 视频展示了 如何快速的切换到某个文件（从 所有Buffers(打开的文件） Recentf(最近
+  打开过的文件）
+  2. Kill Ring 是emacs 的剪切版，  所有剪切版上出现的内容会列出来让你从中选择
+     视频中有展示 如何将剪切版中的内容插入到当前位置
+
+* Helm Imenu
+  列出当前所编辑文件中各个函数/变量 并跳转
+  以emacs源码中的sha256.c(c语言） 及 helm-imenu.el（emacs lisp语言)文件为例
+  Video Demo:
+  https://www.dropbox.com/s/zq6zk562nmgypve/helm-imenu.mkv.7z
+  或http://vdisk.weibo.com/s/A2UdJFfhA_GG3
+* Helm-occur
+  根据关键字列出当前文件中包含关键字的行， 并跳转
+  Video Demo:
+  https://www.dropbox.com/s/9krjogmt9ssk8bm/helm-occur.mkv.7z
+  或http://vdisk.weibo.com/s/A2UdJFfhA_GFO
+
+* helm-grep and Emacs-wgrep
+  helm-grep.el
+  grep 的helm 版， 根据关键字过滤某个文件（如果是一个文件，可以直接用helm-occur)
+    或多个文件，
+    或某个目录
+    或某个目录（包括子目录）
+    并跳转到指定的行
+    (可以是交互式的,即每输入一个字母，过滤后的结果就跟着变化）
+    （也可以将过滤后的结果保存到一个buffer中， 然后在这个buffer中的某一行回车后
+    就跳转到相应的行）
+    同时有了Emacs-wgrep ,则对上述buffer 内容的更改 则会反映到这些文件中，以实现
+    在多个文件中更改某个变量的目录
+    Video Demo:
+    https://www.dropbox.com/s/jvju9gwyctwxg6a/helm-grep-wgrep.mkv.7z
+    1. 视频中展示了以"joseph"为关键字搜索某目录下的文件，并快速跳转到指定行的操作
+    2. 将上述过滤的结果保存到一个临时buffer中，在这个临时buffer中的任意一行回车即
+    可跳转到指定文件位置 ,在这个buffer中修改其中的内容 ，其相应的文件内容也会跟
+    着修改 ,结合前面的Iedit功能 ，则可以实现同时修改这些文件的文件，比如将所有关
+    键字"joseph" 替换成"joseph-new"，
+
+
+* helm-ls-git helm-ls-hg
+  列出git 或hg 仓库里的文件， 从中过滤中某个文件 打开
+  快速打开项目中文件的一种方法
+  以 helm-ls-git 为例
+  https://www.dropbox.com/s/6kpqsvxh4d59ojl/helm-ls-git.mkv.7z
+  或http://vdisk.weibo.com/s/A2UdJFfhA_GFP
+* helm-etags-plus ctags-update.el
+    使用Exuberant Ctags(ctags) 实现函数的跳转（支持c c++ java等多种语言）
+    helm-etags-plus 支持多个TAGS文件，
+    ctags-update.el 则可以自动更新TAGS文件，
+    以emacs 的源代码为例演示如何使用
+    Video Demo:
+    https://www.dropbox.com/s/xroh50ptv5iuw4x/helm-etags-plus.mp4.7z
+    或
+    http://vdisk.weibo.com/s/A2UdJFfhA_GFA
+    视频主要展示了函数间的跳转功能，当发现有多个同名函数/变量时 会列出所有所项供
+    你选择 ，加上helm 关键字过滤的功能， 可以很容易的跳转到目标函数上，
+    虽然比不上eclipse VS 等IDE跳转的那么精确， 但已经足够用了
+    ctags etags global 这些工具并不完善， 但emacs 对其进行包装后， 基本可以实现
+    快速跳转的功能
+* emacs-helm-gtags
+  GNU Global with helm for emacs
+  使用 GNU Global 来实现函数的跳转，查找哪些地方调用了某函数等功能
+  Video Demo:
+  https://www.dropbox.com/s/duuapzy1tuivqas/emacs-helm-gtags.mkv.7z
+  或
+  http://vdisk.weibo.com/s/A2UdJFfhA_GFt
+  同helm-etags-plus 功能类似
+  只是其依赖的是GNU Global 而非ctags etags 而已
+
+* eshell
+  emacs 实现的一个shell ,
+  可以在编辑文件时快速的跳到此文件所在的目录 ，然后执行相应的shell命令
+  可以利用到emacs自身的补全机会，
+  Video Demo:
+  https://www.dropbox.com/s/pc3shb7resaz9k1/eshell.mp4.7z
+  或
+  http://vdisk.weibo.com/s/A2UdJFfhA_GFl
+* ace-jump-mode
+  无笔标快速定位的方法之一：
+  比如 :按下M-m（Alt-m)之后,
+  等侯你按下一个字母(比如m),然后它会用另外一组红色face的字母 标出
+  所有以此字母(m)开头的单词,可以多次操作,直到光标定位到你想要的位置
+  下面以 快速跳转到各个字母m处进行演示(注意窗口最下面提示我输入一个字母
+  Video Demo:
+  https://www.dropbox.com/s/mgsmfhsdpzgcw9v/ace-jump-mode.mp4.7z
+  或
+  http://vdisk.weibo.com/s/A2UdJFfhA_GFN
+*  sqlparser
+   支持mysql oracle sqlserver
+   主要实现编写sql语句时可以实时的从数据据中查询相应的信息 ，帮助编写sql语句，
+   比如 进行补全 表名 列名等
+   以mysql 为例
+   https://www.dropbox.com/s/voo5zxcijq2hk93/sqlparser-mysql-complete.mp4.7z
+   或
+   http://vdisk.weibo.com/s/A2UdJFfhA_GGh
+* golden-ratio.el
+  多窗口操作时 ，比较烦人的一件事情就是调整窗口的大小
+  golden-ratio.el 则按照黄金分隔（0.618）的比例自动调整窗口的大小
+  使光标所在的窗口无论是水平还是竖直方向都占整个比例的0.618，
+  https://www.dropbox.com/s/vozuebnknsxjjj5/golden-ratio-el.mp4.7z
+  或http://vdisk.weibo.com/s/A2UdJFfhA_GFn
+* dired
+  emacs 管理文件的方式，
+  1.在这里更改文件名字就行更改一个文件的内容一样，
+  2.删除文件
+  3.快速当前目录想要的文件（只显示匹配的文件）
+  Video Demo:
+  https://www.dropbox.com/s/gs4zncq9idnecnp/dired.mp4.7z
+  或http://vdisk.weibo.com/s/A2UdJFfhA_GFU
+
+* VC (version control) emacs自带的用于进行svn git cvs hg 等各种版本管理工具的一个统一的接口
+  Video Demo:
+  https://www.dropbox.com/s/rw53o0ee6eoiwap/vc.mp4.7z
+  或http://vdisk.weibo.com/s/A2UdJFfhA_GFQ
+  C-x v v     vc-next-action -- perform the next logical control operation on file 会根据当前文件状态决定该做什么
+    1.如果当前的文件(work file)不在任何一个version control 管理下,则询问你创建什么样的仓库,如svn git等.
+    2.如果在管理下,则register the file. 即git add filename.
+    3.如果work file 与库中的文件一样,do nothing.
+    4.如果你对work file 进行的修改则进行checkin(即commit)操作,它会打开一个*VC-LOG*buffer让你输入日志,关于*VC-LOG* 见下面的注释
+  C-x v =     vc-diff -- diff with other revisions
+    对未提交的文件与最新的版本对应的文件进行diff操作,C-u可以选择用哪两个版本,不仅可以单文件diff,
+    可以是fileset,如何对多文件进行操作看vc-dir mode `C-xvd' 类似于dired, ibuffer.
+  C-x v u     vc-revert-buffer -- undo checkout  放弃对文件的修改,即重新update 一下.
+    查看日志 `*vc-change-log*' buffer
+  C-x v l     vc-print-log -- show log (not in ChangeLog format) 显示日志,只显示当前文件有关的日志
+      这个打开的日志buffer 功能绝对不止显示日志这么简单，
+      你可以按下C-hb 查看一下它的键绑定，
+      比如= 是进行diff比较，默认是最新的版本，与你光标下的版本进行比较
+      也可以用m ,mark 两个版本后，然后= ,将其进行比较
+  C-x v L     `vc-print-root-log' 显示日志,显示所有日志
+      在*VC-change-log*buffer 中可以进行以下操作
+
+* Ediff
+  ediff 在VC 那一节里有演示， 通常情况下， ediff 会与版本管理控制一起使用，
+  可以对同一个文件两个不同版本进行比较 ，也可以在出现冲突的时候用于解决冲突
+  这里就演示一下 what-emacs-can-do.org 这个文件各个版本之间用ediff 进行比较
+  Video Demo:
+  https://www.dropbox.com/s/l9sxfvuhe6t6zos/ediff.mp4.7z
+  或http://vdisk.weibo.com/s/A2UdJFfhA_GG2
+* magit
+  magit 是emacs专门针对git的一个版本控制插件
+  https://github.com/magit/magit
+  https://github.com/magit/magit/wiki
+  Video demo:
+  http://v.youku.com/v_show/id_XNzk1NjI5OTM2.html
+  http://vimeo.com/2871241
+  http://shelby.tv/video/vimeo/2871241/meet-magit
+* org-mode
+  当前文件就是用org-mode 进行编辑的，
+  用Tab 键进行展开或折叠,
+  可以将org file 导出成html
+  | tab                 | col2         |
+  | hello this is a tab | another line |
+  | eeee                | fff          |
+  http://orgmode.org/worg/org-tutorials/index.html
+
+  http://vdisk.weibo.com/s/A2UdJFfhA_GFx
+  或者
+  https://www.dropbox.com/s/4iew0stcupnevk9/org-mode.mp4.7z
+
+* org-agenda org-mode TODO list
+  org mode 用于日程管理
+  (global-set-key (kbd "C-c a")  'org-agenda)
+  (define-key global-map [(control meta ?r)] 'org-capture)
+  比如C-cat 列出所有todo list
+  Control+Alt+r 添加一条新的todo
+  https://www.dropbox.com/s/wfpvt4ydhi56w57/org-mode-todolist.mp4.7z
+  或者
+  http://vdisk.weibo.com/s/A2UdJFfhA_GFR
+* mail
+  使用 mew 发邮件
+  https://www.dropbox.com/s/37n7jv55yvzomot/emacs-mew-send-mail.mp4.7z
+  或者http://vdisk.weibo.com/s/A2UdJFfhA_GFs
+* calc emacs里的计算器
+  https://www.dropbox.com/s/2xb0lorud0hypvs/emacs-calc.mp4.7z
+  或者
+  http://vdisk.weibo.com/s/A2UdJFfhA_GFX
+  可以用calc 的功能
+  如计算1+2 : 1 enter 2 enter +,即先输入数，再输入运算符，+-*/^
+  d2 将当前int 转为二进制
+  d6 转为16进制
+  d8 转为8进制
+  d0 转为十进制
+  当我们只是想简单的对一系列数字进行代数运算时，使用逆波兰表达式不是很直观，因此， calc 提供了一个更加直接的指令：
+  ' （就是分号旁边的那个按键）
+  比如，在 calc 中按“'”，然后输入算式：
+  (3^2 + 4^2) ^ 0.5
+
+  二进制数的输入方法
+  2#01010101
+  8#131324123
+
+  另外，与二进制处理相关的函数绑定在以b开头的键上
+  如bL,br 左移右移
+  ba bo bn  ,and or not
+* Emacs 一些可以提高效率的小tips
+  http://v.youku.com/v_show/id_XNzk1ODA5OTY4.html
+  http://vdisk.weibo.com/s/A2UdJFfhA_iOO
+  1. 我的快捷键 M-w 快速选中当前行(选中后minibuffer 会有已选中的提示)
+     M-w 复制一个区域，但是如果没有区域被选中，则复制当前行
+  2. 一键删除光标后面的内容C-k
+  3. 快速选中函数 ,C-g 取消选中后 光标仍然回到未选中前的位置
+     与功能1相结合 即复制整个函数， 与功能2相结合 即删除整个函数
+  4. 在下一行插入一空行， 在上一行插入一空行，光标并移动到空行上
+  5. 快速跳转到行首（C-a)  行尾(C-e),
+     当行首有空格时C-a跳到行首 ，当已经在行首 再次按下C-a  则跳转到本行第一个非
+     空字符处，多次C-a 在这两个位置来回跳转
+     与 功能2相结合 C-a C-k两键即可删除整行内容
+
+

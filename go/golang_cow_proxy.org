@@ -1,0 +1,46 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     用cow 翻墙的配置
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2016-01-19 二
+#+DESCRIPTION:用cow 翻墙的配置
+#+KEYWORDS: proxy cow golang linux Windows Mac
+#+TAGS:  proxy:cow:Golang
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+* cow 配置文件示例
+https://github.com/cyfdecyf/cow
+
+** 本机上的配置
+#+BEGIN_SRC sh
+  ##### ##### ##### ##### ##### ######      on client
+  #设置本机的http代理服务器和端口
+  listen=http://127.0.0.1:6666
+  dialTimeout = 60s
+  # 从服务器读超时
+  readTimeout = 60s
+  authTimeout = 2h
+  #设置墙外的二级代理，这里同样用了COW的，因为安装太简单，根据二级代理的情况设置用户，密码，服务器ip，端口
+  proxy=cow://aes-128-cfb:passwordddddddddddd@taphero.yinni.chaoshenxy.com:6666
+  #===================================================end on client
+#+END_SRC
+** server 上的配置
+#+BEGIN_SRC sh
+  ##### ##### ##### ##### ##### #####
+  #          on server
+  # 6666 端口需打开
+  listen = cow://aes-128-cfb:passwordddddddddddd@0.0.0.0:6666
+  ##### ##### ##### ##### ##### #####
+#+END_SRC
+
+* Windows
+然后 在 IE/工具/Internet选项/连接/局域网设置/使用自动配置脚本
+填入 http://127.0.0.1:6666/pac
+
+* mac
+  系统偏好配置/网络/高级/代理
+    自动代理配置中  http://127.0.0.1:6666/pac
+    Web 代理  127.0.0.1   6666
+    https代理  127.0.0.1   6666
+    socks 代理 127.0.0.1   6666

@@ -1,0 +1,143 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     consul集群拾遗
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@qq.com
+#+DATE:     2018-01-10 三
+#+DESCRIPTION:consul集群拾遗
+#+KEYWORDS: Go
+#+TAGS:
+#+FILETAGS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \setmainfont{PingFang SC}
+* consul 的一些角色
+
+Consul Cluster有Server和Client两种角色。不管是Server还是Client，统称为
+Agent，Consul Client是相对无状态的，只负责转发RPC到Server，资源开销很
+少。Server是一个有一组扩展功能的代理，这些功能包括参与Raft选举，维护集
+群状态，响应RPC查询，与其他数据中心交互WAN gossip和转发查询给leader或
+者远程数据中心。在每个数据中心，client和server是混合的。一般建议有3-5
+台server。这是基于有故障情况下的可用性和性能之间的权衡结果，因为越多的
+机器加入达成共识越慢，Server之间会选举出一个leader。然而，并不限制
+client的数量，它们可以很容易的扩展到数千或者数万台。
+
+服务可能有几十上百或者更多个，这些服务分布在各个独立的项目（微服务）中，
+而某一个微服务又部署在一台以上的虚机或者物理机上。在各自提供服务的项目
+中如果写死consul集群的IP和端口的时候就会将所有的服务都注册在同一个
+consul集群的server上，虽然当这个server挂掉的时候集群依然能够提供服务，
+但是将所有的服务注册在某一个节点上本身就是不合理的。这样在注册的时候增
+加Nginx负载将注册服务的请求平均分布到集群中不同的consul节点上，同样在
+获取服务的时候也要经过Nginx这一层进行负载
+
+    在server前面挡一层nginx 或slb可能不是好的做法，另一种方式是在每个
+ECS或docker内置一个consul client,而容器内的服务只与本容器内的consul
+client交互， 由consul client与consul server集群交互。
+
+容器内的consul client负责watch 服务，当服务当掉，consul client负责通知到集群
+当consul client 当掉，consul 集群会把与它同ip的服务踢掉
+
+
+    * start.sh 脚本
+#+BEGIN_SRC sh
+  #!/bin/sh
+  leader="10.163.146.174"
+  privateIP=`ifconfig | perl -nle 's/dr:(\S+)/print $1/e'|grep "^10\."|tr -d "\n"`
+  sed "s/#leader#/$leader/g" conf_template_json|sed "s/#privateIP#/$privateIP/g" >conf.json
+  /data/consul/consul agent -server -config-dir /data/consul/
+  # curl -XPUT --data 'pong' --header "X-Consul-Token: "tokenssssssssssssss" http://top1:8500/v1/kv/ping
+  # curl -XGET --data 'ping' --header "X-Consul-Token: "tokenssssssssssssss" http://top1:8500/v1/kv/ping
+
+#+END_SRC
+* 配置文件模版
+#+BEGIN_SRC js
+  {
+      "datacenter"         : "iget-topology-aliyun",
+      "data_dir"           : "/data/consul/data",
+      "log_level"          : "INFO",
+      "server"             : true,
+      "bootstrap_expect"   : 2,
+      "bind_addr"          : "#privateIP#",
+      "client_addr"        : "0.0.0.0",
+      "rejoin_after_leave" : true,
+      "retry_join"         : ["#leader#"],
+      "retry_interval"     : "5s",
+      "retry_max"          : 2,
+      "enable_syslog"      : true,
+      "ui"                 : true,
+      "encrypt"            : "tgYw4Me7aJAEgjzY6bX2FQ==",
+      "acl_datacenter"     :"iget-topology-aliyun",
+      "acl_default_policy" :"deny",
+      "acl_down_policy"    :"deny",
+      "acl_master_token"   :"master-tokens",
+      "acl_token": "client-tokens",
+      "acl_agent_token":"agent-tokens-节点间同步数据验证权限用"
+
+  }
+#+END_SRC
+    + server： 以server身份启动。
+    + bootstrap-expect：集群要求的最少server数量，当低于这个数量，集群即失效,当大于这个，则开始选举leader组集群
+    + data-dir：data存放的目录，更多信息请参阅consul数据同步机制
+    + node：节点id，在同一集群不能重复。
+    + bind：监听的ip地址。
+    + client 客户端的ip地址
+    + encrypt  节点之间通信，避免其他集群节点乱入 ,可以使用consul keygen 生成
+    + 几个tokens 可以用 uuidgen生成
+** 几个简单的命令
+   consul members 查看各节点信息
+   consul info 查看具体信息，比如谁是leader等
+   curl -XPUT --data 'pong' --header "X-Consul-Token: "tokenssssssssssssss" http://top1:8500/v1/kv/ping
+   curl -XGET --data 'ping' --header "X-Consul-Token: "tokenssssssssssssss" http://top1:8500/v1/kv/ping
+   consul  kv put hello world
+   consul  kv get hello
+
+* ACL 权限
+  启动 5个节点分别使用上面的配置启动之后,访问任一节点的8500端口即可web方式管理consul
+   在 设置中 输入上面配置的acl_master_token ,即具有的相应的管理权限
+
+    [[file:../img/go_consul-2018-01-10-22-23-35.png]]
+** Anonymous Token 匿名用户的访问权限
+  1. 如下 对所有的key具有只读限制，只 以lock/ 为前缀的key 有写权限
+  2. 对node 信息具有只读权限 可以使用consul members 查看各节点信息而不用输入tokens (consul members -token tokensssssssssss)
+  3. 对consul service 具有只读权限
+   #+BEGIN_QUOTE
+        key "" {
+        policy = "read"
+        }
+        key "lock/" {
+        policy = "write"
+        }
+        node "" {policy  = "read"}
+        service "consul" {policy  = "read"}
+   #+END_QUOTE
+** Master Token 绝对权限,什么都不用配置就具有所有权限
+** 其他权限需要你自己配置了
+*** 比如我配的agent
+     这个token 我配到 acl_agent_token对应的字段上了，用于node各节点间同步一些信息
+     配置完这个之后token才会生成，生成后需要你把consul停掉，然后配置到acl_agent_token这个字段上再重启
+    #+BEGIN_QUOTE
+    node "" {policy = "write"}
+    service "" {policy = "read"}
+    #+END_QUOTE
+*** 比如我配置的client
+比如我把这个token 配到 acl_token字段上，可以通过设置权限来控制默认kv 的权限
+比如我设置成
+#+BEGIN_QUOTE
+    key "key_2" { policy = "read" }
+    key "key_3" { policy = "deny" }
+    key "" {policy = "write"}
+#+END_QUOTE
+#+BEGIN_SRC sh
+    则这几个命令 不必传token 就可以执行成功
+   curl -XPUT --data 'pong'  http://top1:8500/v1/kv/ping
+   curl -XGET --data 'ping'  http://top1:8500/v1/kv/ping
+   consul  kv put hello world
+   consul  kv get hello
+#+END_SRC
+#+BEGIN_QUOTE
+    而把权限设置成这样，上面几个命令就会出403  Permission denied
+    key "" {policy = "deny"}
+#+END_QUOTE
+
+***  当然也可以提供一个token 给程序用，用来精细控制各个业务的权限

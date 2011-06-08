@@ -1,0 +1,84 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     c-c++-cedet-symref.org
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-08-27 一
+#+DESCRIPTION:c-c++-cedet-.org
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Cedet: :Emacs: :C: :C++:
+* semantic-symref semantic-symref-symbol
+** Search for places where function is called(寻找某函数、变量在哪个地方被调用了)
+semantic-symref命令 可以查找到光标下变量的在本项目中声明位置 semantic-symref-symbol 可以输入你想要找的具体变量名.
+如果某些名称没有在相应的database(如gnu/global,)中找到,它会用 find-grep命令尝试搜索.可以在打开的新buffer中找到你要找的变量进行跳转.
+#+BEGIN_SRC emacs-lisp
+(defun alexott/c-mode-cedet-hook ()
+  (local-set-key "\C-c\C-r" 'semantic-symref)
+  (local-set-key "\C-cr" 'semantic-symref-symbol)
+  )
+(add-hook 'c-mode-common-hook 'alexott/c-mode-cedet-hook)
+#+END_SRC
+#+BEGIN_SRC c++
+#include <iostream>
+
+using namespace std;
+class Stu
+{
+private:
+public:
+  int age;
+  String name;
+  void test();
+};
+
+class P:
+  public Stu
+{
+public:
+  P();
+  virtual ~P();
+};
+int main(int argc, char *argv[]){
+  P p;
+  cout<<p.name;
+  return 0;
+}
+#+END_SRC
+比如在这个一个cpp文件中
+我调用semantic-symref-symbol然后输入 "name" 四个字母
+#+BEGIN_SRC fundamental-mode
+/tmp/a.cpp
+  [+] class Stu {}
+  [+] int main (int argc,char argv[])
+#+END_SRC
+会产生一个 buffer 内容如上，
+在这个buffer中可以用这些调用
+#+BEGIN_SRC emacs-lisp
+Tab         forward-button 可多按几次tab进行跳转，
+(           semantic-symref-list-create-macro-on-open-hit 这个不常用 ,跟宏录制相关
++           semantic-symref-list-toggle-showing  toogle展开与否
+R           semantic-symref-list-rename-open-hits 可以进行批量重命名
+C-c C-e     semantic-symref-list-expand-all 展开所有，
+C-c C-r     semantic-symref-list-contract-all 折叠所有
+Enter       回车中转到相应代码处
+#+END_SRC
+#+BEGIN_SRC fundamental-mode
+/tmp/a.cpp
+  [-] class Stu {}
+    String name;
+  [-] int main (int argc,char argv[])
+    cout<<p.name;
+#+END_SRC
+全部展开之后的样子
+#+BEGIN_QUOTE
+ -- Variable: semantic-symref-tool
+     The value of this variable is a symbol that determines the external
+     symbol reference tool to use.  The default value, `detect', says
+     to look for the best available tool.  Other possible values are
+     `global', `idutils', `cscope', and `grep'.  Note that `grep' is
+     much slower than the others.
+#+END_QUOTE
+semantic 会使 用     `global', `idutils', `cscope', and `grep'这几个工具来实现
+以上功能， grep是最慢的

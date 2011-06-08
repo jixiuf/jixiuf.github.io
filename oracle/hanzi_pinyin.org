@@ -1,0 +1,71 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     汉字拼音对应表
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-29 日
+#+DESCRIPTION:汉字拼音对应表
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Oracle: :DB: :SQL:
+
+[[file:../download/hanzipinyin.txt][汉字拼音对应表]].txt
+
+#+BEGIN_SRC sql
+CREATE OR REPLACE DIRECTORY dat_dir_p
+AS 'D:\pinyin\data';
+CREATE OR REPLACE DIRECTORY log_dir_p
+AS 'D:\pinyin\log';
+CREATE OR REPLACE DIRECTORY bad_dir_p
+AS 'D:\pinyin\bad';
+-- 用户要对这几个目录有写权限，
+-- 我测试 的时候 没通过 ，好你明几个多音词的处理上有问题
+
+GRANT READ ON DIRECTORY dat_dir_p TO itme;
+GRANT READ,WRITE ON DIRECTORY log_dir_p TO itme;
+GRANT READ,WRITE ON DIRECTORY bad_dir_p TO itme;
+
+
+CONNECT itme;
+
+CREATE TABLE tb_hanzipinyin
+(hangzi VARCHAR2(50),
+pinyin VARCHAR2(50)
+)
+ORGANIZATION EXTERNAL
+(
+TYPE ORACLE_LOADER
+DEFAULT DIRECTORY dat_dir_p
+ACCESS PARAMETERS
+(
+RECORDS delimited BY NEWLINE
+BADFILE bad_dir_p:'empxt%a_%p.bad'
+LOGFILE log_dir_p:'empxt%a_%p.log'
+FIELDS TERMINATED BY '#'
+MISSING FIELD VALUES are NULL
+(hangzi,pinyin)
+
+)
+LOCATION ('hanzipinyin.txt')
+)
+PARALLEL
+REJECT LIMIT UNLIMITED;
+
+
+SELECT * FROM tb_hanzipinyin WHERE hangzi LIKE '参';
+
+CREATE OR REPLACE FUNCTION hanzi_to_pinyin(p_hanzi in VARCHAR2)
+  RETURN VARCHAR2 IS
+  v_return_pinyin VARCHAR2(20);
+  BEGIN
+    SELECT pinyin
+      INTO v_return_pinyin
+      FROM tb_hanzipinyin
+     WHERE hangzi = p_hanzi;
+  RETURN          v_return_pinyin;
+  EXCEPTION       WHEN OTHERS THEN RETURN 'ERROR';
+END;
+
+SELECT hanzi_to_pinyin('小') FROM DUAL;
+#+END_SRC

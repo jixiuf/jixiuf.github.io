@@ -1,0 +1,48 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     svn:ignore global-ignores property 忽略某些文件
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-09-08 星期四
+#+DESCRIPTION:svn:ignore property 相关内容
+#+KEYWORDS: svn ignore 
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :SVN:
+
+
+
+参考：http://qa.taobao.com/?p=2163
+
+#+begin_src sh
+svn propedit svn:ignore . -editor-cmd notepad
+或
+EXPORT SVN_EDITOR=emacsclientw.exe 
+svn propedit svn:ignore . 
+#+end_src
+运行上面的命令，会使用你设置的编辑器编辑svn:ignore 属性的内容，
+从网上找了几个例子
+似乎 svn:ignore 属性不能递归目录
+
+不过svn 还有一个属性global-ignores ,这个属性只在客户端有效，
+在windows 上，
+%appdata%/Subversion 目录下有一个config 文件
+在文件中[miscellany] 子模块下，有一个注释掉的属性global-ignore
+它的值是一系列被忽略的文件目录对应的匹配符，用空格格式
+#+begin_quote
+[miscellany]
+global-ignores = *.usr *.hello *.o *.lo *.la *.al .libs *.so *.so.[0-9]* *.a *.pyc *.pyo
+#+end_quote
+
+#+begin_quote
+global-ignores = *.o *.lo *.la #*# .*.rej *.rej .*~ *~ .#* .DS_Store thumbs.db Thumbs.db *.bak *.class *.exe *.dll *.mine *.obj *.ncb *.lib *.log *.idb *.pdb *.ilk *.msi* .res *.pch *.suo *.exp *.*~ *.~* ~*.* cvs CVS .CVS .cvs release Release debug Debug ignore Ignore bin Bin obj Obj *.csproj.user *.user  _ReSharper.* *.resharper.user
+#+end_quote
+
+My ignore pattern for Visual Studio:
+#+begin_quote
+global-ignores= */bin */obj */Release */Debug *.suo *.err *.log *.obj *.bin *.dll *.exe *.LOG *.user *.pdb [tT]emp [tT]empPE Ankh.Load thumbs.db *.resharper *.vspscc *.vsssccc *.scc */_ReSharper* */_ReSharper.* bin obj *.resharperoptions *.db *.bak *_ReSharper* *.snk logs output TestResults
+#+end_quote
+

@@ -1,0 +1,669 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:    墙内搭 vitess 环境
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2016-02-01 一
+#+DESCRIPTION:vitess 测试
+#+KEYWORDS:
+#+TAGS: Golang:Vitess
+#+FILETAGS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+* 墙内在centos7上搭 vitess 环境
+  https://github.com/jixiuf/vitess-build-patch
+  有些墙外的文件 ，放到了 这个仓库中
+  有些 执行 go get url 会失败,但是其代码基本都可以从github.com 上直接下载
+  在centos 7 上执行以下命令 会 下载vitess 源码及其依赖
+  并给源码打补丁以避免翻墙的麻烦
+  #+BEGIN_SRC sh
+    git clone https://github.com/jixiuf/vitess-build-patch
+    cd vitess-build-patch;make
+  #+END_SRC
+  详细内容见https://github.com/jixiuf/vitess-build-patch
+* 检查 ulimit 等
+  #+BEGIN_SRC sh
+    cat /etc/security/limits.conf
+  #+END_SRC
+  #+BEGIN_QUOTE
+    * soft nofile 102400
+    * hard nofile 102400
+  #+END_QUOTE
+* 设置环境变量
+  VTROOT
+  VTDATAROOT
+  #+BEGIN_SRC sh
+    export VTROOT=$HOME/vt
+    export VTDATAROOT=$HOME/vtdataroot
+    export VTTOP=$VTROOT/src/github.com/youtube/vitess
+    export LD_LIBRARY_PATH=$VTROOT/dist/vt-zookeeper-3.4.6/lib:$LD_LIBRARY_PATH
+    mkdir -p $VTDATAROOT/tmp
+    mkdir -p $VTDATAROOT/backups
+  #+END_SRC
+* 启动etcd(global topology service  and  local topology service)
+  [[file:go_etcd.org][etcd介绍]]
+  关于下面提到的cell(数据中心等概念 传送门中有介绍)
+  [[file:go_vitess.org][vitess架构介绍]]
+
+  这里以启动单实例etcd来代替一个集群
+  不用zookeeper
+  下面启动的两个etcd 分别代表两个集群，一个做为 global topology 一个作为数据中心:test 的local topology
+** 本地启动 etcd   (global topology  and local topology)
+  #+BEGIN_SRC sh
+     # 默认etcd client 兼听在localhost:2379端口
+     #启动一个global topology     兼听在2379端口
+    etcd  -listen-client-urls http://0.0.0.0:2379  -advertise-client-urls http://0.0.0.0:2379 -listen-peer-urls http://0.0.0.0:2380
+    #启动一个local topology # 兼听到3379端口
+    etcd  -listen-client-urls http://0.0.0.0:3379  -advertise-client-urls http://0.0.0.0:3379 -listen-peer-urls http://0.0.0.0:3380
+    # 在global topology 中为名为test 的cell（数据中心） 注册 local topology
+    etcdctl  -C "http://127.0.0.1:2379"  set "/vt/cells/test" "http://127.0.0.1:3379"
+    # 注意 这里设置的值使用了127.0.0.1 ,如果像vttablets这种进程不是放在本机器上，则会出问题，你可能需要把127.0.0.1 换成你真实的ip
+    etcdctl -C "http://127.0.0.1:2379" get /vt/cells/test
+  #+END_SRC
+
+** docker 中运行etcd
+   关于国内如何构建 vitess/etcd 镜像 见
+   https://github.com/jixiuf/vitess-build-patch
+   #+BEGIN_SRC sh
+     # docker 运行 这里绑定到0.0.0.0 不可bind 到localhost ，否则 docker容器外无法访问
+     # 用docker 启动一个global topology 命名为 etcd-global
+     sudo docker run --name=etcd-global -d -p 2380:2380 -p 2379:2379 vitess/etcd:v2.0.13-lite etcd  -listen-client-urls http://0.0.0.0:2379  -advertise-client-urls http://0.0.0.0:2379 -listen-peer-urls http://0.0.0.0:2380
+     # 用docker 启动一个local topology 命令为 etcd-cell-test
+     sudo docker run --name=etcd-cell-test -d -p 3380:3380 -p 3379:3379 vitess/etcd:v2.0.13-lite etcd  -listen-client-urls http://0.0.0.0:3379  -advertise-client-urls http://0.0.0.0:3379 -listen-peer-urls http://0.0.0.0:3380
+   #+END_SRC
+   在global topology 中为名为test 的cell（数据中心） 注册 local topology
+   #+BEGIN_SRC sh
+     etcdctl  -C "http://127.0.0.1:2379"  set "/vt/cells/test" "http://etcd-cell-test:3379"
+     # 这里的值使用 etcd-cell-test 作为域名，所以 需要用到etcd-cell-test 的容器需要link 到 etcd-cell-test 上
+     # 比如 启动vttablet时  --link=etcd-cell-test
+     etcdctl -C "http://127.0.0.1:2379" get /vt/cells/test
+   #+END_SRC
+   若不注册，下面启动vtctld 时会意外退出
+   #+BEGIN_QUOTE
+      E0126 13:15:44.855077     957 vttablet.go:126] agent.InitTablet failed: CreateTablet failed: node doesn't exist
+   #+END_QUOTE
+   此处cell 名字是"test" ,所以在下面启动 vttablet时有参数
+   docker run .. --env cell="test" ..指定cell 的值
+   或者手动使用 https://github.com/jixiuf/vitess-build-patch/blob/master/docker/vttablet/vttablet-up.sh 启动时
+   设置环境变量指定cell 的值:
+   #+BEGIN_SRC sh
+     cell="test" ./vttablet-up.sh
+   #+END_SRC
+* 启动vtctld
+** 本地启动vtctld
+  vtctld 是一个http server , 可以通过它查看 lock server(etcd/zookeeper )里的信息
+
+  vtctld is an HTTP server that lets you browse the information stored
+  in the lockserver. It is useful for troubleshooting or for getting a
+  high-level overview of the servers and their current states.
+  启动之后的web 服务器需要访问 google.com 下的js文件， 所以在国内使用时并不好用
+  建议学习下vtctlclient 等命令，在命令行下确定 集群是否正确运行
+
+  vtctld-up.sh
+  #+BEGIN_SRC sh
+    #!/bin/bash
+
+    # This is an example script that starts vtctld.
+
+
+    $VTROOT/bin/vtctld \
+      -web_dir $VTTOP/web/vtctld \
+      -tablet_protocol grpc \
+      -tablet_manager_protocol grpc \
+      -service_map 'grpc-vtctl' \
+      -backup_storage_implementation file \
+      -file_backup_storage_root $VTDATAROOT/backups \
+      -log_dir $VTDATAROOT/tmp \
+      -port 15000 \
+      -grpc_port 15999 \
+      -topo_implementation etcd \
+      -etcd_global_addrs http://127.0.0.1:2379 \
+      -pid_file $VTDATAROOT/tmp/vtctld.pid  \
+      > $VTDATAROOT/tmp/vtctld.out 2>&1 &
+
+    echo "Access vtctld web UI at http://127.0.0.1:15000"
+    echo "Send commands with: vtctlclient -server 127.0.0.1:15999 ..."
+  #+END_SRC
+注意跟etcd 相关的参数
+#+BEGIN_QUOTE
+      -topo_implementation etcd \
+      -etcd_global_addrs http://127.0.0.1:2379 \
+#+END_QUOTE
+  web 访问15000 端口验证vtctld 是否启动成功
+  http://127.0.0.1:15000
+** docker 启动 vtctld
+   #+BEGIN_SRC sh
+   sudo docker run  -p 15000:15000 -p 15999:15999 --link=etcd-cell-test --link=etcd-global:etcd-global-alias --name=vtctld-name -d -u vitess vitess/lite:latest bash -c 'mkdir -p $VTDATAROOT/{backups,tmp}&&
+     vtctld \
+      -web_dir $VTTOP/web/vtctld \
+      -tablet_protocol grpc \
+      -tablet_manager_protocol grpc \
+      -service_map "grpc-vtctl" \
+      -backup_storage_implementation file \
+      -file_backup_storage_root $VTDATAROOT/backups \
+      -log_dir $VTDATAROOT/tmp \
+      -port 15000 \
+      -grpc_port 15999 \
+      -topo_implementation etcd \
+      -etcd_global_addrs http://etcd-global:2379 \
+      -pid_file $VTDATAROOT/tmp/vtctld.pid \
+      > $VTDATAROOT/tmp/vtctld.out 2>&1 '
+   #+END_SRC
+   1. 注意这里的 --link 将etcd 对应的容器链接起来，下面vtctld 起动的时候通过 http://etcd-global:2379 来访问etcd
+   2. 这条指令使用 vitess/lite:latest 镜像生成 此镜像内有
+      VOLUME /vt/vtdataroot
+      这条指令，会创建一个数据卷，而运行后的 vtctld 会把数据存到这个目录/vt/vtdataroot
+      #+BEGIN_SRC sh
+        sudo docker run --rm --volumes-from vtctld-name  -ti debian:jessie
+              #通过这条命令 在这个新启动的容器中你可以看到 /vt/vtdataroot 这个目录
+              #这里面的内容就是 vtctld-name 这个容器里的数据卷
+      #+END_SRC
+* 启动vttablets
+** 本地启动vttablets
+   或者手动使用 https://github.com/jixiuf/vitess-build-patch/blob/master/docker/vttablet/vttablet-up.sh 启动时
+   设置环境变量指定cell 的值:
+   #+BEGIN_SRC sh
+     cell="test" keyspace='test_keyspace'  port=15100  ./vttablet-up.sh
+   #+END_SRC
+
+** docker 启动vttablets
+   如果构建镜像 移步 https://github.com/jixiuf/vitess-build-patch/tree/master/docker/vttablet
+   启动3 个vttablets
+    #+BEGIN_SRC sh
+    sudo docker run  -p 15100:15100 -p 16100:16100 -p 33100:33100 --env etcd_global_addrs="http://etcd-global:2379" --env cell="test" --env keyspace='test_keyspace' --env uid=100 --env port=15100 --env grpc_port=16100 --env mysql_port=33100 --link=etcd-global:etcd-global-alias --link=etcd-cell-test  --volumes-from vtctld-name  --name=vttablet-name-1 -d -u vitess vitess/vttablet:lite /vt/bin/vttablet-up.sh
+
+    sudo docker run  -p 15101:15101 -p 16101:16101 -p 33101:33101 --env etcd_global_addrs="http://etcd-global:2379" --env cell="test" --env keyspace='test_keyspace' --env uid=101  --env port=15101 --env grpc_port=16101 --env mysql_port=33101  --link=etcd-global:etcd-global-alias --link=etcd-cell-test --volumes-from vtctld-name  --name=vttablet-name-2 -d -u vitess vitess/vttablet:lite /vt/bin/vttablet-up.sh
+
+    sudo docker run  -p 15102:15102 -p 16102:16102 -p 33102:33102 --env etcd_global_addrs="http://etcd-global:2379"  --env cell="test" --env keyspace='test_keyspace' --env uid=102  --env port=15102 --env grpc_port=16102 --env mysql_port=33102   --link=etcd-global:etcd-global-alias  --link=etcd-cell-test --volumes-from vtctld-name  --name=vttablet-name-3 -d -u vitess vitess/vttablet:lite /vt/bin/vttablet-up.sh
+    #+END_SRC
+    这里--env 主要为 动态修改vttablet-up.sh 开头的几个变量 ,如果不设置则使用脚本开头设置的默认值
+    #+BEGIN_SRC sh
+    sudo docker run --rm --volumes-from vttablet-name-1  -ti debian:jessie
+    #+END_SRC
+    #+BEGIN_SRC sh
+      vtctlclient -server localhost:15999 GetKeyspaces
+      # 如果执行完以上命令后 能返回 test_keyspace 说明 启动 vttablets 成功
+      #test_keyspace
+    #+END_SRC
+
+启动完之后 启动 http://127.0.0.1:15000
+大概是这个效果（假如你能翻墙,主要是一个js 文件在google.com 上，所以这里还是要翻墙的）
+[[file:../download/vitess-screenshot-1.png]]
+点开0 之后的效果
+[[file:../download/vitess-screenshot-2.png]]
+用 etcdctl 查看 golbal topology 与 local topology 中的key 大概是这样的
+#+BEGIN_QUOTE
+deployer@localhost docker/vttablet (master) $ etcdctl -C "http://127.0.0.1:2379" ls / --recursive                                                                                                         2
+/vt
+/vt/cells
+/vt/cells/test
+/vt/keyspaces
+/vt/keyspaces/test_keyspace
+/vt/keyspaces/test_keyspace/0
+deployer@localhost docker/vttablet (master) $ etcdctl -C "http://127.0.0.1:3379" ls / --recursive
+/vt
+/vt/tablets
+/vt/tablets/test-0000000100
+/vt/tablets/test-0000000101
+/vt/tablets/test-0000000102
+/vt/replication
+/vt/replication/test_keyspace
+/vt/replication/test_keyspace/0
+/vt/ns
+/vt/ns/test_keyspace
+deployer@localhost docker/vttablet $ etcdctl -C "http://127.0.0.1:3379" get /vt/tablets/test-0000000101/_Data                                                                                             1
+{
+  "alias": {
+    "cell": "test",
+    "uid": 101
+  },
+  "hostname": "172.17.0.6",
+  "ip": "172.17.0.6",
+  "port_map": {
+    "grpc": 16101,
+    "mysql": 33101,
+    "vt": 15101
+  },
+  "keyspace": "test_keyspace",
+  "shard": "0",
+  "type": 2
+}
+#+END_QUOTE
+在面的信息 大概显示了有3个tablets 分别名为 test-0000000100 test-0000000101 test-0000000102
+
+** 如何停掉docker 中的vttablets
+   #+BEGIN_SRC sh
+     sudo docker exec vttablet-name-1 vttablet-down.sh
+     sudo docker exec vttablet-name-2 vttablet-down.sh
+     sudo docker exec vttablet-name-3 vttablet-down.sh
+     # 不要用 docker stop vttablet-name-1
+   #+END_SRC
+   停掉后 ，tablet 状态变成spard 态
+   停掉的 vttablets
+   可以用
+   #+BEGIN_SRC sh
+     sudo docker start vttablet-name-1
+     sudo docker start vttablet-name-2
+     sudo docker start vttablet-name-3
+     # 起动之后 从库是处于不同步状态,需要手动同步一下
+     # 原则上 vttablets 不要轻易重起
+     vtctlclient -server localhost:15999 StartSlave test-0000000100
+     vtctlclient -server localhost:15999 StartSlave test-0000000101
+     vtctlclient -server localhost:15999 StartSlave test-0000000102
+
+   #+END_SRC
+
+* Initialize the new keyspace
+  By launching tablets assigned to a nonexistent keyspace, we've
+  essentially created a new keyspace. To complete the initialization
+  of the local topology data, perform a keyspace rebuild:
+#+BEGIN_SRC sh
+  $VTROOT/bin/vtctlclient -server localhost:15999 RebuildKeyspaceGraph test_keyspace
+  或
+  sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base vtctlclient -server vtctld-name:15999 RebuildKeyspaceGraph test_keyspace
+#+END_SRC
+
+* Initialize MySQL databases
+  上面默认创建的3个tablets 都是 replica类型的， 在 vttablet-up.sh脚本中指定的
+  且创建的时候不能指定为Master 类型，
+  所以现在需要将其中一个设为master 类型，
+  我们创建的keyspace 是test_keyspace
+  mysql database 默认名为vt_test_keyspace
+  #+BEGIN_SRC sh
+    vtctlclient -server localhost:15999 InitShardMaster -force test_keyspace/0 test-0000000100
+    或
+    sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base vtctlclient -server vtctld-name:15999 InitShardMaster -force test_keyspace/0 test-0000000100
+  #+END_SRC
+  #+BEGIN_QUOTE
+  W0126 16:27:59.683313       1 main.go:43] W0126 16:27:59.676297 logger.go:256] master-elect tablet test-0000000100 is not the shard master, proceeding anyway as -force was used
+  W0126 16:27:59.686786       1 main.go:43] W0126 16:27:59.676335 logger.go:256] master-elect tablet test-0000000100 is not a master in the shard, proceeding anyway as -force was used
+  #+END_QUOTE
+  因为是第一次启动这个shard (test_keyspace/0 默认没做shard,则命名为0)，所以此时还没有master 及各从库也无从同步数据,
+  InitShardMaster 加-force 参数,似乎是对shard 进行是否正常的检查等
+  正常情况下InitShardMaster 只对master 有用，加了-force则即使是slave也行，估计是同时把它设成master
+  运行此命令之后的情况如下
+  [[file:../download/vitess-screenshot-3.png]]
+  或者通过以下命令查看运行情况
+  #+BEGIN_SRC sh
+    # 这里传递的参数 test 是cell(数据中心名称)
+    $VTROOT/bin/vtctlclient -server localhost:15999 ListAllTablets test
+    sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base vtctlclient  -server vtctld-name:15999 ListAllTablets test
+  #+END_SRC
+  #+BEGIN_QUOTE
+  test-0000000100 test_keyspace 0 master 172.17.0.5:15100 172.17.0.5:33100 []
+  test-0000000101 test_keyspace 0 replica 172.17.0.6:15101 172.17.0.6:33101 []
+  test-0000000102 test_keyspace 0 replica 172.17.0.7:15102 172.17.0.7:33102 []
+  #+END_QUOTE
+  可以看到此时有一个master 两个salve
+
+* 建表
+
+  #+BEGIN_SRC sh
+    sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base vtctlclient  -server vtctld-name:15999 ApplySchema -sql "CREATE TABLE test_table (id BIGINT AUTO_INCREMENT,msg VARCHAR(250),PRIMARY KEY(id)) Engine=InnoDB"  test_keyspace
+  #+END_SRC
+  从任何一个tablets 上查看 建表语句是否成功
+  #+BEGIN_SRC sh
+   sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base vtctlclient  -server vtctld-name:15999 GetSchema test-0000000101
+  #+END_SRC
+  #+BEGIN_QUOTE
+    {
+    "database_schema": "CREATE DATABASE /*!32312 IF NOT EXISTS*/ `{{.DatabaseName}}` /*!40100 DEFAULT CHARACTER SET utf8 */",
+    "table_definitions": [
+        {
+        "name": "test_table",
+        "schema": "CREATE TABLE `test_table` (\n  `id` bigint(20) NOT NULL AUTO_INCREMENT,\n  `msg` varchar(250) DEFAULT NULL,\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8",
+        "columns": [
+            "id",
+            "msg"
+        ],
+        "primary_key_columns": [
+            "id"
+        ],
+        "type": "BASE TABLE",
+        "data_length": 16384
+        }
+    ],
+    "version": "3a40f48d47be23b7827c58f64c00b86f"
+    }
+  #+END_QUOTE
+* backup 备份
+  第一次建完表后，最好进行一次备份，一些从库如果意外当掉，并且数据丢失的话，
+  它可以自动从最近的一次备份开始与master 同步数据
+  #+BEGIN_SRC sh
+  #这里利用最一个从库做备份
+  vtctlclient -server localhost:15999 Backup test-0000000101
+  或
+  sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base vtctlclient  -server vtctld-name:15999 Backup test-0000000101
+  或
+  sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base vtctl -etcd_global_addrs='http://etcd-global:2379'  -topo_implementation=etcd Backup test-0000000101
+  #+END_SRC
+  查看备份
+  #+BEGIN_SRC sh
+  sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base vtctlclient  -server vtctld-name:15999 ListBackups test_keyspace/0
+  sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base vtctl -etcd_global_addrs='http://etcd-global:2379'  -topo_implementation=etcd ListBackups test_keyspace/0
+  #+END_SRC
+  似乎backup 有问题,根本没列出来备份的东西(这里先略过备份)
+  #+BEGIN_QUOTE
+  W0126 17:12:52.129503       1 vtctl.go:77] cannot connect to syslog: Unix syslog delivery error
+  E0126 17:12:52.130768       1 vtctl.go:100] action failed: ListBackups no registered implementation of BackupStorage
+  #+END_QUOTE
+* 启动 vtgate
+  正式环境中， 应该启动多个vtgate 实际来负载均衡
+  注意这里的几个重要参数，
+  -cell 数据中心的名称
+  -port web端口
+  -grpc_port grpc端口
+  #+BEGIN_SRC sh
+       sudo docker run  -p 15001:15001 -p 15991:15991 --link=etcd-cell-test --link=etcd-global:etcd-global-alias --volumes-from vtctld-name  --name=vtgate-name-1 -d -u vitess vitess/lite:latest bash -c 'mkdir -p $VTDATAROOT/{backups,tmp}&&
+       $VTROOT/bin/vtgate \
+    -log_dir $VTDATAROOT/tmp \
+    -port 15001 \
+    -grpc_port 15991 \
+    -cell test \
+    -tablet_protocol grpc \
+    -service_map "bsonrpc-vt-vtgateservice,grpc-vtgateservice" \
+    -pid_file $VTDATAROOT/tmp/vtgate.pid \
+    -topo_implementation etcd \
+    -etcd_global_addrs http://etcd-global:2379 \
+    > $VTDATAROOT/tmp/vtgate.out 2>&1'
+
+  #+END_SRC
+* 启动客户端 连接 vitess 集群
+  https://github.com/youtube/vitess/blob/master/examples/local/client.go
+  vitess 源码有一个测试 client.go
+  #+BEGIN_SRC sh
+    # 这里的15991 端口 即为 上面vtgate 的端口
+    go run client.go -server=localhost:15991
+  #+END_SRC
+  执行的效果图
+  #+BEGIN_QUOTE
+  deployer@localhost examples/local (master) $ go run client.go -server=localhost:15991
+  Inserting into master...
+  Reading from master...
+  (1, "V is for speed")
+  Reading from replica...
+  (1, "V is for speed")
+  deployer@localhost examples/local (master) $
+  #+END_QUOTE
+* 关于 --volumes-from vtctld-name
+  在docker启动中启动vttables vtgates 时加了参数--volumes-from vtctld-name
+  而其使用的镜像中都有一句
+      VOLUME /vt/vtdataroot
+  所以几个容器的/vt/vtdataroot是相同的
+  用下面的命令就可以查看/vt/vtdataroot 目录下的内容
+  当然你也可以选择将宿主机的某个目录挂载到 /vt/vtdataroot 上
+  #+BEGIN_SRC sh
+    sudo docker run --rm --volumes-from vtctld-name  -ti debian:jessie
+  #+END_SRC
+
+* vtctld vtctl vtctlclient的关系
+  vtctld 是个守护进程
+  vtctlclient 需要vtctld的存在才能进行相应的操作 需要-server 指向vtctld的端口
+  如
+  #+BEGIN_SRC sh
+    vtctlclient  -server vtctld-name:15999 Backup test-0000000101
+  #+END_SRC
+  而vtctl 不需要vtctld 守护进程,但是它需要从topology（etcd or zookeeper） 直接获取信息
+  #+BEGIN_SRC sh
+    vtctl -etcd_global_addrs='http://etcd-global:2379'  -topo_implementation=etcd ListBackups test_keyspace/0
+  #+END_SRC
+
+* 一些常用的命令
+** GetKeyspaces 查有哪些keyspace
+    #+BEGIN_SRC sh
+        vtctlclient -server=127.0.0.1:15999  GetKeyspaces
+        sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base  vtctlclient -server=vtctld-name:15999 GetKeyspaces
+    #+END_SRC
+    #+BEGIN_QUOTE
+    test_keyspace
+    #+END_QUOTE
+
+** 查某cell=test  keyspace=test_keyspace shard=0 的主从关系
+    #+BEGIN_SRC sh
+        vtctlclient -server=127.0.0.1:15999 GetShardReplication test test_keyspace/0
+        sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base  vtctlclient -server=vtctld-name:15999 GetShardReplication test test_keyspace/0
+    #+END_SRC
+    #+BEGIN_QUOTE
+        {
+        "nodes": [
+            {
+            "tablet_alias": {
+                "cell": "test",
+                "uid": 100
+            }
+            },
+            {
+            "tablet_alias": {
+                "cell": "test",
+                "uid": 101
+            }
+            },
+            {
+            "tablet_alias": {
+                "cell": "test",
+                "uid": 102
+            }
+            }
+        ]
+        }
+    #+END_QUOTE
+
+** ListAllTablets 查cell=test下有哪些 tablets
+    #+BEGIN_SRC sh
+        vtctlclient -server=127.0.0.1:15999  ListAllTablets test
+        sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base  vtctlclient -server=vtctld-name:15999 ListAllTablets test
+    #+END_SRC
+    #+BEGIN_QUOTE
+        test-0000000100 test_keyspace 0 master 172.17.0.5:15100 172.17.0.5:33100 []
+        test-0000000101 test_keyspace 0 spare 172.17.0.6:15101 172.17.0.6:33101 []
+        test-0000000102 test_keyspace 0 replica 172.17.0.7:15102 172.17.0.7:33102 []
+    #+END_QUOTE
+
+** ListTablets 查某个tablet 的具体信息
+    #+BEGIN_SRC sh
+        vtctlclient -server=127.0.0.1:15999  ListTablets test-0000000100
+        sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base  vtctlclient -server=vtctld-name:15999 ListTablets test-0000000100
+    #+END_SRC
+    #+BEGIN_QUOTE
+        test-0000000100 test_keyspace 0 master 172.17.0.5:15100 172.17.0.5:33100 []
+    #+END_QUOTE
+
+** Validate 查测global replication graph各个节点可达，并检测各cell 的tablets 一致
+    -ping-tablets 表时是否检测各tablets
+    GetShardReplication
+
+    #+BEGIN_SRC sh
+        vtctlclient -server=127.0.0.1:15999  Validate
+        vtctlclient -server=127.0.0.1:15999  Validate -ping-tablets
+        sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base  vtctlclient -server=vtctld-name:15999 Validate
+        sudo docker run --rm  --link=vtctld-name  --link=etcd-global:etcd-global-alias --link=etcd-cell-test  -u vitess vitess/base  vtctlclient -server=vtctld-name:15999 Validate -ping-tablets
+    #+END_SRC
+    #+BEGIN_QUOTE
+        E0127 09:59:18.056776   11676 main.go:45] E0127 01:59:18.056456 logger.go:262] no slaves of tablet test-0000000100 found
+        E0127 09:59:18.087638   11676 main.go:51] Remote error: rpc error: code = 2 desc = "some validation errors - see log"
+    #+END_QUOTE
+
+** ValidateKeyspace 只查测指定keyspace
+    #+BEGIN_SRC sh
+        vtctlclient -server=127.0.0.1:15999  ValidateKeyspace -ping-tablets test_keyspace
+    #+END_SRC
+
+** FindAllShardsInKeyspace 查keyspace=test_keyspace 内有哪些shard信息
+    #+BEGIN_SRC sh
+        vtctlclient -server=127.0.0.1:15999  FindAllShardsInKeyspace test_keyspace
+    #+END_SRC
+    以下内容显示有一个shard名为"0" 的shard,这个shard 中mysql主库 uid=100
+    served_types 不太了解是什么东西
+    #+BEGIN_QUOTE
+        {
+        "0": {
+            "master_alias": {
+            "cell": "test",
+            "uid": 100
+            },
+            "served_types": [
+            {
+                "tablet_type": 1
+            },
+            {
+                "tablet_type": 2
+            },
+            {
+                "tablet_type": 3
+            }
+            ],
+            "cells": [
+            "test"
+            ]
+        }
+        }
+    #+END_QUOTE
+
+** ApplySchema [-allow_long_unavailability] {-sql=<sql> || -sql-file=<filename>} <keyspace>
+    执行建表语句等
+
+** ValidateSchemaKeyspace 检测keyspace=test_keyspace上表结构是否与各slave 同步
+   #+BEGIN_SRC sh
+       vtctlclient -server=127.0.0.1:15999  ValidateSchemaKeyspace test_keyspace
+   #+END_SRC
+** ValidateSchemaShard 检测keyspace=test_keyspace shard=0上表结构是否与各slave 同步
+   #+BEGIN_SRC sh
+       vtctlclient -server=127.0.0.1:15999  ValidateSchemaShard test_keyspace/0
+   #+END_SRC
+** ValidateVersionKeyspace
+    查测 指定keyspace上的 master 的版本是否与各slave 一致
+   #+BEGIN_SRC sh
+       vtctlclient -server=127.0.0.1:15999  ValidateVersionKeyspace  test_keyspace
+   #+END_SRC
+** GetEndPoints
+    查 cell=test,keyspace=test_keyspace shard=0 tableType=master 的EndPoints 信息
+    #+BEGIN_SRC sh
+      vtctlclient -server localhost:15999 GetEndPoints test test_keyspace/0 master
+    #+END_SRC
+    endpoints 似乎是列出 tablets 兼听在哪些端口等信息
+    #+BEGIN_QUOTE
+            {
+        "entries": [
+            {
+            "uid": 100,
+            "host": "172.17.0.5",
+            "port_map": {
+                "grpc": 16100,
+                "mysql": 33100,
+                "vt": 15100
+            }
+            }
+        ]
+        }
+    #+END_QUOTE
+** GetSrvKeyspace 查询 cell=test keyspace=test_keyspace 的Srv信息
+    这个不太明白 ,served_type
+
+    #+BEGIN_SRC sh
+        vtctlclient -server localhost:15999 GetSrvKeyspace  test test_keyspace
+    #+END_SRC
+    #+BEGIN_QUOTE
+     {
+        "partitions": [
+            {
+            "served_type": 1,
+            "shard_references": [
+                {
+                "name": "0"
+                }
+            ]
+            },
+            {
+            "served_type": 2,
+            "shard_references": [
+                {
+                "name": "0"
+                }
+            ]
+            },
+            {
+            "served_type": 3,
+            "shard_references": [
+                {
+                "name": "0"
+                }
+            ]
+            }
+        ]
+    }
+    #+END_QUOTE
+** ReparentTablet 让指定的 tablet 变成master 类型
+    似乎只有在各节点都正常运行的时候这个命令才有可能有效
+    我测试的时候，发现正常的情况下， 也不用把指定的 tablet 切成master
+    #+BEGIN_SRC sh
+    vtctlclient -server localhost:15999 ReparentTablet  test-0000000101
+    #+END_SRC
+** EmergencyReparentShard 将 keyspace='test_keyspace' shard=0 上的 tablet=test-0000000101 设置成当前master
+    这个命令用于紧急情况下的修复（master 节点已经当掉）
+    这个命令会建议你用哪个slave 来暂代master
+    #+BEGIN_SRC sh
+     vtctlclient -server localhost:15999 EmergencyReparentShard test_keyspace/0  test-0000000101
+    #+END_SRC
+    #+BEGIN_QUOTE
+    E0127 10:51:21.409971   12357 main.go:51] Remote error: rpc error: code = 2 desc = "tablet test-0000000101 is more advanced than master elect tablet test-0000000102: MySQL56/36cf5f1e-c494-11e5-8f62-0242ac110005:1-15 > position:\"MySQL56/36cf5f1e-c494-11e5-8f62-0242ac110005:1-11\" master_host:\"172.17.0.5\" master_port:33100 master_connect_retry:10 "
+    deployer@localhost examples/local (master) $ vtctlclient -server localhost:15999 EmergencyReparentShard test_keyspace/0  test-0000000101                                                                  1
+    W0127 10:51:35.206041   12375 main.go:43] W0127 02:51:35.205299 logger.go:256] cannot read old master tablet test-0000000100, won't touch it: node doesn't exist
+    deployer@localhost examples/local (master) $
+    #+END_QUOTE
+** StartSlave 将tablet= test-0000000101 的salve 节点进行 同步
+    如果发现某slave 节点数据不同步，可用此命令
+    #+BEGIN_SRC sh
+    vtctlclient -server localhost:15999 StartSlave test-0000000101
+    #+END_SRC
+** ExecuteFetchAsDba 在指定的tablet 上执行sql 语句
+    #+BEGIN_SRC sh
+    vtctlclient -server localhost:15999 ExecuteFetchAsDba    test-0000000100 "select * from test_table"
+    #+END_SRC
+    但是返回的东西不是sql 语句的结果
+    #+BEGIN_QUOTE
+        {
+    "fields": [
+        {
+        "name": "id",
+        "type": 265
+        },
+        {
+        "name": "msg",
+        "type": 6165
+        }
+    ],
+    "rows_affected": 21,
+    "rows": [
+        {
+        "lengths": [
+            1,
+            14
+        ],
+        "values": "MVYgaXMgZm9yIHNwZWVk"
+        },
+        {
+        "lengths": [
+            1,
+            14
+        ],
+        "values": "MlYgaXMgZm9yIHNwZWVk"
+        },
+    }
+    #+END_QUOTE
+** UpdateTabletAddrs 更改tablet 的host or ip or port
+    -hostname
+    -ip-addr
+    -mysql-port
+    -vt-port
+    -grpc-port
+    #+BEGIN_SRC sh
+    vtctlclient -server=127.0.0.1:15999  UpdateTabletAddrs -ip-addr=172.17.0.5 test-0000000100
+    #+END_SRC
+** DeleteTablet 删除一个Tablet
+** ChangeSlaveType 改变一个tablet 的slave类型
+    #+BEGIN_SRC sh
+      vtctlclient -server=127.0.0.1:15999  ChangeSlaveType test-0000000100 spare
+      # 运行完之后 好像没效果 (可能是这个tablet出问题了)
+      vtctlclient -server=127.0.0.1:15999  ListAllTablets test
+    #+END_SRC
+  + 更多命令 http://vitess.io/reference/vtctl.html

@@ -1,0 +1,98 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     Distributed_Applications.org
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-06 五
+#+DESCRIPTION:Distributed_Applications.org
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Erlang:
+* distributed application 某节点挂了后，此种application 会在另外一个节点上启动
+
+ http://www.erlang.org/doc/design_principles/distributed_applications.html
+ erl -name c@l92.168.0.44 -config c.config
+ erl -name c2@l92.168.0.44 -config c2.config
+ erl -name c3@l92.168.0.44 -config c3.config
+ erl -name emacs@l92.168.0.44 -config master.config
+#+BEGIN_QUOTE
+ distributed = [{Application, [Timeout,] NodeDesc}]
+                                         NodeDesc = [Node | {Node,...,Node}]
+#+END_QUOTE
+ NodeDesc 表示此种Application可以在哪些节点上启动，优先级按NodeDesc[]中出现的顺序而定，但在{} 中的节点优先级相同
+ 比如:
+ #+BEGIN_SRC erlang
+ {distributed, [{game_log_server, 5000, ['emacs@192.168.0.44', {'c@192.168.0.44','c2@192.168.0.44','c3@192.168.0.44' }]}]}
+ #+END_SRC
+ game_log_server 会优先在'emacs@192.168.0.44'上启动，当'emacs@192.168.0.44'当掉后，会从{'c@192.168.0.44','c2@192.168.0.44','c3@192.168.0.44' }
+ 中选择一个节点，在此节点上启动game_log_server application
+ Timeout
+  表示等待多少ms 才决定在其他节点上来启动此 application(即当前节点或许会在Timeout时间内重启成功。)
+
+#+BEGIN_QUOTE
+ sync_nodes_mandatory = [Node]
+     Specifies which other nodes must be started (within the timeout specified by sync_nodes_timeout.
+ sync_nodes_optional = [Node]
+     Specifies which other nodes can be started (within the timeout specified by sync_nodes_timeout.
+ sync_nodes_timeout = integer() | infinity
+     Specifies how many milliseconds to wait for the other nodes to start.
+#+END_QUOTE
+
+ When started, the node will wait for all nodes specified by sync_nodes_mandatory and sync_nodes_optional to come up
+ 在启动当前节点的过程中，会等待 sync_nodes_mandatory 与 sync_nodes_optional属性中指定的节点启动后才启动,如果sync_nodes_mandatory
+ 中有任一节点启动失败，则此停止此节点的启动
+ 所有这些节点中
+ distributed and sync_nodes_timeout,两属性的值必须相同.
+ 当所有distributed属性中指定的节点启动成功后，此 application会首先在emacs@192.168.0.44上启动
+ application:start(Application)
+ Module:start(normal, StartArgs)
+ 当 emacs@192.168.0.44 当掉后,首先会尝试在等5000ms 让 emacs@192.168.0.44重启。
+ application会在新的节点上以
+ Module:start(normal, StartArgs)的方式重启，
+ 例外是如果此 application 定义的tart_phases(http://www.erlang.org/doc/design_principles/included_applications.html)
+ 则 Module:start({failover, Node}, StartArgs)
+
+ 如果 emacs@192.168.0.44重启了。则此时 Takeover 事件会发生，即此 application会在 emacs@192.168.0.44 上重启，而 在old node
+ 上stop
+ Module:start({takeover, Node}, StartArgs)
+*** master.config
+#+BEGIN_SRC erlang
+[{kernel,
+  [{distributed, [{game_log_server, 5000, ['emacs@192.168.0.44', {'c@192.168.0.44','c2@192.168.0.44' }]}]},
+   {sync_nodes_mandatory, ['c@192.168.0.44','c2@192.168.0.44' ]}, % mandatory托管
+   {sync_nodes_timeout, 5000}
+  ]
+ }
+].
+#+END_SRC
+*** c.config
+#+BEGIN_SRC erlang
+%% http://www.erlang.org/doc/design_principles/distributed_applications.html
+%% erl -name emacs@l92.168.0.44 -config master.config
+%% erl -name c@l92.168.0.44 -config c.config
+%% erl -name c2@l92.168.0.44 -config c2.config
+%% erl -name c3@l92.168.0.44 -config c3.config
+[{kernel,
+  [{distributed, [{game_log_server, 5000, ['emacs@192.168.0.44', {'c@192.168.0.44','c2@192.168.0.44' }]}]},
+   {sync_nodes_mandatory, ['emacs@192.168.0.44','c2@192.168.0.44' ]},
+   {sync_nodes_timeout, 5000}
+  ]
+ }
+].
+#+END_SRC
+
+#+BEGIN_SRC erlang
+%% http://www.erlang.org/doc/design_principles/distributed_applications.html
+%% erl -name emacs@l92.168.0.44 -config master.config
+%% erl -name c@l92.168.0.44 -config c.config
+%% erl -name c2@l92.168.0.44 -config c2.config
+%% erl -name c3@l92.168.0.44 -config c3.config
+[{kernel,
+  [{distributed, [{game_log_server, 5000, ['emacs@192.168.0.44', {'c@192.168.0.44','c2@192.168.0.44' }]}]},
+   {sync_nodes_mandatory, ['c@192.168.0.44','emacs@192.168.0.44' ]},
+   {sync_nodes_timeout, 5000}
+  ]
+ }
+].
+#+END_SRC

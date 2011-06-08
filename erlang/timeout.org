@@ -1,0 +1,129 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     receive timeout
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-11-12 六
+#+DESCRIPTION:receive timeout
+#+KEYWORDS: erlang
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Erlang:
+
+#+begin_src erlang
+receive
+    Message1 [when Guard1] ->
+        Actions1 ;
+    Message2 [when Guard2] ->
+        Actions2 ;
+    ...
+after
+    TimeOutExpr ->
+        ActionsT
+end
+#+end_src
+例:
+#+begin_src erlang
+-module(tt).
+-export([start/0,value/1,loop/1,test/0]).
+
+
+start()->
+    spawn(tt,loop,[0])
+        .
+
+value(T) ->
+    T!{self(),value},
+    receive
+        Val->
+            Val
+    after 1000 ->                               %一秒钟超时
+            timeout
+    end
+        .
+loop (Val) ->
+    receive
+        inc->
+            loop(Val+1);
+        {From,value}->
+            From! Val
+    end.
+
+test() ->
+    P=tt:start(),
+    P!inc,
+    P!inc,
+    value(P).
+#+end_src
+
+在超时表达式的参数中有两个值有特殊意义：
++ infinity
+
+原子式infinity表示超时永远也不会发生。如果超时时间需要在运行时计算的话，这个
+功能就很有用。我们可能会希望通过对一个表达式进行求值来得到超时长度：如果返回
+值是infinity的话，则永久等待。
+
++ 0
+数值0表示超时会立即发生，不过在那之前系统仍然会首先尝试对邮箱中已有的消息进
+    行匹配。(我估计含义是:如果已有的消息匹配成功,则不运行超时子句,若此时邮
+    箱中没任何消息,则立即运行超时子句.)
+
+#+begin_src erlang
+  %% 比如,确定 鼠标双击或单击事件
+  get_event() ->
+      receive
+          {mouse, click} ->
+              receive
+                  {mouse, click} ->
+                      double_click
+              after double_click_interval() ->
+                  single_click
+              end
+          ...
+      end.
+#+end_src
+#+begin_src erlang
+  %% 超时,sleep
+  sleep(Time) ->
+      receive
+          after Time ->
+              true
+      end.
+#+end_src
+#+begin_src erlang
+  %% flush_buffer()清空当前进程的邮箱：
+
+  %% 只要邮箱中还有消息，第一个消息会被匹配到（未绑定变量AnyMessage会匹配到任何消
+  %% 息，在这里就是第一个消息），然后flush_buffer会再次被调用，但是如果邮箱已经为
+  %% 空了，那么函数会从超时子句中返回。
+
+  flush_buffer() ->
+      receive
+          AnyMessage ->                           %注意首字母大写表示这是一个变量,所以可以否配任何传过来的消息.
+              flush_buffer()
+          after 0 ->
+              true
+      end.
+
+#+end_src
+#+begin_src erlang
+  %% 消息的优先级也可以通过使用0作为超时长度来实现：
+
+  %% 函数priority_receive会返回邮箱中第一个消息，
+  %% 除非有消息interrupt发送到了邮箱中，此时将返回interrupt
+  %% 即消息 interrupt 优先级较其他高.
+  priority_receive() ->
+      receive
+          interrupt ->
+              interrupt
+      after 0 ->
+          receive
+              AnyMessage ->
+                  AnyMessage
+          end
+      end
+
+#+end_src

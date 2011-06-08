@@ -1,0 +1,63 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     linux 下gbk utf8 转换
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2013-02-23 六
+#+DESCRIPTION:linux 下gbk utf8 转换
+#+KEYWORDS: :Linux:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Linux: :C:
+
+#+BEGIN_SRC c
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <string.h>
+  #include <iconv.h>
+  #define OUTLEN 255
+  /* 用 file a.out 来看输出文件的编码*/
+  int main()
+  {
+    char  buf[255];
+    char out[OUTLEN];
+    int rec;
+
+    FILE *fin = fopen("/tmp/a.in", "r");
+    FILE *fout = fopen("a.out", "w");
+    fscanf(fin,"%s\n",buf);
+    rec = g2u(buf,strlen(buf),out,OUTLEN);
+    fprintf (fout,"%s\n",out);
+    /* fprintf (fout,"%s\n",buf); */
+
+    fclose(fout);
+    fclose(fin);
+    return 0;
+  }
+  //代码转换:从一种编码转为另一种编码
+  int code_convert(char *from_charset, char *to_charset, char *inbuf, int inlen,
+                   char *outbuf, int outlen) {
+    iconv_t cd;
+    int rc;
+    char **pin = &inbuf;
+    char **pout = &outbuf;
+
+    cd = iconv_open(to_charset, from_charset);
+    if (cd == 0)
+      return -1;
+    memset(outbuf, 0, outlen);
+    if (iconv(cd, pin, &inlen, pout, &outlen) == -1)
+      return -1;
+    iconv_close(cd);
+    return 0;
+  }
+  //UNICODE码转为GB2312码
+  int u2g(char *inbuf, int inlen, char *outbuf, int outlen) {
+    return code_convert("utf-8", "gb2312", inbuf, inlen, outbuf, outlen);
+  }
+  //GB2312码转为UNICODE码
+  int g2u(char *inbuf, size_t inlen, char *outbuf, size_t outlen) {
+    return code_convert("gb2312", "utf-8", inbuf, inlen, outbuf, outlen);
+  }
+#+END_SRC
+测试 的时候从windows下创建a.in文件(gbk编码)，

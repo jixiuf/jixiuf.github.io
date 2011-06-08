@@ -1,0 +1,102 @@
+# -*- coding:utf-8-unix -*-
+#+TITLE:     使用Emacs中的Ediff 作为git mergetool使用的工具进行文件合并
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-07-04 一
+#+DESCRIPTION:使用Emacs中的Ediff 作为git mergetool使用的工具进行文件合并
+#+KEYWORDS: Emacs Ediff git merge 
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil 
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Emacs: :Git: :Ediff:
+
+关于什么是Ediff 什么是Git 就不作详细介绍了，简单讲Ediff是Emacs进行文件比较、
+合并的工具，Git 是与svn 一样的版本控制工具。我个人的许多代码都用git进行管理。
+运行git mergetool 命令时会对有冲突的文件进行合并，
+我这里使用了emacsclient ，避免每次都要打开一个Emacs进程。
+总共分为两大步:
+* 在.emacs 中加入以下代码
+#+begin_src emacs-lisp
+;;git mergetool 使用ediff ,前提可以正常使用emacsclient ,并且Emacs已经启动。
+;; ~/.gitconfig
+;; [mergetool "ediff"]
+;; cmd = emacsclient --eval \"(git-mergetool-emacsclient-ediff \\\"$LOCAL\\\" \\\"$REMOTE\\\" \\\"$BASE\\\" \\\"$MERGED\\\")\"
+;; trustExitCode = false
+;; [mergetool]
+;; prompt = false
+;; [merge]
+;; tool = ediff
+;;
+;; Setup for ediff.
+;;
+;;(require 'ediff)
+
+(defvar ediff-after-quit-hooks nil
+  "* Hooks to run after ediff or emerge is quit.")
+
+(defadvice ediff-quit (after edit-after-quit-hooks activate)
+  (run-hooks 'ediff-after-quit-hooks))
+
+(setq git-mergetool-emacsclient-ediff-active nil)
+
+(defun local-ediff-frame-maximize ()
+  (when (boundp 'display-usable-bounds)
+    (let* ((bounds (display-usable-bounds))
+           (x (nth 0 bounds))
+           (y (nth 1 bounds))
+           (width (/ (nth 2 bounds) (frame-char-width)))
+           (height (/ (nth 3 bounds) (frame-char-height))))
+      (set-frame-width (selected-frame) width)
+      (set-frame-height (selected-frame) height)
+      (set-frame-position (selected-frame) x y))  )
+  )
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+(setq ediff-split-window-function 'split-window-horizontally)
+
+(defun local-ediff-before-setup-hook ()
+  (setq local-ediff-saved-frame-configuration (current-frame-configuration))
+  (setq local-ediff-saved-window-configuration (current-window-configuration))
+  (local-ediff-frame-maximize)
+  (if git-mergetool-emacsclient-ediff-active
+      (raise-frame)))
+
+(defun local-ediff-quit-hook ()
+  (set-frame-configuration local-ediff-saved-frame-configuration)
+  (set-window-configuration local-ediff-saved-window-configuration))
+
+(defun local-ediff-suspend-hook ()
+  (set-frame-configuration local-ediff-saved-frame-configuration)
+  (set-window-configuration local-ediff-saved-window-configuration))
+
+(add-hook 'ediff-before-setup-hook 'local-ediff-before-setup-hook)
+(add-hook 'ediff-quit-hook 'local-ediff-quit-hook 'append)
+(add-hook 'ediff-suspend-hook 'local-ediff-suspend-hook 'append)
+
+;; Useful for ediff merge from emacsclient.
+(defun git-mergetool-emacsclient-ediff (local remote base merged)
+  (setq git-mergetool-emacsclient-ediff-active t)
+  (if (file-readable-p base)
+      (ediff-merge-files-with-ancestor local remote base nil merged)
+    (ediff-merge-files local remote nil merged))
+  (recursive-edit))
+
+(defun git-mergetool-emacsclient-ediff-after-quit-hook ()
+  (exit-recursive-edit))
+
+(add-hook 'ediff-after-quit-hooks 'git-mergetool-emacsclient-ediff-after-quit-hook 'append)
+#+end_src
+* 修改~/.gitconfig 文件，
+在其中加入以下代码
+#+begin_src  c 
+[mergetool "ediff"]
+cmd = emacsclient --eval \"(git-mergetool-emacsclient-ediff \\\"$LOCAL\\\" \\\"$REMOTE\\\" \\\"$BASE\\\" \\\"$MERGED\\\")\"
+trustExitCode = false
+[mergetool]
+prompt = false
+[merge]
+tool = ediff
+
+
+#+end_src

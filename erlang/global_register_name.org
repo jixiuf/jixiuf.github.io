@@ -1,0 +1,36 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     global_register_name.org
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-09 一
+#+DESCRIPTION:global_register_name.org
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Erlang:
+global:register_name(Name, Pid).
+global:unregister_name(Name).
+当global 出现命名冲突时，默认是随机kill其中一个
+但也可以覆盖默认行为
+#+BEGIN_SRC erlang
+ Resolve = fun(_Name,Pid1,Pid2) ->
+     case process_info(Pid1, message_queue_len) > process_info(Pid2, message_queue_len) of
+         true -> Pid1;
+         false -> Pid2
+     end
+ end,
+global:register_name({zombie, 12}, self(), Resolve).
+#+END_SRC
+而global 也默认提供了几个函数来解决这种冲突
+
+    + fun global:random_exit_name/3
+              will kill a process randomly. This is the default option.
+    + fun global:random_notify_name/3
+             will randomly pick one of the two processes as the one to
+      survive, and it will send {global_name_conflict, Name} to the process
+      that lost.
+    + fun global:notify_all_name/3
+            it unregisters both pids, and sends the message {global_name_conflict,
+      Name, OtherPid} to both processes and lets them resolve the issue
+      themselves so they re-register again.

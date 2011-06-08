@@ -1,0 +1,57 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     emacs 配置文件相关
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2015-10-18 日
+#+DESCRIPTION:000051-emacs-keybind.org
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Emacs:
+* emacs 配置文件相关
+emacs 的配置文件可以有以下有个
+  ~/.emacs
+  ~/.emacs.d/init.el
+  如果你的配置非常简单 你可以直接写在 ~/.emacs 这一个文件中
+  但是 通常情况下 随着你对emacs 的了解越深入 你需要的配置去越来越多
+  且需要安装一些第三方的插件 ，所以建议把emacs 相关的配置都配到
+  ~/.emacs.d/及其子目录下 ，
+  然后emacs 的初始配置配到 ~/.emacs.d/init.el 中
+  比如 我的目录结构是这样的
+.emacs.d
+├── bin
+├── cache
+├── site-lisp
+│   ├── actionscript-mode
+│   ├── csharp-mode
+│   ├── dired
+│   ├── erlang
+│   ├── golang
+│   ├── hide
+│   ├─joseph
+我自己写的配置放到 ~/.emacs.d/site-lisp/joseph/目录下
+  比如 ~/.emacs.d/site-lisp/joseph/joseph-common.el
+   ~/.emacs.d/site-lisp/joseph/joseph-program.el
+第三单插件到配置放到 ~/.emacs.d/site-lisp/的子目录下
+比如 ~/.emacs.d/site-lisp/golang/go-mode.el
+所以
+  在~/.emacs.d/init.el 中加入以下代码
+  #+BEGIN_SRC emacs-lisp
+    ;; 加载我自己写的配置
+    (add-to-list 'load-path "~/emacs/site-lisp/joseph/")
+    (require 'joseph-common)
+    (require 'joseph-program)
+    ;; 加载第三单的提供的一些插件
+    (add-to-list 'load-path "~/emacs/site-lisp/golang/")
+    (require 'go-mode)
+  #+END_SRC
+每次修改完配置文件保存后 重启emacs 即可使配置生效
+* 执行Elisp代码
+    在某条语句后面按C-x C-e (eval-last-sexp)可以执行那条语句
+    M-x eval-buffer 可以执行当前buffer内的Elisp代码
+    选中一个region后, M-x eval-region可以执行这个region内的代码
+
+
+* 我的配置在github.com 可以找到
+  https://github.com/jixiuf/emacs_conf

@@ -1,0 +1,13 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+title: 关于本站
+*** 关于本站:
+    本站使用Emacs 编辑器上的org-page  生成。
+    原始org 文件放在 https://github.com/jixiuf/jixiuf.github.io
+
+    只需要如何编译成html
+    #+BEGIN_SRC sh
+       make  all
+       #或者
+       make recent
+    #+END_SRC

@@ -1,0 +1,257 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     3.ManageAnOracleInstance.org
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-07-09 六
+#+DESCRIPTION:3ManageAnOracleInstance.org
+#+KEYWORDS: oracle linux 
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+TAGS: :Oracle:
+* 学习目标
+  + create and manager  initialization parameter files 管理参数文件
+  + start up and shutdown oracle instance.启动关闭oracle instance
+  + monitor and use diagnostic files 
+
+* $ORACLE_BASE  $ORACLE_HOME $ORACLE_SID
+  oracle 公司不只oracle数据库一个软件，他们希望把他们的所有软件安装在同一个
+  目录下，即$ORACLE_BASE目录。而$ORACLE_HOME的值则是oracle数据库的安装目录.
+  它是 $ORACLE_BASE下的一个目录。而 $ORACLE_SID则是一个数据库instance的名称。
+  一个oracle database可以有多个oracle instance.而不同的instance 通过
+  $ORACLE_SID 来区分。另外 在linux上。一个oracle instance 会启用多个进程，它
+  们共享一块内存，而这块内存的位置是通过 $ORACLE_HOME与$ORACLE_SID两个变量的
+  值通过hash 计算后得到的。（可以这样理解，可能并不完全正确）.Windows 上，一
+  个oracle instance 只有一个进程，进程中再分出多个线程。所以不需要进程间共享
+  内存。
+  比如我系统上对应的值是：
+  
+  | $ORACLE_BASE | /home/oracle/                                   |
+  | $ORACLE_HOME | /home/oracle/app/oracle/product/11.2.0/dbhome_1 |
+  | $ORACLE_SID  | orcl                                            |
+
+* Initialization  Parameter Files 参数文件
+  
+  参数文件分两种,参数文件在linux上位于 $ORACLE_HOME/dbs/目录下。windows 上，
+  好像是 $ORACLE_HOME/database/. 参数分explicit和inplicit ，显式或隐式。未声
+  明的则使用oracle默认的设置，即inplicit
+**   Static parameter file :PFILE ,纯文本。
+     $ORACLE_HOME/dbs/initSID.ora (注：SID为 $ORACLE_SID的值)如initorcl.ora
+     其中的值会在oracle instance 启动时读入。目录下有个init.ora的示例文件，
+     可以参照之。不过好像oracle9上的init.ora文件太老了，最后修改时间1989年针
+     对oracle8的，可能不能用。好像不推荐使用。 在linux 上，没实验成功.
+
+**   Persistent server parameter file : SPFILE
+     也位于 $ORACLE_HOME/dbs/目录下。名称以spfie打头。
+     + 二进制文件。
+     + 由oracle server来维护，即，通过sqlplus用命令修改。
+     + Always resides on the server side 存在于oracle 服务器上，不在客户端。
+       (防止多个版本的存在，导致你不知该用哪个pfile)
+     + ability to make changes persistent across  shutdown and startup
+       修改后，即使重启，关闭，它会一直有效。
+     + can have Recovery Manager(RMan ,oracle的备份工具)support backing up
+       to initialization file .即，RM备份时他会备份 initialization file .
+*** 创建SPFILE
+    + 根据PFILE 创建SPFILE
+          进入sqlplus后使用以下命令 
+       create spfile= '/tmp/spfile_example1'  FROM pfile= '/tmp/init.ora';
+       或者简写为，
+        create spfile from pfile; 则使用默认的pfile 创建spfle
+        前提是默认的pfile 存在。
+        使用linux 下的命令strings 查看生成的spfile 中的字符串
+        strings /tmp/spfile_example1
+*** 修改 SPFILE的内容。
+    #+begin_src sql
+    alert system set parameter = value  <comment= 'text'>  <deferred>
+    <scope=  memory|spfile|both> <sid='sid|*'>
+    #+end_src
+    括号中的内容为可选
+    | comment  | 注释                                                             |
+    | deferred | 下一次登录的时候有效                                               |
+    | scope    | 影响的范围，只修改内存中的参数，修改spfile,两者都修改 （默认both） |
+    | sid      | 可以指定只对某一特定的instance的参数进行修改                       |
+    |          |                                                                    |
+    alter system set undo_tablespace=undo2;
+    alert system reset undo_tablespace;
+    详见联机文档
+*** 根据 SPFILE创建 PFILE
+    create pfile ='/tmp/pfile' from spfile
+    create pfile ='/tmp/pfile' from spfile='/tmp/spfile.ora'
+*** SPFILE 比 PFILE好
+
+* oracle的启动过程
+  oracle寻找 parameter file的顺序
+   + spfileSID.ora
+   + Default spfile : spfile.ora
+   + initSID.ora
+   + Default PFILE :(可能是init.ora,未验证)
+     (这几个文件都在 $ORACLE_HOME/dbs/目录下)
+     或者手动指定使用哪个 pfile
+     startup  pfile='/path/to/pfile.ora'
+     但是没有spfile='' 的参数
+     不过可以有可选的解决方案，在一个pfile 中加入一句
+     #+begin_src sql
+     SPFILE=/path/to/spfile
+     #+end_src
+     然后使用
+     #+begin_src sql
+     startup pfile='/path/to/pfile'
+     #+end_src
+     间接指定spfile
+     
+* 谁能开关oracle
+  1). 操作系统的管理员
+  2). 被赋予 sysdba system权限的用户
+* oracle database 的状态
+  --------------startup------------------------->
+  
+  shutdown ----> nomount------>mount------>open
+  
+  <--------------shutdown------------------------
+
+**    shutdown---->nomount启动一个instance
+  + 首先读取参数文件(spfile or pfile)
+  + 分配 SGA内存，启动后台进程,此时还没在oracle database与这段内在及进程关
+   联.
+  + 当instance 启动时，database 会将一些 explicit的parameter写到alert log 中。
+    你可以依次运行
+    #+begin_src sql
+    sqlplus /nolog
+    conn / as sysdba 
+    startup nomount
+    alert database mount
+
+    #+end_src
+**    nomount---->mount 将这个启动的instance与database进行关联
+      instance 寻找control file 并open 之.control file 是以
+      CONTROL_FILES='/PATH/TO/CTL_FILE.ctl'.形式存在于parameter文件中的
+**    mount----->open 
+      mount之后，普通用户是无关连接database的.
+      这个过程会根据control file 中的描述，寻找其他一些必须的文件
+      (online datafiles ,redo log files).如果一个tablespace在上一次shutdown
+      时处于offline状态，此时它依然如故(offline)，如果，没找到online
+      datafiles ,or redo log files ,会报错.一般此时需要进行恢复。
+      所以可以在不同的状态进行一定的维护工作。
+    
+** oracle状态的切换
+   + alter database nomount
+   + alert database mount
+   + alert database open
+     状态只能从shutdown 到nomount ,由nomount变成mount 
+     由mount 变open 而不能反过来。
+** Restricted mode 受限模式，
+   只有具有restricted 权限的用户才能连上来，它跟open状态相同，只是不允许普通
+   的用户连接上来，有些命令在mount状态下没法使用，而又不想启动到open状态。只
+   能具有和restricted session系统权限的用户才可以访问数据库，
+   而通常只有数据库管理员具有这种系统权限
+   ，实例只能为管理用户服务，当采用这种模式启动时，主要是为了完成以下任务：
+   1). 执行export或import数据
+   2). 执行data load
+   3). 临时防止用户使用数据
+   4). 执行某些移植或升级操作
+   #+begin_src sql
+   startup restrict
+   #+end_src
+   如果已经处于open状态，可以使用
+   #+begin_src sql
+   alter system enable restricted session
+   alter system diable restricted session (回到正常open状态)
+   #+end_src
+   处于这种状态,一般是管理员想进行一定的维护工作。
+   赋予某用户权限可以在restircted mode下工作. 
+   #+begin_src sql
+   grant restricted session to scott;
+   #+end_src
+   
+*** 查或kill掉一个会话 v$session 可知目前连接的会话,
+    对于已经连接的session,可以把它踢出去
+    #+begin_src sql
+    select  SADDR ,SID,  SERIAL#,  AUDSID ,username from v$session;
+    #+end_src
+    这是表中的前几列， 主要看sid ,username ,可能会有很多username是空，表示
+    这是一个后台进程，找到某一用户的sid后
+    #+begin_src sql
+    alter system kill session 'sid,serial#'
+   alter system kill session '15,6'
+    #+end_src
+    
+** Read Mode
+   #+begin_src sql
+    startup mount
+    alter database open read only
+   #+end_src
+   可以：
+   + execute queries
+   + execute disks sorts using  Logically Managered TableSpace
+   + take data files  offline or online ,but not tablespace(可以把
+     tablespace的某个data file 设成离线，在线，但不能整个tablespace)
+   + perform recovery  of offline data files  and tablespace，可以对离线的
+     data file 或 tablespace进行恢复操作.
+     
+
+** oracle database的关闭
+*** Close a Database
+    将SGA中的database data 、recovery data 写入data file 、redo log file
+    the database is closed ,but still mounted 
+*** Unmount a Database
+    disassociate a database from the instance.
+    the database is unmounted .
+    the control files is closed .
+*** Shutdown an instance
+    SGA 内存释放，杀掉后台进程
+    
+*** shutdown 命令
+    | shutdown mode                      | abort | immediate | transactional | normal |
+    | all new connection                 | No    | No        | No            | No     |
+    | wait until current session end     | no    | no        | no            | yes    |
+    | wait util current transaction end  | no    | no        | yes           | yes    |
+    | force a checkpoint and close files | no    | yes       | yes           | yes    |
+#+begin_src sql
+shutdown immediate ,最常用，它不等事务完成，而是回滚，保证数据的完整，同时
+快速的关闭
+#+end_src
+
+*** v$transcation 可以查是否有活动的事务，即未提交的事务。
+    #+begin_src sql
+    select addr ,status from v$transcation
+    #+end_src
+    shutdown transaction 命令会一直等到所有事务均提交后。
+
+* Diagnostic Files (诊断文件)
+   + 记录一些大事件，如启动关闭等
+   + used to resolve problems
+   + used to better manage the database on a day-to-day  bsis
+  主要包括以下几种类型的files
+** alert_SID.log
+   + record you command
+   + record results of major event
+   + used for day-to-day operational  info.
+   + used to diagnosing  database error
+它位于 background_dump_dest 参数对应的文件夹下。
+show parameter dump 
+
+**  Background  trace files
+    记录后台进程的信息，后台进程出错时记录
+    文件名：    SID_precessName_pid.trc
+**  user trace files 
+    文件名：    SID_ora_pid.trc
+    位置在user_dump_dest   
+    + procuded by user process
+    + can  be generated by a server process
+    + contain statistics  for traced sql statement .
+    + contain usr messages
+      默认只在user precess 出错时才记录。也可以随时都做
+    + alter session set sql_trace=true
+      或者设参数sql_trace=true
+
+* sqlplus 小技巧，调整某列的显示宽度
+  + set pagesize 300
+  + set linesize 200
+  + col col_name format a30
+
+* oracle instance 启动后，查看parameter的值。
+** 查动态视图 v$parameter
+   select name ,value ,type from v$parameter where name='';
+** 通过show parameter命令，
+   如： show parameter sga ，注参数名不需要输入完整的名称，如这个命令，会
+   显示所有参数名称包含sga 的参数。
+

@@ -1,0 +1,120 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     Emacs的插件openwith.el
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-07-08 五
+#+DESCRIPTION:Emacs的插件open-with.el
+#+KEYWORDS: emacs open with 
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil 
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+TAGS: :Emacs:
+
+默认情况下，当你用Emacs中的`C-xC-f' 打开文件时，不论它是什么类型的文件，都会
+使用emacs打开。但有些时候希望遇到avi 文件时使用外部播放器打开，而非emacs所以
+emacswiki上有人提供了openwith.el 插件。用来实现对于不同后缀的文件可以调用不
+同的命令来打开.因为我用Linux及Windows两个系统所以配置文件分成了两套。
+在Windows 上，同时用到了w32-browser.el w32-shell-execute.el等插件。
+
+#+begin_src emacs-lisp
+;;  openwith ,外部程序
+
+;;直接用正常的方式打开相应的文件,openwith会自动做处理
+;;`C-xC-f'即可
+(when (eq system-type 'windows-nt)
+  (require'w32-shell-execute)
+  )
+(require 'openwith)
+(openwith-mode t)
+(when (eq system-type 'gnu/linux)
+  (setq openwith-associations
+        '(("\\.pdf$" "acroread" (file)) ("\\.mp3$" "mplayer" (file) )
+          ("\\.mov\\|\\.RM$\\|\\.RMVB$\\|\\.avi$\\|\\.AVI$\\|\\.flv$\\|\\.mp4\\|\\.mkv$\\|\\.rmvb$" "mplayer" (file) )
+;;          ("\\.jpe?g$\\|\\.png$\\|\\.bmp\\|\\.gif$" "gpicview" (file))
+          ("\\.CHM$\\|\\.chm$" "chmsee"  (file) )
+          )
+        )
+  )
+(when (eq system-type 'windows-nt)
+  ;;windows 上使用w32-shell-execute 调用系统的相应程序打开
+  (setq openwith-associations
+        '(("\\.pdf$" "open" (file)) ("\\.mp3$" "open" (file) )
+          ("\\.mov\\|\\.RM$\\|\\.RMVB$\\|\\.avi$\\|\\.AVI$\\|\\.flv$\\|\\.mp4\\|\\.mkv$\\|\\.rmvb$" "open" (file) )
+          ("\\.jpe?g$\\|\\.png$\\|\\.bmp\\|\\.gif$" "open" (file))
+          ("\\.CHM$\\|\\.chm$" "open"  (file) )
+          )
+        )
+  )
+
+;;默认情况下，return 即可以用`open-with'对特定后缀的文件使用相应的程序或
+;;emacs mode打开，但有时候想提供第二种打开的方式 。比如默认对于html文件，我
+;;会用emacs中的nxml-mode打开，但有时也想在firefox中浏览它，于是return 使用
+;;nxml-mode，而C-RET则使用firefox进行打开
+;;注意，我这里对html做了特殊处理，当打开html时，焦点自动切换到firefox上。使用了
+;; Awesome 窗口管理器的特性。所以未必适合你，仅做参考。
+(defun open-with-C-RET-on-linux()
+  "in dired mode ,`C-RET' open file with ..."
+  (interactive)
+  (let ((file-name (dired-get-filename))
+        (openwith-associations
+        '(("\\.pdf$" "acroread" (file)) ("\\.mp3$" "mplayer" (file) )
+          ("\\.RM$\\|\\.RMVB$\\|\\.avi$\\|\\.AVI$\\|\\.flv$\\|\\.mp4\\|\\.mkv$\\|\\.rmvb$" "mplayer" (file) )
+          ("\\.jpe?g$\\|\\.png$\\|\\.bmp\\|\\.gif$" "gpicview" (file))
+          ("\\.CHM$\\|\\.chm$" "chmsee"  (file) ))))
+    (if (string-match "\\.html?$" file-name)
+          (if (> (string-to-number (shell-command-to-string "pgrep firefox | wc -l")) 0)
+              (progn
+                (start-process-shell-command "firefox" nil (format "echo ' show_matched_client({class=\"Firefox\" ,instance=\"Navigator\"},\"www\",\"/usr/bin/firefox %s  \" ,nil)' |awesome-client " file-name))
+                (start-process "firefox-file" nil "firefox" file-name))
+            (start-process-shell-command "firefox" nil (format "echo ' show_matched_client({class=\"Firefox\" ,instance=\"Navigator\"},\"www\",\"/usr/bin/firefox %s  \" ,nil)' |awesome-client " file-name))
+            )
+      (dired-find-file)
+      )
+    )
+  )
+(when (equal system-type 'gnu/linux)
+  (eval-after-load 'dired
+  '(define-key dired-mode-map [(control return)] 'open-with-C-RET-on-linux)))
+
+;; 使用外部 文件管理器 打开选中文件所在文件夹
+(when (eq system-type 'windows-nt)
+  ;;on windows
+  ;;  C-RET  用系统默认程序打开选中文件
+  ;; M-RET  open Windows Explorer
+  ;; ^ 我改成了u ,可以列出根盘符
+  ;;
+  (require 'w32-browser)
+  ;; (define-key diredp-w32-drives-mode-map "n" 'next-line)
+  ;; (define-key diredp-w32-drives-mode-map "p" 'previous-line)
+
+  ;;C-M-<RET> 用资源管理器打开当前文件所处目录
+  (defun explorer-open()
+"用windows 上的explorer.exe打开此文件夹."
+    (interactive)
+    (if (equal major-mode 'dired-mode)
+        (w32explore (expand-file-name (dired-get-filename)))
+      (w32explore (expand-file-name (buffer-file-name)))
+       )
+    )
+  (eval-after-load 'dired
+    '(define-key dired-mode-map (quote [C-M-return]) 'explorer-open))
+  (global-set-key (quote [C-M-return]) 'explorer-open)
+;;  (lambda () (interactive ) (w32explore (expand-file-name default-directory)))
+  )
+
+;; linux `C-M-RET' 用pcmanfm文件管理器打开当前目录
+(when (eq system-type 'gnu/linux)
+  (defun open-directory-with-pcmanfm()
+    (interactive)
+    (start-process "pcmanfm"  nil "pcmanfm" (expand-file-name  default-directory)))
+  (eval-after-load 'dired
+    '(define-key dired-mode-map (quote [C-M-return]) 'open-directory-with-pcmanfm))
+  (global-set-key (quote [C-M-return]) (quote open-directory-with-pcmanfm))
+    )
+
+(provide 'joseph-openwith)
+
+
+
+#+end_src

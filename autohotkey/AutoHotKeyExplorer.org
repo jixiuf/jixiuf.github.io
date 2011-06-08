@@ -1,0 +1,229 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     对"我的电脑"  进行增强
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-06-15 星期三
+#+DESCRIPTION:对"我的电脑"  进行增强
+#+KEYWORDS: autohotkey explorer 我的电脑
+#+TAGS: :AutoHotKey: :Windows:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+
+这里不对代码进行过于详细的讲解。只贴代码，并简单描述其功能[[file:AutoHotKey_1.org][
+AutoHotKey几个简单的小例子]] 中已经有一个关于对资源管理器中实现Ctl+alt+h
+[[file:AutoHotKey_1.html#sec-2_3][一键显隐 隐藏文件]]的功能，这里再给出其他几个与资源管理器有关的功能增强。
+* 复制当前文件的路径
+这段代码实现
++ Alt+1 : copy 选中文件的名称
++ Alt+2 : copy 当前路径名
++ Alt+3 : copy 选中文件的完整路径名
+#+begin_src sh
+SetTitleMatchMode Regex ;可以使用正则表达式对标题进行匹配
+; 下面的窗口类依次为：桌面、Win+D后的桌面、我的电脑、资源管理器、另存为等
+#IfWinActive ahk_class Progman|WorkerW|CabinetWClass|ExploreWClass|#32770
+;;Alt+1 copy文件名
+!1::
+  send ^c
+  sleep,200
+  clipboard = %clipboard%
+  SplitPath, clipboard, name
+  clipboard = %name%
+  return
+;;alt+2 copy 此文件所在的路径名
+!2::
+  send ^c
+  sleep,200
+  clipboard = %clipboard%
+  SplitPath, clipboard, , dir
+  clipboard = %dir%
+  return
+;;copy 此文件的全路径名
+!3::
+  send ^c
+  sleep,200
+  clipboard = %clipboard%
+  return
+#IfWinActive
+#+end_src
+
+* Alt+h 一键显隐扩展名
+#+begin_src xahk
+SetTitleMatchMode Regex ;可以使用正则表达式对标题进行匹配
+#IfWinActive ahk_class CabinetWClass|ExploreWClass
+;Alt+h TOGGLES FILE EXTENSIONS
+!h::
+RegRead, HiddenFiles_Status, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, HideFileExt
+If HiddenFiles_Status = 1
+     RegWrite, REG_DWORD, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, HideFileExt, 0
+Else
+   RegWrite, REG_DWORD, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, HideFileExt, 1
+WinGetClass, eh_Class,A
+If (eh_Class = "#32770" OR A_OSVersion = "WIN_VISTA")
+   send, {F5}
+Else PostMessage, 0x111, 28931,,, A
+Return
+#IfWinActive
+#+end_src
+
+* Ctl+Alt+c 在当前路径下打开Cmd.exe 窗口。  
+#+begin_src c
+SetTitleMatchMode Regex ;可以使用正则表达式对标题进行匹配
+#IfWinActive ahk_class CabinetWClass|ExploreWClass
+; open 'cmd' in the current directory
+^!c::OpenCmdInCurrent()
+#IfWinActive
+
+; Opens the command shell 'cmd' in the directory browsed in Explorer.
+; Note: expecting to be run when the active window is Explorer.
+;
+OpenCmdInCurrent()
+{
+ ControlGetText, full_path, Edit1, A
+ IfInString full_path, \
+  {
+    Run, cmd /K cd /D "%full_path%"
+  }
+  else
+  {
+    Run, cmd /K cd /D "C:\ "
+  }
+}
+#+end_src
+
+*  Alt+n 新建文本文件 Shift+= 新建文件夹
+#+begin_src c
+; create new text file
+SetTitleMatchMode Regex ;可以使用正则表达式对标题进行匹配
+#IfWinActive ahk_class CabinetWClass|ExploreWClass
+
+;"+"  like Emacs dired: create new folder 
++=::Send !fwf
+
+!n::
+InputBox, UserInput, New File Name?, Please enter a New File Name(.txt), , 280, 100,,,,,.txt will be append
+if ErrorLevel
+{
+}else
+{
+  Send {Left}
+ControlGetText, ExplorePath, Edit1, A
+StringRight, isEndsWithPathSeaprator, ExplorePath, 1
+if (isEndsWithPathSeaprator ="\")
+{
+  newFilePath=%ExplorePath%%UserInput%.txt
+}else
+{
+  newFilePath=%ExplorePath%\%UserInput%.txt
+}
+FileAppend,, %newFilepath%
+ControlFocus, SysListView321,A
+; Switch the active window's keyboard layout/language to English:
+PostMessage, 0x50, 0, 0x4090409,, A  ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
+SendInput {F5}%UserInput%  
+}
+return
+#IfWinActive 
+#+end_src
+* 焦点的移动
+  + Ctrl+, 选中第一个文件
+  + Ctrl+. 选中最后一个文件
+  + ctrl+; 定位到左侧目录树
+  + ctrl+L 定位在地址栏
+#+begin_src c
+#IfWinActive ahk_class CabinetWClass|ExploreWClass
+;;Ctrl+, 选中第一个文件
+^,::
+   ControlFocus, SysListView321,A
+    Send {Home}
+return
+;;Ctrl+. 选中最后一个文件
+^.::
+  ControlFocus, SysListView321,A
+  Send {End}
+  return
+  
+;;ctrl+; 定位到目录树
+^;::
+  ControlFocus, SysTreeView321,A
+return
+
+ ;;ctrl+L 定位在地址栏
+^l:: ControlFocus, Edit1,A
+#IfWinActive 
+#+end_src
+* 用键盘进行管理
+  一些绑定模拟Emacs 中Dired（Emacs中目录管理工具） 的操作。
++ Ctrl+n 向下移动
++ Ctrl+p 向上移动
++ Ctrl+f 向右移动
++ Ctrl+b 向左移动
++ Ctrl+h 如果在左侧的资源管理器中，表示折叠目录树
++ Ctrl+j 基本相当于回车（进入子目录后后选中第一个文件）
++ Ctrl+u 上层目录，并选中第一个文件
+#+begin_src c 
+#IfWinActive ahk_class ExploreWClass|CabinetWClass
+^n::Send {Down}
+^p::Send {Up}
+^j::
+  ControlGetFocus, focusedControl,A 
+    if(focusedControl="SysListView321")
+  {
+    Send {Enter}
+    ControlFocus, SysListView321,A
+    Send {Home}
+  }else
+  {
+    Send {Enter}
+  }
+return
+
+^f::Send {Right}
+
+^b::send {Left}
+^h::
+   ControlGetFocus, focusedControl,A 
+    if(focusedControl="SysTreeView321")
+  {
+    send {Left}
+  }else
+  {
+    Send ^h
+  }
+return
+ 
+^u::
+   ControlGetFocus, focusedControl,A 
+    if(focusedControl="SysListView321")
+  {
+    send     {backspace}
+    ControlFocus, SysListView321,A
+    Send {Home}
+  }
+return
+#IfWinActive 
+#+end_src
+* Ctrl+e 用Emacs编辑器打开选中的文件
+#+begin_src c
+;;需要 emacsclientw 在Path路径下
+openSelectedfileWithEamcs()
+{
+  ControlGetFocus, focusedControl,A
+  if (focusedControl="SysListView321")
+  {
+    ClipSaved := ClipboardAll
+    Send ^c
+    sleep,200
+    clipboard = %clipboard%
+    fullPath=%clipboard%
+    Clipboard := ClipSaved   
+    run , emacsclientw %fullPath%
+  }
+}
+#IfWinActive ahk_class ExploreWClass|CabinetWClass
+^e:: openSelectedfileWithEamcs()
+#IfWinActive
+#+end_src

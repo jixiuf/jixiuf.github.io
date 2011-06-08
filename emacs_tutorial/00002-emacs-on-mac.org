@@ -1,0 +1,253 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     emacs 在Mac上的安装及一些相应配置
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2015-10-17 六
+#+DESCRIPTION:emacs 在Mac上的安装
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Emacs:  :Mac:
+* GNU Emacs For Mac OS X                                              :Emacs:
+ http://emacsformacosx.com/
+   去这里下载 ，下载完  托动到 /Applications/目录就可以了
+* 使用brew 命令安装
+**  安装 带图形界面的emacs
+#+BEGIN_SRC sh
+    brew install emacs --cocoa
+#+END_SRC
+**  安装 不带图形界面的emacs,只能在终端下使用的，
+  mac 自带了emacs22 ，但是版本太老所以需要删掉
+#+BEGIN_SRC sh
+    sudo rm -f /usr/bin/emacs
+    sudo rm -f /usr/bin/emacsclient
+    brew install emacs
+#+END_SRC
+  为方便终端下使用 定义些别名
+  #+BEGIN_SRC sh
+  alias e='emacs -nw'
+  #+END_SRC
+
+* 从源代码编译emacs
+** 获取emacs 源码
+  #+BEGIN_SRC sh
+  git clone  git://git.sv.gnu.org/emacs.git
+  或者
+  git clone  git://git.sv.gnu.org/emacs.git --depth=1
+  #+END_SRC
+**  只编译终端下可用的版本 编译完后 会安装到/usr/local/bin/下
+  #+BEGIN_SRC sh
+  cd emacs
+  ./configure --without-ns
+  or
+  ./configure --disable-ns-self-contained
+  make
+  make install
+#+BEGIN_QUOTE
+    If you pass the --disable-ns-self-contained option to configure, the lisp
+    files will be installed under whatever 'prefix' is set to (defaults to
+    /usr/local).  The bundle will be smaller, but depend on these resources (may
+    require 'sudo' for "make install").
+#+END_QUOTE
+
+  #+END_SRC
+** 编译 图形界面的
+  #+BEGIN_SRC sh
+  cd emacs
+   ./configure
+   make
+   make install
+  #+END_SRC
+   编译完之后 会生成nextstep/Emacs.app
+   把Emacs.app 移动到/Applications/目录即可
+
+* mac 启动时自动启动 emacs --daemon进程
+~/Library/LaunchAgents/emacs-daemon.plist
+把这个文件放到~/Library/LaunchAgents/目录下 ，重起下电脑，就会启动emacs --deamon 进程
+或者执行下
+#+BEGIN_SRC sh
+   launchctl load ~/Library/LaunchAgents/emacs-daemon.plist
+#+END_SRC
+#+BEGIN_SRC xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+  <plist version="1.0">
+  <dict>
+      <key>EnableGlobbing</key>
+      <true/>
+      <key>KeepAlive</key>
+      <true/>
+      <key>Label</key>
+      <string>emacs-daemon</string>
+      <key>ProgramArguments</key>
+      <array>
+          <string>/usr/local/bin/emacs</string>
+          <string>--daemon</string>
+      </array>
+      <key>RunAtLoad</key>
+      <true/>
+      <key>WorkingDirectory</key>
+      <string>/Users/</string>
+  </dict>
+  </plist>
+#+END_SRC
+* ~/bin/em emacsclient 封装
+  写了个脚本命名为  ~/bin/em  封装emacsclient,配合emacs --daemon 使用
+  #+BEGIN_SRC sh
+    #!/bin/sh
+    # use default emacsclient in $PATH
+    EMACSCLIENT=`command -v emacsclient`
+    # if emacsclient major version ==22
+    if [ ! -z $EMACSCLIENT ] && [ `$EMACSCLIENT --version 2>&1| awk -F ' ' '/emacsclient/ {print $2}'|awk -F '.' '{print $1}'` = "22" ] ; then
+        EMACSCLIENT=""
+    fi
+    #  if EMACSCLIENT is empty
+    if [  -z $EMACSCLIENT ] && [ -x "~/bin/emacsclient"  ] && [ `~/bin/emacsclient --version 2>&1| awk -F ' ' '/emacsclient/ {print $2}'|awk -F '.' '{print $1}'` != "22" ]; then
+        EMACSCLIENT="~/bin/emacsclient"
+    fi
+
+    if [  -z $EMACSCLIENT ] && [ -x "/usr/local/bin/emacsclient"  ] && [ `/usr/local/bin/emacsclient --version 2>&1| awk -F ' ' '/emacsclient/ {print $2}'|awk -F '.' '{print $1}'` != "22" ]; then
+        EMACSCLIENT="/usr/local/bin/emacsclient"
+    fi
+    if [  -z $EMACSCLIENT ] && [ -x "/usr/bin/emacsclient"  ] && [ `/usr/bin/emacsclient --version 2>&1| awk -F ' ' '/emacsclient/ {print $2}'|awk -F '.' '{print $1}'` != "22" ]; then
+        EMACSCLIENT="/usr/bin/emacsclient"
+    fi
+
+    if [  -z $EMACSCLIENT ] && [ -x "/Applications/Emacs.app/Contents/MacOS/bin/emacsclient"  ]; then
+        EMACSCLIENT="/Applications/Emacs.app/Contents/MacOS/bin/emacsclient"
+    fi
+
+    if [  -z $EMACSCLIENT ] ; then
+        echo "can not find emacsclient exit"
+        exit 1
+    fi
+
+    if [ -z "$1" ]
+    then
+        #/usr/bin/emacsclient -t  --socket-name=$HOME/.emacs.d/cache/emacs-server-file
+        $EMACSCLIENT -t  -nw
+    else
+        #/usr/bin/emacsclient -t  --socket-name=$HOME/.emacs.d/cache/emacs-server-file "$@"
+        $EMACSCLIENT -t   -nw "$@"
+    fi
+  #+END_SRC
+在 ~/.bashrc 或 ~/.zshrc 中加入以下内容
+#+BEGIN_SRC sh
+  if [ -f /Applications/Emacs.app/Contents/MacOS/Emacs ]; then
+      export  ALTERNATE_EDITOR=/Applications/Emacs.app/Contents/MacOS/Emacs
+  fi
+  if [ -f /usr/local/bin/emacs ]; then
+      export  ALTERNATE_EDITOR=/usr/local/bin/emacs
+  fi
+#+END_SRC
+
+* 让emacs 支持编辑 plist 文件
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'jka-compr-compression-info-list
+               ["\\.plist$"
+                "converting text XML to binary plist"
+                "plutil"
+                ("-convert" "binary1" "-o" "-" "-")
+                "converting binary plist to text XML"
+                "plutil"
+                ("-convert" "xml1" "-o" "-" "-")
+                nil nil "bplist"])
+#+END_SRC
+* 让emacs 支持编辑 applescript 脚本
+  ~/.emacs.d/bin/applescript-helper.sh
+  #+BEGIN_SRC sh
+    #/bin/sh
+    # mac 上 emacs 直接编辑二进制applescript
+    if [ "$1" = "-d" ]; then
+        RANDOMFILE="applescript${RANDOM}.scpt"
+        cat /dev/stdin >"/tmp/$RANDOMFILE"
+        osadecompile "/tmp/$RANDOMFILE"
+        rm "/tmp/$RANDOMFILE"
+    else
+        RANDOMFILE="applescript${RANDOM}.scpt"
+        osacompile -o "/tmp/$RANDOMFILE"
+        cat "/tmp/$RANDOMFILE"
+        rm "/tmp/$RANDOMFILE"
+    fi
+  #+END_SRC
+  #+BEGIN_SRC emacs-lisp
+    ;; # mac 上 emacs 直接编辑二进制applescript
+    (add-to-list 'jka-compr-compression-info-list
+                 `["\\.scpt\\'"
+                   "converting text applescript to binary applescprit " ,(expand-file-name "applescript-helper.sh" "~/.emacs.d/bin/") nil
+                   "converting binary applescript to text applescprit " ,(expand-file-name "applescript-helper.sh" "~/.emacs.d/bin/") ("-d")
+                   nil t "FasdUAS"])
+  #+END_SRC
+*  emacs 与 iTerm2
+** iTerm2 下 的emacs 绑定 C-, C-; Ctrl-return 等按键的问题
+  我喜欢使用 [[https://iterm2.com/][iTerm2]]这款终端
+  但是在终端下的emacs 有些按键是不能按的,比如C-, C-;
+   与[[https://iterm2.com/][iTerm2]] 配合 可以解决这样的问题
+   http://superuser.com/questions/731427/how-do-i-send-ctrl-in-iterm2
+   [[file:../img/iterm-key.png]]
+   #+BEGIN_SRC emacs-lisp
+     (global-set-key (kbd "C-[ [ a f") 'backward-kill-word) ;== "M-[ a f" iterm2 map to ctrl-;
+
+     也可以对其他键进行绑定
+     (global-set-key (kbd "C-[ [ a a") 'backward-kill-word) ;== "M-[ a a" iterm2 map to ctrl-backspace
+     (global-set-key (kbd "C-[ [ a b") 'toggle-eshell-cd)   ;iterm2 map to ctrl-f2
+     (global-set-key (kbd "C-[ [ a c") 'hippie-expand)   ; iterm map to ctrl-return
+     (global-set-key (kbd "C-[ [ a d") 'bm-previous)   ; iterm map to ctrl-,
+     (global-set-key (kbd "C-[ [ a e") 'goto-definition)   ; iterm map to ctrl-.
+
+   #+END_SRC
+   这样就实现了iTerm下的emacs 对C-; 进行绑定了
+** 在Finder 中使用iTerm2 中的emacs/emacsclient 打开文件
+     打开/Applications/Automator.app 文件->新建->应用程序
+     然后选择 实现工具->运行applescript 脚本
+     右侧会出现 编辑applescript 脚本的内容， 里面输入以下内容
+     然后 存储为EmcacClientOpenWith-InIterm2.app
+     把这个EmcacClientOpenWith-InIterm2.app 移动到/Applications/目录
+     在Finder 中的文件右键  打开方式 选择 /Applications/EmcacClientOpenWith-InIterm2.app
+     即可用终端下的emacs/emacsclient 打开此文件
+   #+BEGIN_SRC applescript
+     -- -*- coding:utf-8 mode:applescript-*-
+     -- 打开 automator.app ，然后 文件  选择本目录下的EmcacClientOpenWith-InIterm2.app
+     -- 本文件只是其txt 格式的备份
+     -- http://superuser.com/questions/457484/how-to-open-emacs-from-macs-finder
+     -- https://gist.github.com/ambethia/304964#comment-799519
+     -- http://superuser.com/questions/662815/how-to-exec-command-in-iterm-2-from-applescript
+     -- 在Finder 中右键使用emacsclient 打开文件
+     --  这个需要用automator.app 存成app  ,用applescript.app 存成的app 不行
+
+     -- em is my script wrapper for emacsclient
+
+     -- #!/bin/sh
+     -- if [ -z "$1" ]
+     -- then
+     --     emacsclient -t
+     -- else
+     --     emacsclient -t   "$@"
+     -- fi
+
+
+     on run {input, parameters}
+         tell application "iTerm"
+             activate
+             if (count of terminals) = 0 then
+                 set t to (make new terminal)
+             else
+                 set t to current terminal
+
+             end if
+             tell t
+                 set s to (make new session at the end of sessions)
+                 tell s
+                     -- em 命令是 上面注释的emacsclient 脚本，
+                     -- exec command (("emacs \"" & POSIX path of first item of input as text) & "\"")
+                     exec command (("em \"" & POSIX path of first item of input as text) & "\"")
+                 end tell
+             end tell
+         end tell
+     end run
+   #+END_SRC
+[[file:../img/automator1.jpg]]
+[[file:../img/automator2.jpg]]
+
+

@@ -1,0 +1,105 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     emacs-some-func.org
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-07-04 一
+#+DESCRIPTION:emacs-some-func.org
+#+KEYWORDS: emacs 
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Emacs:
+这个函数，用于跳转到下一处空格的位置，如果是连续的多个空格，则跳转到所有空
+格的开头及结尾。这个键我绑定在C-o上。
+#+begin_src emacs-lisp
+;;;###autoload
+(defun joseph-jump-to-space-forward()
+  (interactive)
+  (let ((old-pos (point))
+        m-end m-begin
+        )
+    (when (re-search-forward "[ \t]+"  nil t)
+      (setq m-begin (match-beginning 0))
+      (setq m-end (match-end 0))
+      (goto-char m-begin)
+      (if (equal old-pos m-end)
+          (progn
+            (re-search-forward "[ \t]+"  nil t)
+            (goto-char (match-beginning 0)))
+        (if (equal m-begin old-pos)
+            (goto-char m-end)
+            )))))
+#+end_src
+编写代码的时候添加或者删除注释是一个经常性的活动。默认emacs为这个工作已经做
+的很好了.不论你在写什么语言。都是`M-;'进行注释与反注释。
+即，如果你选中的区域已经被注释上了，则M-;取消注释。否则就是为你所中的区域添
+加注释。如果你没选中内容，则在行末添加注释。我想做的是，如果没有选中内容，
+则注释或者反注释当前行。如果在行末时，才在行末添加注释。
+将这个函数绑定在M-;上即可。
+#+begin_src emacs-lisp
+;;代码注释工作，如果有选中区域，则注释或者反注释这个区域
+;;如果，没选中区域，则注释或者注释当前行，如果光标在行末，则在行末添加或删除注释
+;;;###autoload
+(defun joseph-comment-dwim-line (&optional arg)
+  "Replacement for the comment-dwim command.
+If no region is selected and current line is not blank and we are not at the end of the line,
+then comment current line.
+Replaces default behaviour of comment-dwim, when it inserts comment at the end of the line."
+  (interactive "*P")
+  (comment-normalize-vars)
+  (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
+      (comment-or-uncomment-region (line-beginning-position) (line-end-position))
+    (comment-dwim arg)))
+#+end_src
+
+写程序时在行尾添加分号,不必非得光标在行尾。
+#+begin_src emacs-lisp
+(define-key java-mode-map ";"  'joseph-append-semicolon-at-eol)
+ 
+;;;###autoload
+(defun joseph-append-semicolon-at-eol(&optional arg)
+  "在当前行任何位置输入分号都在行尾添加分号，除非本行有for 这个关键字，
+如果行尾已经有分号则删除行尾的分号，将其插入到当前位置,就是说输入两次分号则不在行尾插入而是像正常情况一样."
+  (interactive "*p")
+  (let* ( ( init_position (point))
+          (b (line-beginning-position))
+          (e (line-end-position))
+          (line_str (buffer-substring b e))
+          (semicolon_end_of_line (string-match ";[ \t]*$" line_str ))
+          )
+    (if semicolon_end_of_line ;;;;如果行尾已经有分号，则删除行尾的分号，并在当前位置输入分号;;;;;;
+        (progn
+          (save-excursion
+            (goto-char (+ semicolon_end_of_line b))
+            (delete-char 1) )
+          (insert ";") )
+      ;;在整行内容中搜索有没有关键字for的存在,或者当前位置已经是行尾,直接插入分号
+      (if   (or (string-match "^[ \t]*$" (buffer-substring init_position e))
+                (string-match "\\bfor\\b" line_str))
+          (insert ";")
+        (save-excursion ;;如果搜索不到 for 则在行尾插入分号;
+          (end-of-line)
+          (delete-trailing-whitespace)
+          (insert ";")
+          )))))
+#+end_src
+
+这个函数是将C-j 与C-o 的功能进行合并。
+当光标在行首时，调用此函数，在上一行添加空行。当光标在行尾时，调用此命令则
+在下一行添加空行。所以可以节省下一个快捷键
+#+begin_src emacs-lisp
+;;;###autoload
+(defun open-line-or-new-line-dep-pos()
+  "if point is in head of line then open-line
+if point is at end of line , new-line-and-indent"
+  (interactive)
+  (if (and (= (point) (point-at-bol))
+           (not (looking-at "^[ \t]*$")))
+      (progn
+        (open-line 1)
+        (indent-for-tab-command))
+    (newline-and-indent)))
+#+end_src

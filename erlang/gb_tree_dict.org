@@ -1,0 +1,40 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     gb_tree dict proplist orddict
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-11-20 日
+#+DESCRIPTION:erlang.org
+#+KEYWORDS: erlang
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Erlang:
+* and or andalso orelse
+Expr1 orelse Expr2 Expr2可能被短路， 不运算
+Expr1 or Expr2 Expr2一定会被运算
+Expr1 andalso Expr2 Expr2一定会被运算
+Expr1 and Expr2 Expr2可能被短路， 不运算
+
+* Key-Value 存储
+**  对于小数据量，  有proplist 和 orddict
+*** proplist
+  提供了，
+  proplists:delete/2, proplists:get_value/2, proplists:get_all_values/2, proplists:lookup/2 and
+  proplists:lookup_all/2.
+  没有add or update 方法，只能手工使用 [H|T] 的方式自已处理，其内部结构[{Key,Value}].
+  可以使用lists:keyreplace/4.进行处理
+*** orddict
+   the whole list is sorted for faster average lookup,
+   75左右个元素时效率最高
+** 对于大数据量 有dicts gb_trees
+***   dicts 适于读多于写的
+   Dicts are thus very good choices to scale orddicts up whenever it is needed.
+***   gb_trees适于写多于读的
+      正常的gb_trees:enter/2, gb_trees:lookup/2 and gb_trees:delete_any/2
+      smart 的：gb_trees:insert/3, gb_trees:get/2, gb_trees:update/3 and gb_trees:delete/2.
+      smart的之处在于，它认为要处理的key在 gb_trees中存在，所以一些检查不必做，速度会快一点。
+
+https://github.com/jixiuf/helloerlang/tree/master/benchmark/src

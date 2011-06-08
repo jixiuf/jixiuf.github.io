@@ -1,0 +1,96 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     yasnippet Auto Insert mode整合
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:      2011-06-03 星期五
+#+TAGS: :Emacs: :Linux: :Windows:
+#+DESCRIPTION: Emacs 实现auto insert 时整合yasnippet 的模版功能
+#+KEYWORDS: Emacs yasnippet auto insert
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+EXPORT_SELECT_TAGS: Emacs
+#+EXPORT_EXCLUDE_TAGS: noexport
+
+auto-insert 是GNU/Emacs自带的一个功能，它可以实现当你新建一个文件的时候，自动
+在这个新建的文件里插入相应的内容，比如你新建一个c源文件的时候它自动加入这样一
+段代码：
+* c模版代码1
+#+BEGIN_SRC c
+#include <stdio.h>
+
+int main(void){
+  return 0;
+}
+#+END_SRC
+auto-insert 会根据你所新建文件的后缀名或major mode种类决定插入哪个模版文件。要
+实现上述功能 ，只需要在你Emacs的配置文件中加入似类如下的代码
+* 启用Auto Insert 的配置代码
+#+BEGIN_SRC emacs-lisp
+;;首先这句话设置一个目录，你的auto-insert 的模版文件会存放在这个目录中，
+(setq-default auto-insert-directory "~/.emacs.d/auto-insert/")
+(auto-insert-mode)  ;;; 启用auto-insert
+;; 默认情况下插入模版前会循问你要不要自动插入，这里设置为不必询问，
+;; 在新建一个org文件时，自动插入`auto-insert-directory'目录下的`org-auto-insert`文件中的内容
+(setq auto-insert-query nil)
+(define-auto-insert "\\.org" "org-auto-insert")
+;;这个就是新建以.c 结尾的C文件时，会自动插入c-auto-insert文件中的内容
+(define-auto-insert "\\.c" "c-auto-insert")
+#+END_SRC
+下面要做在只需要在~/.emacs.d/auto-insert/c-auto-insert 文件中插入上面提到的[[c模版代码1][c模
+版代码1]]建好~/.emacs.d/auto-insert/c-auto-insert 文件后，用Emacs新建 一个c文
+件，你就会发现你新建的文件中已经包含上面那段c代码片段了。故事并没有到此结束 ，
+写到这里，还一直没yasnippet什么事呢.假如我想在创建这个c文件的时候，在文件开头
+插入文件创建的时间，作者的姓名，又或者是这个刚刚创建的文件的名称，其格式大概如
+下
+#+BEGIN_SRC c
+//file name : hellworld.c
+//created at: 2011-11-11 11:11:11
+//author: 爱谁谁
+
+#include <stdio.h>
+
+int main(void){
+  return 0;
+}
+#+END_SRC
+这个作者姓名或许你可以硬编码到这个模版文件中，因为毕竟只有你自己在用你的Emacs
+,可是这个创建时间，及文件名你就很难把它办到了，当然EmacsWiki上介绍
+[[http://www.emacswiki.org/emacs/AutoInsertMode][AutoInSertMode]]的页面上有解决这个问题的办法 ，但是它针对上面提到的每个问题都要
+写一个elisp函数来实现其功能。很明显，易用性、扩展性差了点。而讲到模版功能，相
+信在Emacs中可用的模版功能，目前可以说[[http://code.google.com/p/yasnippet/][yasnippet]] 算得上是最强大的了。
+将这两者结合来用，自然再合适不过了。
+* 将auto-insert-mode与yasnippet 进行整合的代码
+#+BEGIN_SRC emacs-lisp
+(defadvice auto-insert  (around yasnippet-expand-after-auto-insert activate)
+  "expand auto-inserted content as yasnippet templete,
+  so that we could use yasnippet in autoinsert mode"
+  (let ((is-new-file (and (not buffer-read-only)
+                          (or (eq this-command 'auto-insert)
+                              (and auto-insert (bobp) (eobp))))))
+    ad-do-it
+    (let ((old-point-max (point-max)))
+      (when is-new-file
+        (goto-char old-point-max)
+        (yas/expand-snippet (buffer-substring-no-properties (point-min) (point-max)))
+        (delete-region (point-min) old-point-max)
+        )
+      )
+    )
+  )
+#+END_SRC
+将这段代码放到[[启用Auto Insert 的配置代码]] 的后面，即可。然后c-auto-insert 这个
+文件里的代码 就可以是yasnippet 支持的模版文件的代码了,上面提到的功能，
+可以这样实现
+* Yasnippet 格式的模版
+#+BEGIN_SRC c
+//file name : `(buffer-name)`
+//created at: `(format-time-string "%c")`
+//author:  `user-full-name`
+
+#include <stdio.h>
+
+int main(void){
+  return 0;
+}
+#+END_SRC

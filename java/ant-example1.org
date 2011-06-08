@@ -1,0 +1,14 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE: ant build.xml 示例 
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:      2011-06-04 星期六
+#+KEYWORDS: ant java build.xml 
+#+LANGUAGE:  zh
+#+TAGS: :Java:
+
+*自已写的关于ant 的一个build脚本，没什么好说的，脚本在这里。
+[[file:../download/ant_build.xml][build.xml]]
+[[file:../download/build2.xml]]
+    

@@ -1,0 +1,33 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     emacs narrow-to-region 与widen
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2015-10-18 日
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Emacs:
+*  C-x n n narrow-to-region
+ 效果是 当你选中一个区域 然后按下C-x n n 后
+ 选中区域 之外的其他内容不会再显示（并没有被删掉， 只是不显示了而已）
+ 这个命令 会让初学者迷惑(会给人一种感觉，丢了一部分内容)，所以默认是禁用的
+#+BEGIN_SRC emacs-lisp
+;; 起用这个命令
+(put 'narrow-to-region 'disabled nil)
+#+END_SRC
+* C-x n w widen
+  narrow-to-region 的返向操作，
+  按下 C-x n w  原来被隐藏的内容会显示出来
+
+narrow-to-region 的意义
+举个例子
+
+比如 我想修改某个函数的变量名 但是由于同文件里的其他函数里也有可能含有
+同名变量, 此时就可以 C-M-h 选中当前函数 然后 C-x n n 只显示 当前函数
+然后把 所有的变量改名后C-x n w 再恢复 就完成了只改此函数内变量功能
+ 像 这种情况可以结合 Iedit 一起使用
+  [[file:00007-emacs-search-replace.org][emacs 搜索与替换]] 内有介绍Iedit 的使用
+
+
+

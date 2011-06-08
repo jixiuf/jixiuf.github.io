@@ -1,0 +1,243 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     cc mode 里关于indent(缩进)的控制
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-11-20 日
+#+DESCRIPTION:cc mode 里关于indent(缩进)的控制
+#+KEYWORDS: cc indent emacs
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil 
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Emacs:
+
+* `C-cC-s'  `C-uC-cC-s'  
+  显示当前行的indent信息
+* indent 定位信息  
+** (函数相关的定位)function related Symbols 
+#+begin_src c
+ void                           /* ((topmost-intro 1)), top-level 表达示的第一行, */
+ swap( int& a, int& b )         /* ((topmost-intro-cont 2)) 是topmost-intro 的continuation(继续) */
+ {                              /* ((defun-open 2)) 函数定义的开始*/
+     int tmp = a;               /* ((defun-block-intro 123)) ,函数内第一条语句*/
+     a = b;                     /* ((statement 182)) 普通的一条语句*/
+     b = tmp;                   /* ((statement 246)) */
+     int ignored =              /* ((statement 302)) */
+             a + b;             /* ((statement-cont 358)) ,上一句不完整statement的继续*/
+  }                             /* ((defun-close 123)) 函数的结束*/
+#+end_src
+** 类相关的定位 Class related Symbols
+#+begin_src c++
+ class Bass                     // ((topmost-intro 1))
+   : public Guitar,           // ((inher-intro 2) inheritance(继承), 继承语句的开始)
+     public Amplifiable       // ((inher-cont 61) 继承语句的continuation(继续) )
+ {                              // ((class-open 2))
+public:                        // ((inclass 163) (access-label 163)) ,包括了两个类型,inclass ,access-label访问控制符,估计是protect public之流
+     Bass()                     // ((inclass 163) (topmost-intro 162))
+         : eString( new BassString( 0.105 )), // ((member-init-intro 289)) 第一个member
+           aString( new BassString( 0.085 )), // ((member-init-cont 366)),member 的继续
+           dString( new BassString( 0.065 )), // ((member-init-cont 366))
+           gString( new BassString( 0.045 ))  // ((member-init-cont 366))
+     {                                        // ((inclass 163) (inline-open)) inline-open 与 defun-open的不同是,它是"类中函数" 
+         eString.tune( 'E' );                 // ((defun-block-intro 657)) 函数定义的第一句
+         aString.tune( 'A' );                 // ((statement 740))
+         dString.tune( 'D' );                 // ((statement 815))
+         gString.tune( 'G' );                 // ((statement 882))
+     }                                        // ((inline-close 657))
+     friend class Luthier;                    // ((inclass 163) (topmost-intro 1007) (friend))
+ };                                           // ((class-close 2))
+#+end_src
+** Conditional Construct Symbols if else for子句 
+#+begin_src c++
+ void spam( int index )         // ((topmost-intro 1))
+ {                              // ((defun-open 2))
+     for( int i=0; i<index; i++ ) // ((defun-block-intro 57))
+     {                                 // ((substatement-open 113)) 函数内部的一些if for 等语句的open 
+       if( i == 10 )            // ((statement-block-intro 175)) 函数内部的一些if for 等语句的open 第一条语句
+             do_something_special(); // ((substatement 242))
+         else                        // ((else-clause 242))
+           silly_label:              // ((substatement-label 370)) 
+             do_something( i );      // ((substatement 370))
+     }                               // ((block-close 175))
+     do {                            // ((statement 113))
+         another_thing( i-- );       // ((statement-block-intro 614))
+     }                               // ((block-close 614))
+     while( i > 0 );                 // ((do-while-closure 614))
+ }                                   // ((defun-close 57))
+#+end_src
+** switch case 子句  
+#+begin_src c++
+void spam( enum Ingredient i )  // ((topmost-intro 1)) 
+{                               // ((defun-open 1))
+    switch                      // ((defun-block-intro 56))
+    ( i ) {                     // ((statement-cont 112))
+    case Ham:                   // ((case-label 112))           case 语句
+        be_a_pig();             // ((statement-case-intro 230)) case 下第一条语句
+        break;                  // ((statement 288))          
+    case Salt:                  // ((case-label 112))
+        drink_some_water();     // ((statement-case-intro 401))
+        break;                  // ((statement 459))
+    default:                    // ((case-label 112))
+        {                       // ((statement-case-open 572))   case 的open 
+            what_is_it();       // ((statement-block-intro 630)) 
+            break;              // ((statement 697))
+        }                       // ((block-close 630))
+    }                           // ((block-close 112))
+}                               // ((defun-close 56))
+#+end_src
+** })', `([ ])' and `(< >)', are treated as brace lists too.  An example:
+#+begin_src c++
+  static char* ingredients[] =   // ((topmost-intro 1))
+ {                              // ((brace-list-open 2))
+     "Ham",                     // ((brace-list-intro 57))
+     "Salt",                    // ((brace-list-entry 118))
+     NULL                       // ((brace-list-entry 118))
+ };                             // ((brace-list-close 57))
+#+end_src
+** 括号匹配,参数相关 
+#+begin_src c++
+void a_function( int line1,     // ((topmost-intro 1))
+                 int line2 );   // ((arglist-cont-nonempty 1 16)) 表示这是 (arglist-cont,并且noempty 表示此行包含 了右括号) 
+                                // ((topmost-intro 56))
+void a_longer_function(         // ((topmost-intro 56)) 
+    int line1,                  // ((arglist-intro 178 200))        第一个参数
+    int line2                   // ((arglist-cont 238)) 参数的继续
+    );                          // ((arglist-close 178 200))参数关闭
+void call_them( int line1, int line2 ) // ((topmost-intro 351))
+ {                                     // ((defun-open 469))
+     a_function(                       // ((defun-block-intro 534))
+         line1,                        // ((arglist-intro 599 609))
+         line2                         // ((arglist-cont 671))
+         );                            // ((arglist-close 599 609))
+                                // ((statement 599))
+     a_longer_function( line1,  // ((statement 599))
+                        line2 ); // ((arglist-cont-nonempty 919 936)) 函数 调用参数相关的,表示这是(arglist-cont, noempty 表示此行包含 了右括号) 
+ }                               // ((defun-close 534))
+#+end_src
+**  其他  
+#+begin_src c++
+void Bass::play( int volume )                                         // ((topmost-intro 1))
+const                                                                 // ((func-decl-cont 1)) function声明若多行时,的继续
+{                                                                     // ((defun-open 1))
+  /*this line starts a multiline                                         ((defun-block-intro 112) (comment-intro)),注释的开始
+     * comment.  This line should get `c' syntax */                   // ((c 196)) 注释
+    char* a_multiline_string = "This line starts a multiline \        // ((defun-block-intro 112)) 
+string.  This line should get `string' syntax.";                      // ((string 395))       ,表示是一个string的窝内
+   note:                                                              // ((label 112))
+     {                                                                // ((block-open) (statement 399))
+ #ifdef LOCK                                                          // ((statement-block-intro 675) (cpp-macro))
+         Lock acquire();                                              // ((statement-block-intro 675))
+ #endif                                                               // ((statement 822) (cpp-macro))LOCK
+         slap_pop();                                                  // ((statement 822))
+         cout << "I played "                                          // ((statement 956))
+              << "a note\n";                                          // ((stream-op 1009))
+     }                                                                // ((block-close 675))
+ }                                                                    // ((defun-close 112))
+#+end_src
+** java 相关   
+#+begin_src java 
+ @Test                          // ((topmost-intro 1))
+ public void watch(Observable o) { // ((annotation-top-cont 2)) 对method class进行 annotation声明
+     @NonNull                      // ((defun-block-intro 2))
+         Observer obs = new Observer() { // ((annotation-var-cont 125))对变量进行 annotation声明 
+             public void update(Observable o, Object arg) { // ((inexpr-class内部类) (inclass 187) (topmost-intro 182)),它具有普通inclass的特性,同时有inexpr-class的特性
+             history.addElement(arg);                   // ((defun-block-intro 259))
+         }                                              // ((inline-close 259))
+     };                                                 // ((inexpr-class) (class-close 187))
+     o.addObserver(obs);                                // ((statement 125))
+ }                                                      // ((defun-close 2))
+
+#+end_src
+** statement  
+#+begin_src c++
+int res = ({                    // ((topmost-intro 1))
+    int y = foo (); int z;  // ((inexpr-statement) (statement-block-intro 1)) ,(inexpr-statement)表示它处于一个statement的内部的表达示
+        if (y > 0) z = y; else z = - y; // ((statement 64))
+        z;                              // ((statement 146))
+    });                                 // ((inexpr-statement) (block-close 1))
+#+end_src
+
+* c-offsets-alist
+#+begin_src emacs-lisp
+  (setq c-offsets-alist
+        ' ((statement . 0)
+           (statement-cont . 0)
+           (substatement . +)
+           (cpp-macro . [0])
+           (topmost-intro-cont . c-lineup-topmost-intro-cont)
+           (statement-block-intro . ++)
+           (statement-block-intro . (add c-lineup-whitesmith-in-block
+                                         c-indent-multi-line-block))
+           ))
+或者
+只设某一个值
+ (c-set-offset 'topmost-intro '+)
+
+#+end_src  
+* 示例
+  #+begin_src c
+          1: int add( int val, int incr, int doit )
+          2: {
+          3:   if( doit )
+          4:     {
+          5:       return( val + incr );
+          6:     }
+          7:   return( val );
+          8: }
+    变成,
+          1: int add( int val, int incr, int doit )
+          2: {
+          3:   if( doit )
+          4:   {
+          5:     return( val + incr );
+          6:   }
+          7:   return( val );
+          8: }
+      
+  #+end_src
+  区别在第四行,光标移动到第4行,按下C-cC-s ,显示
+  ((substatement-open 44))
+  所以此行对应substatement-open
+  #+begin_src emacs-lisp
+  (c-set-offset 'substatement-open 0) ;缩进变成0 
+  #+end_src
+  
+* style
+#+begin_src emacs-lisp
+(defconst my-c-style
+  '((c-tab-always-indent        . t)
+    (c-comment-only-line-offset . 4)
+    (c-hanging-braces-alist     . ((substatement-open after)
+                                   (brace-list-open)))
+    (c-hanging-colons-alist     . ((member-init-intro before)
+                                   (inher-intro)
+                                   (case-label after)
+                                   (label after)
+                                   (access-label after)))
+    (c-cleanup-list             . (scope-operator
+                                   empty-defun-braces
+                                   defun-close-semi))
+    (c-offsets-alist            . ((arglist-close . c-lineup-arglist)
+                                   (substatement-open . 0)
+                                   (case-label        . 4)
+                                   (block-open        . 0)
+                                   (knr-argdecl-intro . -)))
+    (c-echo-syntactic-information-p . t))
+  "My C Programming Style")
+(c-add-style "PERSONAL" my-c-style)
+
+
+(defun my-c-mode-common-hook ()
+  ;; set my personal style for the current buffer
+  (c-set-style "PERSONAL")
+  ;; other customizations
+  (setq tab-width 8
+        ;; this will make sure spaces are used instead of tabs
+        indent-tabs-mode nil)
+  ;; we like auto-newline, but not hungry-delete
+  (c-toggle-auto-newline 1))
+(add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
+
+#+end_src

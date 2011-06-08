@@ -1,0 +1,44 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     读写二进制文件,读写int
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-11-01 二
+#+DESCRIPTION:读写二进制文件,读写int
+#+KEYWORDS: C fread fwrite fopen
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil 
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :C:
+#+begin_src c
+//file name : a.c
+//created at: 2011年11月01日 星期二 20时28分13秒
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <malloc.h>
+#include <string.h>
+
+int main(int argc, char *argv[]){
+  FILE *fp = fopen("/tmp/aout", "wb+");
+  int a =30;
+  fwrite(&a,sizeof(int),1,fp);
+  a=1;
+  fwrite(&a,sizeof(int),1,fp);
+  fclose(fp);
+
+  fp = fopen("/tmp/aout", "rb");
+
+  fseek(fp,0,SEEK_SET);
+  fread(&a,sizeof(int),1,fp);
+  printf ("%d\n",a);
+
+  fseek(fp,0+sizeof(int),SEEK_SET);
+  fread(&a,sizeof(int),1,fp);
+  printf ("%d\n",a);
+
+  return 0;
+}
+#+end_src

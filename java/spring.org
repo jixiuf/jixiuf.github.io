@@ -1,0 +1,281 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     spring.rnc的作成
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-10-18 二
+#+DESCRIPTION:spring.rnc的作成
+#+KEYWORDS: spring rnc trang rngrnc nxml emacs
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Java:
+链接:
+http://jamsa.javaeye.com/blog/38202
+http://infohost.nmt.edu/tcc/help/pubs/nxml/schema-locating.html
+http://infohost.nmt.edu/tcc/help/pubs/rnc/def-patterns.html
+演示视频：http://screencast-repos.googlecode.com/files/emacs-can-do-what-nxml0springContext.mp4
+我提供的关于spring-3.0.rnc struts 等一些rnc文件  https://github.com/jixiuf/emacs_conf/tree/master/script/nxml
+关于如何作成spring-3.0.rnc
+因为spring-3.0 的applicationContext.xml 使用xsd进行约束.
+而要将xsd 转换成rnc 需要经过两步
+xsd  --> rng -->rnc
+先将xsd格式转换成rng格式,然后再转换在rnc
+由xsd 转换成rng 的过程可以通过rngconv来实现
+#+begin_src sh
+  java -jar rngconv.jar spring-beans-3.0.xsd   >spring-beans-3.0.rng
+#+end_src
+而由rng转换成rnc 的过程可以通过trang来实现
+#+begin_src sh
+  java -jar trang.jar  spring-beans-3.0.rng spring-beans-3.0.rnc
+#+end_src
+
+如果一切都正常的话,那面上面这些已经足够了,但是实际情况总是会出一些小问题
+下面具体分说
+* 下载trang.jar rngconv.jar
+首先你先要下载trang.jar rngconv.jar 等几个jar 包,当然可能会有几个依赖的jar
+会一起用到,分别下载两个压缩包解压开找到jar 即可.
+* 2找到这几个文件,放到同一个目录
+#+begin_src sh
+  spring-aop-3.0.xsd
+  spring-beans-3.0.xsd
+  spring-context-3.0.xsd
+  spring-jdbc-3.0.xsd
+  spring-jee-3.0.xsd
+  spring-jms-3.0.xsd
+  spring-lang-3.0.xsd
+  spring-mvc-3.0.xsd
+  spring-oxm-3.0.xsd
+  spring-task-3.0.xsd
+  spring-tool-3.0.xsd
+  spring-tx-3.0.xsd
+  spring-util-3.0.xsd
+#+end_src
+* 具体操作
+* spring-beans-3.0.xsd 转换成spring-beans-3.0.rnc
+  当运行这条命令时,
+#+begin_src sh
+  java -jar rngconv.jar spring-beans-3.0.xsd   >spring-beans-3.0.rng
+#+end_src
+会出现这个错误
+
+#+begin_quote
+"schemaLocation" attribute is required for "xsd:import" element, but is not specified
+  7:64@file:///tmp/spring-beans-3.0.xsd
+namespace "http://www.w3.org/XML/1998/namespace" is referenced but no schema definition of this namespace was found.
+  7:64@file:///tmp/spring-beans-3.0.xsd
+failed to load the grammar
+#+end_quote
+
+解决办法是:
+打开spring-beans-3.0.xsd 注释掉下面这句,或者直接删除也可以
+#+begin_quote
+	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+#+end_quote
+注意所有其他几个文件中的<xsd:import />
+namespace指向http://www.w3.org/XML/1998/namespace地址的 import 都可以这样处
+理,但是不是指向这个地址的需要另作处理
+
+再次运行这条命令,会成功生成rng文件
+#+begin_src sh
+然后用这条命令生成 rnc文件
+  java -jar trang.jar  spring-beans-3.0.rng spring-beans-3.0.rnc
+#+end_src
+对于spring-bean-.3.0.xsd转换成rnc 的步骤是最简单的.
+与此相同处理即可得到rnc  的是spring-tool-3.0.xsd
+因为它们不依赖其他几个xsd
+
+* 如何编辑applicationContext.xml 文件时,自动用spring-beans-3.0.rnc 对其进行解析
+#+begin_src emacs-lisp
+(eval-after-load 'rng-loc
+  '(progn
+     (add-to-list 'rng-schema-locating-files (expand-file-name "~/.emacs.d/script/nxml/schemas.xml"))
+     ))
+(defun nxml-mode-hook-fun ()
+  ;;默认绑定的键是`C-cC-sC-a' ,将当前编辑的文件与特定的rnc 文件进行关联,只有
+  ;;关联后的xml 才可以解析其语法规则进行补全
+  (require 'rng-valid)
+  (rng-auto-set-schema-and-validate)
+  )
+(add-hook 'nxml-mode-hook 'nxml-mode-hook-fun)
+#+end_src
+  将spring-beans-3.0.rnc   复制到 ~/.emacs.d/script/nxml/目录下,与
+  [[https://github.com/jixiuf/emacs_conf/tree/master/script/nxml][schemas.xml]] 同目录
+然后就是修改 [[https://raw.github.com/jixiuf/emacs_conf/master/script/nxml/schemas.xml][ "~/.emacs.d/script/nxml/schemas.xml"]]文件,
+然后在其中加入这样两句话,
+#+begin_src xml
+ <namespace ns="http://www.springframework.org/schema/beans" typeId="Spring3.0" />
+  <typeId id="Spring3.0" uri="spring-3.0.rnc"/>
+#+end_src
+#+begin_src xml
+这一句等效于上面两句
+ <namespace ns="http://www.springframework.org/schema/beans"  uri="spring-3.0.rnc" />
+#+end_src
+关于schemas.xml的格式详见:
+http://infohost.nmt.edu/tcc/help/pubs/nxml/schema-locating.html
+因为applicationContext.xml含有这样一句话,所以它会首先使用  spring-3.0.rnc对
+文件进行解析
+#+begin_src xml
+<beans xmlns="http://www.springframework.org/schema/beans">
+#+end_src
+
+当你打开一个 applicationContext.xml 时,
+会报错
+#+begin_src emacs-lisp
+Debugger entered--Lisp error: (error "Expected `}' but got `+'")
+  signal(error ("Expected `}' but got `+'"))
+  error("%s" "Expected `}' but got `+'")
+  nxml-display-file-parse-error((rng-c-incorrect-schema "/tmp/spring-beans-3.0.rnc" 743 "Expected `}' but got `+'"))
+  rng-set-schema-file("/tmp/spring-beans-3.0.rnc")
+  rng-set-schema-file-and-validate("/tmp/spring-beans-3.0.rnc")
+  call-interactively(rng-set-schema-file-and-validate nil nil)
+#+end_src
+或
+#+begin_src emacs-lisp
+Debugger entered--Lisp error: (error "Invalid grammar content")
+  signal(error ("Invalid grammar content"))
+  error("%s" "Invalid grammar content")
+  nxml-display-file-parse-error((rng-c-incorrect-schema "/tmp/spring-beans-3.0.rnc" 1627 "Invalid grammar content"))
+  rng-set-schema-file("/tmp/spring-beans-3.0.rnc")
+  rng-set-schema-file-and-validate("/tmp/spring-beans-3.0.rnc")
+  call-interactively(rng-set-schema-file-and-validate nil nil)
+#+end_src
+并在 spring-beans-3.0.rnc  中定位出错误来,
+大概定位在
+#+begin_quote
+         (import | alias | bean)?+,
+#+end_quote
+问题出在 "?+"这两个字符,将"?"删除,只留"+"号,保存后,
+回到 applicationContext.xml 文件中按下C-cC-sC-a
+又会出错,问题相同,删除相应问号后,应该就没问题了.估计直接将全文的"?+"替换为
+"+"就可以.
+
+最后,在 编辑applicationContext.xml 时,按Control+Return 可以,补全出相应的属
+性名.
+* spring-aop-3.0.xsd 转换成spring-aop-3.0.rnc
+spring-aop-3.0.xsd比 spring-beans-3.0.xsd的处理要复杂一点
+#+begin_src sh
+ java -jar rngconv.jar spring-aop-3.0.xsd   >spring-aop-3.0.rng
+#+end_src
+#+begin_src sh
+"schemaLocation" attribute is required for "xsd:import" element, but is not specified
+  7:64@http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+"schemaLocation" attribute is required for "xsd:import" element, but is not specified
+  8:64@http://www.springframework.org/schema/tool/spring-tool-3.0.xsd
+namespace "http://www.w3.org/XML/1998/namespace" is referenced but no schema definition of this namespace was found.
+  7:64@http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+failed to load the grammar
+#+end_src
+解法:
+将其中的这两句
+#+begin_src xml
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.0.xsd"/>
+#+end_src
+换成:使用相对路径
+#+begin_src xml
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="spring-beans-3.0.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="spring-tool-3.0.xsd" />
+#+end_src
+同时,不要忘了,将spring-tool-3.0.xsd文件中的 这句删掉
+#+begin_src xml
+	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+#+end_src
+除此之外,处理方法与spring-beans-3.0.xsd同,
+此次生成的rnc 文件,相对 spring-beans-3.0.rnc的优点是,不但可以补全像
+#+begin_src xml
+    <bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+        <property name="sessionFactory">
+            <ref local="sessionFactory"/>
+        </property>
+    </bean>
+#+end_src
+ 这样的元素
+还可以补全带有aop前缀的元素
+#+begin_src xml
+    <aop:config>
+        <aop:pointcut id="allManagerMethod" expression="execution (* org.jixiuf.drp.service.*.*(..))"/>
+#+end_src
+同样的道理, spring-context-3.0.rnc 可以补全如下元素
+#+begin_src xml
+   <context:annotation-config />
+    <context:component-scan base-package="org.jixiuf" />
+#+end_src
+但是,缺点是 spring-context-3.0.rnc spring-beans-3.0.rnc spring-aop-3.0.rnc
+三个文件不能同时使用
+,解决办法,就是将文章开头列出的几个文件,过行合并后,统一生成一个rnc文件
+
+
+* 合并成一个spring.rnc
+  通过修改 spring-aop-3.0.xsd,来包含其他几个文件来实现,这样生成的
+  spring-aop-3.0.rnc 就包含了其他几个xsd文件中的内容
+  修改后的 spring-aop-3.0.xsd头部如下
+#+begin_src xml
+<xsd:schema xmlns="http://www.springframework.org/schema/aop"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns:beans="http://www.springframework.org/schema/beans"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xmlns:tool="http://www.springframework.org/schema/tool"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+		xmlns:jee="http://www.springframework.org/schema/jee"
+		xmlns:jms="http://www.springframework.org/schema/jms"
+		xmlns:lang="http://www.springframework.org/schema/lang"
+		xmlns:mvc="http://www.springframework.org/schema/mvc"
+		xmlns:oxm="http://www.springframework.org/schema/oxm"
+		xmlns:task="http://www.springframework.org/schema/task"
+		xmlns:util="http://www.springframework.org/schema/util"
+		targetNamespace="http://www.springframework.org/schema/aop"
+		elementFormDefault="qualified"
+		attributeFormDefault="unqualified">
+	<xsd:import namespace="http://www.springframework.org/schema/tx" schemaLocation="spring-tx-3.0.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/context" schemaLocation="spring-context-3.0.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/jdbc" schemaLocation="spring-jdbc-3.0.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/jee" schemaLocation="spring-jee-3.0.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/jms" schemaLocation="spring-jms-3.0.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/lang" schemaLocation="spring-lang-3.0.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/mvc" schemaLocation="spring-mvc-3.0.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/oxm" schemaLocation="spring-oxm-3.0.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/task" schemaLocation="spring-task-3.0.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/util" schemaLocation="spring-util-3.0.xsd" />
+#+end_src
+下面这几个文件不需要这么复杂,只需要将其中的
+#+begin_quote
+  spring-context-3.0.xsd
+  spring-jdbc-3.0.xsd
+  spring-jee-3.0.xsd
+  spring-jms-3.0.xsd
+  spring-lang-3.0.xsd
+  spring-mvc-3.0.xsd
+  spring-oxm-3.0.xsd
+  spring-task-3.0.xsd
+  spring-tx-3.0.xsd
+  spring-util-3.0.xsd
+#+end_quote
+#+begin_src xml
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.0.xsd"/>
+#+end_src
+
+换成:使用相对路径
+#+begin_src xml
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="spring-beans-3.0.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="spring-tool-3.0.xsd" />
+#+end_src
+
+这两个文件,删除其中的
+#+begin_quote
+  spring-tool-3.0.xsd
+  spring-beans-3.0.xsd
+#+end_quote
+#+begin_quote
+	<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+#+end_quote
+用这两条命令生成spring-3.0.rnc,生成之后还会出现 "?+" 这个问题,解决掉之后,即
+可
+#+begin_src sh
+ java -jar rngconv.jar spring-aop-3.0.xsd   >spring-aop-3.0.rng
+  java -jar trang.jar  spring-aop-3.0.rng spring-3.0.rnc
+#+end_src

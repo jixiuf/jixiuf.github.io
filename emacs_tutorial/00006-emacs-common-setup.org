@@ -1,0 +1,193 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     emacs 一些简单的设置
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2015-10-18 日
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Emacs:
+* 不使用对话框进行（是，否 取消,打开文件） 的选择，而是用minibuffer
+  #+BEGIN_SRC emacs-lisp
+    (setq-default  use-dialog-box nil)
+  #+END_SRC
+* 关闭scratch消息提示
+  #+BEGIN_SRC emacs-lisp
+    # 默认的 *scratch* buffer 里面会有一段下面的内容，
+    ;; This buffer is for notes you don't want to save, and for Lisp evaluation.
+    ;; If you want to create a file, visit that file with C-x C-f,
+    ;; then enter the text in that file's own buffer.
+    默认不想显示此内容，则这样设置
+    (setq  initial-scratch-message nil)
+  #+END_SRC
+* 隐藏启动显示画面
+  #+BEGIN_SRC emacs-lisp
+    (setq inhibit-startup-screen t)
+  #+END_SRC
+
+* 设置窗口标题格式
+  #+BEGIN_SRC emacs-lisp
+     ;标题显示文件名，而不是默认的username@localhost
+    (setq frame-title-format "%b  [%I] %f  GNU/Emacs" )
+  #+END_SRC
+* 关闭烦人的出错时的提示声。
+  #+BEGIN_SRC emacs-lisp
+    (setq visible-bell t)
+    (setq  ring-bell-function 'ignore)
+  #+END_SRC
+* 输入括号时 自动添加半边括号的功能
+  #+BEGIN_SRC emacs-lisp
+    (electric-pair-mode t)
+  #+END_SRC
+*  隐藏菜单栏 工具栏 滚动条
+   #+BEGIN_SRC emacs-lisp
+     (require 'menu-bar)
+     (menu-bar-mode nil)
+     (require 'tool-bar)
+     (tool-bar-mode nil)
+     (require 'scroll-bar)
+     (scroll-bar-mode nil)
+   #+END_SRC
+* 鼠标粘贴相关
+  不要在鼠标点击的那个地方插入剪贴板内容。我不喜欢那样，经常把 我的文档
+  搞的一团糟。我觉得先用光标定位，然后鼠标中键点击要好 的多。不管你的光
+  标在文档的那个位置，或是在 minibuffer，鼠标 中键一点击，X selection 的
+  内容就被插入到那个位置
+  #+BEGIN_SRC emacs-lisp
+    (setq mouse-yank-at-point t)
+  #+END_SRC
+* kill-ring 设置的大一些,默认60
+  emacs 会维护一个 剪切环，所有你剪切 复制,kill掉的内容都会先放到这里
+  面你粘贴的时候 就是把这里面的内容粘贴到光标处,在windows 上你复制两个
+  内容到剪切板，最先复制的那个就是被丢弃只保留最后复制的一个，而emacs
+  可以保存多份你复制过的内容，这里就设置最多允许保存多少份与此相关的粘
+  贴命令是C-y ，使用一个C-y会把最近复制的内容放到光标处此时再按多次M-y
+  则后 把前一次复制的内容放到光标处 ，重复多次M-y 就可以遍历kill-ring
+  中的内容
+  #+BEGIN_SRC emacs-lisp
+    (setq kill-ring-max 200)
+    (setq kill-do-not-save-duplicates t);不向kill-ring中加入重复内容
+  #+END_SRC
+* space vs tab  代码缩进
+  #+BEGIN_SRC emacs-lisp
+   用空格代替tab来进行代码的缩进
+   (setq-default indent-tabs-mode nil)
+  #+END_SRC
+* C-k kill-line 相关
+  默认C-k 绑定 kill-line 命令
+  这个命令的作用是 删除从光标到行末的内容
+  如果此时光标在行首 则删除整行内容，但不包括行尾的换行符
+  需要你再按一次C-k 才会删除行尾的换行符
+  C-u 0 C-k 则会删除从光标到行首的内容
+  #+BEGIN_SRC emacs-lisp
+   (setq kill-whole-line t);在行首 C-k 时，同时删除末尾换行符
+  #+END_SRC
+** C-k 的改进版
+   #+BEGIN_SRC emacs-lisp
+     ;;我写的一个函数,如果有选中区域,则kill选区,否则删除当前行
+     ;;注意当前行并不代表整行,它只删除光标到行尾的内容,也就是默认情况下
+     ;;C-k 所具有的功能
+     ;; C-w kill-region 这个按键可以省下来，此改进版 包含了kill-region 功能
+     ;; 你可以把C-w 绑定到其他命令上去
+     (defun joseph-kill-region-or-line(&optional arg)
+       "this function is a wrapper of (kill-line).
+             When called interactively with no active region, this function
+            will call (kill-line) ,else kill the region."
+       (interactive "P")
+       (if mark-active
+           (if (= (region-beginning) (region-end) ) (kill-line arg)
+             (kill-region (region-beginning) (region-end)))
+         (kill-line arg)))
+     (global-set-key (kbd "C-k") 'joseph-kill-region-or-line)
+   #+END_SRC
+* kill 相关
+  如果在一些read-only 的buffer 中去kill (kill-line kill-region) 默认是
+  kill 不成功的会给出警告,如在dired-mode 中按C-k
+  #+BEGIN_SRC emacs-lisp
+    (setq kill-read-only-ok t)
+    ;;kill read-only buffer内容时,会把此内容放到kill-ring中而不用警告
+  #+END_SRC
+  #+BEGIN_SRC emacs-lisp
+    (delete-selection-mode 1) ;;当选中内容时，输入新内容则会替换掉,启用delete-selection-mode
+  #+END_SRC
+* default-major-mode
+  #+BEGIN_SRC emacs-lisp
+    ;; 把缺省的 major mode 设置为 text-mode, 而不是几乎什么功能也 没有的 fundamental-mode.
+    (setq default-major-mode 'text-mode)
+  #+END_SRC
+* 自动备份相关
+  #+BEGIN_SRC emacs-lisp
+    (setq
+     backup-by-copying t    ;自动备份
+     delete-old-versions t ; 自动删除旧的备份文件
+     kept-new-versions 10   ; 保留最近的10个备份文件
+     kept-old-versions 2   ; 保留最早的2个备份文件
+     version-control t    ; 多次备份
+     ;; 把生成的备份文件放到统一的一个目录,而不在在文件当前目录生成好多 ~ #的文件
+     ;; 如果你编辑某个文件时 后悔了想恢复成以前的一个版本 你可以到这个目录下
+     ;; 找到备份的版本
+     backup-directory-alist `((".*" . "~/.emacs.d/cache/backup_files/")) ;
+     auto-save-file-name-transforms `((".*" "~/.emacs.d/cache/backup_files/" t))
+     auto-save-list-file-prefix   "~/.emacs.d/cache/backup_files/saves-")
+  #+END_SRC
+* 打开大文件
+  #+BEGIN_SRC emacs-lisp
+    (setq  large-file-warning-threshold nil);打开大文件时不必警告
+  #+END_SRC
+* recentf  最近打开过的文件
+  #+BEGIN_SRC emacs-lisp
+    (setq recentf-max-saved-items 500)
+  #+END_SRC
+* 即便重新打开emacs 也要保存emacs 的某些变量 ，比如kill-ring
+  即保存剪切板中的内容
+  #+BEGIN_SRC emacs-lisp
+    (setq-default savehist-additional-variables
+          '(kill-ring))
+    (savehist-mode 1)
+  #+END_SRC
+* 记住上次打开某文件时光标所在的位置
+  #+BEGIN_SRC emacs-lisp
+    (setq-default save-place t)
+    (require 'saveplace)
+    (save-place-mode 1)                     ;emacs-25 以后才有
+  #+END_SRC
+* 个人信息
+  #+BEGIN_SRC emacs-lisp
+    (setq user-full-name "myname")
+    (setq user-mail-address "my@qq.com")
+  #+END_SRC
+* y-or-n-p
+  #+BEGIN_SRC emacs-lisp
+    (fset 'yes-or-no-p 'y-or-n-p) ;; 把Yes用y代替
+  #+END_SRC
+* 如果没选中区域，则默认选中当前行
+  #+BEGIN_SRC emacs-lisp
+    ;;; 关于没有选中区域,则默认为选中整行的advice
+    ;;;;默认情况下M-w复制一个区域，但是如果没有区域被选中，则复制当前行
+    (defadvice kill-ring-save (before slickcopy activate compile)
+      "When called interactively with no active region, copy a single line instead."
+      (interactive
+       (if mark-active (list (region-beginning) (region-end))
+         (message "已选中当前行!")
+         (list (line-beginning-position)
+               (line-beginning-position 2)))))
+  #+END_SRC
+* minibuffer 相关配置(minibuffer文件名补全相关)
+  #+BEGIN_SRC emacs-lisp
+    (setq-default
+     enable-recursive-minibuffers t        ;在minibuffer 中也可以再次使用minibuffer
+     history-delete-duplicates t          ;minibuffer 删除重复历史
+     minibuffer-prompt-properties (quote (read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt)) ;;;;minibuffer prompt 只读，且不允许光标进入其中
+     resize-mini-windows t ;; 当minibuffer 内容一行显示不下来时 允许调整minibuffer大小
+     read-buffer-completion-ignore-case t ;;补全buffer名时忽略大小写
+     read-file-name-completion-ignore-case t;;补全文件名时忽略大小写
+     completion-cycle-threshold 8)
+  #+END_SRC
+* fill-column 当某行的长度大于70个字符的时候，再次输入文字会自动添加到下一行
+  #+BEGIN_SRC emacs-lisp
+   (setq-default fill-column 80)
+   或者可以 C-x f 交互式的设置这个值
+  #+END_SRC
+  与此相关的一个命令是M-q fill-paragraph比如 某一段文字，每一行的字数
+  长度不一，比较混乱光标移动到此段文字上 然后按下C-q 后， 会自动调整每
+  一行的字数到fill-column 个.

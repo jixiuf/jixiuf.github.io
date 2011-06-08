@@ -1,0 +1,29 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     llvm逻辑卷管理
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-12-23 日
+#+DESCRIPTION:llvm分区管理
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Linux:
+
+* 缩小成35G:
+  缩小时要先缩小文件系统，
+  再缩小分区
+  然后将文件系统的大小扩展成与分区大小相同即可
+  即先缩小内层，再缩小外层， 然后扩大内层至带好填充完外层
+  其实如果大小计算的合适，不用这么烦，但是很难合适
+resize2fs /dev/vg1/java 34G
+lvreduce /dev/vg1/java -L 35G
+resize2fs /dev/vg1/java
+
+* 扩大成35G
+lvextend /dev/vg1/java -L 35G
+resize2fs /dev/vg1/java
+
+* 加大1G
+lvextend /dev/vg1/java -L +1G
+resize2fs /dev/vg1/java

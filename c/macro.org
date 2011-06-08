@@ -1,0 +1,77 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     c中的宏
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-10-24 一
+#+DESCRIPTION:c中的宏
+#+KEYWORDS: macro c 宏
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil 
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :C:
+
+#+begin_src c
+#与##在宏定义中的--宏展开
+#include <stdio.h>
+#define f(a,b) a##b
+#define g(a) #a
+#define h(a) g(a)
+int main()
+{
+  printf("%s\n", h(f(1,2))); // 12
+  printf("%s\n", g(f(1,2))); // f(1,2)
+  return 0;
+}
+#+end_src
+#+begin_quote
+ "#" 与"##" 是宏中两个特殊的符号
+ "##"相当于连字符,即java中进行字符串连接的加号,sqlplus 中的||  如a##b##c 等同于 "abc"
+ 而#用来控制是否展开宏,下面详解.
+#+end_quote
+  + 规则1: 如果宏定义以#开头，不展开参数，直接替换。 规则1包括三句话
+   - 如果宏定义以#开头,
+     在代码中遇到一个宏,而这个宏的定义,二话没说,第一个字符是#
+   - 不展开参数
+     无论参数有多复杂,把它作为一个字符串整体,不再进行展开,因为一个宏内容中
+     可能包含另一个宏,正常情况下,这个宏中宏也会被展开,但遇到#则例外.
+   - 直接替换。     
+     把这个参数放到宏内容中参数的相应位置,即所谓的"直接替换".
+     比如 下面这个宏 
+     #+begin_src c
+     #define g(a) #a
+      这个宏的内容以#开头,它的参数名为a
+     下面对其进行调用时传过去的参数是"f(1,2)"
+     虽然传过去的参数是另一个宏,但并不把它当作宏,而仅认为它是个字符串
+      printf("%s\n", g(f(1,2))); //结果打: f(1,2)
+     #+end_src
+ + 规则2:如果宏定义不以#开头，展开参数，直接替换，如果碰到的是#开头的宏，不继续往里层展开，往外层展开。
+    - 含义是,首先把参数作为一个宏进行展开,将其展开后的结果作为参数传到本宏
+      中,然后才对本宏进行展开
+      #+begin_src c
+       printf("%s\n", h(f(1,2))); // 12
+      #+end_src
+        比如对h(a)这个宏,传过去的参数是"f(1,2)",首先把其作为一个宏进行展开
+        如展开 f(1,2)的结果是:12
+        然后对h(12)进行展开,第一步展开的结果是g(12)
+        g(12)展开的结果是12
+        h(f(1,2))-->h(12)-->g(12)-->12
+      
+
+#+begin_src c
+另外几个更复杂的例子
+printf("%s\n", h(f(1,2))); // 12
+  printf("%s\n", g(f(1,2))); // f(1,2)
+  printf("%s\n", g(h(f(1,2)))); // h(f(1,2))
+  printf("%s\n", h(g(f(1,2)))); // "f(1,2)"
+  printf("%s\n", h(h(f(1,2)))); // "12"
+#+end_src
+总而言之,先展开参数,再展开自身. 遇#则停
+另外,如果验证结果gcc 可以加 -E 选项
+#+begin_src sh
+gcc -E macro.c
+或
+gcc -E macro.c -o macro.i
+#+end_src

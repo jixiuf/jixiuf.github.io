@@ -1,0 +1,144 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     AutoHotKey 简介
+#+DATE:     2011-06-26 星期日
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+TAGS: :AutoHotKey: :Windows:
+#+DESCRIPTION:autohotkey 简介
+#+KEYWORDS: autohotkey windows 
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+
+* 废话
+    AutohotKey是Windows下的一个不到3M的软件，有了它，在Windows下终于多少可
+以找回一点使用Linux的感觉。从Windows 转入Linux 绝对是个痛苦的过程，但是当你
+用熟了Linux 却又被迫转回到Windows时，那种不适比那更甚十倍。但是Windows有了
+AutohotKey后，这种感觉可以稍微弱化一些了。Autohotkey 是开源的，小巧只有3M，
+像极了Linux 下的软件。
+
+AutohotKey究竟是什么东西，它是一个拦路抢劫的大盗，是张无忌的乾坤大挪移，是
+Java里的AOP 。它拦的是你对键盘鼠标的一切操作，而不论它们是对谁而发，它都可以
+拦到，当然它可以选择放过。它是一个间谍，可以轻易取得、篡改鼠标下程序对应组件
+的内容，不论它是一个文本框还是一个按纽。只要它愿意它都可以做到。
+
+* 键盘映射
++ 它不仅可以拦，还有篡权夺位的野心。比如你明明按下了a ,它却向你的程序发送了b，
+而你明明按了b，它却把a 给发送过去。如此，可以做键盘映射 。
++ 你明明只按了一次鼠标，它却发送了十次，如此可以写简单的游戏外挂。无聊乏味的
+重复操作它以让它一次完成。
++ 关闭或屏蔽 Windows自有的快捷键，例如Win+E和Win+R；
+
+* 窗口管理器
+用它可以写出一个窗口管理器，实际是已经有人写了一个bug.n 的平铺式窗口管理器。
+如果你一直没有接触Linux的机会，或许你不会有窗口管理器的概念。并不是Windows
+没有相应的操作，只是，它没专门提这个概念。窗口管理器主要做的是:窗口的切换、
+焦点的转移、移动窗口、改变窗口大小、最大化最小化、关闭窗口、窗口装饰(标题栏
+的外观)。在Linux 上这些操作只归窗口管理器管理，而不归窗口本身管的。
+
+*** Windows自身提供了一套方案:
++ 窗口的切换、焦点的转移:使用鼠标点选窗口、或者Alt-Tab键盘切换。
++ 移动窗口 :点选窗口标题栏然后移动鼠标
++ 改变窗口大小: 将光标移动到窗口边界拖动。
+似乎它没提供备选方案。
+只此一家别无分店的后果就是你用也得用不用也得用。
+没有比较的后果就是你不知道它是好是坏,你也永远不知道你所不知道的。
+
+*** Linux 下我用过一窗口管理器
+Linux下我用过的窗口管理器一个是gnome自带的Metacity ，一个是openbox、一个是
+xface、另一个也是一直用到现在的awesome。
+用Metacity 的时候，没进行任何定制、因为它是gnome集成的，使用体验完全是
+Windows的那一套。第二个是xface那一套， 除了比Gnome轻量之外，也没进行任何定
+制;
+   接下来的是lxde带的openbox ，这个我花了很长的时间、主要做了
++ 将常用的程序与特定的按键绑定，
++ 使用键盘改变窗口大小、移动窗口、初始化特定窗口起动后的位置。
+当用openbox做完这些的时候，我下了个结论openbox是最好的窗口管理器。
+  可是后来经历了3到5次的安装卸载awesome、终于把它驯服后、我又下了一个结
+论：awesome是最好的窗口管理器。可是这次结论下得有点勉强。或者给它加个限定词
+“我用过的”我会说得更有底气。
+
+在经历了这么久的Linux软件的挑挑拣拣之后，我已经没有勇气说“它是最好的”这句
+话了。如果说Windows是温顺的圈养家马的话、Linux就是桀傲难驯的野马了。说
+Linux难用、是因为你还没驯服它。它没把你当主人之前，怎么会让你用得顺心呢。驯
+服了它，你就可以发挥它千里马的能力。
+
+用过Awesome 之后，我对窗口管理器的理解:
+**** 一键显隐
+  有些程序可以做到呼之即来挥之即去。Linux下的终端可以说是一个好例子。因为并
+不是任何时候我都需要输入命令。但是我想输入命令的时候、它能马上跳到我面前，
+输完之后、立马滚蛋。不要碍着我做其他事。我现在的配置就是<F1>键按下，urxvt窗
+口跳到我面前、如果已经在我面前了，马上消失、连任务栏上都不要有它的影子。它
+仅仅是消失、并没有退出、窗口并不是不存在了只是我看不见了。如此便做到了一键
+显隐。Windows下也有这样的最多只需要启动一个窗口的程序，如Firefox、编写Java
+用的Eclipse。等等、用了autohotkey 之后我的按键绑定是
++ Win+f ,一键显隐Firefox
++ Win+1 一键显隐Eclipse
++ Win+x 一键显隐IE 
++ Win+a 一键显隐Emacs。
+**** 窗口布局
+| 位置                 | Windows我的键绑定 |
+|----------------------+-------------------|
+| 占据整个屏幕的左半边 | Win+f1            |
+| 占据整个屏幕的右半边 | Win+f2            |
+| 占据整个屏幕的上半边 | Win+f3            |
+| 占据整个屏幕的下半边 | Win+f4            |
+| 占据屏幕中心         | Win+f5            |
+| 全屏                 | Win+f11           |
+      
+这六个位置我也分别进行了键绑定比如: Win+f1 将当前窗口发送到 "占据整个屏幕的
+左半边"的位置.
+#+begin_quote
+如果我当年去问顾客他们想要什么，他们肯定会告诉我：“一匹更快的马”——福特
+当人们想要一匹更快的马的时候，福特造出了一辆汽车.
+#+end_quote
+
+或许你听过这两句话。其实用户想要的不是马，而是“快”。
+同样的道理、有时用户去移动窗口，目的并不是为了移动窗口，移动窗口并不见得有
+多么好玩、他仅仅是要看到窗口下面被挡住的内容。Awesome 选择了平铺式窗口管
+理，窗口之间没有重叠、它事选定义了几种布局、而你要做的就是把你的窗口放到布
+局的相应位置。比如
+#+begin_html
+<pre>
+ +-----------+             +-----------+
+ |           |             |    |      |
+ |    a      |             |    |  b   |
+ |-----------|             | a  |------| 
+ | b  | c    |             |    |  c   |
+ |    |      |             |    |      |
+ +-----------+             +-----------+
+ </pre>
+#+end_html
+ 而在这种情况下，即便要调整大小，也仅仅是边线的移动，而不是某“一”窗口
+的移动。它移动的是整个窗口的相对位置。
+*** 虚拟桌面（标签）
+你可能会担心、窗口不能重叠、窗口多了岂不是每个窗口都会变得很小。Linux 支持
+多个桌面，就像Firefox支持多个标签页一样。你可以事先指定特定的程序启动之后在
+哪个标签页打开，可以指定某个标签页使用什么布局。比如，我的Firefox 打开会一
+定会位于全屏的那个标签页。
+
+说了那么多关于Linux 下窗口管理器的话，其实是想说有了autohotkey ,在Windows 下
+实现这些功能不是没有可能。
+*** [[http://www.autohotkey.com/docs/scripts/EasyWindowDrag_(KDE).htm][EasyWindowDrag(KDE)]]
+窗口的移动，不一定要按下标题栏。
+Alt+鼠标左键 在窗口的任何位置都可以改变窗口大小。
+Alt+鼠标右键，拖动窗口就可以，不需要一定在窗口边界，而那个边界有时并不怎么
+好找。
+*** [[file:AutoHotKey_auto_close_boring_window.org][监控您的系统。例如，当您不希望见到的窗口出现时自动关闭它们；]]
+
+* [[file:AutoHotKey_1.html#sec-1][支持缩写]]
+    键入“btw”然后按下tab 空格或回车后 就可以自动扩展为“by the way”
+    
+
+* 一些链接
++ [[http://www.autohotkey.com/download/][下载地址autohotkey 有base 版_L 版，前者完全不支持中文，后者支持一部分，选Autohotkey_L ]]
++ [[http://ahk.5d6d.com/home.php][Autohotkey中文论坛]]
++ [[http://www.autohotkey.com ][Autohotkey官网]]
++ [[http://www.autohotkey.com/forum/viewforum.php?f=2][官网论坛上好多不错的脚本都在这发布]]
++ [[http://www.autohotkey.com/docs/Tutorial.htm][官网快速入门]]
++ [[http://www.autohotkey.com/docs/scripts/][官网自带的几个好用的脚本,英文]]
++ [[http://www.hx263.net/archiver/view.asp?id=673][官网自带的几个好用的脚本,中文]]
++ [[https://github.com/jixiuf/my_autohotkey_scripts/tree/master/ahk_scripts][我写的及收集的脚本都在这里]]

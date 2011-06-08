@@ -1,0 +1,36 @@
+#+TITLE:     自动关闭某些窗口
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-06-25 星期六
+#+LANGUAGE:  zh
+#+DESCRIPTION:自动关闭某些窗口
+#+KEYWORDS: autohotkey auto close boring window 自动关闭某些窗口 广告窗口 
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :AutoHotKey: :Windows: 
+
+
+* 利用AutoHotKey 关闭某些烦人的广告弹出窗口
+原理很简单，某些常见的窗口有其特有的特点，比如窗口标题 ，可以利用AutoHotkey
+每隔一定的时间检测一次是否有特定标题的窗口出现，有的话，就地斩于马下。
+代码主要用了[[http://www.autohotkey.com/docs/commands/SetTimer.htm][setTimer]] 计时器的功能，以及[[http://www.autohotkey.com/docs/commands/WinClose.htm][WinColse]] 关闭特定的窗口
+#+begin_src  c
+;; 自动关闭某些窗口
+#Persistent
+#NoTrayIcon
+#SingleInstance force
+SetWorkingDir %A_ScriptDir%
+
+SetTimer, autocloseWin, 250
+return
+
+autocloseWin:
+;;qq 广告窗口
+WinClose, 腾讯网 - 我的资讯
+WinClose, 安全沟通 - 为您提供全面的QQ安全保护
+return
+#+end_src
+

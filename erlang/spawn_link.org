@@ -1,0 +1,124 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     spawn_link 进程关联
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-11-13 日
+#+DESCRIPTION:spawn_link.org
+#+KEYWORDS: spawn_link erlang
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Erlang:
+
+进程可以互相监视。这里要引入两个概念，进程链接和EXIT信号。在执行期间，进程可
+以与其他进程（和端口，参见??章节）建立链接。当一个进程终止（无论正常或非正常
+终止）时，一个特殊的EXIT信号将被发送到所有与即将终止的进程相链接的进程（及端
+口）。该信号的格式如下：
+#+begin_src erlang
+{'EXIT', Exiting_Process_Id, Reason}
+#+end_src
+
+Exiting_Process_Id是即将终止的进程的进程标识，Reason可以是任意的Erlang项式。
+收到Reason不是原子式normal的EXIT信号时，信号接收进程的默认动作是立即终止并，
+同时向当前与之链接的进程发送EXIT信号。默认情况下，Reason为原子式normal的
+EXIT信号将被忽略
+
+* Link/1
+  通过执行BIF link(Pid)便可创建链接。调用link(Pid)时，若调用进程和Pid之间已经
+  存在链接，则不会产生任何影响。
+* unlink/1
+  进程终止时，它所持有的链接都将被删除。也可以通过执行BIF unlink(Pid)显式删除
+  链接。由于所有链接都是双向的，删除这一端到另一端的链接的同时，另一端的到这一
+  端的链接也会被删除。若调用进程和Pid之间原本就没有链接，unlink(Pid)不会产生任
+  何影响。
+*  spawn_link/3
+   BIF spawn_link/3在创建新进程的同时还会在调用进程和新进程间建立链接。
+   其行为可以定义为：
+   #+begin_src erlang
+     spawn_link(Module, Function, ArgumentList) ->
+         link(Id = spawn(Module, Function, ArgumentList)),
+         Id.
+   #+end_src
+
+#+begin_src erlang
+-module(lk).
+-export([start/0,start2/0,hello/0,sleep/1]).
+
+
+start()->
+    spawn(lk,hello,[]),
+    sleep(5000).
+
+start2()->
+    spawn_link(lk,hello,[]),
+    sleep(5000).
+
+hello()->
+    sleep(1000) ,                                %1后秒退出.
+    exit(abc)
+        .
+
+sleep(ms)->
+    receive
+    after ms ->
+            true
+    end.
+
+%% 40> lk:start(). 5 秒钟后才退出
+%% true
+
+%% 41> lk:start2(). 1秒钟后即一起退出
+%% ** exception exit: abc
+#+end_src
+
+* ping 示例
+#+begin_src erlang
+-module(ping).
+-compile([export_all]).
+
+ping (0)->
+    link(whereis(pongRegName)),
+    exit(ping_exit);                            %此时会向与此进程进行关联的进程发出'EXIT'信号,{'EXIT',self(),Reason}
+ping (N) ->
+    link(whereis(pongRegName)),
+    pongRegName ! {ping,self()},
+    receive
+        _ ->
+            io:format("pong~n" ,[])
+    end,
+    ping(N-1).
+pong()->
+    process_flag(trap_exit,true),
+    pong1().
+
+pong1()->
+    receive
+        {ping,F} ->
+            F! pong;
+        {'EXIT',F,Reason} ->                    %注意是单引号,一个atom一般是小写的,但也可以是单引号引起来的任意字符,如大写字母
+            io:format("pong found ping exited:~p,[~p].~n" ,[F,Reason]);
+        O ->
+            io:format("other msg in pong process:~p~n" ,[O])
+    end        ,
+    pong1().
+
+start()->
+    process_flag(trap_exit,true),               %主进程也对exit信息进行处理
+    register(pongRegName,spawn(ping,pong,[])),
+    register(pingRegName,spawn(ping,ping,[3])),
+
+    link(whereis(pingRegName)),                 %将主进程与ping 进程关联,ping 进程退出时,主信息要收到其信号
+    receive
+        {'EXIT',F,Reason} ->
+            io:format("main process found ping exit:~p,[~p].~n" ,[F,Reason]);
+        O ->
+            io:format("other msg in main process:~p~n" ,[O])
+    end        .
+%% 知识点whereis(RegName) ->processId
+%% link(pid) 将当前进程与pid 进行关联
+%% process_flag(trap_exit,true),当前进程收到与当前进程进行关联的进程发出的EXIT信号时,当前进程并不自动退出,而是自行处理此信号
+#+end_src
+* 进程异常退出时,往往不是自行处理,而是邮父进程进行处理,即如果发现子进程退出,可以重启之.

@@ -1,0 +1,54 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     4ManageADatabase.org
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-07-10 日
+#+DESCRIPTION:4ManageADatabase.org
+#+KEYWORDS: oracle database db
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil 
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Oracle: :DB:
+
+* 学习目标
+  + list the prerequisites necessary  for database creation.
+  + create a database using  Oracle Database Configuration Assistant (DBCA)
+  + create a daatabase manually
+  + create a database  using Oracle Managered Files (OMF)
+
+* Planing for your database is the first step of managing a database
+** Define the purpose of your database (规划)
+  + oltp 联机事务处理 (大量并发，短小事务)
+  + olap 数据仓库  (少量并发，大事务)
+** defind the type of your database ,同上一条
+** outline a database architectural design  (如何存储，几块硬盘等)
+* Create your database
+** 图使用开界面的工具创建数据库，DBCA ,运行dbca 命令即可。
+** 手工方式创建。
+*** 指定 $ORACLE_SID 的值
+*** 指定一些环境变量的值
+    | ORACLE_BASE | ORACLE_HOME | ORA_NLS33 | PATH | LD_LIBRARY_PATH |
+*** 指定 认证方法
+**** with a password file
+**** OS authentication
+     在linux 上，只要属于dba 组的用户，就有权限创建database. 
+*** 如何删除一个database
+**** 使用dbca图形界面删除    
+**** 手动删除    
+***** 删除 $ORACLE_HOME/dbs/ 目录下相应原parameter file ,
+      如，以orcl database 的删除为例，删除此目录下的所有带orcl 的文件
+***** 删除 $ORACLE_BASE/oradata/$ORACLE_SID目录
+***** 删除 $ORACLE_BASE/admin/$ORACLE_SID目录
+* User  Oracle Data Migration Assistant  to migrate from an earlier version database
+  (数据迁移)
+* oracle 推荐的arch (OFA : Optimal Flexible Arch)
+  + Establish a directory structure  where any database  file can be stored
+    on any disk resource
+  + separate objects  with different  behavior  into different tablespace
+  + Maximuse database reliablity and performance by separating database
+    components across disk resource .(比如将online redo log与 data file放到
+    不同磁盘上)
+

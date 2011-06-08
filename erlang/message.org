@@ -1,0 +1,100 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     分布式,聊天小例
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-11-19 六
+#+DESCRIPTION:分布式,聊天小例
+#+KEYWORDS: erlang
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Erlang:
+#+begin_src erlang
+-module(msg).
+-compile([export_all]).
+%%分布式聊天,
+start_server()->
+    register (server,spawn(msg,server,[[]])).
+server(UserList)->
+    receive
+        {logon,UserInfo} ->
+            server(handle_logon(UserInfo,UserList));
+        {message2,[To,From,Msg]}->
+            io:format("a conn~n",[]),
+            io:format("~w~n",[UserList]),
+            case lists:keysearch(To,1,UserList) of
+                false ->
+                    io:format("user ~p doesnt exists ~n", [To]);
+                {value,{_,UserPid}}->
+                    io:format("Msg to ~p ~n", [To]),
+                    UserPid!{message2,{From,Msg}}
+            end,
+            server(UserList);
+        _ ->
+            server(UserList)
+    end.
+handle_logon(UserInfo,UserList)->
+    [Username,From]=UserInfo,
+    case lists:keymember(Username,1,UserList) of
+        true ->
+            From ! reject,
+            io:format("server rejected ~p\n",[Username]),
+            UserList;
+        false ->
+            From!accept,
+            io:format("server acceped ~p\n",[Username]),
+            [{Username,From}|UserList]
+    end
+        .
+
+message(To,Msg)->
+    case whereis(client) of
+        undefined->
+            you_are_not_logged_on;
+        _ ->
+            client!{message_req,{To,Msg}}
+    end
+    %% {server,server@jf.org} !{message2,[To,self(),Msg]}
+    %% receive
+    %%     {message2,{From,Msg}}->
+    %%         io:format(" ~p: ~p\n",[To,Msg])
+    %% end
+        .
+receive_msg()->
+    receive
+        {message2,{From,Msg}}->
+            io:format(" ~p: ~p\n",[From,Msg]);
+        {message_req,{To,Msg}} ->
+            {server,server@jf.org} !{message2,[To,self(),Msg]};
+        accept->
+            io:format("acceped~n",[]),
+            true;
+        reject->
+            io:format("rej~n",[]),
+            false
+    end,
+    receive_msg()
+        .
+logon(Username)->
+    case whereis(client) of
+        undefined ->
+            register(client, spawn(msg,receive_msg,[])),
+            {server,server@jf.org} !{logon,[Username,whereis(client)]};
+        _ ->
+            already_logged_on
+    end.
+%% erl -name server
+%% msg:start_server().
+%% erl -name c1
+%%  msg:logon("c1").
+%%  erl -name c2
+%%  msg:logon("c2").
+%%  msg:message("c1","hello,c1,I am c2").
+%%  msg:message("c2","hello,c2,I am c1").
+
+
+%% whereis(RegName) ->pid or port or undefined.
+#+end_src

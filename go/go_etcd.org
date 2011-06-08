@@ -1,0 +1,232 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     etcd 总结
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2016-01-25 一
+#+DESCRIPTION:etcd 总结
+#+KEYWORDS: etcd go
+#+TAGS:Golang:Etcd:Vitess
+#+FILETAGS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+* etc 简介
+  [[https://github.com/coreos/etcd][etcd]] = etc  distributed
+  /etc 是unix 系 下的一个目录， 这个目录的作用是  放一些基本的配置文件
+  而[[https://github.com/coreos/etcd][etcd]]  在etc 的名字基础上加了个d (distributed)
+  意即  分布式etc
+  最基本的功能是来代替 配置文件的
+  配置文件格式基本是key=value 这种，所以[[https://github.com/coreos/etcd][etcd]]  可以认为是一个 高分布式 key/value 存储服务
+  [[https://github.com/coreos/etcd][etcd]]  的定位是来 代替配置文件的，
+  所以其吞吐量不会很高 (单实例 每秒1000次写操作)
+  你要是拿它来作redis memcache 用那就大错特错了
+  [[https://github.com/coreos/etcd][etcd]]  除代替配置文件的功能外 还有服务发现（service discovery） 的功能
+  它提供了数据TTL失效、数据改变监视、多值、目录监听、分布式锁原子操作等功能，可以方便的跟踪并管理集群节点的状态
+  使用golang 编写，类似功能的有
+  1. [[http://zookeeper.apache.org/][Zookeeper]] (java具说维护起来很复杂) ,
+  2. [[https://github.com/ha/doozerd][Doozer]](golang，具说不怎么活跃，看了下代码最后一次提交2013,今年2016)
+  官方给的一段描述
+  [[https://github.com/coreos/etcd][etcd]]  is a distributed, consistent key-value store for shared configuration and service discovery, with a focus on being:
+  + Simple: curl'able user-facing API (HTTP+JSON)
+  + Secure: optional SSL client cert authentication
+  + Fast: benchmarked 1000s of writes/s per instance
+  + Reliable: properly distributed using Raft
+
+* etcd 单实例
+  #+BEGIN_SRC sh
+  jixiuf@jfmac ~ $ etcd
+  #+END_SRC
+  启动后的效果
+  #+BEGIN_QUOTE
+  2016/01/25 19:01:02 etcd: no data-dir provided, using default data-dir ./default.etcd
+  2016/01/25 19:01:02 etcd: already initialized as member before, starting as etcd member...
+  2016/01/25 19:01:02 etcd: listening for peers on http://localhost:2380
+  2016/01/25 19:01:02 etcd: listening for peers on http://localhost:7001
+  2016/01/25 19:01:02 etcd: listening for client requests on http://localhost:2379
+  2016/01/25 19:01:02 etcd: listening for client requests on http://localhost:4001
+  2016/01/25 19:01:02 etcdserver: datadir is valid for the 2.0.1 format
+  2016/01/25 19:01:02 etcdserver: recovered store from snapshot at index 10001
+  2016/01/25 19:01:02 etcdserver: name = default
+  2016/01/25 19:01:02 etcdserver: data dir = default.etcd
+  2016/01/25 19:01:02 etcdserver: member dir = default.etcd/member
+  2016/01/25 19:01:02 etcdserver: heartbeat = 100ms
+  2016/01/25 19:01:02 etcdserver: election = 1000ms
+  2016/01/25 19:01:02 etcdserver: snapshot count = 10000
+  2016/01/25 19:01:02 etcdserver: advertise client URLs = http://localhost:2379,http://localhost:4001
+  2016/01/25 19:01:02 etcdserver: loaded cluster information from store: default=http://localhost:2380,default=http://localhost:7001
+  2016/01/25 19:01:02 etcdserver: restart member ce2a822cea30bfca in cluster 7e27652122e8b2ae at commit index 11019
+  2016/01/25 19:01:02 raft: ce2a822cea30bfca became follower at term 2
+  2016/01/25 19:01:02 raft: newRaft ce2a822cea30bfca [peers: [ce2a822cea30bfca], term: 2, commit: 11019, applied: 10001, lastindex: 11019, lastterm: 2]
+  2016/01/25 19:01:04 raft: ce2a822cea30bfca is starting a new election at term 2
+  2016/01/25 19:01:04 raft: ce2a822cea30bfca became candidate at term 3
+  2016/01/25 19:01:04 raft: ce2a822cea30bfca received vote from ce2a822cea30bfca at term 3
+  2016/01/25 19:01:04 raft: ce2a822cea30bfca became leader at term 3
+  2016/01/25 19:01:04 raft.node: ce2a822cea30bfca elected leader ce2a822cea30bfca at term 3
+  2016/01/25 19:01:04 etcdserver: published {Name:default ClientURLs:[http://localhost:2379 http://localhost:4001]} to cluster 7e27652122e8b2ae
+  #+END_QUOTE
+** 测试效果
+   #+BEGIN_SRC sh
+默认 2379 端口是给client 连接用的
+而 2380  则在etcd 集群 各个节点之间交互用的
+兼容老版本会同时开放4001 7001
+curl -L http://127.0.0.1:2379/v2/keys/mykey -XPUT -d value="this is awesome"
+curl -L http://127.0.0.1:2379/v2/keys/mykey
+
+curl -L http://127.0.0.1:4001/v2/keys/mykey2 -XPUT -d value="this is awesome"
+curl -L http://127.0.0.1:4001/v2/keys/mykey2
+   #+END_SRC
+   详细的 api 官网readme 里有链接， 这里只给出 set get 示例
+* etcd 集群
+  官网文档 https://github.com/coreos/etcd/blob/master/Documentation/clustering.md
+** 静态服务发现
+   这种方式需要在启动etcd的时候，确定etcd node的ip，使用-peers | --initial-cluster来指定集群成员
+   这种方式 需要事先知道要启动几个节点， 及各节点的ip:port 等
+   下面在3台机器上启动etcd
+   etcd 可以通过参数与环境变量进行配置
+    -my-flag 与 ETCD_MY_FLAG 是等价的,参数可以覆盖环境变量
+   注意
+   1. -name 值 与 -initial-cluster中名称要对应上
+   2. -data-dir 指定数据存到哪个目录 默认是"${name}.etcd
+   3. -initial-cluster-token etcd-cluster-1 需要保证每个节点设置相同的值,作用只是避免混乱，
+      比如你在同一台机器上配置了多个集群， 此值可避免不同集群节点间混乱
+   4. -listen-client-urls 指定 哪此端口对client 开放
+   5. -listen-peer-urls default: "http://localhost:2380,http://localhost:7001" 节点之间的流量走这个端口 可以https
+   6. -initial-cluster-state new
+      ("new" or "existing"). Set to new for all members present during
+      initial static or DNS bootstrapping. If this option is set to
+      existing, etcd will attempt to join the existing cluster. If the
+      wrong value is set, etcd will attempt to start but fail safely.
+   7. -advertise-client-urls
+      List of this member's client URLs to advertise to the rest of the cluster.
+      它是把当前运行的etcd的client URL地址通知给cluster中的其它成员
+      Be careful if you are advertising URLs such as
+      http://localhost:2379 from a cluster member and are using the
+      proxy feature of etcd. This will cause loops, because the proxy
+      will be forwarding requests to itself until its resources
+      (memory, file descriptors) are eventually depleted.
+      在使用etcd 的proxy 时 ，需要特别注意
+      需要特别注意的是如果多个地址，用逗号隔开，而不是写多次参数
+      #+BEGIN_SRC sh
+      etcd -name cave -initial-advertise-peer-urls http://10.44.37.249:2380 \
+       -listen-peer-urls http://10.44.37.249:2380 \
+       -listen-client-urls http://127.0.0.1:2379,http://10.44.37.249:2379 \
+       -advertise-client-urls http://10.44.37.249:2379,http://127.0.0.1:2379
+
+      #+END_SRC
+
+
+   listen-client-urls 对client 开放， 即你curl set get 时用的端口
+   而 2380 用来节点间通信
+   node1
+   #+BEGIN_SRC sh
+     etcd -name infra0 -initial-advertise-peer-urls http://127.0.0.1:2380 \
+            -listen-peer-urls http://127.0.0.1:2380 \
+            -listen-client-urls http://127.0.0.1:2379 \
+            -advertise-client-urls http://127.0.0.1:2379 \
+            -initial-cluster-token etcd-cluster-1 \
+            -initial-cluster infra0=http://127.0.0.1:2380,infra1=http://127.0.0.1:3380,infra2=http://127.0.0.1:4380 \
+            -initial-cluster-state new
+   #+END_SRC
+   node2
+   #+BEGIN_SRC sh
+     etcd -name infra1 -initial-advertise-peer-urls http://127.0.0.1:3380 \
+            -listen-peer-urls http://127.0.0.1:3380 \
+            -listen-client-urls http://127.0.0.1:3379 \
+            -advertise-client-urls http://127.0.0.1:3379 \
+            -initial-cluster-token etcd-cluster-1 \
+            -initial-cluster infra0=http://127.0.0.1:2380,infra1=http://127.0.0.1:3380,infra2=http://127.0.0.1:4380 \
+            -initial-cluster-state new
+   #+END_SRC
+   node3
+   #+BEGIN_SRC sh
+     etcd -name infra2 -initial-advertise-peer-urls http://127.0.0.1:4380 \
+            -listen-peer-urls http://127.0.0.1:4380 \
+            -listen-client-urls http://127.0.0.1:4379 \
+            -advertise-client-urls http://127.0.0.1:4379 \
+            -initial-cluster-token etcd-cluster-1 \
+            -initial-cluster infra0=http://127.0.0.1:2380,infra1=http://127.0.0.1:3380,infra2=http://127.0.0.1:4380 \
+            -initial-cluster-state new
+   #+END_SRC
+   验证 集群是否连通
+#+BEGIN_SRC sh
+  # 在其中一个节点上put
+  curl -L http://127.0.0.1:2379/v2/keys/mykey -XPUT -d value="hello"
+  # 在其他节点上get 看取到的值是否是set 的值
+  curl -L http://127.0.0.1:2379/v2/keys/mykey
+  curl -L http://127.0.0.1:3379/v2/keys/mykey
+  curl -L http://127.0.0.1:4379/v2/keys/mykey
+#+END_SRC
+
+** etcd服务发现
+*** 使用公有 etcd 发现服务（Public etcd Discovery Service）
+    从 https://discovery.etcd.io/new 申请size=3 的一个token
+    然后用这个token 启动3个节点
+    当3个节点都启动成功后， 集群算启动成功
+    获得的token 只能使用一次(只能用于一个集群的创建)
+    但是网速原因 以下代码可能会失败
+    #+BEGIN_SRC sh
+    curl "https://discovery.etcd.io/new?size=3"
+    #return this:  https://discovery.etcd.io/b3117295b04f74ab53f9ea32fa5a4dcb
+    #+END_SRC
+
+   node1
+   #+BEGIN_SRC sh
+     etcd -name infra0 -initial-advertise-peer-urls http://127.0.0.1:5380 \
+            -listen-peer-urls http://127.0.0.1:5380 \
+            -listen-client-urls http://127.0.0.1:5379 \
+            -advertise-client-urls http://127.0.0.1:5379 \
+            -discovery  https://discovery.etcd.io/b3117295b04f74ab53f9ea32fa5a4dcb
+   #+END_SRC
+   node2
+   #+BEGIN_SRC sh
+     etcd -name infra1 -initial-advertise-peer-urls http://127.0.0.1:3380 \
+            -listen-peer-urls http://127.0.0.1:3380 \
+            -listen-client-urls http://127.0.0.1:3379 \
+            -advertise-client-urls http://127.0.0.1:3379 \
+            -discovery  https://discovery.etcd.io/b3117295b04f74ab53f9ea32fa5a4dcb
+   #+END_SRC
+   node3
+   #+BEGIN_SRC sh
+     etcd -name infra2 -initial-advertise-peer-urls http://127.0.0.1:4380 \
+            -listen-peer-urls http://127.0.0.1:4380 \
+            -listen-client-urls http://127.0.0.1:4379 \
+            -advertise-client-urls http://127.0.0.1:4379 \
+            -discovery  https://discovery.etcd.io/b3117295b04f74ab53f9ea32fa5a4dcb
+   #+END_SRC
+*** 构建自己的 etcd discovery service
+    首先要起动一个etcd 或集群用来做discovery service(即有一个已经起动的etcd)
+    比如我打算建一个size=3的etcd 集群
+    #+BEGIN_SRC sh
+      curl -X PUT https://localhost:2379/v2/keys/discovery/6c007a14875d53d9bf0ef5a6fc0257c817f0fb83/_config/size -d value=3
+    #+END_SRC
+
+   node1
+   #+BEGIN_SRC sh
+     etcd -name infra0 -initial-advertise-peer-urls http://127.0.0.1:5380 \
+            -listen-peer-urls http://127.0.0.1:5380 \
+            -listen-client-urls http://127.0.0.1:5379 \
+            -advertise-client-urls http://127.0.0.1:5379 \
+            -discovery  http://localhost:2379/v2/keys/discovery/6c007a14875d53d9bf0ef5a6fc0257c817f0fb83
+   #+END_SRC
+   node2
+   #+BEGIN_SRC sh
+     etcd -name infra1 -initial-advertise-peer-urls http://127.0.0.1:3380 \
+            -listen-peer-urls http://127.0.0.1:3380 \
+            -listen-client-urls http://127.0.0.1:3379 \
+            -advertise-client-urls http://127.0.0.1:3379 \
+            -discovery  http://localhost:2379/v2/keys/discovery/6c007a14875d53d9bf0ef5a6fc0257c817f0fb83
+   #+END_SRC
+   node3
+   #+BEGIN_SRC sh
+     etcd -name infra2 -initial-advertise-peer-urls http://127.0.0.1:4380 \
+            -listen-peer-urls http://127.0.0.1:4380 \
+            -listen-client-urls http://127.0.0.1:4379 \
+            -advertise-client-urls http://127.0.0.1:4379 \
+            -discovery  http://localhost:2379/v2/keys/discovery/6c007a14875d53d9bf0ef5a6fc0257c817f0fb83
+   #+END_SRC
+
+   为了安全，在每次启动新的etcd集群时，请务必使用新的discovery token进
+   行注册。 另外，如果你初始化时启动的节点超过了指定的数量，多余的节点
+   会自动转化为proxy模式的etcd。
+*  link
+  http://www.sel.zju.edu.cn/?p=523

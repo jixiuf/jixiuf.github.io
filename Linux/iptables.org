@@ -1,0 +1,261 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     iptables防火墙
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-29 日
+#+DESCRIPTION:iptables防火墙
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS::Linux:
+#+BEGIN_SRC sh
+
+# 五个检查点PREROUTING ，FORWARD POSTROUTING INPUT OUTPUT
+#   一个数据包从prerouting 进入我的机器，它有两个去向，一是经过input 访问我机器上的应用程序，后经output ,postrouting
+# 流走，另一个去向是：直接经forward postrouting 流向别的机器，也就是说我的机器只是充当路由，数据包经我的机器到其他机器上
+#
+#      PREROUTING ---------------->FORWARD---------------------> POSTROUTING
+#                   |                                ^
+#                   |                                |
+#                   INPUT                           OUTPUT
+#                   |                                |
+#                   v                                |
+#                    --->我机器上的应用程序---------->
+#
+#iptables 的结构由上到下是:表(table)，规则链(chain)，规则(rule) ，表由规则链组成，规则链由一条条规则组成
+#iptables 默认有三张表filter ,nat ,mangle ,   使用-t 参数指定对哪张表操作，如果不指定,则默认是对filter 表进行操作
+#
+# filter 默认有三条内建的规则链, INPUT FORWARD OUTPUT
+# nat     。。。。。。。。。。。 POSTROUTING ,OUTPUT PREROUTING
+# mangle  .....两.............    OUTPUT PREROUTING
+#
+#iptables 命令的一般格式 iptables [ -t table]  操作  [ chain] [options ]
+#一个查对完整参数的示例
+#iptables -t filter      -I    INPUT 2    -i eth0  -s 10.2.1.111 --sport 1234 -d 10.2.1.123 --dport 22   -j ACCEPT
+#iptables -t filter      -I    OUTPUT 2    -i eth0  -d 10.2.1.123  --dport 22 -s 10.2.1.123  --sport 1234   -j ACCEPT
+#这条命令是：在filter 表中的INPUT 链上 插入一条规则在2处(此规则排在第二个位置) ,规则的具体：从我的eth0 网卡联我，且对方机的ip 是10.2.1.111 对方端口1234,访问我的ip :10.2.1.123 我的22端口 ,时才接受
+# 然后是，从我的ip 10.2.1.123:22 向10.2.1.111:1234 经eth0 网卡发出的包放行
+#iptables -F  ,清空filter 的所有规则链
+#iptables -t nat -F 清空nat 表的所有规则链
+###################################################################################################
+# 关于INPUT ,OUTPUT 都是相对于“我”这台机器，即INPUT  ：表示向我输入数据，OUTPUT 表示“我”向外输出数据
+# 而-s -d --sport --dport 分别表示 源ip(source) ,目标ip(destination) ,源ip的端口，目标ip的端口
+# 当在对INPUT 作处理的时候，-s 指的是对方的机器，-d  指的是我这台机器,因为数据是从对方的机器流向我的，
+# 而对OUTPUT 作处理的时候   -s 指的是我，而-d 指的是对方的机器
+
+#正确使用防火墙，一般默认设为拒绝所有，然后只开放需要开放的，而不是允放所有，只拒绝需要拒绝的
+#首先启动iptables 服务/etc/init.d/iptables start
+#我用的是gentoo 系统装上iptables 后，第一次运行 它它提示我要先运行/etc/init.d/iptables save ，好像是做一些初始化或者保存一些文件，
+/etc/init.d/iptables save
+/etc/init.d/iptables start
+#启动后看一下默认的访问规则
+iptables -L 或者iptables -L --line-number 显示行号， -v 详细信息
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination
+
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination
+#默认情况下是policy 是ACCEPT    ，等于没有防火墙,现在修改默认的policy
+#注意千万不要使用远程ssh 连接进行这个操作，因为它也会关闭ssh 使用的22 端口，
+#使用ssh 连接 ，首先开放了22 端口再进行下面三条命令
+# sshd
+# 允许任何机器向我的22 端口发出请求
+#  这里没用用-t 则默认是-t filter
+                        iptables -A INPUT  -p tcp --dport 22      -j ACCEPT
+# 等价于:iptables -t filter  -A INPUT  -p tcp --dport 22      -j ACCEPT
+#允许我的22端口向外输出数据
+                        iptables -A OUTPUT  -p tcp --sport 22      -j ACCEPT
+#如果只限某些特定ip 的机器访问我,上面两条要换成
+                        iptables -A INPUT  -p tcp --dport 22  -s 10.2.1.110     -j ACCEPT
+                        iptables -A OUTPUT  -p tcp --sport 22 -d 10.2.1.110     -j ACCEPT
+#现在只有ip为10.2.1.110的ip 可以访问我
+#
+iptables -P INPUT  DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+
+#默认的策略只能是ACCEPT ，DROP ，不能是REJECT
+Chain INPUT (policy DROP)
+target     prot opt source               destination
+
+Chain FORWARD (policy DROP)
+target     prot opt source               destination
+
+Chain OUTPUT (policy DROP)
+target     prot opt source               destination
+#现在无论INPUT ,OUTPUT ,FORWARD 默认都是丢包(drop拒绝)，而不是accept 接受
+
+#此时我极度安全，等于没连网，我不能访问别人，别人不能访问我
+
+
+
+为何 iptables 的 rule 都会先写这行叙述在前面不是没道理的
+# 第一条规则 允许已建立的或相关连的通行
+# iptables 的规则需要一条条遍历匹配所有规则，直到找到匹配的才结束，
+# 这里对已经建立连接的包直接放行，以提高iptables 效率
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+#现在我想上网
+# 假如我想访问对方的80 端口，其实包括了两个方面，一是我有权限向对方的80 端口发出请求，二是有权限从对方的80 端口取得数据，这里只规定对方的80 端口，而没有规定我从哪个端口去访问它的80 ,意味着我可以从任意端口访问对方的80端口,这里端口都是tcp 类型的
+#允许我向对方的80 端口发出请求
+iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
+#允许对方的80 端口向我返回数据
+iptables -A INPUT -p tcp --sport 80 -j ACCEPT
+
+#虽然我们此时可以访问对方的80 端口，但是我们在浏览器中输入www.baidu.com 并不能显示对方的网页，但是http://202.108.22.142/ 确可以。因为在这个过程中还要进行dns域名解析,又要有另一个权限，那就是允许我向dns server 的udp 53 端口请求，并允许从它返回数据
+ iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+ iptables -A INPUT -p udp --sport 53 -j ACCEPT
+# 这里没有指定dns server 的ip 地址，如果想边dns server 的ip 也做限定的话
+# 可以这样写
+ iptables -A OUTPUT -p udp -d 211.64.208.1 --dport 53 -j ACCEPT
+ iptables -A INPUT -p udp -s 211.64.208.1  --sport 53 -j ACCEPT
+
+#
+#我校园网用drcom 进行流量计费要开upd 61440 端口
+# drcom
+#允许211.64.208.160 从它的61440 (sport) 端口连接到我的机器的61440 (dport)
+# -s 表示源，表示从哪台机器向我发送数据
+iptables -A INPUT  -p udp --sport 61440 --dport 61440 -s 211.64.208.160 -j ACCEPT
+#允许 我的机器 从61440(sport) 端口 向211.64.208.160 的61440(dport)端口发送数据
+# -d 指定对方机器(目标机器)
+iptables -A OUTPUT  -p udp --sport 61440 --dport 61440 -d 211.64.208.160 -j ACCEPT
+
+#目前为止，都是作为一个客户去访问别人，如果我要在我的电脑上架设个服务器又当如何呢，比如架设sshd 及web 服务器
+
+#web服务器，开放80端口
+iptables -A INPUT -p tcp  --dport 80 -j ACCEPT
+iptables -A OUTPUT  -p tcp  --sport 80 -j ACCEPT
+
+
+
+#开放ftp 服务
+#iptables -A INPUT -m state –state ESTABLISHED,RELATED -j ACCEPT
+#允许连接保持的被动访问。
+#ftp协议是一个简单、保密性差（明码）的tcp协议，它的工作原理是客户端先连服务器端的21端口，然后经过3步的握手以后建立了一条连接。要注意的是，这条连接只可以用来传输ftp的命令，只有这条连接的话是什么都传不了的，就算是用“ls”命令来查看文件也不行。
+#建立了命令的连接以后，服务器端就要建立一条数据的连接。数据的连接又分为主动模式（port）和被动模式（passive）。ftp默认是被动模式，主动和被动之间使用"pass"命令切换。主动模式通过20端口与客户端相连，而被动模式却使用1024以后的端口与客户端相连。由于1024以后的端口是随机分配的，所以在被动模式下我们是不知道服务端是使用什么端口与客户端连接的。也就是说，我们是不知道iptables要开放什么端口。
+#
+#
+#1 在/etc/conf.d/iptables配置文件中 加入 如下语句(不同发行版可能文件位置不同)
+#IPTABLES_MODULES="ip_conntrack_ftp"
+#
+iptables -A INPUT  -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+iptables -A INPUT -p tcp --dport 21 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 21 -j ACCEPT
+
+#主动模式使用20端口
+iptables -A OUTPUT -p tcp --sport 20 -j ACCEPT
+iptables -A INPUT -p tcp --dport 20 -j ACCEPT
+
+
+#对于lo 设备的数据包都放行 ，也就是本机数据 -i 表示输入，-o 表示输出
+#表示所有从lo 来的数据accept
+iptables  -t filter  -I  INPUT l -i lo  -j ACCEPT
+#表示流向lo 的数据accept
+iptables  -t filter  -I   OUTPUT 1 -o lo  -j ACCEPT
+#
+#
+#
+#
+
+
+另外若是跑的 iptables rule 很长的话, 一般要搭配 -N 建立不同的 chain 来跳跃呼叫使用, 这样效率才会好.
+比方常见一般例子说明:
+iptables -A INPUT -p tcp -s 192.168.1.1 -p tcp --dport 25 -j DROP
+iptables -A INPUT -p tcp -s 192.168.1.10 -p tcp --dport 25 -j DROP
+iptables -A INPUT -p tcp -s 192.168.1.20 -p tcp --dport 25 -j DROP
+iptables -A INPUT -p tcp -s 192.168.1.30 -p tcp --dport 25 -j DROP
+
+这个通常可以改成:
+iptables -N BAN_INPUT_PORT25
+iptables -A BAN_INPUT_PORT25 -p tcp -s 192.168.1.1 -j DROP
+iptables -A BAN_INPUT_PORT25 -p tcp -s 192.168.1.10 -j DROP
+iptables -A BAN_INPUT_PORT25 -p tcp -s 192.168.1.20 -j DROP
+iptables -A BAN_INPUT_PORT25 -p tcp -s 192.168.1.30 -j DROP
+iptables -A INPUT -p tcp --dport 25 -j BAN_INPUT_PORT25
+
+
+# 防止DoS攻击
+iptables -A INPUT -p tcp --dport 22 -m limit --limit 25/minute --limit-burst 20 -j ACCEPT
+# -m limit: 启用limit扩展
+# –limit 25/minute: 允许最多每分钟25个连接
+# –limit-burst 20: 当达到20个连接后，才启用上述25/minute限制
+
+
+#关于地址转换，一般是在网关上作操作，网关上一般有两个网卡，一个有外网的地址，可以与外网互访，一个有内网的ip，可以与内网互访。需要地址转换的情况：服务架设在内网的某台机上，外网通过访问网关的80端口，则认为是访问这台内网的80端口，即保护内网服务器，另一种情况，内网机器访问外网，则将内网发出的数据包的源地址改成可以外网访问的公网ip(网关的地址),
+内网访问外网，作源地址转换，即将发出去的数据包的源地址改成外网识别我网关的地址，在POSTROUTING 链上做源地址转换
+iptables -t nat -A POSTROUTING  -s 192.168.0.0/24 -j  SNAT --to 192.168.1.1(网关的ip)
+#也可以不具体指定网关的ip ,在网关ip经常变动的情况下,masquerade ,伪装的意思，表示伪装成网关的ip
+iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -j MASQUERADE
+
+外网访问内网：一般作服务器用的时候，这种情况一般是访问网关的某个端口，然后网关的iptables 将它映射成内网某台机器的对应的端口
+这个时候浏览里输入http://192.168.1.1:80 实际是访问内网的http://192.168.0.100:80 ,因为是内网，所以外网直接输入
+http://192.168.0.100:80 是无法访问的,192.168.1.1 是网关，也就是本机
+iptables -t nat -A PREROUTING -d 192.168.1.1 --dport 80 -j DNAT --to 192.168.0.100:80
+
+
+
+
+
+
+完整的脚本:
+sudo /etc/init.d/iptables save
+sudo /etc/init.d/iptable restart
+#清空表中规则链
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+# 这里对已经建立连接的包直接放行，以提高iptables 效率(此条规则通常放在第一条)
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+#开放sshd服务
+iptables -A INPUT  -p tcp --dport 22      -j ACCEPT
+iptables -A OUTPUT  -p tcp --sport 22      -j ACCEPT
+#默认drop 所有包
+iptables -P INPUT  DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+#本机设备放行
+iptables  -t filter  -I  INPUT 1 -i lo  -j ACCEPT
+iptables  -t filter  -I   OUTPUT 1 -o lo  -j ACCEPT
+
+
+#dns 服务器
+iptables -A INPUT -p udp --sport 53 -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -p tcp --sport 53 -j ACCEPT
+iptables -A INPUT -p tcp --dport 53 -j ACCEPT
+
+#dns
+ iptables -A OUTPUT -p udp   --dport 53 -j ACCEPT
+ iptables -A INPUT -p udp --sport 53  -j ACCEPT
+#上网
+iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --sport 80 -j ACCEPT
+#drcom
+iptables -A INPUT  -p udp --sport 61440 --dport 61440 -s 211.64.208.160 -j ACCEPT
+iptables -A OUTPUT  -p udp --sport 61440 --dport 61440 -d 211.64.208.160 -j ACCEPT
+# ftp
+# 在配置文件中加入  IPTABLES_MODULES="ip_conntrack_ftp"
+iptables -I INPUT  2 -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -I OUTPUT 2  -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -p tcp --dport 21 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 21 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 20 -j ACCEPT
+iptables -A INPUT -p tcp --dport 20 -j ACCEPT
+#web 服务
+Alearcla
+e
+extexi
+iptables -A INPUT -p tcp  --dport 80 -j ACCEPT
+iptables -A OUTPUT  -p tcp  --sport 80 -j ACCEPT
+
+# dhcp ，使用dhcp 获得ip ,
+# dhcp
+iptables -A INPUT -p udp --sport 67 --dport 68 -j ACCEPT
+#+END_SRC

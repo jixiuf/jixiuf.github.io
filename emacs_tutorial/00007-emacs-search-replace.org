@@ -1,0 +1,58 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:    emacs 搜索与替换
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2015-10-18 日
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Emacs:
+
+* C-s isearch-forward
+按下 C-s 然后输入你想搜索的词，emacs 随着你的输入会自动把光标移动到第
+一个与你输入相匹配的内容前,此地继续按C-s 会跳到下一个匹配的地方，如果
+想反方向搜索,则按C-r ,找到目标后按回车就会结束搜索。或者按C-g 回退到最
+初的位置
+
+ 渐近搜索注释
+进入搜索模式之后(即按下C-s后)，几个好用的按键
+`C-w' 把光标下的word作为搜索关键字，可多次按下`C-w',你会发下光标下的内容会自动添加到minibuffer处作为关键词
+`M-y' 将`king-ring'中的内容取出作为搜索关键字
+`M-e'光标跳到minibuffer，编辑关键字
+`M-%' 改为用query-replace替换
+`C-M-%' 改为用query-regex-replace替换
+`M-r' 在正则与非正则之切换
+`M-c' 是否忽略大小写
+
+如果想直接搜索上次搜索的词 直接C-s C-s即可
+
+* 替换 query-replace Alt-% 即Alt-Shift-5
+  按下 Alt-% 后 ，会提示你输入 替换前的词 及替换后的词，然后 会找到所
+  有匹配的地方 依次提示你是否替换该处的内容(y or n) 如果输入n 则跳过此
+  处，如果输入! 则不再提示直接替换所有
+* 直接替换 M-x replace-string
+  会提示你输入替换前与替换后的词 然后直接把匹配的所有都给替换了
+* 使用Iedit进行替换(第三单提供 需要下载)
+  http://www.emacswiki.org/emacs/Iedit
+  https://github.com/victorhge/iedit
+
+  Edit multiple regions in the same way simultaneously
+  即同时替换/编辑多个区别的相同内容
+  #+BEGIN_SRC emacs-lisp
+    ;; 把下载的iedit.el 所在目录加到load-path 下
+    ;; 如 (add-to-list 'load-path "~/.emacs.d/site-lisp/iedit/")
+    (require 'iedit)
+    (setq-default iedit-toggle-key-default (kbd "C-;"))
+    (autoload 'iedit-mode-from-isearch "iedit" "enable iedit-mode when in isearch mode")
+    (define-key global-map iedit-toggle-key-default 'iedit-mode)
+    (define-key global-map (kbd "C-[ [ a f") 'iedit-mode) ;iterm map C-; to this
+    (d'efine-key isearch-mode-map iedit-toggle-key-default 'iedit-mode-from-isearch)
+  #+END_SRC
+  使用方式 比如我想把文件中所有的hello 都替换到 helloworld
+  操作方法：
+  1 选中 任意一个hello 然后按 C-; 此时 全部的hello 会被高亮显示
+    然后输入world 此时所有的hello 都变成helloworld了
+    然后再次输入 C-; 退出 iedit模式
+* 函数内变量的改名
+  可以结合 Iedit 与 [[file:00008-emacs-narrow.org][narrow-to-region]] 来完成

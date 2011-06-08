@@ -1,0 +1,83 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     erlang distel
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-03-16 五
+#+DESCRIPTION:erlang 的调试 distel
+#+KEYWORDS: erlang distel
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:nil f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Erlang:
+
+* 参考链接
+distel 的源代码在这里 https://github.com/massemanet/distel
+这个是我从massemanet fork 出来的一版 https://github.com/jixiuf/distel
+我关于erlang的配置在这里https://github.com/jixiuf/emacs_conf/raw/master/site-lisp/joseph/joseph-erlang.el
+http://bc.tech.coop/blog/070528.html
+http://renzhi.ca/2010/08/04/debugging-erlang-programs-in-emacs/
+* 关于调试
+   distel 一直有个bug就是不能设置断点
+   http://renzhi.ca/2010/08/04/debugging-erlang-programs-in-emacs/
+   里面有提到如何处理.
+   虽然这个调试工具可以用，但是工作的不是很好。建议用erlang 自带的调试工具，也
+   是图形界面.
+   debugger:start().
+* 关于我对distel 的增强 https://github.com/jixiuf/distel
+  关于我的这个fork 的一些改进
+ + 对distel 的补全机制进行了重写。
+   使用(completing-read) 进行补全,也就是说在emacs24上，你可以不用emacs 默认的
+   补全机制，你如果知道git://github.com/emacs-helm/helm.git的heml-mode(前身是anything.el)
+   或许你会知道这种补全机制的好处。
+   - 对C-cC-dF erl-find-module 进行了重写，添加了补全机制，即它会列出所有可用
+     的module 让你从中选择，而不必输入整个模块名。
+   - 对C-cC-dh (erl-find-doc-under-point)打开当前光标下函数的文档，当然你要装
+     emacs-w3m,(这是默认就有的，我没进行增强，在这里提一下它。).
+   - 对C-cC-dH (erl-find-doc)进行增强，同样也添加了补全机制,提示你输入module
+     名字，然后用w3m浏览此module 对应的文档.
+ +  distel 的另一卖点是函数的跳转
+    #+BEGIN_SRC emacs-lisp
+  (defun my-erlang-mode-hook ()
+    (local-set-key "\M-."  'erl-find-source-under-point )
+    (local-set-key "\M-,"  'erl-find-source-unwind))
+  (add-hook 'erlang-mode-hook 'my-erlang-mode-hook)
+    #+END_SRC
+    但是它只能进行函数间的跳转。（即你把光标移动到函数名上，然后按下M-. 即Alt+.）
+    就会打开相应的源码文件跳转在函数的定义处。
+    我对此功能的增强是
+    - 跳转到头文件
+      -include_lib("kernel/include/file.hrl").
+      比如，我把光标移动到这样一个路径下"kernel/include/file.hrl" 按下M-.
+      会打开file.hrl文件 。
+   - 跳转到宏定义处
+     这个就不多详细解释了 ，也集成到了M-.功能中
+ + 函数名与模块名的补全，这个是 distel 的又一卖点，你如果用过eclipse或VS等IDE
+   工具，一定不会对此陌生。
+   我把这个功能绑在Ctl-Return 这个键上。
+  #+BEGIN_SRC emacs-lisp
+    (defun my-erlang-mode-hook2 ()
+       (local-set-key  [(control return)]  'erl-complete)
+    )
+   (add-hook 'erlang-mode-hook 'my-erlang-mode-hook2)
+  #+END_SRC
+  我对这个功能的增强是:
+   对 include_lib 输入头文件名进行补全。注意只对include_lib 有效，对include无
+   效
+   使用方法:
+   -include_lib("光标位置在此，按下Ctrl-Return").
+   这样会列出所有erlang安装目录下可用的头文件，你可以输入几个字母从中进行过滤.
+   下面附上几张效果图
+* screenshot
+file:../download/2012-04-21-212041scrot.png
+
+file:../download/2012-04-21-214841scrot.png
+
+file:../download/2012-04-21-214947scrot.png
+
+file:../download/2012-04-21-215010scrot.png
+
+file:../download/2012-04-21-215028scrot.png
+
+file:../download/2012-04-21-215108scrot.png
+
+file:../download/2012-04-21-215159scrot.png

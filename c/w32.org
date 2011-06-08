@@ -1,0 +1,16 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     windows VS拾遗
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-12-13 四
+#+DESCRIPTION:windows VS拾遗
+#+KEYWORDS: :C:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :C:
+* windows 下VS 下命令行调用
+#+begin_src sh
+ devenv.exe project.sln /build "DEBUG|Win32"
+ devenv.exe project.sln /build "DEBUG|x64"
+#+end_src

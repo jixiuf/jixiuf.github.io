@@ -1,0 +1,185 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     clone db in sqlserver 
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-10-28 星期五
+#+DESCRIPTION:clone db in sqlserver 
+#+KEYWORDS: sql server 
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil 
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :SQL:
+
+#+begin_src sql
+-- sqlserver ，根据已有数据库创建一个完全相同的数据库
+--  原理是先用backup 语句将当前数据库备份成一个备份文件
+--  然后用restore 命令恢复。中间过程中，会将数据文件与日志文件
+-- 的名字及数据库的名字进行更改，从而，实现clone .
+
+USE master
+GO
+--原始的数据库名称。比如此处我设成HAIHUA_MRP 
+-- the original database (use 'SET @DB = NULL' to disable backup)
+DECLARE @DB varchar(200)
+SET @DB = 'meiji_0421_null'
+
+-- 生成的备份文件的位置
+-- the backup filename
+DECLARE @BackupFile varchar(2000)
+SET @BackupFile = 'c:\meiji_jixf4.dat'
+
+-- 新数据库的名字
+-- the new database name
+DECLARE @TestDB varchar(200)
+SET @TestDB = 'meiji_jixf4'
+-- 新数据库所用到的日志文件及数据文件的名字，不包含后缀字
+-- 下文会自动追加后缀名
+-- the new database files without .mdf/.ldf
+DECLARE @RestoreFile varchar(2000)
+SET @RestoreFile = 'c:\meiji_jixf4'
+
+
+-- ****************************************************************
+--                    no change below this line
+--  以下内容，不要修改
+-- ****************************************************************
+
+
+DECLARE @query varchar(2000)
+
+DECLARE @DataFile varchar(2000)
+SET @DataFile = @RestoreFile + '.mdf'
+
+DECLARE @LogFile varchar(2000)
+SET @LogFile = @RestoreFile + '.ldf'
+
+IF @DB IS NOT NULL
+BEGIN
+SET @query = 'BACKUP DATABASE ' + @DB + ' TO DISK = ' + QUOTENAME(@BackupFile, '''')
+EXEC (@query)
+END
+
+-- RESTORE FILELISTONLY FROM DISK = 'C:\temp\backup.dat'
+-- RESTORE HEADERONLY FROM DISK = 'C:\temp\backup.dat'
+-- RESTORE LABELONLY FROM DISK = 'C:\temp\backup.dat'
+-- RESTORE VERIFYONLY FROM DISK = 'C:\temp\backup.dat'
+
+IF EXISTS(SELECT * FROM sysdatabases WHERE name = @TestDB)
+BEGIN
+SET @query = 'DROP DATABASE ' + @TestDB
+EXEC (@query)
+END
+
+-- RESTORE HEADERONLY FROM DISK = @BackupFile
+-- DECLARE @File int
+-- SET @File = @@ROWCOUNT
+
+DECLARE @Data varchar(500)
+DECLARE @Log varchar(500)
+
+SET @query = 'RESTORE FILELISTONLY FROM DISK = ' + QUOTENAME(@BackupFile , '''')
+
+--- 这张临时表的结构与SET @query = 'RESTORE FILELISTONLY FROM DISK = ' + QUOTENAME(@BackupFile , '''')
+--  命令的结果相同，目的只是为了保存上述结果到一张表，然后取得其中日志文件及数据文件的logicalName
+-- 因为在restore 时，会用到它将日志文件数据文件的位置进行更改
+CREATE TABLE #restoretemp
+(
+LogicalName varchar(500),
+PhysicalName varchar(500),
+type varchar(10),
+FilegroupName varchar(200),
+size int,
+maxsize bigint,
+fileid varchar(200),
+createlsn varchar(200),
+droplsn  varchar(200),
+uniqueid varchar(200),
+readonlylsn  varchar(200),
+readwritelsn varchar(200),
+backupsizeinbytes bigint ,
+sourceblocksize int ,
+filegroupid int ,
+loggroupguid varchar(200),
+differentialbaselsn bigint,
+differentialbaseguid varchar(200),
+isreadonly bit,
+ispresent bit
+
+
+)
+INSERT #restoretemp EXEC (@query)
+
+SELECT @Data = LogicalName FROM #restoretemp WHERE type = 'D'
+SELECT @Log = LogicalName FROM #restoretemp WHERE type = 'L'
+
+PRINT @Data
+PRINT @Log
+
+TRUNCATE TABLE #restoretemp
+drop table  #restoretemp
+SET @query = 'RESTORE DATABASE ' + @TestDB + ' FROM DISK = ' + QUOTENAME(@BackupFile, '''') + 
+' WITH MOVE ' + QUOTENAME(@Data, '''') + ' TO ' + QUOTENAME(@DataFile, '''') + ', MOVE ' +
+QUOTENAME(@Log, '''') + ' TO ' + QUOTENAME(@LogFile, '''')  
+EXEC (@query)
+GO
+------------------------------------------
+--简单的示例，不具通用，但典型，上面的代码基本使用这面代码
+-- backup database jixf to disk='d:jixf_data.bak'
+-- Restore FILELISTONLY FROM DISK='d:\jixf_data.bak'
+-- rESTORE DATABASE jixf2
+-- FROM DISK='d:\jixf_data.bak'
+-- WITH
+-- MOVE 'jixf' TO 'D:\jixf_data2.mdf',
+-- MOVE 'jixf_log' TO 'D:\jixf_data2_log.ldf'
+
+-- rESTORE DATABASE jixf2
+-- FROM DISK='d:\jixf_data.bak'
+-- WITH
+-- MOVE 'jixf' TO 'D:\jixf_data2.mdf',
+-- MOVE 'jixf_log' TO 'D:\jixf_data2_log.ldf',stats=5
+
+-- RESTORE HEADERONLY FROM DISK ='d:\jixf_data.bak'
+
+
+
+-- backup database  [HAIHUA_MRP_Test_jujt(20110905)] TO DISK = N'C:\HAIHUA_MRP_Test_jujt.bak'  
+-- go
+
+-- rESTORE DATABASE jixf23
+-- FROM
+-- DISK = N'C:\HAIHUA_MRP_Test_jujt.bak'
+-- WITH
+-- MOVE 'HAIHUA_MRP_TEST1' TO 'D:\jixf_data23.mdf',
+-- MOVE 'HAIHUA_MRP_TEST1_log' TO 'D:\jixf_data23_log.ldf',stats=5
+
+
+-- rESTORE DATABASE jixf23
+-- FROM DISK = N'C:\HAIHUA_MRP_Test_jujt.bak'
+-- WITH
+-- MOVE 'HAIHUA_MRP_TEST1' TO 'D:\jixf_data23.mdf',
+-- MOVE 'HAIHUA_MRP_TEST1_log' TO 'D:\jixf_data23_log.ldf',stats=5
+
+-- RESTORE HEADERONLY FROM DISK = N'C:\HAIHUA_MRP_Test_jujt.bak'
+
+-- 20110921
+-- rESTORE DATABASE HAIHUA_MRP_Test_WANGZL_20110921
+-- FROM
+-- DISK = N'c:\haihua\HAIHUA_MRP_TEST_20110921_BAK.bak'
+-- WITH
+-- MOVE 'HAIHUA_MRP_TEST1' TO 'c:\haihua\Temp\db\jixf_data56.mdf',
+-- MOVE 'HAIHUA_MRP_TEST1_log' TO 'c:\haihua\Temp\db\jixf_data56_log.ldf',stats=5
+
+
+
+-- rESTORE DATABASE HAIHUA_MRP_Test_WANGZL_20110921
+-- FROM 
+-- DISK = N'c:\haihua\HAIHUA_MRP_TEST_20110921_BAK.bak'
+-- WITH
+-- MOVE 'HAIHUA_MRP_TEST1' TO  'c:\haihua\Temp\db\jixf_data56.mdf',
+-- MOVE 'HAIHUA_MRP_TEST1_log' TO 'c:\haihua\Temp\db\jixf_data56_log.ldf',stats=5
+
+-- RESTORE HEADERONLY FROM DISK =N'c:\haihua\HAIHUA_MRP_TEST_20110921_BAK.bak'
+#+end_src

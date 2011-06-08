@@ -1,0 +1,8 @@
+*.elc
+*~
+
+/erlang/erl_crash.dump
+/Linux/font.html
+/Linux/gentoo.html
+/author.html
+/author2.html

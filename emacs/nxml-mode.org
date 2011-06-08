@@ -1,0 +1,124 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     nxml-mode补全
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-10-22 六
+#+DESCRIPTION:nxml-mode补全
+#+KEYWORDS: emacs nxml mode
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil 
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Emacs:
+
+使用介绍 http://jamsa.javaeye.com/blog/38202
+官方内容:
+http://infohost.nmt.edu/tcc/help/pubs/nxml/schema-locating.html
+
+emacs nxml-mode 只支持rnc格式的xml 解析
+dtd --->rnc
+xsd---->rng----->rnc
+需要用到的转换工具trang.jar     dtd--->rnc         rng--->rnc
+                 rngconv.jar    xsd ---->rnc
+
+* dtd 使用 trang
+# java -jar trang.jar http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd hibernate-mapping-3.0.rnc  
+# java -jar trang.jar  http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd hibernate-cfg-3.0.rnc
+将生成的hibernate-mapping-3.0.rnc复制到emacs的nXML-mode安装目录。
+     (add-to-list 'rng-schema-locating-files (expand-file-name "~/.emacs.d/script/nxml/schemas.xml"))
+     我copy  到 "~/.emacs.d/script/nxml/" 这个目录也可
+     修改nXML-mode安装目录下的schema/schema.xml。在文件中增加一种新的文件类型对质，在文件中加入：
+
+     xml 代码
+   1. <typeId id="Hibernate HBM" uri="hibernate-mapping-3.0.rnc"/> 
+   在schema.xml文件中加入hbm的一种识别方式，这里将根据文件名以hbm.xml结尾，来识别这是一个Hibernate HBM类型的文件：
+        <uri pattern="*.hbm.xml" typeId="Hibernate HBM"/>  
+
+       ------------------------------------------------------
+* xsd
+rngconv 将 xsd转换成rng格式供emacs nxml-mode 编辑xml文件使用
+   1. java -jar rngconv.jar http://maven.apache.org/maven-v4_0_0.xsd >> maven2.rng  
+       java -jar trang.jar maven2.rng maven2.rnc  
+
+       将maven2.rnc复制到nXML-mode安装目录中。修改schema.xml增加一种新的类型
+           <typeId id="Maven2" uri="maven2.rnc"/>  
+
+修改schema.xml，加入自动识别pom文件的功能，这里不通过文件名来识别，而是使用namespace来识别
+ <namespace ns="http://maven.apache.org/POM/4.0.0" typeId="Maven2" />  
+pom.xml 的头部声明是这样的
+ <project xmlns="http://maven.apache.org/POM/4.0.0"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+
+.
+官方内容:
+http://infohost.nmt.edu/tcc/help/pubs/nxml/schema-locating.html
+关于schemas.xml 内容的介绍:
+下面是一系列匹配规则用于选择使用哪个schema locating file:
+* <uri resource="f" uri="s"/>
+表示将f 对s(s is a schema file) 进行关联. f 可以是一个 full URL 也可以是一个本地的文件
+ 比如:<uri resource="abc.xyz" uri="xyz.rnc"/>
+ 表示文件打开abc.xyz 时使用xyz.rnc 对其进行解析.
+
+* <uri pattern="p" uri="s"/>
+  相对于 <uri pattern="p" uri="s"/> 中的resource 所指定的内容是一个特定的不
+  具通用性.pattern 可以是一个regexp 匹配某一类的文件.
+比如:  <uri pattern="*.hbm.xml" uri="hibernate-mapping-3.0.rnc"/>
+所有以hbm.xml 结尾的文件,将使且hibernate-mapping-3.rnc 对其进行解析
+
+* <uri pattern="p" typeId="T"/>
+  pattern 与前者相同,typeId 则是一个Id
+  比如:
+    <uri pattern="*.xsl" typeId="XSLT"/>
+    <typeId id="XSLT" uri="xslt.rnc"/>
+    效果与
+    <uri pattern="*.xsl" uri="xslt.rnc"/>同
+    typeId 存在的必要仅仅是 多种匹配规则都使用同一个schema s 进行解析的时候
+  用,当然可以选择不用
+    
+* <documentElement prefix="N" localName="E" uri="s"/>
+  即如果一个xml 文件的根元素是E ,并且其namespace是N的话,将使用 schema s  
+  <documentElement prefix="" localName="hibernate-mapping" uri="hibernate.rnc"/>
+  比如:根元素是hibernate-mapping 前缀是空的文件,将使用hibernate.rnc 进行解
+  析
+  <documentElement prefix="" localName="hibernate-mapping" uri="hibernate-mapping-3.0.rnc"/> 
+
+  prefix参数可以省略,表示只要localName="E" 即可,不考虑namespace的影响
+  <documentElement  localName="hibernate-mapping" uri="hibernate-mapping-3.0.rnc"/> 
+  <documentElement prefix="" localName="hibernate-mapping" uri="hibernate-mapping-3.0.rnc"/> 
+两者效果相同
+另外,似乎prefix localName 两参数只是可省略的参数
+* <documentElement prefix="N" localName="E" typeId="T"/>
+  有了前两个,这个应该不难理解
+  <documentElement localName="stylesheet" typeId="XSLT"/> ;所以root element 
+  是stylesheep 的xml文件使用类型XSLT类型的schemas进行解析
+  
+  这个对所有根元素为 xsl:transform 的xml文件使用类型XSLT类型的schemas进行解析
+  <documentElement prefix="xsl" localName="transform" typeId="XSLT"/>
+  
+  <typeId id="XSLT" uri="xslt.rnc"/> ;这里对XSLT类型的schemas进行定义
+  
+* <transformURI fromPattern="p" toPattern="q"/>
+  p 和q 里应该含有相同数量的"*" 他们是一一对应的
+    <transformURI fromPattern="*.xml" toPattern="*.rnc"/>
+    比如当你编辑 a.xml 时,它将寻找一个a.rnc 文件对其将行解析
+* <namespace ns="N" uri="s"/> 与* <namespace ns="N" typeId="T"/>
+  <namespace ns="http://www.w3.org/1999/xhtml" typeId="XHTML"/>
+  <namespace ns="http://www.w3.org/1999/xhtml" uri="xhtml.rnc"/>
+  比如当你编辑 一个声明有 xmlns="http://www.w3.org/1999/xhtml"的xml 文件时,
+  #+begin_src html
+  <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  </html>
+  #+end_src
+
+* 如何定义一个typeId  <typeId id="T" uri="s"/>
+  <typeId id="XSLT" uri="xslt.rnc"/>
+  <typeId id="XSLT_alias" typeId="XSLT"/>
+  对于定义了一个typeId 后可以在nxml-mode中
+  使用 `C-cC-sC-t' 列出所有的typeId ,以便使当前buffer用特定的typeId进行解析 
+* 也可以包含另一个schemas 文件
+  <include rules="F"/>
+  

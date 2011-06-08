@@ -1,0 +1,257 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     AutoHotKey对Eclipse 进行增强
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2011-06-26 星期日
+#+DESCRIPTION:对Eclipse 进行增强
+#+KEYWORDS: eclipse autohotkey 
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+TAGS: :Eclipse: :AutoHotKey:
+
+正常情况下，Eclipse下可以对按键进行绑定，但是有些时候，也会出现eclipse无能为
+力的时候，比如，在eclipse中，对所有打开的文件进行“上一个”、“下一个”这种
+操作进行键绑定。并不是eclipse未提供这两个功能，而是他们将它进行了硬编码，这
+两个功能默认绑定在Ctrl+pageUp ,Ctrl+PageDown 上。而按照Emacs使用键盘进行高
+效快捷操作的理念：“双手始终不离键盘，且不使用距离键盘中心区域过远的按键”，这
+个PageUp ,PageDown 实在不应该使用。所以重新对它做映射。映射为Ctrl+Alt+n,
+与Ctrl+Alt+p ,这两个键。
+另外一个功能就是Alt+n ,Alt+p ,光标分别向下、向上移动4行，这样可以实现光标的
+中小范围的跳跃。我在Eclipse中使用了一个插件EmacsPlus,，虽然Eclipse 也默认提
+供了Emacs的按键绑定，但毕竟功能有限，而EmacsPlus 插件可以将Eclipse模拟的更
+像Emacs. 下面是以上功能的代码。
+#+begin_src c
+SetKeyDelay 0
+;;Eclipse 中Ctrl+PageUP Ctrl+pagedown在打开的编辑器中切换
+;;但是它硬编辑到代码中了,没法进行配置,这里将Ctrl+alt+n 按下时等效于Ctrl+pageDown
+#IfWinActive ahk_class SWT_Window0
+^!n::Send ^{PgDn}
+^!p::Send ^{PgUp}
+;;而此处Alt+n 相当于按下5次{Down
+;;     Alt+p 相当于按下5次Up
+!n::Send {Down 4} 
+!p::Send {Up 4}
+#IfWinActive 
+#+end_src
+另外一个功能增强是，Eclipse默认的绑定为Ctrl+Shift+r的Open Resource,它会打开
+一个窗口，然后你可以输入正则表达式去匹配项目中的文件，然后打开相应的文件，这
+种方式比你一层层地打开目录找到相应的文件要快许多，尤其在项目比较大的时候。
+这个功能虽然已经很强大了，但与Emacs中的Anything插件寻找文件的功能还是差了两
+点：
++  输入正则表达式中的星号*的过程有点麻烦，为什么不像Google一样用空格来分开
+   关键字呢。
++ 另外大部分人使用这个功能，我相信他最后是用鼠标点选最后过滤出来的文件，或者
+  用上下键来选中相应的文件然后回车。无论是用哪种方式都与Emacs使用键盘进行快
+  捷操作的理念相违背。sorry ,我已经深深地被Emacs毒害了。(用鼠标，这无疑是个
+  高速缓冲错误，而上下键，它们离键盘中心区域太远(Emacs中始终用Ctrl+n
+  ,Ctrl+p来代替上下键的操作))。还有一个不便之处是，当用户用上下键选中某个候
+  选项时，突然发现这些候选项还是有点多，想再次输入一个关键字过滤一下后再进行
+  选择。这又牵扯到焦点的问题了，现在焦点在文件列表中而不是文本框中,想继续输
+  入关键字的话首先你得将光标定位到文本框。大多数人是用鼠标来完成的吧。我就不
+  提醒你又用了一次鼠标了。
+那如何用AutoHotkey 来解决以上问题呢。
+1. 最根本的办法当然是修改Eclipse的源代码了，但是我找了半天也没定位出这块功能
+   的源代码在什么文件里，后来就懒得找了，用Autohotkey简单的做一下处理，虽然
+   还是有点小缺陷，但已经好许多了。我做的处理就是，当按下空格的时候它会输入
+   星号。使用体验和用空格分隔关键字是相同的，缺点就是关键字的顺序必须按照文
+   件名中出现的顺序来。代码是:
+   #+begin_src c
+   space::Send *
+   #+end_src
+2. 第2个问题的解决方法是：
+   首先对Ctrl+n Ctrl+p 分别映射为Down, Up 键。
+   #+begin_src c
+   ^p::send {Up}
+   ^n::send {Down}
+   #+end_src
+   当我按下字母数字的时候，首先把焦点定位到文本框，然后才输入相应的字母，因
+   为需要对每个字母进行映射，所以代码会很长，但是逻辑很简单，比如以对字母
+   a的映射为例：
+   #+begin_src c
+   a::
+   ControlFocus ,Edit1
+   SendInput a
+   return
+   #+end_src
+   代码很简单就是当你按下字母a的时候，首先将焦点定位到Edit1即文本框，然后才
+   输入字母a ,然后就return结束了。 
+   将上面所有的代码放到
+  #+begin_src c
+  #IfWinActive Open Resource
+   这里放以上代码
+  #IfWinActive 
+  #+end_src
+  表示以上的代码只是窗口标题为Open Resource的窗口中有效。下面附上上面提到的
+   所有代码 
+  #+begin_src  c 
+; #NoTrayIcon
+; #SingleInstance force   
+SetKeyDelay 0
+;;Eclipse 中Ctrl+PageUP Ctrl+pagedown在打开的编辑器中切换
+;;但是它硬编辑到代码中了,没法进行配置,这里将Ctrl+alt+n 按下时等效于Ctrl+pageDown
+#IfWinActive ahk_class SWT_Window0
+^!n::Send ^{PgDn}
+^!p::Send ^{PgUp}
+;;而此处Alt+n 相当于按下5次{Down
+;;     Alt+p 相当于按下5次Up
+!n::SendInput {Down 4} 
+!p::SendInput {Up 4}
+#IfWinActive 
+
+;;对于Ctrl+Shift+r ,open resource
+;;按下空格相当于按下*
+;;而输入a-z任何一个字符，先将焦点移到Edit上，然后再输入相应的字符
+#IfWinActive Open Resource
+^p::send {Up}
+^n::send {Down}
+space::SendInput *
+a::
+ControlFocus ,Edit1
+SendInput a
+return
+b::
+ControlFocus ,Edit1
+SendInput b
+return
+c::
+ControlFocus ,Edit1
+SendInput c
+return
+d::
+ControlFocus ,Edit1
+SendInput d
+return
+e::
+ControlFocus ,Edit1
+SendInput e
+return
+f::
+ControlFocus ,Edit1
+SendInput f
+return
+g::
+ControlFocus ,Edit1
+SendInput g
+return
+h::
+ControlFocus ,Edit1
+SendInput h
+return
+i::
+ControlFocus ,Edit1
+SendInput i
+return
+j::
+ControlFocus ,Edit1
+SendInput j
+return
+k::
+ControlFocus ,Edit1
+SendInput k
+return
+l::
+ControlFocus ,Edit1
+SendInput l
+return
+m::
+ControlFocus ,Edit1
+SendInput m
+return
+n::
+ControlFocus ,Edit1
+SendInput n
+return
+o::
+ControlFocus ,Edit1
+SendInput o
+return
+p::
+ControlFocus ,Edit1
+SendInput p
+return
+q::
+ControlFocus ,Edit1
+SendInput q
+return
+r::
+ControlFocus ,Edit1
+SendInput r
+return
+s::
+ControlFocus ,Edit1
+SendInput s
+return
+t::
+ControlFocus ,Edit1
+SendInput t
+return
+u::
+ControlFocus ,Edit1
+SendInput u
+return
+v::
+ControlFocus ,Edit1
+SendInput v
+return
+w::
+ControlFocus ,Edit1
+SendInput w
+return
+x::
+ControlFocus ,Edit1
+SendInput x
+return
+y::
+ControlFocus ,Edit1
+SendInput y
+return
+z::
+ControlFocus ,Edit1
+SendInput z
+return
+1::
+ControlFocus ,Edit1
+SendInput 1
+return
+2::
+ControlFocus ,Edit1
+SendInput 2
+return
+3::
+ControlFocus ,Edit1
+SendInput 3
+return
+4::
+ControlFocus ,Edit1
+SendInput 4
+return
+5::
+ControlFocus ,Edit1
+SendInput 5
+return
+6::
+ControlFocus ,Edit1
+SendInput 6
+return
+7::
+ControlFocus ,Edit1
+SendInput 7
+return
+8::
+ControlFocus ,Edit1
+SendInput 8
+return
+9::
+ControlFocus ,Edit1
+SendInput 9
+return
+.::
+ControlFocus ,Edit1
+SendInput .
+return
+#IfWinActive 
+#+end_src

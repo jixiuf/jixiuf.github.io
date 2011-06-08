@@ -1,0 +1,55 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     errno_perror.org
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-23 一
+#+DESCRIPTION:errno_perror.org
+#+KEYWORDS: C
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :C:
+很多系统函数在错误返回时将错误原因记录在libc定义的全局变量errno中，每种错误原因
+对应一个错误码，请查阅errno(3)的Man Page了解各种错误码，errno在头文件errno.h中
+声明，是一个整型变量，所有错误码都是正整数。
+
+如果在程序中打印错误信息时直接打印errno变量，打印出来的只是一个整数值，仍然看不
+出是什么错误。比较好的办法是用perror或strerror函数将errno解释成字符串再打印。
+#+BEGIN_SRC c
+#include <stdio.h>
+void perror(const char *s);
+#+END_SRC
+perror函数将错误信息打印到标准错误输出，首先打印参数s所指的字符串，然后打印:号，
+然后根据当前errno的值打印错误原因。例如：
+#+BEGIN_SRC c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void)
+{
+    FILE *fp = fopen("abcde", "r");
+    if (fp == NULL) {
+        perror("Open file abcde");
+        exit(1);
+    }
+    return 0;
+}
+#+END_SRC
+如果文件abcde不存在，fopen返回-1并设置errno为ENOENT，紧接着perror函数读取errno
+的值，将ENOENT解释成字符串No such file or directory并打印，最后打印的结果是
+Open file abcde: No such file or directory。虽然perror可以打印出错误原因，传给
+perror的字符串参数仍然应该提供一些额外的信息，以便在看到错误信息时能够很快定位
+是程序中哪里出了错，如果在程序中有很多个fopen调用，每个fopen打开不同的文件，那
+么在每个fopen的错误处理中打印文件名就很有帮助。
+
+errno是一个全局变量，很多系统函数都会改变它，fopen函数Man Page中的ERRORS部分描
+述了它可能产生的错误码，perror函数的Man Page中没有ERRORS部分，说明它本身不产生
+错误码，但它调用的其它函数也有可能改变errno变量。大多数系统函数都有一个Side
+Effect，就是有可能改变errno变量（当然也有少数例外，比如strcpy），所以一个系统函
+数错误返回后应该马上检查errno，在检查errno之前不能再调用其它系统函数。
+#+BEGIN_SRC c
+  #include <string.h>
+
+  char *strerror(int errnum);
+  /* 返回值：错误码errnum所对应的字符串 */
+#+END_SRC

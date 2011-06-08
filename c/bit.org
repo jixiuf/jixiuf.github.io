@@ -1,0 +1,63 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     二进制，int 的与或非、移位操作
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-19 四
+#+DESCRIPTION:二进制，int 的与或非
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS::C:
+  /* 位的与或非，是针对int 类型的。对于char short 会被自动提升为int 之后再做与或非 */
+  /* ~ 取返(单目运算符),0变1 1变0 */
+
+  /* ^ 异或 */
+  从异或的真值表可以看出，不管是0还是1，和0做异或保持原值不变，和1
+  做异或得到原值的相反值
+  #+BEGIN_SRC c
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <malloc.h>
+      #include <string.h>
+
+    /* 2、从异或的真值表可以看出，不管是0还是1，和0做异或保持原值不变，和1做异或得到原值的相反值。可以利用这个特性配合掩码实现某些位的翻转，例如 */
+      int main(int argc, char *argv[]){
+        unsigned int a, b, mask = 1U ; /* 1U=2#00000000 00000000 00000000 00000001 */
+        a = 0x12345678;                 /*  2#10010 00110100 01010110 01111000 */
+        b = a ^ mask; /*                    2#10010 00110100 01010110 01111001*/
+        printf ("%x\n",b);
+        printf ("%x\n",1U);
+        return 0;
+      }
+  #+END_SRC
+
+  1、一个数和自己做异或的结果是0。如果需要一个常数0，x86平台的编译器可能会生成
+  这样的指令：xorl %eax, %eax。不管eax寄存器里的值原来是多少，做异或运算都能得
+  到0，这条指令比同样效果的movl $0, %eax指令快，直接对寄存器做位运算比生成一个
+  立即数再传送到寄存器要快一些。
+
+
+#+BEGIN_SRC c
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <malloc.h>
+  #include <string.h>
+  int main(int argc, char *argv[]){
+    unsigned int a, b, mask = 0x0000ff00;
+    a = 0x12345678;               /* 针对a的对8～15位进行操作， */
+    b = (a & mask) >> 8; /* 0x00000056 */
+    printf ("%x\n",b);
+
+    b =( a>>8) &(~((~0 )<<8 ));   /* ~0== ffffffff , (~0)<<8 == ffffff00 */
+    printf ("%x\n",b);
+
+    return 0;
+  }
+#+END_SRC
+
+左移<< 低位补0 （同样是针对int 类型的操作）
+[[file:../download/shiftleft.png]]
+
+右移则高位补0
+# 注意如为对负数（最高位为1）进行右移操作。高位补0还是补1不定，依编译器而定。

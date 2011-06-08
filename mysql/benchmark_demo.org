@@ -1,0 +1,564 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     mysql压力测试 实战
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-22 日
+#+DESCRIPTION:mysql压力测试 实战
+#+KEYWORDS: :Mysql: :DB:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS::DB: :Mysql: :SQL:
+关于mysql的压力测试工具mysqlslap用法在[[file:benchmark.org][这里]].
+建表及存诸过程的语句 create_table.sql
+mysqlslap 有--create参数
+--create ="用于生成一个表，"后绪的查询
+--query 用这个表做测试,这里一般是insert ,或select 或update 语句
+--create 可以是几条sql语句 ，也可以是一个文件名，里面写满sql语句
+但是这条语句太长，放在一个文件里,又提示$$分隔符有问题，所以只好手动建表
+mysqlslap
+#+BEGIN_SRC sql
+  create database if not exists mysqlslap ;
+  use mysqlslap;
+  drop table if exists tbl_test;
+  CREATE TABLE `tbl_test` (
+     `id` int(11) NOT NULL AUTO_INCREMENT,
+     `onOffType` int(11) DEFAULT NULL,
+     `accountId` int(11) DEFAULT NULL,
+     `accountType` int(11) DEFAULT NULL,
+     `playerId` int(11) DEFAULT NULL,
+     `headHeroId` int(11) DEFAULT NULL,
+     `playerLevel` int(11) DEFAULT NULL,
+     `playerName` varchar(255) DEFAULT NULL,
+     `logTime` datetime DEFAULT NULL,
+     `clientVersion` varchar(255) DEFAULT NULL,
+     `clientType` varchar(255) DEFAULT NULL,
+     `issuers` varchar(255) DEFAULT NULL,
+     `flashPlayerVersion` int(11) DEFAULT NULL,
+     `connectType` int(11) DEFAULT NULL,
+     `gameServerName` varchar(255) DEFAULT NULL,
+     `ipAddr` varchar(255) DEFAULT NULL,
+     PRIMARY KEY (`id`)
+   ) engine=myisam;
+
+   DELIMITER $$
+
+  drop procedure if exists `insert_tbl_test`$$
+
+  create procedure `insert_tbl_test`(
+  IN inaccountId int(11),/**/
+  IN inaccountType int(11),/**/
+  IN inplayerId int(11),/**/
+  IN inheadHeroId int(11),/**/
+  IN inplayerLevel int(11),/**/
+  IN inplayerName varchar(255),/**/
+  IN inlogTime datetime,/**/
+  IN inclientVersion varchar(255),/**/
+  IN inclientType varchar(255),/**/
+  IN inissuers varchar(255),/**/
+  IN inflashPlayerVersion int(11),/**/
+  IN inconnectType int(11),/**/
+  IN ingameServerName varchar(255),/**/
+  IN inipAddr varchar(255),/**/
+  IN inonOffType int(11) /**/
+  )
+  BEGIN
+  insert into `tbl_test`(
+  `accountId`, /**/
+  `accountType`, /**/
+  `playerId`, /**/
+  `headHeroId`, /**/
+  `playerLevel`, /**/
+  `playerName`, /**/
+  `logTime`, /**/
+  `clientVersion`, /**/
+  `clientType`, /**/
+  `issuers`, /**/
+  `flashPlayerVersion`, /**/
+  `connectType`, /**/
+  `gameServerName`, /**/
+  `ipAddr`, /**/
+  `onOffType` /**/
+  ) values(
+  inaccountId,/**/
+  inaccountType,/**/
+  inplayerId,/**/
+  inheadHeroId,/**/
+  inplayerLevel,/**/
+  inplayerName,/**/
+  inlogTime,/**/
+  inclientVersion,/**/
+  inclientType,/**/
+  inissuers,/**/
+  inflashPlayerVersion,/**/
+  inconnectType,/**/
+  ingameServerName,/**/
+  inipAddr,/**/
+   inonOffType /**/
+  );
+  END$$
+  DELIMITER ;
+
+#+END_SRC
+
+向表中插入用的sql
+#+BEGIN_SRC sql
+  /* 使用存储过程 */
+  call insert_tbl_test(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1);
+   /* 或 */
+   insert into tbl_test(  `accountId`,  `accountType`,  `playerId`,  `headHeroId`,  `playerLevel`,  `playerName`,  `logTime`,  `clientVersion`,  `clientType`,  `issuers`,  `flashPlayerVersion`,  `connectType`,  `gameServerName`,  `ipAddr`,  `onOffType`  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1);
+#+END_SRC
+测试用语句,在测试这前要用上面create_table.sql建表及存储过程。
+#+BEGIN_SRC sh
+mysqlslap --query="call insert_tbl_test(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)" --concurrency=50  --number-of-queries 10000 --iterations=3 --engine=myisam -uroot -proot
+#+END_SRC
+开50个连接共执行10000次插入操作，
+进行3次测试以便数据得到max、min、avg几个值，准确一点.
+并且分别测在myisam,ARCHIVE,InnoDB 引擎上的差异
+测试结果没太大差别
+#+BEGIN_QUOTE
+mysqlslap --query="call insert_tbl_test(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)" --concurrency=50  --number-of-queries 10000 --iterations=3 --engine=myisam -uroot -proot
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.528 seconds
+    Minimum number of seconds to run all queries: 1.503 seconds
+    Maximum number of seconds to run all queries: 1.545 seconds
+    Number of clients running queries: 50
+    Average number of queries per client: 200
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 1.790 seconds
+    Minimum number of seconds to run all queries: 1.535 seconds
+    Maximum number of seconds to run all queries: 2.289 seconds
+    Number of clients running queries: 50
+    Average number of queries per client: 200
+
+Benchmark
+    Running for engine InnoDB
+    Average number of seconds to run all queries: 1.578 seconds
+    Minimum number of seconds to run all queries: 1.544 seconds
+    Maximum number of seconds to run all queries: 1.625 seconds
+    Number of clients running queries: 50
+    Average number of queries per client: 200
+#+END_QUOTE
+
+下面不使用存储过程，而直接用insert语句的效果
+#+BEGIN_SRC sh
+ mysqlslap --query="insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)" --concurrency=50  --number-of-queries 10000 --iterations=3 --engine=myisam -uroot -proot
+#+END_SRC
+#+BEGIN_QUOTE
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.209 seconds
+    Minimum number of seconds to run all queries: 1.188 seconds
+    Maximum number of seconds to run all queries: 1.234 seconds
+    Number of clients running queries: 50
+    Average number of queries per client: 200
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 1.255 seconds
+    Minimum number of seconds to run all queries: 1.178 seconds
+    Maximum number of seconds to run all queries: 1.393 seconds
+    Number of clients running queries: 50
+    Average number of queries per client: 200
+
+Benchmark
+    Running for engine InnoDB
+    Average number of seconds to run all queries: 1.245 seconds
+    Minimum number of seconds to run all queries: 1.241 seconds
+    Maximum number of seconds to run all queries: 1.250 seconds
+    Number of clients running queries: 50
+    Average number of queries per client: 200
+#+END_QUOTE
+另我不解的是直接insert竟然比使用存储过程快，不知何解
+
+测试开不同连接数的执行速度
+#+BEGIN_SRC sh
+ mysqlslap --query="insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)" --concurrency=5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100  --number-of-queries 10000 --iterations=3 --engine=myisam -uroot -proot
+#+END_SRC
+#+BEGIN_QUOTE
+  mysqlslap --query="insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)" --concurrency=5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100  --number-of-queries 10000 --iterations=3 --engine=myisam -uroot -proot
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.758 seconds
+    Minimum number of seconds to run all queries: 1.730 seconds
+    Maximum number of seconds to run all queries: 1.783 seconds
+    Number of clients running queries: 5
+    Average number of queries per client: 2000
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.681 seconds
+    Minimum number of seconds to run all queries: 1.455 seconds
+    Maximum number of seconds to run all queries: 1.819 seconds
+    Number of clients running queries: 10
+    Average number of queries per client: 1000
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.269 seconds
+    Minimum number of seconds to run all queries: 1.230 seconds
+    Maximum number of seconds to run all queries: 1.317 seconds
+    Number of clients running queries: 15
+    Average number of queries per client: 666
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.181 seconds
+    Minimum number of seconds to run all queries: 1.148 seconds
+    Maximum number of seconds to run all queries: 1.202 seconds
+    Number of clients running queries: 20
+    Average number of queries per client: 500
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.245 seconds
+    Minimum number of seconds to run all queries: 1.233 seconds
+    Maximum number of seconds to run all queries: 1.251 seconds
+    Number of clients running queries: 25
+    Average number of queries per client: 400
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.188 seconds
+    Minimum number of seconds to run all queries: 1.174 seconds
+    Maximum number of seconds to run all queries: 1.206 seconds
+    Number of clients running queries: 30
+    Average number of queries per client: 333
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.348 seconds
+    Minimum number of seconds to run all queries: 1.180 seconds
+    Maximum number of seconds to run all queries: 1.452 seconds
+    Number of clients running queries: 35
+    Average number of queries per client: 285
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.193 seconds
+    Minimum number of seconds to run all queries: 1.183 seconds
+    Maximum number of seconds to run all queries: 1.213 seconds
+    Number of clients running queries: 40
+    Average number of queries per client: 250
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.201 seconds
+    Minimum number of seconds to run all queries: 1.192 seconds
+    Maximum number of seconds to run all queries: 1.213 seconds
+    Number of clients running queries: 45
+    Average number of queries per client: 222
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.219 seconds
+    Minimum number of seconds to run all queries: 1.184 seconds
+    Maximum number of seconds to run all queries: 1.276 seconds
+    Number of clients running queries: 50
+    Average number of queries per client: 200
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.200 seconds
+    Minimum number of seconds to run all queries: 1.191 seconds
+    Maximum number of seconds to run all queries: 1.209 seconds
+    Number of clients running queries: 55
+    Average number of queries per client: 181
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.211 seconds
+    Minimum number of seconds to run all queries: 1.192 seconds
+    Maximum number of seconds to run all queries: 1.245 seconds
+    Number of clients running queries: 60
+    Average number of queries per client: 166
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.297 seconds
+    Minimum number of seconds to run all queries: 1.231 seconds
+    Maximum number of seconds to run all queries: 1.412 seconds
+    Number of clients running queries: 65
+    Average number of queries per client: 153
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.459 seconds
+    Minimum number of seconds to run all queries: 1.432 seconds
+    Maximum number of seconds to run all queries: 1.483 seconds
+    Number of clients running queries: 70
+    Average number of queries per client: 142
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.520 seconds
+    Minimum number of seconds to run all queries: 1.487 seconds
+    Maximum number of seconds to run all queries: 1.539 seconds
+    Number of clients running queries: 75
+    Average number of queries per client: 133
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.647 seconds
+    Minimum number of seconds to run all queries: 1.506 seconds
+    Maximum number of seconds to run all queries: 1.876 seconds
+    Number of clients running queries: 80
+    Average number of queries per client: 125
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.519 seconds
+    Minimum number of seconds to run all queries: 1.500 seconds
+    Maximum number of seconds to run all queries: 1.532 seconds
+    Number of clients running queries: 85
+    Average number of queries per client: 117
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.507 seconds
+    Minimum number of seconds to run all queries: 1.491 seconds
+    Maximum number of seconds to run all queries: 1.530 seconds
+    Number of clients running queries: 90
+    Average number of queries per client: 111
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.556 seconds
+    Minimum number of seconds to run all queries: 1.500 seconds
+    Maximum number of seconds to run all queries: 1.661 seconds
+    Number of clients running queries: 95
+    Average number of queries per client: 105
+
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.521 seconds
+    Minimum number of seconds to run all queries: 1.508 seconds
+    Maximum number of seconds to run all queries: 1.534 seconds
+    Number of clients running queries: 100
+    Average number of queries per client: 100
+#+END_QUOTE
+从结果来看，20连接，速度提升，开到70个连接时速度下隆,大楖在40左右时速度最好。
+
+#+BEGIN_SRC sh
+  mysqlslap --query="insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)" --concurrency=5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100  --number-of-queries 10000 --iterations=3 --engine=ARCHIVE -uroot -proot
+#+END_SRC
+
+#+BEGIN_SRC sql
+  CREATE TABLE `tbl_test` (
+     `id` int(11) NOT NULL AUTO_INCREMENT,
+     `onOffType` int(11) DEFAULT NULL,
+     `accountId` int(11) DEFAULT NULL,
+     `accountType` int(11) DEFAULT NULL,
+     `playerId` int(11) DEFAULT NULL,
+     `headHeroId` int(11) DEFAULT NULL,
+     `playerLevel` int(11) DEFAULT NULL,
+     `playerName` varchar(255) DEFAULT NULL,
+     `logTime` datetime DEFAULT NULL,
+     `clientVersion` varchar(255) DEFAULT NULL,
+     `clientType` varchar(255) DEFAULT NULL,
+     `issuers` varchar(255) DEFAULT NULL,
+     `flashPlayerVersion` int(11) DEFAULT NULL,
+     `connectType` int(11) DEFAULT NULL,
+     `gameServerName` varchar(255) DEFAULT NULL,
+     `ipAddr` varchar(255) DEFAULT NULL,
+     PRIMARY KEY (`id`)
+   ) engine=ARCHIVE;
+#+END_SRC
+#+BEGIN_QUOTE
+jixiuf@jf erlang/lib $  mysqlslap --query="insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)" --concurrency=5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100  --number-of-queries 10000 --iterations=3 --engine=ARCHIVE -uroot -proot
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.894 seconds
+    Minimum number of seconds to run all queries: 0.879 seconds
+    Maximum number of seconds to run all queries: 0.905 seconds
+    Number of clients running queries: 5
+    Average number of queries per client: 2000
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.813 seconds
+    Minimum number of seconds to run all queries: 0.812 seconds
+    Maximum number of seconds to run all queries: 0.815 seconds
+    Number of clients running queries: 10
+    Average number of queries per client: 1000
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.784 seconds
+    Minimum number of seconds to run all queries: 0.759 seconds
+    Maximum number of seconds to run all queries: 0.802 seconds
+    Number of clients running queries: 15
+    Average number of queries per client: 666
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.790 seconds
+    Minimum number of seconds to run all queries: 0.752 seconds
+    Maximum number of seconds to run all queries: 0.852 seconds
+    Number of clients running queries: 20
+    Average number of queries per client: 500
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.747 seconds
+    Minimum number of seconds to run all queries: 0.736 seconds
+    Maximum number of seconds to run all queries: 0.758 seconds
+    Number of clients running queries: 25
+    Average number of queries per client: 400
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.728 seconds
+    Minimum number of seconds to run all queries: 0.721 seconds
+    Maximum number of seconds to run all queries: 0.741 seconds
+    Number of clients running queries: 30
+    Average number of queries per client: 333
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.749 seconds
+    Minimum number of seconds to run all queries: 0.744 seconds
+    Maximum number of seconds to run all queries: 0.761 seconds
+    Number of clients running queries: 35
+    Average number of queries per client: 285
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.708 seconds
+    Minimum number of seconds to run all queries: 0.691 seconds
+    Maximum number of seconds to run all queries: 0.721 seconds
+    Number of clients running queries: 40
+    Average number of queries per client: 250
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.688 seconds
+    Minimum number of seconds to run all queries: 0.687 seconds
+    Maximum number of seconds to run all queries: 0.691 seconds
+    Number of clients running queries: 45
+    Average number of queries per client: 222
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.682 seconds
+    Minimum number of seconds to run all queries: 0.673 seconds
+    Maximum number of seconds to run all queries: 0.688 seconds
+    Number of clients running queries: 50
+    Average number of queries per client: 200
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.750 seconds
+    Minimum number of seconds to run all queries: 0.673 seconds
+    Maximum number of seconds to run all queries: 0.879 seconds
+    Number of clients running queries: 55
+    Average number of queries per client: 181
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.825 seconds
+    Minimum number of seconds to run all queries: 0.668 seconds
+    Maximum number of seconds to run all queries: 1.138 seconds
+    Number of clients running queries: 60
+    Average number of queries per client: 166
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.680 seconds
+    Minimum number of seconds to run all queries: 0.676 seconds
+    Maximum number of seconds to run all queries: 0.686 seconds
+    Number of clients running queries: 65
+    Average number of queries per client: 153
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.691 seconds
+    Minimum number of seconds to run all queries: 0.690 seconds
+    Maximum number of seconds to run all queries: 0.695 seconds
+    Number of clients running queries: 70
+    Average number of queries per client: 142
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.723 seconds
+    Minimum number of seconds to run all queries: 0.686 seconds
+    Maximum number of seconds to run all queries: 0.756 seconds
+    Number of clients running queries: 75
+    Average number of queries per client: 133
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.746 seconds
+    Minimum number of seconds to run all queries: 0.710 seconds
+    Maximum number of seconds to run all queries: 0.799 seconds
+    Number of clients running queries: 80
+    Average number of queries per client: 125
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.715 seconds
+    Minimum number of seconds to run all queries: 0.707 seconds
+    Maximum number of seconds to run all queries: 0.723 seconds
+    Number of clients running queries: 85
+    Average number of queries per client: 117
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.737 seconds
+    Minimum number of seconds to run all queries: 0.723 seconds
+    Maximum number of seconds to run all queries: 0.759 seconds
+    Number of clients running queries: 90
+    Average number of queries per client: 111
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.796 seconds
+    Minimum number of seconds to run all queries: 0.754 seconds
+    Maximum number of seconds to run all queries: 0.859 seconds
+    Number of clients running queries: 95
+    Average number of queries per client: 105
+
+Benchmark
+    Running for engine ARCHIVE
+    Average number of seconds to run all queries: 0.751 seconds
+    Minimum number of seconds to run all queries: 0.738 seconds
+    Maximum number of seconds to run all queries: 0.760 seconds
+    Number of clients running queries: 100
+    Average number of queries per client: 100
+#+END_QUOTE
+很明显使用ARCHIVE在insert 方面 要比 myisam 快将近一倍
+连接数在40~65之间时插入速度达到最大
+
+#+BEGIN_SRC sh
+  mysqlslap --query="insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)" --concurrency=5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100  --number-of-queries 10000 --iterations=3 --engine=InnoDB -uroot -proot
+#+END_SRC
+
+#+BEGIN_SRC sql
+  CREATE TABLE `tbl_test` (
+     `id` int(11) NOT NULL AUTO_INCREMENT,
+     `onOffType` int(11) DEFAULT NULL,
+     `accountId` int(11) DEFAULT NULL,
+     `accountType` int(11) DEFAULT NULL,
+     `playerId` int(11) DEFAULT NULL,
+     `headHeroId` int(11) DEFAULT NULL,
+     `playerLevel` int(11) DEFAULT NULL,
+     `playerName` varchar(255) DEFAULT NULL,
+     `logTime` datetime DEFAULT NULL,
+     `clientVersion` varchar(255) DEFAULT NULL,
+     `clientType` varchar(255) DEFAULT NULL,
+     `issuers` varchar(255) DEFAULT NULL,
+     `flashPlayerVersion` int(11) DEFAULT NULL,
+     `connectType` int(11) DEFAULT NULL,
+     `gameServerName` varchar(255) DEFAULT NULL,
+     `ipAddr` varchar(255) DEFAULT NULL,
+     PRIMARY KEY (`id`)
+   ) engine= InnoDB;
+#+END_SRC
+我不贴 InnoDB的测试数据了，我没耐心等了, InnoDB支持事务 ，全表锁，插入奇慢无比。
+
+最后补充一点：
+照常来说 建表语句 应该在 --create语句中的，这样指定 --engine可以指定多个engine,以逗号隔开，
+直接出测试结果 ，不必每次手动建表建表.

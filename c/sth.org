@@ -1,0 +1,1776 @@
+#+LANGUAGE:  zh
+#+TITLE:     c cpp 拾遗
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-08-01 星期三
+#+DESCRIPTION:c拾遗
+#+KEYWORDS: :C:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :C:
+* make_mark
+  #+BEGIN_SRC c
+  比如MAKE_MASK(3 )会生成  二进制的 00000111
+  #define MAKE_MASK(n)  ((((int)1) << (n)) -1)
+  #+END_SRC
+* c cpp  的一些判断
+  #+BEGIN_SRC c
+    if(flag)
+    if(!flag)
+    /* 而非 */
+    if(0==flag)
+
+    /* 判断指针非空用 */
+    if(p==NULL) // NULL 定义的 #include<cstdlib>  或c的stdlib.h
+    /* 尽量少用: */
+    if(p)
+    if(p==0)
+  #+END_SRC
+
+* const 的作用
+  1. 定义常量
+  2. 在函数的返回值或参数中对其类型进行限制，防止函数内修改参数，一般多指指针类型
+* c++的初始化
+  #+BEGIN_SRC c++
+     int i(1024);// 直接初始化
+     int i=1024; //复制初始化
+
+  #include<string>
+  std:string str="asfdasd";
+  std:string str("asfdasd");
+  #+END_SRC
+* c++ 的声明与定义，
+  声明可以多次， 定义只能一次，声明不分配内存
+  用extern关键来来声明
+  #+BEGIN_SRC c++
+     extern int i ;//声明i
+     int i ;//声明 并定义,所以这是定义 ，不可以出现多次
+     int i=2 ;//声明 并定义,并初始值
+     // 因为声明 不分配内存 所以不可以初始化，一旦有初始化的行为，则认为是定义，即便使用了ertern 也认为是定义而非声明
+     extern int i =3; // 声明 定义 并初始化， 这里的extern 几乎无意义.
+    // 定义之后可以再次出现 单独声明的语句， 但是不能出现
+  #+END_SRC
+  #+BEGIN_SRC c++
+  int main(int argc, char *argv[]){
+    extern  string s;// 只是声明 ，编译会报错
+    std::cout << s << std::endl;
+  }
+  #+END_SRC
+  非const 变量默认extern ,要使const 变量可以在其他文件中使用，
+  必须在本文件及其他文件中声明它为extern
+  默认const 变量只在定义它的文件中有用的局部变量,
+** 在头文件中不可以出现定义,只能有声明,因为会被多个源文件引用， 导致多处定义
+   头文件里不能有定义有3个例外:
+   1. 定义类
+   2. 编译期就已经知道的const对象
+   3. 内联函数
+   这些实体可在多个源文件中出现 只要处处定义相同
+   编译器需要知道这些来产生代码(为什么允许这3个例外)
+   默认const 变量只在定义它的文件中有用的局部变量,这样规定后， const变量就允许
+   出现在头文件里,但是必须用常量表达式出始化 否则必须像正常变量一样源文件里定义并
+   初始化，在头文件里添加extern 声明，以使其被多个文件共享
+   const int a = squt(2 ) ;就不是常量表达式
+* c++ 引用
+  引用不可以为null ,定义时必须初始化,
+  初始化后，不可能绑定到其他对象了,所以一个引用只能绑定一个对象
+  const 引用 是指向 const对象的 引用 both ref and object are const
+  #+BEGIN_SRC c++
+  int i =1;
+  int &iRef=i;//正确
+  int &iRef2; //错
+  int &iref3=10;//错  10是常量
+
+  const  int i3=10;
+  const  int &i3ref=i3;//对
+  int &i3ref2=i3;//错 必须 加 const
+
+  const int &i4=111;//对 ，const引用可以指向常量
+  #+END_SRC
+* c++ 枚举 enum
+  #+BEGIN_SRC c++
+      enum Forms{shape=1,sphere,cylinder,polygon}
+      // 枚举的值后一个比前一个加1,除非显示初始化
+      shape=1 , sphere=2,cylinder=3,
+
+      // 枚举的值可以重复
+      enum Forms{shape=1,sphere,cylinder=2,polygon}
+      // 则shape=1 sphere=2 cylinder=2 polygon=3
+     // 定义成枚举后， 枚举跟int是不同类型
+     // 如
+    Froms f1=shape; //ok
+    Froms f2=2 ; // error
+
+
+  #+END_SRC
+* string 相关
+**  string.size() 返回string::size_type类型,而非int
+   #+BEGIN_SRC c++
+     string::size_type len=  s.size();//ok
+     int len=  s.size();//error, 但是我试了 编译运行都 可过， 但是不推荐
+   #+END_SRC
+** 取string第n个字符用[]下标操作即可,也可对其赋值,只能对已经存在的元素赋值，不能添加
+   []中的数是一个size_type类型,从0 始计
+   #+BEGIN_SRC c++
+     string str("hello");
+     char c=str [1];
+     std::cout << c << std::endl;
+     str[1]='E';
+     std::cout << str << std::endl;  // "hEllo"
+   #+END_SRC
+   #+BEGIN_SRC c++
+     // 遍历
+     for (string::size_type  i= 0; i < str.size(); i++){
+       std::cout << str[i] << std::endl;
+      }
+   #+END_SRC
+** cctype 头文件里一些函数如isupper tolower isspace
+   #+BEGIN_SRC c++
+     #include <cctype>
+     // isdigit(int)
+     // islower(int)
+     // isupper
+     // isalnum
+     // isspace 这些函数也是在std::下的
+     char c='d';
+     std::cout << isupper(c) << std::endl;
+
+   #+END_SRC
+* vector 容器
+  是同一种类型的对象的集合
+  vector是类模版，不是数据类型
+  vector<int> vector<string>则是数据类型
+  #+BEGIN_SRC c++
+    vector<string> v1;
+    string s1("aaa");
+    string s2("bbb");
+
+    v1.push_back(s1);
+    v1.push_back(s2);
+    vector<string> v2(v1);
+
+    s1="ccc";//对s1的改变 变不会影响v1 v2中的元素
+
+    // size_type类型的写法,不可以写成vector::size_type
+    for (vector<string>::size_type i = 0; i<v1.size(); i++) {
+      std::cout << v1.at(i) << std::endl;
+     } // 打印后的是"aaa" "bbb",
+    std::cout << "" << std::endl;
+
+    for (vector<string>::size_type i = 0; i<v2.size(); i++) {
+      std::cout << v2.at(i) << std::endl;
+     }// 打印后的是"aaa" "bbb",
+  #+END_SRC
+** vector [] 下标操作同 string ,可get 可set,只能针对存在的元素,但不能add
+** 使用iterator
+   #+BEGIN_SRC c++
+     # vector1.begin()指向首元素，
+     #vector1.end()指向尾元素的下一个位置
+     // iterator的解引用操作(*it)，取得指向元素的对象 如元素类型是string ,则返回的是string对象
+     for (vector<string>::iterator it =  v1.begin();it!= v1.end() ; it++){
+       std::cout << *it << std::endl;
+       ,*it= *it+"hello";  //可以改变元素的值
+     }
+   #+END_SRC
+** 使用const_iterator
+   与iterator一样， 只是不能对iterator指向的元素进行赋值操作.
+   其指向的元素是只读的，并不是 const_iterator只读
+   意思是不能改变它指向元素的值， 但能改变他指向什么元素
+   所以 const vector<string>:iterator it;
+   vector<string>:const_iterator it;
+   并不相同
+** vector的iterator可以进行简单的算术运算操作，
+   不是所有的容器类型都支持
+   iter+n
+   iter-n
+   iter1-iter2
+   // 返回两元素间的位置差,返回的类型是vector<string>:difference_type
+   //可正可负
+** 任何改变vector长度的操作，都会使已存在的iterator 失效,
+   如push_back()之后，   原来iterator指向的值就不可信了
+* bitset
+  bitset 是模版， 不同的是区别只在长度 ，不在类型
+  #+BEGIN_SRC c++
+     #include<bitset>
+     using std::bitset;
+     bitset<32> bs; //32 bits all 0
+     bitset<16> bs2(0xffff);// 用0xffff的低16位填充
+     // bs[0]  指的是低位第一位
+     bitset<16> bs2("11110001");
+
+    // bitset 提供 了 set all() any() ,count() test(pos)
+    //  flip()  flip(pos) 按位取反
+    // to_string to_ulong()
+    //  std::cout << bs << std::endl; //可以直接 入 流
+    // count() 返回有多少位是1，类型是size_t,在 #include<cstddef>中定义
+  #+END_SRC
+* 数组
+  数组的维数 只能用 包含整形字面值常量、枚举常量 或者用常量表达式初始化的整形
+  const对象 ,非const变量， 以及到运行时才知道其值的const变量都不能用来定义其维数
+  #+BEGIN_SRC c++
+  const int i=10;
+  int j=10;
+  int arr[i+1];                   // 合法的 常量表达式(i是const变量， 编译其就知道其大小)
+  int arr2[j];                   // 不合法的 (j不是const变量， 编译其不知道其大小)
+  #+END_SRC
+** 初始化
+   #+BEGIN_SRC c++
+   //数组初始化
+   int array[3] = {1,2,3};
+   int array[] = {1,2,3};//不指定数据长度也可，此时
+   char array[] = "c";//等同于 char array[]= {'c','\0'}
+   // 可以用sizeof(array) 取数组的长度(数组的长度编译期就确定了，所以sizeof可以做到, c语言里也一样)
+   // 但是 数组作为参数传递时会自动转化成char* 指针， 它是没法取到数组的长度的
+   #+END_SRC
+
+***  在函数体外定义的内置类型的数组，其元素初始化为0
+***  在函数体内定义的内置类型的数组，其元素未初始化，
+*** 不论数组在哪定义，若元素类型为类，则自动调用其默认构造函数初始化，若无默认构造函数，则必须显示初始化
+* 指针
+** 指针的定义 风格
+   #+BEGIN_SRC c++
+    char *p1 ,*p2; //p1 p2 都是指针
+
+   //p1 是指针 ，p2是char ,//跟 char *p1 p2;写法一样
+   // 建议使用 char *p1 ,而非 char* p1;
+    char* p1 p2 ;
+   #+END_SRC
+** 指针的初始化
+   #+BEGIN_SRC c++
+   //指针不可以用int类型的变量来赋值,
+    //但可以用值为0 的const 变量来初始化
+   int a =0;
+   const b=0;
+   int *p =a;//错误
+   int *p2=b;// ok,
+   int *p2=0;// ok,
+   int *p2=NULL;// ok, #include<cstdlib>
+   #+END_SRC
+** 指针类型要匹配
+   #+BEGIN_SRC c++
+   double d =10;
+   double *pd=&d;
+   int *pi =pd;//error
+   #+END_SRC
+** 指针与引用的区别
+   1. 引用必须指向某个对象，不可以为null, 必须进行初始化
+   2. 赋值行为的差异，对指针进行赋值，是让指针指向另一个对象
+      而对引用进行赋值，则是改变当前引用所指对象的值(引用就是对象)
+** 指针的运算
+   指针的类型不能乱用，所以一个指针是什么类型的是知道的 ，
+   对指针加一个数， 实际就是将指针往后移动这种类型的一个单位
+   比如
+   #+BEGIN_SRC c++
+    int i=1;
+    int *p =&i;
+    p++; //往后移动一个int单位,指向下一个int
+   *(p+4) ;//可以这样取p往后挪4个 int后所指对象的值
+   #+END_SRC
+** 指向const对象的指针 和const 指针(本身的值不可变)
+*** 指向const对象的指针
+    #+BEGIN_SRC c++
+      const double d=1;
+      const double *p=&d;//ok, 指向const 对象的指针 ,p 并不是const的
+      double *p2 = &d;//error ,普通的指针 不可以指向const对象
+      void *p3 = &d ;//错
+      const void *p4=&d;//ok
+
+      // 允许 把非const对象的地址赋值给 指向const对象的指针
+       double d2=2;
+
+      // 自以为指向const对象的指针
+       const double *p5 =&d2;     //ok, 但是不能通过*p5来改变 d2的值,虽然可以通过其他方法改d2的值
+    #+END_SRC
+*** const 指针(本身的值不可变),即定义时必须初始化
+    #+BEGIN_SRC c++
+    int i=1;
+    int *const p = &i;// p 只能指向i , 不可以指向其他值了
+    #+END_SRC
+*** typedef 与const易引起歧义
+    #+BEGIN_SRC c++
+     typedef string *pstring;
+     const pstring ctr;
+     并不能简单的将 上述两句像宏一样 扩展成 const  *pstring ctr; ,这则说明ctr是指向const对象的指针
+     而实际 ctr 是const 指针 ,即， 不可以将ctr再指向其他对象 ，但可以改变当前所指对象的值
+
+    可以这样理解， typedef string *pstring ; 说明 这种类型的指向string的指针， 并没有const限定,
+    const pstring ctr; 这里const只是限定ctr这个变量，  而非pstring这种类型， 这种类型在typedef时就已经确定了
+    并不会因为在它前面加一个const 就改变
+    #+END_SRC
+* 动态数组
+  普通数组长度在编译期就需要确定下来，动态数组长度可以在运行期确定
+  #+BEGIN_SRC c++
+    int *p = new int[10];//返回指向第一个元素的指针
+
+    // 动态数据允许长度为0
+    int *p = new int[0];//ok, 返回不是空， 但是不能进行解引用操作， 似类于vector.end()的返回值
+    int i[0]; //error
+
+    delete[] p; //释放
+  #+END_SRC
+* -> 操作符
+  #+BEGIN_SRC c++
+  Item item;
+  Item *p=&item;
+  item.sth().
+  // 下面这两个操作同义
+  (*p).sth().
+   p->sth().
+  #+END_SRC
+* sizeof 操作符 的结果是 编译时常量
+  #+BEGIN_SRC c++
+  int array[3]={1,2,3};
+  sizeof(array); //12  3*sizeof(int)
+  #+END_SRC
+
+  #+BEGIN_SRC c++
+  char *c=(char*) malloc(sizeof(char)*3);
+  strcpy(c, "ab");
+  std::cout << sizeof(c) << std::endl; // 4 返回指针的大小
+  std::cout << sizeof(*c) << std::endl; //1 返回指针所指对象的大小
+  // 上面两个都没有返回"ab"长度相关的内容
+  #+END_SRC
+* new delete
+  #+BEGIN_SRC c++
+   string *str= new string; //初始化为空串
+   int *i = new int;   //内建类型 则未初始化
+
+   int *j  = new int(); // 初始化为0
+  #+END_SRC
+* 强制类型转换( static_cast const_cast, dynamic_cast, reinterpret_cast)
+** static_cast 默认所有的隐式类型转换，都可以通过static_cast显示实现
+   #+BEGIN_SRC c++
+   double d =1;
+   int i =2;
+   i *= static_cast<int>(d) ;// 将d 强制转化成int ,然后与 int i相乘
+
+   void *p = &d;
+   double *pd= static_const<double*> (p);
+   #+END_SRC
+** const_cast 去掉var的const 属性
+   #+BEGIN_SRC c++
+   void test(char* c){}
+   int main(){
+     const char* c;
+     test(c);// error
+     test(const_cast<char*>(c)); //ok
+   }
+   #+END_SRC
+** reinterpret_cast
+   #+BEGIN_SRC c++
+     int i =1;
+    int *ip=&i;
+    //  转化之后， pc 依然是int* 类型的指针
+    char *pc = reinterpret_cast<char*>(ip);
+    string str(pc);////导致运行时error, 但是编译时不会出警告
+   //用int 来初始化string
+   #+END_SRC
+   #+BEGIN_SRC c++
+   char* pc=(char*)ip;//  c++ 似乎不建议使用 这种c里使用的强转
+   //效果与使用 reinterpret_cast一样
+   //这种强转 具有 static_cast const_cast  reinterpret_cast 相同的功能,更笼统
+   #+END_SRC
+* switch
+  执行到某个case后，如果不加break，会继续执行余下的case里的代码
+  所以 在case里定义变量，可能导致重复定义同一个变量，或者因为没有执行某个case里
+  的定义 ，导致 后面的case使用未定义 的变量,
+  所以switch里除了最后一个case 或default可以定义变量外， 其他case语句里不可以定
+  义变量, 如果一定要在case里定义变量可以用块语句(即大括号),在大括号里定义的变量
+  只在此块中有效
+
+  #+BEGIN_SRC c++
+  int i=1;
+  switch (i) {
+  case 1:
+    int j =0; // 这句出错，
+    break;
+  case 2:
+    int j =0;
+    break;
+  }
+  #+END_SRC
+* 内联函数
+** 内联函数应该在头文件中定义(对编译器必须是可见的)
+* 成员函数
+** 成员函数可在类外或类内定义，在类内定义 ，编译器隐式的将其转成内联函数
+** 成员函数的隐含形参this 是一个指针(不是引用),指向调用此函数的对象的地址
+   #+BEGIN_SRC c++
+   class Test
+   {
+   public:
+     Test(int parmI){
+       i=parmI;
+     }
+     bool test(int j) const{// const 是对this 对象的限制,意思是说此函数内不可以改变this对象的属性
+       // this->i=3; // 这种编译出错，尝试对const this对象进行修改
+
+       //  这两种方式是一样的
+       // return i==j;
+       return this->i==j;
+     }
+   private:
+     int i;
+   };
+   #+END_SRC
+* 构造函数
+** 必须在类中声明， 可在类内或类外定义
+** 构造函数的初始化列表(在参数列表后，函数体前的代码)
+   #+BEGIN_SRC c++
+   class Test
+   {
+   public:
+     Test(int parmI):i(parmI){
+     }
+   private:
+     int i;
+   };
+
+   #+END_SRC
+** 默认构造函数不能自动初始化 内置类型 的成员,必须自定义构造函数初始化这些成员,对于类类型的成员默认用他们默认构造函数来初始化
+** 构造函数隐式转换
+   #+BEGIN_SRC c++
+   class Name
+   {
+   public:
+     Name(string &str){
+
+     }
+     void copy(Name n){           // 接受一个Name类型
+       std::cout << "it works" << std::endl;
+     }
+   };
+    int main(int argc, char *argv[])
+    {
+      string str=string("hello");
+      string world=string("world");
+      Name name(str);
+      name.copy(world);  // 传过来的是string 类型， 但是copy()接受的是Name,编译器会自动用string调用Name的相应构造函数
+      return 0;
+    }
+   #+END_SRC
+*** 抑制构造函数隐匿转换
+    #+BEGIN_SRC c++
+    class Name
+    {
+    public:
+      explicit Name(string &str){
+      }
+    };
+
+    #+END_SRC
+* 函数重载(同一个类中 ，函数名相同参数不同)
+** 参数不同的含义，使用typedef定义一个别名后，认为使用别名跟使用本名是同一种类型
+** 参数的const 与否，与重载
+*** 对于值传递的参数,操作的只是副本,const与否并不影响副本,
+    值传递参数 仅const 的区别,认为是同一个函数,不能根据是否有const来区分两个函数
+    #+BEGIN_SRC c++
+       // 以下两种重载是  不 允许的
+      string getj(const int pi){
+      }
+      string getj(int pi){
+      }
+
+      string getj(const Test pi){
+      }
+      string getj(Test pi){
+      }
+    #+END_SRC
+*** 对于引用形参和指针形参 可以根据 是否const 来区分两个函数
+    #+BEGIN_SRC c++
+    // 以下两种重载是允许的
+     string getj(const int *pi){
+       return str;
+     }
+     string getj(int *pi){
+       return str;
+     }
+
+     string getj(const int &pi){
+       return str;
+     }
+     string getj(int &pi){
+       return str;
+     }
+    #+END_SRC
+** 不能仅仅根据返回值类型不同来区别两个函数
+* 函数指针
+  #+BEGIN_SRC c++
+  typedef bool (*compFun) (const string &,const string);
+   // 以下两种方式 效果相同
+   compFun comF1= lengComp;
+   compFun comF2= &lengComp;
+
+  //调用 的时候 以下效果也相同
+  compF1(str1,str2);
+  (*compF1)(str1,str2);
+  #+END_SRC
+* IO
+** 类的关系
+   fstream sstring中定义的类型都是从iostream中定义的类型继承而来
+   |----------+------------------------------------------+--------|
+   | 头文件   | 头文件中的类                             | 类型   |
+   |----------+------------------------------------------+--------|
+   | iostream | istream,ostream,iostream                 |        |
+   | fstream  | ifstream ofstream fstream                | 文件   |
+   | sstream  | istringstream,ostringstream,stringstream | string |
+   |----------+------------------------------------------+--------|
+   #+BEGIN_SRC ditaa :file ../img/cpp-io-class.png :cmdline  -r -S -E
+                       +---------+                                    +-------+
+                       |         | ^                                ^ |       | ^
+                       |         |  \                              /  |       |  \
+                       |ostream  |   \                            /   |istream|   \
+                      ^+-+-------+    \                          /    +---+---+    \
+                     /   ^             \                        /         ^         \
+                    /    |              \                      /          |          \
+                   /     |                +-----------------+             |           \
+                  /      |                |                 |             |            \
+                 /       |                |  iostream       |             |             \
+                /        |                |                 |             |              \   +-----------+
+               /         |                +-----------------+             |               \  |cBLU       |
+  +--------------+       |                ^                 ^             |                \ |ifstream   |
+  |cBLU ofstream |       |                |                 |             |                  |           |
+  |              |       |                |                 |             |                  |           |
+  |              |       |                |                 |             |                  +-----------+
+  +--------------+       |                |                 |             |
+                         |                |                 |             |
+                         |                |                 |             |
+                         |       +--------+----+       +----+------+      |
+                         |       |cPNK         |       |cBLU       |      |
+                         |       |stringstream |       |fstream    |      |
+                         |       |             |       |           |      |
+                         |       +-------------+       +-----------+      |
+                +-----------------+                                       |
+                |cPNK             |                                +------+------+
+                |ostringstream    |                                |cPNK         |
+                |                 |                                |istringstream|
+                |                 |                                |             |
+                +-----------------+                                +-------------+
+   #+END_SRC
+
+** io 与宽字符
+   以上类名前加一个w ,则支持读写wchar_t类型的字符，如 wostream wistream
+
+** IO 对象 不可赋值或复制
+** 条件状态
+   | eof()                   | 判断是否eof                |
+   | good()                  | 流处于有效状态，则true     |
+   | fail()                  | 失败的IO操作               |
+   | bad()                   | 是否被破坏，strm::badbit位 |
+   | clear()                 | 重置所有状态为有效态       |
+   | clear(flag)             | 重置某状态为有效态         |
+   | setstate(strm::iostate) |                            |
+   | rdstate()               | 返回strm::iostate          |
+   #+BEGIN_SRC c++
+  int i;
+  cin>>i;
+  if(cin){// 这里是判断 cin是处于有效状态，cin跟据当前条件状态 自动转换 成bool
+  }
+   #+END_SRC
+   #+BEGIN_SRC c++
+  #include <iostream>
+  #include <string>
+  #include <stdio.h>
+  #include <stdlib.h>
+  using std::cin;
+  using std::cout;
+  using std::cerr;
+  using std::endl;
+  using std::string;
+  using std::istream;
+  int read_int(istream &in){
+    int i =0;
+    while(in>>i , !in.eof()){// 读取一个int ,然后判断是否读到结尾
+      if(in.bad()){
+        exit(1);
+      }else if (in.fail()){
+        cerr<<"bad data,not int ,try again " <<std::endl;
+        in.clear(istream::failbit); // reset failbit
+        std::cerr<< "failbit flag after in.clear(istream::failbit) "<< in.fail() << std::endl;
+        in.clear();
+        std::cerr << "failbit flag after in.clear() "<< in.fail() << std::endl;
+        cin.ignore();// 忽略掉上次读取失败的字符，以便继续读下一个
+        continue;
+      }else{//成功读取一个int后退出循环
+        break;
+      }
+    }
+    return i;
+  }
+  main(int argc, char *argv[]){
+    int i =read_int(cin);
+    std::cout << i << std::endl;
+  }
+   #+END_SRC
+** File
+   #+BEGIN_SRC c++
+  //一行行读取一个文件， 写到另一个文件
+  main(int argc, char *argv[]){
+    ifstream fin("c.cpp");
+    ofstream fout("c.cpp2");
+    string buf;
+    if (fin ){
+      while(std::getline(fin, buf)){
+        fout<< buf <<std::endl ;
+      }
+    }
+    fout.close();
+    fin.close();
+  }
+   #+END_SRC
+*** open close
+    #+BEGIN_SRC c++
+     ifstream fin;
+     fin.open("filename");
+     fin.close();
+    #+END_SRC
+** 字符流 stringstream ostringstream istringstream
+   #+BEGIN_SRC c++
+     #include <sstream>
+     using std::stringstream;
+
+     stringstream ss("hello");
+     std::cout << ss.str() << std::endl;
+
+     ss<< "hello" << 1<< "world";
+     std::cout << ss.str() << std::endl;
+   #+END_SRC
+* 顺序容器
+** 包括哪些
+   | vector | 快速随机访问       |
+   | list   | 支持快速插入、删除 |
+   | deque  | 双端队列           |
+
+   以上类型的适配器
+   | stack          | 后进先出 |
+   | queue          | 先进先出 |
+   | priority_queue | 有优先级 |
+   #+BEGIN_SRC c++
+  #include<vector>
+  #include<list>
+  #include<deque>
+   #+END_SRC
+** 容器内元素的约束
+   1. 元素类型必须支持 赋值
+   2. 元素类型对象必须可以复制
+   所以 引用不可以作元素 IO类不可以作元素
+   容器的容器
+   #+BEGIN_SRC c++
+ vector< vector<string> > lol;//中间需要有空格 ，否则 误解为>> <<
+   #+END_SRC
+** 容器iterator支持的操作
+   | *iter        |
+   | iter->mem    |
+   | ++iter       |
+   | iter++       |
+   | --iter       |
+   | iter--       |
+   | iter==iter2  |
+   | iter !=iter2 |
+   #+BEGIN_SRC c++
+  vector<int> v1;
+  v1.push_back(1);
+  v1.push_back(2);
+  v1.push_back(3);
+  vector<int>::iterator it = v1.begin()+ v1.size()/2;
+  std::cout << *it << std::endl;
+
+  list<int> il(v1.begin(),v1.end());
+
+  // list<int>::iterator it = il.begin()+il.size()/2; //error  list doesnot support
+   #+END_SRC
+
+*** vector deque 支持的特殊操作(数组实现的 支持随机访问的)
+    |              | return                        |
+    |--------------+-------------------------------|
+    | iter+n       | iter                          |
+    | iter-n       | iter                          |
+    | iter1+=iter2 | iter                          |
+    | iter1-=iter2 | iter                          |
+    | iter1-iter2  | vector<type>::difference_type |
+    | > >= < <=    | bool                          |
+
+** 容器提供的类型
+   |                        | 例                                   |                                                 |
+   |------------------------+--------------------------------------+-------------------------------------------------|
+   | size_type              | vector<int>::size_type               | v1.size()                                       |
+   | difference_type        | list<int>::difference_type           | iter1-iter2                                     |
+   | iterator               | vector<string>::iterator             | vector<int>::iterator beg=v1.begin()            |
+   | const_iterator         | vector<string>::const_iterator       | vector<int>::const_iterator beg=v1.begin()      |
+   | reverse_iterator       | vector<string>::reverse_iterator     | v1.rbegin(),v1.rend()                           |
+   | const_reverse_iterator | list<string>::const_reverse_iterator |                                                 |
+   | value_type             | vector<string>::value_type           | vector<int>::value_type value1=  *(v1.begin()); |
+   | reference              | vector<string>::reference            | 同value_type&                                   |
+   | const_reference        | vector<string>::const_reference      | const value_type&                               |
+** 插入元素
+   | push_back(New)                  | append to end of ...                         |
+   | insert(iter1,New)               | insert before element of iter1               |
+   | insert(iter1,n,New)             | insert n个 New                               |
+   | insert(iter1,iter_beg,iter_end) | 在iter1前插入从iter_beg,到iter_end之间的元素 |
+*** 插入元素会使iterator失效
+    #+BEGIN_SRC c++
+      vector<int>::iterator first= v1.begin();
+      v1.push_back(3);
+      vector<int>::iterator first2= v1.begin();
+      std::cout << first==first2 << std::endl;
+      // 两次返回的begin()是不同的，如果下面的处理，使用到了first局部变量，
+      // 后果不可预知
+    #+END_SRC
+**  删除元素
+   | c.erase(iter1)   |
+   | c.erase(beg,end) |
+   | c.clear()        |
+   | c.pop_back()     |
+   | c.pop_front()    |
+   |                  |
+* 关联容器
+** 关联窗口列表
+   | map      |               |
+   | set      |               |
+   | multimap | key可多次出现 |
+   | multiset |               |
+** pair
+   #+BEGIN_SRC c++
+     #include <utility>
+     pair<string ,int> p("v1" ,100);
+     std::cout << p.first << " "<< p.second<< std::endl;
+     p=make_pair("hello", 300);
+   #+END_SRC
+** map
+   #+BEGIN_SRC c++
+        map<string,int> m;
+        m["3"]=3;
+        // 使用下标访问元素，如果key不存在， 则自动创建一个，value为相应类型的默认值
+        std::cout <<m["3"]<< std::endl;
+     // 如果不想自动插入，则用map.count() ,map.find() ,来处理
+     if(m.count("3")){
+       map<string,int>::iterator it=m.find("3");
+         pair<string,int> p = *it;
+         std::cout << p.second << std::endl;
+     }
+
+
+        for (map<string,int>::iterator it=m.begin(); it!=m.end(); it++) {
+          pair<string,int> p = *it;
+          std::cout << p.first <<"="<<p.second << std::endl;
+         }
+   #+END_SRC
+*** map 的iterator解引用 是pair类型
+
+*** map 插入
+    #+BEGIN_SRC c++
+      map<string,string> m;
+      m.insert(make_pair("3", "111"));
+      pair<map<string,string>::iterator,bool> ret=
+        m.insert(make_pair("3", "222"));//重复则什么都不做, 返回值是一个pair<iterator,boolInsertSuccessful>
+      std::cout << m["3"] << std::endl;//m["3"] 的值 是"111" ,而不是"222"
+
+      m["4"]="111";
+      m["4"]="222"; //覆盖
+      std::cout << m["4"] << std::endl;//m["4"] 的值 是"222" ,而不是"111"
+
+    #+END_SRC
+*** map 删除
+    | erase(Key)     |
+    | erase(iter)    |
+    | erase(beg,end) |
+** set
+   #+BEGIN_SRC c++
+     //count(Key) 返回0 1 是否含有此key
+   #+END_SRC
+* 泛形算法(可以操作在多种容器类型上)
+  多数算法都是通过  iterator来标记一段范围
+  #+BEGIN_SRC c++
+    #include <algorithm>
+    #include <numeric>
+  #+END_SRC
+** find(iter_beg,iter_end,search_value) 从某段范围内查找search_value,失败返回iter_end,成功返回iter
+** accumulate(iter_beg,iter_end,init_value) 求和,类似于erlang里的lists:foldl
+   #+BEGIN_SRC c++
+     vector<int> v;
+     vector<int> v;
+     v.push_back(1);
+     v.push_back(2);
+     v.push_back(3);
+     int value=accumulate(v.begin(),v.end(),0);
+     std::cout << value << std::endl;
+
+     //字符串连接
+     vector<string> v;
+     v.push_back("1");
+     v.push_back("2");
+     v.push_back("3");
+     string value=accumulate(v.begin(),v.end(),string(""));
+     std::cout << value << std::endl;
+   #+END_SRC
+** find_first_of(iter1_beg,iter1_end,iter2_beg,iter2_end)
+   在iter1_beg iter1_end的范围内查找任意一个属于iter2_beg iter2_end
+   #+BEGIN_SRC c++
+     vector<string> v;
+     v.push_back("1");
+     v.push_back("2");
+     v.push_back("3");
+
+     list<string> l;
+     l.push_back("2");
+     l.push_back("4");
+
+     vector<string>::iterator it=find_first_of(v.begin(), v.end(), l.begin(), l.end());
+     if(it!=v.end()){
+       std::cout << *it << std::endl;
+     }
+   #+END_SRC
+** fill(beg,end,value) 填充value
+   #+BEGIN_SRC c++
+  vector<string> v;
+  v.push_back("1");
+  v.push_back("2");
+  v.push_back("3");
+  fill(v.begin(),v.end(),"test");
+   #+END_SRC
+** fill_n(beg,N,value) 填充N个value
+   #+BEGIN_SRC c++
+     vector<string> v;
+     v.push_back("1");
+     v.push_back("2");
+     v.push_back("3");
+     fill_n(v.begin(),2,"test");// 填充2个test
+     fill_n(v.begin(),4,"test");// error,长度不够4 个
+   #+END_SRC
+   引入back_iterator ,当fill_n 的N 超出容器长度之后， 自动使用push_back添加到末尾
+   #+BEGIN_SRC c++
+  vector<string> v;
+  v.push_back("1");
+  v.push_back("2");
+  v.push_back("3");
+  fill_n(back_inserter(v),4,"test");
+   #+END_SRC
+** replace(beg,end,old,new) 把old换成new
+** replace_copy(beg,end,NewIterBeg,old,new) 不改变原来的容器，将改变后的内容存入NewIterBeg所指容器中
+   #+BEGIN_SRC c++
+     vector<string> v;
+     v.push_back(string("1"));
+     v.push_back(string("2"));
+     v.push_back(string("3"));
+
+     vector<string> v2;
+
+     replace_copy(v.begin(),v.end(),back_inserter(v2),string("2"),string("222"));
+     for (vector<string>::iterator it=v2.begin();it!= v2.end(); it++) {
+       std::cout << *it << std::endl;
+     }
+   #+END_SRC
+** sort unique 排序 去重，
+   #+BEGIN_SRC c++
+     vector<string> v;
+     v.push_back(string("2"));
+     v.push_back(string("2"));
+     v.push_back(string("1"));
+     v.push_back(string("1"));
+     v.push_back(string("3"));
+
+     sort(v.begin(),v.end());//排序
+     //把不重复的元素移动到容器的前面，返回多余的重复元素的首地址
+     // unique 并没有真正的去重， 只是把重复 的移动容器尾部 以便删除
+    //算法并不删除或添加元素，若需要 ，则要则使用容器删除
+     vector<string>::iterator it=unique(v.begin(), v.end());
+     v.erase(it,v.end());//删除那些重复的元素 ,从it所指位置到 end()
+
+     for (vector<string>::iterator it=v.begin(); it!=v.end(); it++) {
+       std::cout << *it << std::endl;
+     }
+   #+END_SRC
+** count_if(beg,end,Pred)  类似函数式编程，
+   #+BEGIN_SRC c++
+  bool is_2(string str){
+    str=="2";
+  }
+
+  vector<string> v;
+  v.push_back(string("2"));
+  v.push_back(string("2"));
+  v.push_back(string("1"));
+  v.push_back(string("1"));
+  v.push_back(string("3"));
+  vector<string>::size_type cnt=count_if(v.begin(),v.end(),is_2);
+  std::cout << cnt << std::endl;
+   #+END_SRC
+** 泛形与iterator
+*** 插入迭代器
+    1. back_inserter  当需要插入时 用push_back
+    2. front_inserter当需要插入时 用push_front (容器需支持push_front)
+    3. inserter(vector,iter) 当需要插入时 在iter所指位置后插入
+*** iostream 迭代器
+*** 反向迭代器
+* 类
+  1. 类的定义必须以分号结束 ， 因为可以}后加 对象定义列表,像struct一样
+     #+BEGIN_SRC c++
+       class Name
+       {
+       } name1, name2;
+     #+END_SRC
+* 类 this 指针
+  #+BEGIN_SRC c++
+    //this 是指针
+    class Name
+    {
+    public:
+      int i;
+      Name& get(){
+        return *this;//this指针   转成对象的引用
+      }
+      Name get2(){                  // // 转成对象
+        return *this;
+      }
+
+    };
+
+    int main(int argc, char *argv[]){
+      Name n;
+      n.i=3;
+      Name &p = n.get();
+      Name same = n.get2();
+      // 打印结果都是3
+      std::cout << p.i << std::endl;
+      std::cout << same.i << std::endl;
+      return 0;
+    }
+  #+END_SRC
+** this 与const
+   1. this 的类型是 指向类类型的const 指针， 意思是它只能指向当前对象， 不能指向其
+      他对象 ，可以改变所指对象 的值 ， 但不能改变this所指的地址
+   2. 在const 成员函数中，this是一个指向const类类型对象的const 指针
+      即 不能改变其所指的对象 ，也不能改变其地址
+      有一个问题 ，即return 当前对象时 类型也固定成this的类型，
+      #+BEGIN_SRC c++
+        class Name
+        {
+        public:
+          int i;
+          Name& get() const{// 编译是通不过的(这里的const 是对this的限制)
+            //因为*this 的类型是const的
+            return *this;
+          }
+          const Name& get2() const{      //这样是允许的
+            return *this;
+          }
+        };
+      #+END_SRC
+* mutable 可变数据成员
+  即使在const成员函数中， 也可以对mutable成员变量进行更改
+  #+BEGIN_SRC c++
+    class Name
+    {
+    public:
+      mutable int i;
+      Name& set() const{
+        i=3;//this 是const的， 但是依然可以对this->i 进行更改
+      }
+    };
+  #+END_SRC
+* 友元 friend
+** friend Class
+   允许某些 非成员函数或类 访问类private成员，同时阻止其他一般的访问
+   如 重载的操作符（操作符不是类的成员)
+   #+BEGIN_SRC c++
+  class Name
+  {
+// 声明， NameF 类，可以访问我的么有成员
+    friend class NameF;//只是一个声明， 不是定义
+  private :
+    string name;
+  public:
+    Name(string n){
+      name=n;
+    }
+  };
+  class NameF
+  {
+  public:
+    void print(Name n){
+      //访问n 的private成员 name
+      std::cout << n.name << std::endl;
+    }
+  };
+
+  int main(int argc, char *argv[])
+  {
+    Name n("hello");
+    NameF f;
+    f.print(n);
+    return 0;
+  }
+   #+END_SRC
+** friend Function
+   #+BEGIN_SRC c++
+  class Name; // 前向声明，因为NameF依赖Name , Name也依赖NameF
+
+  class NameF{
+  public:
+    void print(Name n);
+    void print2(Name n);
+  };
+
+  class Name
+  {
+    // 声明， NameF.print，可以访问我的私有成员
+    friend void NameF::print(Name n);//只是一个声明， 不是定义
+  private :
+    string name;
+  public:
+    Name(string n){
+      name=n;
+    }
+  };
+
+  void NameF::print(Name n)
+  {
+    //访问n 的private成员 name
+    std::cout << n.name << std::endl;
+  }
+
+  void NameF::print2(Name n){
+    // 在这里访问n.name是不允许 的，print2不是friend
+    // std::cout << n.name << std::endl;
+  }
+  int main(int argc, char *argv[])
+  {
+    Name n("hello");
+    NameF f;
+    f.print(n);
+    return 0;
+  }
+   #+END_SRC
+* static 数据成员
+
+** static 数据成员必须在 类的定义 外 初始化 (只能一次）
+   #+BEGIN_SRC c++
+  class Name
+  {
+  private:
+    static int init_i(int iParm){
+      return iParm;
+    }
+
+  public:
+    // static int i=3; // error 不允许在类内初始化 static 数据成员
+    //static const int i=4;  //ok 例外是 static const类型的常量，则可以在类体用常量表达式初始化，
+
+    static int i;
+  };
+  // 在类外定义  初始化 ,初始化的时候 不能加static 关键字
+  //init_i() 是Name类private static 成员， 此处也可以直接这样调
+  int Name::i =init_i(3);
+
+  int main(int argc, char *argv[])
+  {
+    return 0;
+  }
+   #+END_SRC
+
+* 复制构造函数
+  #+BEGIN_SRC c++
+  class MyClass
+  {
+  public:
+   //用另一个MyClass  初始化
+   //若要禁止复制 ， 则声明为private
+  //若要连自身的成员函数 或友元函数也不能访问， 则只声明 不定义
+    MyClass(const MyClass &cls);
+  };
+  #+END_SRC
+* 赋值操作符
+  #+BEGIN_SRC c++
+      MyClass& MyClass::operator=(const MyClass &rhs) {
+        // Check for self-assignment!
+        if (this == &rhs)
+          return *this;
+        return *this;
+      }
+  #+END_SRC
+* 析构函数
+  #+BEGIN_SRC c++
+    class Name
+    {
+    private :
+      string name;
+    public:
+      Name(string &n){name=n;}
+      virtual ~Name(){
+        std::cout << "deleted Name class:" <<name << std::endl;
+      }
+    };
+
+    int main(int argc, char *argv[])
+    {
+      string hello= "hello";
+      Name *n  = new Name(hello);
+      delete n;
+      return 0;
+    }
+  #+END_SRC
+  1.  即使我们自己编写了析构函数 ， 系统为我们自动 生成的合成析构函数也会运行
+* 管理具有指针成员的类（引用计数)
+  #+BEGIN_SRC c++
+    #include <iostream>
+    #include <string>
+    #include <vector>
+
+    using namespace std;
+    class Nptr
+    {
+      friend class Obj;
+    private:
+      size_t cnt;
+      int *p;
+    public:
+      Nptr(size_t c,int *pr):cnt(c), p(pr)  {}
+      ~Nptr(){
+        std::cout << "~Nptr() is called" << std::endl;
+        delete p;
+      }
+      int * get_value(){
+        return p;
+      }
+      size_t  get_cnt(){
+        return cnt;
+      }
+
+    };
+    class Obj
+    {
+    public:
+      Nptr *nptr;
+      Obj(int *i ):nptr( new Nptr(1,i)) {}
+      virtual ~Obj(){
+        std::cout << "nptr.cnt--" << std::endl;
+        if (--nptr->cnt==0){
+              delete nptr;
+          std::cout << "nptr cnt =0 ,deleted" << std::endl;
+        }
+      }
+      Obj(Obj &another): nptr(another.nptr)
+      {
+        another.nptr->cnt++;
+      }
+      Obj& operator=(const Obj &rhs) {
+        // Check for self-assignment!
+        if (this == &rhs)
+          return *this;
+        if ((--nptr->cnt)==0){
+          delete nptr;
+        }
+        nptr=rhs.nptr;
+        rhs.nptr->cnt++;
+        return *this;
+      }
+    };
+
+    int main(int argc, char *argv[]){
+      int *i   = new int(3) ;
+      Obj obj(i);
+      std::cout << obj.nptr->get_cnt()<< std::endl;
+      Obj obj2(obj);
+      std::cout << obj.nptr->get_cnt()<< std::endl;
+      Obj obj3=obj2;
+
+      std::cout << obj.nptr->get_cnt()<< std::endl;
+      return 0;
+    }
+  #+END_SRC
+* 操作符重载
+  1. 重载操作符 必须 具有  一个 类类型 操作数，即 不能重载内置类型的操作符，
+     #+BEGIN_SRC c++
+     int  operator+(int ,int )//eror , int int 都是内转类型
+     #+END_SRC
+  2. 优先级 结合性是固定的
+  3. 不再具备短路求值特殊性（重载 || &&时） ，因 重载后  ，不能保证 求值顺序，
+     所以 两个值都要 求
+  4. 一般将自述和关系操作符 定义为 非成员函数，赋值 定义为成员函数(=  += )
+     #+BEGIN_SRC c++
+       MyClass& MyClass::operator=(const MyClass &rhs) { //赋值= 与+=  返回 引用
+         // Check for self-assignment!
+         if (this == &rhs)
+           return *this;
+         return *this;
+       }
+
+       MyClass operator+(const MyClass &me const MyClass &other) //返回 不是引用
+       {
+         MyClass result = *this;
+         result += other;
+         return result;
+       }
+     #+END_SRC
+  5. 与友元函数 ，当为非成员函数时， 通常设为它的友好函数
+     #+BEGIN_SRC c++
+     class A
+     {
+       friend A operator+(const A &a, const A &a2);// 声明为A的码元函数,这样 ，可以访问A的private member
+
+     };
+
+     A operator+(const A &self,const A &other)
+     {
+       A result =*self +*other;
+
+       return result;
+     }
+     #+END_SRC
+  6. 不建议 重载  逗号 取地址 逻辑与 逻辑或
+  7. 如果重载了 ＋  通常也会重载 +=
+  8. 要作为map 的key 的类 ，通常要重载<号与==, 如果定义了== 一般会定义!= ,如果定
+     义的<  通常也该提供 > >= <=
+  9. = [] ()  -> 四个必须定义的成员函数（否则编译错)， \+= 建议定义成成员，改变对
+     象状态 如++ -- 通常定义为成员，对象的操作符通常定义为非成员 如 + - * / = =
+     ! =
+  10. < < 与 > > 必须非成员函数
+      #+BEGIN_SRC c++
+        std::ostream& operator<<(std::ostream& s, const MyClass& c)
+        {
+          return s;
+        }
+
+        istream& operator>>(istream& s, const MyClass& c)
+        {
+         //要处理 错误 ，与eof
+          return s;
+        }
+      #+END_SRC
+  11. = 操作符 ，可以重载 ,必须定义为成员函数
+  12. [] 下标
+      #+BEGIN_SRC c++
+        Class& operator[](int index);
+      #+END_SRC
+  13. 成员访问 解引用*  箭头-> (通常用在 智能指针的类中)
+      #+BEGIN_SRC c++
+        //* 必须定义为成员
+        MyClass& MyClass::operator*() {
+          return *ptr->sp;  //return ref
+        }
+
+        MyClass* MyClass::operator->():const { //const or not
+          return ptr->sp;  //return pointer
+        }
+      #+END_SRC
+  14. ++ --
+      #+BEGIN_SRC c++
+     MyClass& MyClass::operator++() { //++i
+       return *this;
+     }
+     MyClass& MyClass::operator++(int) {//i++ ,参数int 无意义 ，只是为了区分i++ ++i
+       return *this;
+     }
+      #+END_SRC
+  15. 调用操作符（） 和函数对象
+  #+BEGIN_SRC c++
+    class MyClass
+    {
+    public:
+      int operator() (int i) {
+        return i+1;
+      }
+    };
+    int main(int argc, char *argv[])
+    {
+      MyClass c;//c is object
+      int ret=c(1);                 // 调用操作符,定义了调用操作符的类，的对象 常称为函数对象 ，
+      return 0;
+    }
+  #+END_SRC
+  #+BEGIN_SRC c++
+     //函数对象在 算法库中的应用
+    #include <iostream>
+    #include <string>
+    #include <cstdlib>
+    #include <vector>
+    #include <algorithm>
+    using namespace std;
+
+    class IsGreatThanN
+    {
+    private:
+      size_t n;
+    public:
+    IsGreatThanN(size_t N){
+        this->n=N;
+      }
+
+      bool operator() (const string & str) { //定义了 调用操作符()
+        return str.size()>n;
+      }
+    };
+
+    int main(int argc, char *argv[])
+    {
+      vector<string> v;
+      v.push_back(string("abc"));
+      v.push_back(string("abcccccc"));
+      v.push_back(string("dddddabc"));
+      int cnt=count_if(v.begin(),v.end(),IsGreatThanN(5)); // 这里利用函数对像 ，在初始化时，将参数5传过去 ，count_if 其实是利用了 IsGreatThanN 对象的() 操作符来完成bool的判断的
+      std::cout << cnt << std::endl;
+      return 0;
+    }
+  #+END_SRC
+  16  转换操作符
+  #+BEGIN_SRC c++
+      class SmallInt
+      {
+      public:
+        //转换成int 的转换操作符
+        operator int() const{ return 0}
+      };
+
+  #+END_SRC
+* 面向对象 多承 多态(动态绑定,父类引用指向子类对象)) 封装
+** 父类 通常 应该 将 子类需要重新定义的函数 声明为 virtual
+** 继承语法  子类:[public |private|protected] 父类, 子类权限的控制
+   子类可以进一步限制 但不能 放松 它所继承来的成员的访问权限
+*** class Child:public Parent ,原来为public 则为public,原来为protected 则为  protected
+*** class Child:protect Parent ,原来为public 则为protected,原来为protected 则为protected(默认)
+*** class Child:private Parent ,parent所有成员在Child为成为private
+    public 的,可以继承Parent继承的接口,private protected 不行
+    #+BEGIN_SRC c++
+     class Base{};
+      struct D1: Base{}  ;;默认是public
+      class D2:Base{}  默认是protected
+    #+END_SRC
+
+
+** 子类可以选择性的继承父类的 virtaul 函数
+   #+BEGIN_SRC c++
+      class Parent
+      {
+      public:
+        virtaul void test();
+      };
+     class Child:public Parent
+     {
+     public:
+       void test();
+     };
+   #+END_SRC
+** 子类的声明(并非定义)
+   #+BEGIN_SRC c++
+       //正确
+       class Child;
+       class Parent;
+   #+END_SRC
+   #+BEGIN_SRC c++
+        //错误
+        class Child :Parent
+   #+END_SRC
+** virtaul
+   #+BEGIN_SRC c++
+    #include <iostream>
+    #include <string>
+    #include <vector>
+
+    using namespace std;
+
+    class Parent
+    {
+    public:
+      virtual void test(){
+        std::cout << "pppp" << std::endl;
+      }
+    };
+    class Child:public Parent
+    {
+    public:
+      virtual void test(){
+        std::cout << "childdddd" << std::endl;
+      }
+    };
+
+    void call_test(Parent *p){// 这里声明为Parent* 类型,
+      p->test(); // 因为Parent 将test()函数 声明为 virtaul
+    };
+
+    int main(int argc, char *argv[]){
+      Parent p  ;
+      Child c;
+      call_test(&p);
+      call_test(&c);
+      c.Parent::test();// 强制使用 parent版 的test
+      return 0;
+    }
+   #+END_SRC
+** virtaul 函数 与　默认参数
+   若　父类　子类都为virtal 函数 指定了默认参数 , 则 传过来的是什么跟所指对象
+   的实际类型无关, 跟 传过来形参的类型有关
+   #+BEGIN_SRC c++
+       #include <iostream>
+       #include <string>
+       #include <vector>
+
+       using namespace std;
+
+       class Parent
+       {
+       public:
+         virtual void test(int i=1 ){
+           std::cout << "pppp"<< i << std::endl;
+         }
+       };
+       class Child:public Parent
+       {
+       public:
+         virtual void test(int i=2){
+           std::cout << "childdddd"<<i << std::endl;
+         }
+       };
+
+       void call_test(Parent *p){
+         p->test();
+       };
+
+       int main(int argc, char *argv[]){
+         Parent p  ;
+         Child c;
+         call_test(&p); //打印的int 是 1
+         call_test(&c);//打印的int 是 1 ,因为 call_test()里调用的时候 , 指针的类型是Parent* 类型的
+         c.Parent::test();
+         // 最佳实践,默认参数 要一致
+         return 0;
+       }
+   #+END_SRC
+** 友元关系不能继承
+   #+BEGIN_SRC c++
+    #include <iostream>
+    #include <string>
+    #include <vector>
+
+    using namespace std;
+    class Parent
+    {
+      friend class Friend;
+    protected:
+      int i;
+    };
+
+    class Child:public Parent
+    {
+    protected:
+      int j;
+    };
+    class Friend
+    {
+    public:
+      void test(Parent p){p.i=3;}           // ok
+      // void test(Child c){c.j=3;}            // errro
+    };
+    class FriendChild:public Friend
+    {
+    public:
+      // void test(Parent p){p.i=3;};   // error
+    };
+   #+END_SRC
+** static
+   父类定义了static成员, 则无论继承多少次, 整个继承层次中只有一个这样的成员
+   若为private ,则子类不能访问之
+   可以这样访问 Parent.static_mem ,Child.static_mem
+** 继承与转化
+   1. 可以将子类对象传给接受 "父类引用" 的函数,此行为并非对象的转换, 引用依然指向子
+      类
+   2. 可以将子类对象 传给 接受 父类对象 的函数,会将 子类对象中父类的那部分 复制
+      到形参(值传递)
+   3. 父类转子类
+      #+BEGIN_SRC c++
+        Child c;
+        Parent *p =&c;                  // ok
+        Child *cp =p;                   //  error ,虽然p所指向的是个Child,但,p是 Parent* 类型的指针, 转化失败,
+        // 不过可以用static_cast 或dynamic_cast 进行转换
+      #+END_SRC
+** 构造函数 与继承
+   #+BEGIN_SRC c++
+     class Parent
+     {
+     public:
+       Parent(int i){}
+     };
+
+     class Child:public Parent
+     {
+     private:
+       int member_j;
+     public:
+     // 先初始化父类, 然后按照 声明的顺序 初始化自己的成员,
+       Child(int i ,int j) :Parent(i),member_j(j){}
+     };
+   #+END_SRC
+   只能初始化直接父类,祖父的的初始化让父类去完成就可以了.
+** 复制构造函数 与继承
+   #+BEGIN_SRC c++
+        class Child
+        {
+        public:
+          Child(Child c ){
+            Parent(c); //先调用父类的复制构造函数 ,
+            //然后对自己的部分进行处理
+          }
+        };
+   #+END_SRC
+** 赋值操作符 与继承
+   #+BEGIN_SRC c++
+        Child& Child::operator=(const Child &rhs) {
+          // Check for self-assignment!
+          if (this == &rhs)
+            return *this;
+          Parent::operator=(rhs);//先初始化父类部分
+          // ...
+          return *this;
+        }
+   #+END_SRC
+** 如果在构造函数 或 析构函数 中调用  虚函数,
+   则调用的是 对象本身类型定义的版本,
+   在运行构造函数 或析构函数时, 自身对象是不完整的,
+   在父类构造或析构函数中,将子类对象当作父类对象对待,此时调用的虚函数
+   是父类中定义的版本
+** 名字冲突与继承
+   与父类成员同名的子类成员 会屏蔽父类的,函数也一样(即便参数不同)
+   Base::i ,这样可以访问 父类的,函数也一样 ,
+   #+BEGIN_SRC c++
+     class Parent
+     {
+     public:
+       void test(){}
+     };
+     class Child:public Parent
+     {
+     public:
+       void test(int i){} //隐藏了 父类中的同名函数,虽然 参数不同
+     };
+     int main(int argc, char *argv[])
+     {
+       Parent p;
+       Child c;
+       p.test();                     // ok
+       c.test(1);                    // ok
+       c.Parent::test();             // ok
+       // c.test();                     // error
+       return 0;
+     }
+   #+END_SRC
+** 重载
+   如果 子类重定义了重载的成员, 则通过子类型 只能访问 子类中定义 的那些成员
+   子类想通过自身类型使用所有的重载版本,要么重定义所有的重载版本, 要么一个不定义
+   或者子类中使用using声明, using声明 只能指定函数名,不能指向参数 ,所以可以把父
+   类中所有同名函数 引到子类中,然后 只重载需要的就可
+   #+BEGIN_SRC c++
+
+     using namespace std;
+     class Parent
+     {
+     public:
+       void test(){
+         std::cout << "parent test()" << std::endl;
+       }
+       void test(int i){
+         std::cout << "parent test(int)" << std::endl;
+       }
+     };
+     class Child:public Parent
+     {
+     public:
+       using Parent::test;// 使用 using声明
+       void test(int i){//只重载需要重载的部分
+         std::cout << "child test(int)" << std::endl;
+       }
+     };
+     int main(int argc, char *argv[])
+     {
+       Parent p;
+       Child c;
+       p.test();                     // ok
+       c.test(1);                    // ok
+       c.test();                     // ok 这里不在报错
+       return 0;
+     }
+   #+END_SRC
+** 纯虚函数 ,
+   含有纯虚函数的类是抽象的 ,类似于java abstract关键字
+   #+BEGIN_SRC c++
+        class AbClass
+        {
+        public:
+            public void test():const =0; //=0 定义 为纯虚函数
+        };
+   #+END_SRC
+** 容器与继承
+   容器存储是 值copy的,所以把子类存到一个父类型的容器里, 只是存了子类中属于父类
+   的那一部分,
+   所以, 要想解决问题,可以存储 指针到容器中,  带来的问题是, 需要管理指针所指对象
+   ,进一步的解决办法:又回到了 引用计数.
+   设计一个中间类 里面存着 类型为父类的一个指针类型(可以指向子类向象),
+   及 引用计数 来管理指向此对象的引用数,以便管理内存,为方便可能需要重定义操作符
+   * ->
+* 模版
+  #+BEGIN_SRC c++
+    template<typename T> compare(const T &v1,const &v2){
+      if (v1 <v2)return 1;
+      if (v1 >v2)return -1;
+      return 0;
+    }
+
+    template<class T> class List{
+    public:
+      List();
+      T& first();
+      void add(T &t);
+      void del(T &t);
+
+    }
+   //关键字 class typename 完全相同 , 只是给程序员 直观的感受来区分 T的可能类型
+  #+END_SRC
+* 高级内存分配
+** allocator 模版类
+   内存分配和对象的初始化是可以分开进行的 ，
+   主要作用是 ，预先分配一段内存 ，然后在这段内存上分配对象，
+   这段内存
+   | allocator<T> a                   | 定义a,a可以用来为类型T申请内存，在这段内存上构造销毁对象                                                  |
+   | a.allocate(N)                    | 为类型T 申请N个大小的内存空间，                                                                           |
+   | a.deallocate(ptr,N)              | 回收allocate(N)分配的内存空间                                                                             |
+   | a.construct(ptr,t)               | 在ptr所指的内存中 利用t的复制构造函数 构造一个新的对象 (copy t 到ptr),ptr是a.allocate(n),分配到的内存     |
+   | a.destroy(ptr)                   | 调用ptr所指对象的析构函数，并没有释放这段内存 ，在deallocate调用之前,这段内存 可以再次分配给另一个t对象了 |
+   | uninitialized_copy(beg end,beg2) | 从beg end 范围内的对象 copy 到beg2所指对象处，beg2 指向a.allocate(n) 所分配的未初始化内存中               |
+
+   a.construct(ptr,t) 不灵活的一点是 ，只能得用T的复制构造函数来初始化这段内存，
+   即必须事先构造一个t对象， 然后利用这个t来初始化之
+   应用场合， 比如vector 的实现， 预先分配n的对象的空间， add 或delete 时， 直接
+   使用这些已经申请到的内存， 不必每次都向操作系统申请
+** 普通的new
+   string *str = new string("hello");
+   实际分3 部
+   1. 调用 operator new 的标准库函数 ，分配足够大的内存
+   2. 调用构造函数构造对象
+   3. 返回指针
+
+   这里提到了 operator new ,标准库函数 只是分配内存， 未初始化,功能类似于c里的malloc
+   void *operator  new (size_t); //分配size_t 大小的内存,为一个object,
+   void *operator  new[] (size_t);//分配size_t大小的内存，为一个数组
+   void *operator  delete (void*);// free an object
+   void *operator  delete[] (void*);// free an array
+
+
+** 特殊的new ,定位new表达式
+   new (ptr) T(param);
+   在ptr所指的内存中 构造T(param)对象,比 allocator.construct(T) 好的地方是
+   直接在所指内存中构造对象 ，可以使用其任何构造函数，
+   #+BEGIN_SRC c++
+     allocator<string> a;
+     string* str=a.allocate(2) ;//分配空间 hold  2 strings
+     new (str)string("he");
+     a.construct((str+1),string("llo"));
+     std::cout << *str << std::endl;
+     std::cout << *(str+1) << std::endl;
+
+     str->~string(); //调用析构函数
+     a.destroy(str+1);//调用析构函数
+     a.deallocate(str,2);//释放内存
+
+   #+END_SRC
+   这个操作并没有分配内存，ptr所指的内存是事先申请好了的，
+   其反操作是直接调用 相应对象的析构函数
+**    string *str = new string("hello");
+   综上 ，对此语句进行细化
+   #+BEGIN_SRC c++
+        allocator<string> a;
+        string* str=a.allocate(1) ;//分配空间 hold  1 string
+        new (str)string("hell");
+        std::cout << *str << std::endl;
+   #+END_SRC
+
+   #+BEGIN_SRC c++
+        string *str = static_cast<string*> (operator new (sizeof(string)));
+        new (str)string("hell");
+        std::cout << *str << std::endl;
+   #+END_SRC
+
+** 例子 一个内存分配置基类
+   #+BEGIN_SRC c++
+     #include <iostream>
+     #include <string>
+     #include <vector>
+     #include <stdexcept>
+     #include <memory>
+
+     using namespace std;
+     template<class T> class CacheObj
+     {
+     public:
+       static size_t sz;// debug用，记录 当前早请了多少个T了
+     protected:
+       T *next;//指向下一个
+     private:
+       static allocator<T> t_allocator;
+       static T *free_list;                 // 申请到的内存里，尚未被使用的
+       static const std::size_t incr_size;      // 每次内存不足时 扩容那么大
+       static void add_to_free_list(T *t);
+
+     public:
+       virtual ~CacheObj(){};
+       void* operator new (size_t sz);
+       void operator delete (void* ptr,size_t sz);
+     };
+
+     template<class T>  allocator<T> CacheObj<T>::t_allocator;
+     template<class T>  T* CacheObj<T>::free_list=NULL;
+     template<class T>  const size_t CacheObj<T>::incr_size=2;
+     template<class T>  size_t CacheObj<T>::sz=0;
+
+     template<class T> void* CacheObj<T>::operator new (size_t sz){
+
+       std::cout << "new called" << std::endl;
+       if (sizeof(T)!= sz){//这里做检查 ，保证传过来是T本身， 而非其子类
+         throw std::runtime_error("CacheObj wrong size");
+       }
+       if(!free_list){               // 如果free_list null
+         T* array=t_allocator.allocate(incr_size);
+         CacheObj<T>::sz= CacheObj<T>::sz+incr_size;
+         for (int i = 0; i !=incr_size ; i++){
+           add_to_free_list(&array[0]);
+         }
+       }
+       T* tmp = free_list;
+       free_list=free_list->CacheObj<T>::next;
+       return tmp;
+     }
+
+     template<class T> void CacheObj<T>::operator delete(void* ptr,size_t sz){
+       std::cout << "delted called" << std::endl;
+       if(ptr){
+         add_to_free_list(static_cast<T*> (ptr));
+       }
+     }
+
+     template<class T> void CacheObj<T>::add_to_free_list(T* t){
+       t->CacheObj<T>::next=free_list;
+       free_list=t;
+     }
+     class Item: public CacheObj<Item>
+     {
+     public:
+       int value;
+     };
+
+     // 实现了为 Item new 新对象时 ，提前分配好CacheObj<T>::incr_size 大小的空间
+     //限制是Item 不可以有子类， 或者说 不可以将Item的子类对象放进去
+     //哪个类继承了CacheObj<T> ,哪个类可以放
+     // 因为提前分配内存时 是按照T的大小来分配的，而其子类的大小必然比其本身大
+
+     int main(int argc, char *argv[]){
+
+       Item *item = new Item();
+       std::cout << item->sz << std::endl;
+
+       Item *item2 = new Item();
+       std::cout << item2->sz << std::endl;
+
+       Item *item3 = new Item();
+       std::cout << item3->sz << std::endl;
+
+       delete item;
+       delete item2;
+       delete item3;
+       return 0;
+     }
+   #+END_SRC

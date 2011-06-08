@@ -1,0 +1,85 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     linux 下 c内存检漏工具 valgrind
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-12-27 四
+#+DESCRIPTION:c内存检漏工具
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS::Linux: :C:
+* 安装 在Gentoo系统上安装
+  http://blog.kompiler.org/post/10/2011-11-30/Fix_Valgrind%27s_must-be-redirected_error_in_Gentoo/
+#+srcname: c
+  #+begin_src c
+      #include <stdio.h>
+    #include <stdlib.h>
+    #include <malloc.h>
+    #include <string.h>
+
+    int main(int argc, char *argv[]){
+      printf ("%s\n","dsafsd");
+      char* c =malloc(4);
+      strcpy(c ,"abc");
+      printf ("%s\n",c);
+      free(c);
+      c=malloc(6);
+      c=malloc(6);
+      c[7]='a';
+       int x;
+        if(x == 0)
+        {
+            printf("X is zero"); /* replace with cout and include
+                                    iostream for C++ */
+        }
+        free(c);
+        free(c);
+      return 0;
+    }
+  #+end_src
+#+begin_quote
+  ==28025== Memcheck, a memory error detector
+==28025== Copyright (C) 2002-2011, and GNU GPL'd, by Julian Seward et al.
+==28025== Using Valgrind-3.7.0 and LibVEX; rerun with -h for copyright info
+==28025== Command: ./a
+==28025==
+==28025== Invalid write of size 1
+==28025==    at 0x400700: main (a.c:18)
+==28025==  Address 0x51dd0e7 is 1 bytes after a block of size 6 alloc'd
+==28025==    at 0x4C2AF5D: malloc (vg_replace_malloc.c:263)
+==28025==    by 0x4006F3: main (a.c:17)
+==28025==
+==28025== Conditional jump or move depends on uninitialised value(s)
+==28025==    at 0x400707: main (a.c:20)
+==28025==
+==28025== Invalid free() / delete / delete[] / realloc()
+==28025==    at 0x4C2A0BC: free (vg_replace_malloc.c:427)
+==28025==    by 0x400732: main (a.c:26)
+==28025==  Address 0x51dd0e0 is 0 bytes inside a block of size 6 free'd
+==28025==    at 0x4C2A0BC: free (vg_replace_malloc.c:427)
+==28025==    by 0x400726: main (a.c:25)
+==28025==
+==28025==
+==28025== HEAP SUMMARY:
+==28025==     in use at exit: 6 bytes in 1 blocks
+==28025==   total heap usage: 3 allocs, 3 frees, 16 bytes allocated
+==28025==
+==28025== 6 bytes in 1 blocks are definitely lost in loss record 1 of 1
+==28025==    at 0x4C2AF5D: malloc (vg_replace_malloc.c:263)
+==28025==    by 0x4006E5: main (a.c:16)
+==28025==
+==28025== LEAK SUMMARY:
+==28025==    definitely lost: 6 bytes in 1 blocks
+==28025==    indirectly lost: 0 bytes in 0 blocks
+==28025==      possibly lost: 0 bytes in 0 blocks
+==28025==    still reachable: 0 bytes in 0 blocks
+==28025==         suppressed: 0 bytes in 0 blocks
+==28025==
+==28025== For counts of detected and suppressed errors, rerun with: -v
+==28025== Use --track-origins=yes to see where uninitialised values come from
+==28025== ERROR SUMMARY: 4 errors from 4 contexts (suppressed: 2 from 2)
+#+end_quote
+
+* Link
+  http://www.cprogramming.com/debugging/valgrind.html

@@ -1,0 +1,21 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     热代码替换拾遗
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-08 日
+#+DESCRIPTION:热代码替换拾遗
+#+KEYWORDS: Erlang
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Erlang:
+
+*与代码替换相关的函数
+ + erlang:purge_module(Mod)
+       Removes old code for Module.
+ + check_process_code(Pid, Module) -> boolean()
+       Returns true if the process Pid is executing old code for Module
+ + code:soft_purge(Mod)
+   基本是以上两个函数的合作。，只有当此Module 的old code 没有任何进程调用时，
+   才将old code 清除
+   具体代码在code_server:do_soft_purge/1里

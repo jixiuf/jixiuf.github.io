@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="tests">
+  <property name="app.name"   value="mars" />
+  <property environment="env"/>
+  <!-- 可以用${env.TOMCAT_HOME}引用环境变量 -->
+  <property name="src.dir" location="./src/"/>
+  <property name="test.dir" location="./test/"/>
+  <property name="lib.dir" location="./lib/"/>
+  <property name="build.dir" location="./bin/"/>
+  <property name="build.test.dir" location="./build/"/>
+  <property name="dest.dir" location="./dest/"/>
+
+  <path id="master-classpath">
+    <fileset dir="${lib.dir}">
+      <include name="*.jar"/>
+    </fileset>
+    <pathelement path="${build.dir}"/>
+  </path>
+
+  <target name="clean" description="Clean up the build dir.">
+    <echo message="Cleaning up the build dir"/>
+    <delete dir="${build.dir}"/>
+    <!-- <mkdir dir="${build.dir}"/> -->
+    <delete dir="${build.test.dir}"/>
+    <!-- <mkdir dir="${build.test.dir}"/> -->
+    <delete dir="${dest.dir}"/>
+    <!-- <mkdir dir="${dest.dir}"/> -->
+  </target>
+
+  <target name="init" description="copy resources to build dir">
+    <echo>copy resource files from src dir to build dir</echo>
+    <mkdir dir="${build.dir}"/>
+    <copy todir="${build.dir}" preservelastmodified="true">
+      <fileset dir="${src.dir}">
+        <include name="**/*.*"/>
+        <exclude name="**/*.java"/>
+        <exclude name="**/*.class"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="compile" description="Compile source " depends="init">
+    <javac destdir="${build.dir}"  debug="true" includeantruntime="on" deprecation="false" optimize="true" failonerror="true">
+      <src path="${src.dir}"/>
+      <classpath refid="master-classpath"/>
+    </javac>
+  </target>
+
+  <target name="jar" depends="compile">
+    <mkdir dir="${dest.dir}"/>
+    <jar jarfile="${dest.dir}/${app.name}.jar"
+         basedir="${build.dir}" includes="com/**"/>
+  </target>
+
+  <target name="compiletests" depends="jar" >
+    <mkdir dir="${build.test.dir}"/>
+    <javac srcdir="${test.dir}" destdir="${build.test.dir}" includeantruntime="on">
+      <classpath refid="master-classpath"/>
+      <classpath>
+        <pathelement location="${dest.dir}/${app.name}.jar" />
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="tests" depends="compiletests" >
+    <echo message="run junit test"/>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+      <arg value="com.github.jixiuf.mars.AllJUnitTests"/>
+      <classpath refid="master-classpath"/>
+      <classpath>
+        <pathelement location="${dest.dir}/${app.name}.jar" />
+        <pathelement path="${java.class.path}" />
+        <pathelement path="${build.test.dir}"/>
+      </classpath>
+    </java>
+  </target>
+</project>

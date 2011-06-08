@@ -1,0 +1,291 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     emysql 压力测试
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-04-22 日
+#+DESCRIPTION:emysql 压力测试
+#+KEYWORDS: erlang mysql emysql benchmark
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Erlang: :Mysql: :DB:
+本站关于mysql的测试在 [[file:../mysql/benchmark_demo.org]]
+* 建表语句
+#+BEGIN_SRC sql
+   CREATE TABLE `tbl_test` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `onOffType` int(11) DEFAULT NULL,
+    `accountId` int(11) DEFAULT NULL,
+    `accountType` int(11) DEFAULT NULL,
+    `playerId` int(11) DEFAULT NULL,
+    `headHeroId` int(11) DEFAULT NULL,
+    `playerLevel` int(11) DEFAULT NULL,
+    `playerName` varchar(255) DEFAULT NULL,
+    `logTime` datetime DEFAULT NULL,
+    `clientVersion` varchar(255) DEFAULT NULL,
+    `clientType` varchar(255) DEFAULT NULL,
+    `issuers` varchar(255) DEFAULT NULL,
+    `flashPlayerVersion` int(11) DEFAULT NULL,
+    `connectType` int(11) DEFAULT NULL,
+    `gameServerName` varchar(255) DEFAULT NULL,
+    `ipAddr` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`id`)
+  );
+
+  DELIMITER $$
+  drop procedure if exists `insert_tbl_test`$$
+  create procedure `insert_tbl_test`(
+  IN inaccountId int(11),/**/
+  IN inaccountType int(11),/**/
+  IN inplayerId int(11),/**/
+  IN inheadHeroId int(11),/**/
+  IN inplayerLevel int(11),/**/
+  IN inplayerName varchar(255),/**/
+  IN inlogTime datetime,/**/
+  IN inclientVersion varchar(255),/**/
+  IN inclientType varchar(255),/**/
+  IN inissuers varchar(255),/**/
+  IN inflashPlayerVersion int(11),/**/
+  IN inconnectType int(11),/**/
+  IN ingameServerName varchar(255),/**/
+  IN inipAddr varchar(255),/**/
+  IN inonOffType int(11) /**/
+  )
+  BEGIN
+  insert into `tbl_on_off`(
+  `accountId`, /**/
+  `accountType`, /**/
+  `playerId`, /**/
+  `headHeroId`, /**/
+  `playerLevel`, /**/
+  `playerName`, /**/
+  `logTime`, /**/
+  `clientVersion`, /**/
+  `clientType`, /**/
+  `issuers`, /**/
+  `flashPlayerVersion`, /**/
+  `connectType`, /**/
+  `gameServerName`, /**/
+  `ipAddr`, /**/
+  `onOffType` /**/
+  ) values(
+  inaccountId,/**/
+  inaccountType,/**/
+  inplayerId,/**/
+  inheadHeroId,/**/
+  inplayerLevel,/**/
+  inplayerName,/**/
+  inlogTime,/**/
+  inclientVersion,/**/
+  inclientType,/**/
+  inissuers,/**/
+  inflashPlayerVersion,/**/
+  inconnectType,/**/
+  ingameServerName,/**/
+  inipAddr,/**/
+   inonOffType /**/
+  );
+  END$$
+  DELIMITER ;
+#+END_SRC
+* mysqlslap 测试
+#+BEGIN_SRC sh
+其中关于开一个mysql连接执行10000次存储过程插入10000条数据的测试
+ mysqlslap --query="call insert_tbl_test(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)" --concurrency=1  --number-of-queries 10000 --iterations=3 --engine=myisam -uroot -proot
+#+END_SRC
+#+BEGIN_QUOTE
+结果显示不用3s就插入了10000条数据
+jixiuf@jf /tmp/d $ mysqlslap --query="call insert_tbl_test(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)" --concurrency=1  --number-of-queries 10000 --iterations=3 --engine=myisam -uroot -proot
+Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 2.496 seconds
+    Minimum number of seconds to run all queries: 2.469 seconds
+    Maximum number of seconds to run all queries: 2.551 seconds
+    Number of clients running queries: 1
+    Average number of queries per client: 10000
+#+END_QUOTE
+#+BEGIN_SRC sh
+ 使用普通的insert 语句 (对于非常简单的insert语句 没有必要包装成存储过程，以下
+  证明，存储过程不比简单insert快)
+  mysqlslap --query="insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)"  --concurrency=1  --number-of-queries 10000 --iterations=3 --engine=myisam -uroot -proot
+#+END_SRC
+  #+BEGIN_QUOTE
+  jixiuf@jf /tmp/d $ mysqlslap --query="insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)"  --concurrency=1  --number-of-queries 10000 --iterations=3 --engine=myisam -uroot -proot
+  Benchmark
+    Running for engine myisam
+    Average number of seconds to run all queries: 1.642 seconds
+    Minimum number of seconds to run all queries: 1.620 seconds
+    Maximum number of seconds to run all queries: 1.676 seconds
+    Number of clients running queries: 1
+  Average number of queries per client: 10000
+  #+END_QUOTE
+
+* emysql的压力测试，开一条mysql连接，用存储过程插入10000条数据
+1. 首先修改emysql的 emysql.app.src,添加env的值{lock_timeout,infinity}
+   ,以避免因超时 emysql不工作 。别忘了重新编译emysql
+   #+BEGIN_SRC sh
+     %% Emysql .app file template
+     %% This template is filled out by rebar,
+     %% or make (Makefile made to fill modules in)
+     %% and then cp src/emysql.app.src ebin/emysql.app
+
+     %% Settings (defaults in include/emysql.hrl):
+     %% default_timeout (TIMEOUT = 8000)
+     %% lock_timeout (LOCK_TIMEOUT = 5000)
+
+     {application, emysql, [
+             {description, "Emysql - Erlang MySQL driver"},
+             {vsn, "0.2"},
+             {modules, []},
+             {mod, {emysql_app, ["%MAKETIME%"]}},
+             {registered, []},
+             {applications, [kernel, stdlib, crypto]},
+             {env, [{default_timeout, 5000},
+                     {lock_timeout,infinity}
+                     ]}
+             ]}.
+   #+END_SRC
+
+** 测试用 press.erl
+#+BEGIN_SRC erlang
+  -module(press).
+  -export([get_timestamp/0,start/3,run/3]).
+  -include("emysql.hrl").
+
+  -record(state,{running=0,start_time,process_count_all,sql_count_each_process}).
+  %% 启动ProcessCount个进程，每个进程执行SqlCountEachProcess次sql 操作
+  start(ProcessCount,SqlCountEachProcess,MysqlConnectionCount)->
+      crypto:start(),
+      application:start(emysql),
+      emysql:add_pool(hello_pool, MysqlConnectionCount, "root", "root", "localhost", 3306, "mysqlslap", utf8),
+
+      CurrentTime=get_timestamp(),
+      spawn_link(?MODULE,run,[ProcessCount,SqlCountEachProcess,#state{start_time=CurrentTime,
+                                                                      process_count_all=ProcessCount,
+                                                                      sql_count_each_process=SqlCountEachProcess}])
+          .
+
+
+  recv(#state{running=0,start_time=StartTime,
+              process_count_all=ProcessCount,
+              sql_count_each_process=SqlCountEachProcess
+             })->
+      Usedtime =get_timestamp()-StartTime,
+      io:format("process_count:~p sql count each process:~p used time:~p~n",[ProcessCount,SqlCountEachProcess,Usedtime]),
+      emysql:remove_pool(hello_pool);
+  recv(#state{running=Running}=State)->
+      receive
+          done->
+              recv(State#state{running=Running-1})
+      end
+          .
+
+  run(0,_SqlCountEachProcess,#state{}=State)->
+      recv(State);
+  run(ProcessCount,SqlCountEachProcess,#state{running=Running}=State) ->
+      Parent =self(),
+      spawn(fun()-> run_sql(SqlCountEachProcess,Parent)end),
+      run(ProcessCount-1,SqlCountEachProcess,State#state{running=Running+1})
+          .
+
+  run_sql(0,Parent)->
+      Parent!done;
+  run_sql(SqlCountEachProcess,Parent) ->
+      test2(),
+      run_sql(SqlCountEachProcess-1 ,Parent)
+          .
+
+
+  test2()->
+      %%"insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)"
+      %% "call insert_tbl_test(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1);"
+      Result=emysql:execute(hello_pool,<< "call insert_tbl_test(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1);">>),
+      case Result of
+          Rec when is_record(Rec ,ok_packet) ->
+              ok;
+          Rec when is_record(Rec ,error_packet) ->
+              io:format("~p~n",[Result])
+      end
+
+      %% %% Pid=global:whereis_name(emysql_center)
+          .
+  get_timestamp() ->
+      {Mega,Sec,Micro} = erlang:now(),
+      ((Mega*1000000+Sec)*1000000+Micro)/1000.
+
+
+#+END_SRC
+#+BEGIN_SRC sh
+启用10000个erlang进程，每个进程向emysql发一条sql(存储过程),最后一个参数是emysql连接池
+里只开一个mysql连接
+press:start(10000,1,1).
+#+END_SRC
+#+BEGIN_SRC sh
+测试结果显示大概用了8秒，大概是比单纯的mysql测试慢3~4倍 (7583/2496=3.45)
+(emacsdd@jf.org)4> press:start(10000,1,1).
+process_count:10000 sql count each process:1 used time:7583.25390625
+#+END_SRC
+有些网友怀疑创建10000个进程也会消耗一部分时间 ，所以增加下面几个测试 ，结果显
+示所用时间仍然处于7~9s这个范围内，影响不大
+#+BEGIN_SRC sh
+起用一个进程，此进程向emysql发送10000条sql语句
+1>  press:start(1,10000,1).
+process_count:1 sql count each process:10000 used time:8632.112060546875
+#+END_SRC
+#+BEGIN_SRC sh
+1>  press:start(10,1000,1).
+process_count:10 sql count each process:1000 used time:7520.348876953125
+#+END_SRC
+#+BEGIN_SRC sh
+1>  press:start(100,100,1).
+process_count:100 sql count each process:100 used time:7613.68896484375
+#+END_SRC
+# 以下是用java jdbc连 mysql的测试
+#+BEGIN_SRC java
+import java.sql.Date;
+import java.sql.Types;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+public class TestMysqlConn {
+    public static void main(String[] args) throws Exception {
+        // Class.forName("com.mysql.jdbc.Driver");
+        Class.forName("org.gjt.mm.mysql.Driver");
+        long start= System.currentTimeMillis();
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mysqlslap?user=root&password=root");
+        // call insert_tbl_test(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)
+        CallableStatement cs = conn.prepareCall("{call insert_tbl_test(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}");
+        cs.setInt(1 , 1);
+        cs.setInt(2 , 1);
+        cs.setInt(3 , 1);
+        cs.setInt(4 , 1);
+        cs.setInt(5 , 1);
+        cs.setString(6 , "name");
+        cs.setDate(7 , new Date(1989 , 1 , 26));
+        cs.setString(8 , "ver");
+        cs.setString(9 , "t");
+        cs.setString(10 , "dd");
+        cs.setInt(11 ,1);
+        cs.setInt(12 ,1);
+        cs.setString(13 , "name");
+        cs.setString(14 , "localhost");
+        cs.setInt(15 , 1);
+        for (int i = 0; i < 10000; i++) {
+            cs.executeUpdate();
+        }
+        long end= System.currentTimeMillis();
+        System.out.println(end-start);
+
+    }
+}
+#+END_SRC
+#+BEGIN_QUOTE
+java TestMysqlConn
+7198
+java TestMysqlConn
+7453
+java TestMysqlConn
+7031
+#+END_QUOTE
+测测结果显示，jdbc也用了大概7s左右的时间执行10000次存储过程的插入,
+可以证明emysql跟java jdbc连mysql基本不相上下

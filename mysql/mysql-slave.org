@@ -1,0 +1,167 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     mysql5.6 主从复制的配置过程
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2015-10-19 Mon
+#+DESCRIPTION:mysql 主从复制的配置过程
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS: :Mysql:
+* master 的配置 ip 192.168.1.132
+[mysqld]
+server-id = 1  #这里的数字不能和从库一样
+#需要复制的数据库，多个数据库写多行,不写的话默认复制所有库
+binlog_do_db = t1
+binlog_do_db =t2
+
+log-bin                        = /data/mysql/data/mysql-bin
+#expire-logs-days               = 14
+#sync-binlog                    = 1 #事务提交后立即写入二进制日志，而不是放内存中，避免主服务器故障时事务没有写入日志
+binlog_format=MIXED   #混合格式
+* slave 配置 ip 192.168.1.137
+[mysqld]
+server-id = 2
+replicate-do-db =t1
+replicate-do-db =t2
+binlog-format                  = mixed
+replicate-ignore-db=mysql
+log-slave-update=true
+slave-skip-errors=true
+
+* 配置完 之后
+** master 上的操作
+  #+BEGIN_SRC sh
+   #master 上创建用于同步数据的账户
+   grant replication slave on *.* to slave@'192.168.1.137' identified by 'slave';
+   # 锁表
+   flush tables with read lock;
+   show master status;
+  #+END_SRC
+#+BEGIN_QUOTE
+mysql>  show master status;
++------------------+----------+--------------+------------------+-------------------+
+| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
++------------------+----------+--------------+------------------+-------------------+
+| mysql-bin.000005 |     2147 | t1,t2        |                  |                   |
++------------------+----------+--------------+------------------+-------------------+
+mysql-bin.000005   和     2147  这两个数据 会在从库上用到
+#+END_QUOTE
+#+BEGIN_SRC sh
+    # 将 t1,t2 库的数据导出到sql 文件 ，然后在从库192.168.1.137 上 建立t1,t2 库， 把数据分别导入
+   /usr/bin/mysqldump t1 -uroot -padmin >t1.sql
+   /usr/bin/mysqldump t2 -uroot -padmin >t2.sql
+    #或者 从库上加立空库t1,t2后， 直接这样将主库数据导入到从库中
+   # /usr/bin/mysqldump t1 -uroot -padmin --opt | mysql t1 -uroot -padmin -h 192.168.1.37
+   # /usr/bin/mysqldump t2 -uroot -padmin --opt | mysql t2 -uroot -padmin -h 192.168.1.37
+   #dump to slave ,(需要提前在slave 上建上空库t1,t2)
+    # 导完数据之后 解锁表
+   unlock tables;
+#+END_SRC
+** slave 上的操作
+    首先完成 t1,t2 两个数据库数据的同步
+   #+BEGIN_SRC sh
+    create database t1;
+    use t1;
+    source t1.sql
+
+    create database t2;
+    use t2;
+    source t2.sql
+   #+END_SRC
+    然后 根据master 上  show master status 获得的数据
+    #+BEGIN_SRC sh
+    change master to master_host='192.168.1.132',master_user='slave',master_password='slave',master_log_file='mysql-bin.000005',master_log_pos=2147;
+    start slave;  # 开始保持同步
+    #+END_SRC
+    此时在从库上
+    #+BEGIN_SRC sh
+     show slave status \G;
+    #+END_SRC
+    #+BEGIN_QUOTE
+        mysql> show slave status \G;
+                Slave_IO_Running: Yes
+                Slave_SQL_Running: Yes
+
+    #+END_QUOTE
+    当 Slave_IO_Running 与Slave_SQL_Running 状态是Yes 的时候 就算配置完成了
+    可以试着在master 插入数据 看看slave 上数据是否得到同步
+**  当出现主从不一致的时候的做法，
+   stop slave;
+   #表示跳过一步错误，后面的数字可变
+   set global sql_slave_skip_counter =1;
+   start slave;
+*  mysql热备做DR
+** 在master db上使用mysqldump构建基于时间点的一致性全备
+   mysqldump -uroot -pPASSWORD --single-transaction --master-data=2 --skip-opt --create-option -B item > dump.sql
+
+** scp该sql文件到slave dr上面
+
+** 在slave dr上把全备的数据入库
+   mysql -uroot -pPASSWORD --default-character-set=latin1 < dump.sql
+
+** 在master db上执行授权语句
+   GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'repl'@'slave1ip' IDENTIFIED BY 'pass'
+
+** 在slave dr上设置热备关系
+  CHANGE MASTER TO
+    MASTER_HOST='masterIP',
+    MASTER_USER='root',
+    MASTER_PASSWORD='pass，
+    MASTER_LOG_FILE='binlog.022804',
+    MASTER_LOG_POS=98;
+  start slave;
+
+** 注：其中pos和file参数可以从mysqldump出来的sql文件前25行了解到
+   head -25
+
+** 使用show slave status\G 查看slave的情况
+   说明：上述的步骤是简单的热备做dr的步骤，有常见需要注意的问题
+   1）mysqldump生成全备sql时需要注意--single-transaction --master-data等参数，详细可以参见mysqldump --help
+   2）全备入库时，需要设置--default-character-set，使用一致的字符集
+
+   先前在使用mysqldump的时候，没有加任何选项，查看dump出来的文件，发现每
+   个table的insert语句被lock tables write和unlock tables包住。mysqldump在
+   备份的时候，居然锁表！如果这张表非常大，在dump的过程中，其他线程岂不是
+   不能写数据？看了下mysql的manual，发现--lock-tables默认是True，可以使
+   用--skip-opt选项来屏蔽--lock-tables。另外，我们很多时候需要基于时间点
+   的备份，如早上9点，这时，可以使用--single-transaction选项，这个选项可
+   以在dump之前发出一个BEGIN语句，获取一个短暂的全局写锁，可以所有事务性
+   数据库的一致性（内部应该是使用snapshot来实现，待求证），另外通过指
+   定--master-data=2，可以在dump文件中用注释的方式指定当前dump快照使用的
+   binlog文件和位置，联合--single-transaction和--master-data两个选项，可
+   以实现基于时间点的备份和恢复，特别是做热备。
+
+   [注意]--skip-opt禁用了很多默认的选项，如--create-option等，其
+   中--create-option是比较重要的属性，如果该选项被disable掉，则在dump出来
+   的table会少了auto-increment等字段属性。
+
+
+#+BEGIN_QUOTE
+  --single-transaction
+                      Creates a consistent snapshot by dumping all tables in a
+                      single transaction. Works ONLY for tables stored in
+                      storage engines which support multiversioning (currently
+                      only InnoDB does); the dump is NOT guaranteed to be
+                      consistent for other storage engines. While a
+                      --single-transaction dump is in process, to ensure a
+                      valid dump file (correct table contents and binary log
+                      position), no other connection should use the following
+                      statements: ALTER TABLE, DROP TABLE, RENAME TABLE,
+                      TRUNCATE TABLE, as consistent snapshot is not isolated
+                      from them. Option automatically turns off --lock-tables.
+  --master-data[=#]   This causes the binary log position and filename to be
+                      appended to the output. If equal to 1, will print it as a
+                      CHANGE MASTER command; if equal to 2, that command will
+                      be prefixed with a comment symbol. This option will turn
+                      --lock-all-tables on, unless --single-transaction is
+                      specified too (in which case a global read lock is only
+                      taken a short time at the beginning of the dump; don't
+                      forget to read about --single-transaction below). In all
+                      cases, any action on logs will happen at the exact moment
+                      of the dump. Option automatically turns --lock-tables
+                      off.
+#+END_QUOTE
+
+

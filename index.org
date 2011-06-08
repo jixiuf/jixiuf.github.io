@@ -1,0 +1,10 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:     拾遗
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:      2011-06-04 星期六
+
+ + 你想更多地了解我，请前往@@html:<a href="/about/">About</a>@@页面
+ + safari firefox supergenpass 密码生成器 https://chriszarate.github.io/supergenpass/mobile/
+ + -----------------------------------------------------------------------------------------

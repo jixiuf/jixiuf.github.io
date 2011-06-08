@@ -1,0 +1,64 @@
+# -*- coding:utf-8-unix -*-
+#+LANGUAGE:  zh
+#+TITLE:    linux 下字体相关
+#+AUTHOR:    纪秀峰
+#+EMAIL:     jixiuf@gmail.com
+#+DATE:     2012-12-21 五
+#+DESCRIPTION:font.org
+#+KEYWORDS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+TAGS::Linux:
+linux 下与字体相关的命令
+* 列出可用的字体
+  xlsfontls
+  fc-list
+  mkfontscale
+  mkfontdir
+  xrdb ~/.Xdefaults
+  fc-cache
+* 更新字体信息,mkfontscale mkfontdir
+  #+BEGIN_SRC sh
+  cd /usr/share/fonts/windows_fonts/
+  mkfontscale .
+  mkfontdir .
+  #+END_SRC
+
+* linux 下我用的字体
+   + wqy-bitmapfont linux下的中文字体
+   + media-fonts/corefonts 里面有 Courier New
+   + dejavu
+* emacs 下我用字体 dejavu 如下,
+  dejavu的好处是 可以很容易的区分 0与o l与1
+#+BEGIN_SRC emacs-lisp
+  (setq-default window-system-default-frame-alist
+                '( (x ;; if frame created on x display
+                    (background-color . "#0C1021")
+                    (background-mode . dark)
+                    (border-color . "black")
+                    (cursor-color . "green")
+                    (foreground-color . "#F8F8F8")
+                    (mouse-color . "sienna1")
+                    (font . "DejaVu Sans Mono:pixelsize=15"))
+                   (nil ;; if on term
+                    (background-color . "black")
+                    (foreground-color . "green")
+                    )))
+#+END_SRC
+* 终端我用rxvt-unicode ,使用字体
+#+BEGIN_SRC sh
+  cat ~/.Xdefaults
+  URxvt.font:xft:Courier New:pixelsize=18:antialias=false,xft:WenQuanYi Bitmap Song:pixelsize=16
+#+END_SRC
+#+BEGIN_SRC sh
+  cat /etx/X11/xorg.conf
+  Section "Files"
+          FontPath "/usr/share/fonts/truetype/dejavu"
+          FontPath "/usr/share/fonts/truetype/corefonts"
+          FontPath "/usr/share/fonts/wqy-bitmapfont"
+  EndSection%
+#+END_SRC
+* link
+  http://hivelogic.com/articles/top-10-programming-fonts/
+  文件有点老,但里面有linux两种字体系统的介绍(emacs现在已经支持xft了)
+  http://laokaddk.blog.51cto.com/368606/686817
