@@ -106,37 +106,50 @@ func runqput(_p_ *p, gp *g, next bool) {
   这就能解释下面这段程序的打印顺序问题了
 #+BEGIN_SRC go
 package main
+
 import (
- "fmt"
- "runtime"
+	"fmt"
+	"runtime"
 )
 
 func main() {
- runtime.GOMAXPROCS(1)
- var c chan int = make(chan int, 0)
+	runtime.GOMAXPROCS(1)
+	var c chan int = make(chan int, 100)
 
- go func() { c <- 1 }()
- go func() { c <- 2 }()
- go func() { c <- 3 }()
- go func() { c <- 4 }()
- go func() { c <- 5 }()
- go func() { c <- 6 }()
- go func() {c <- 7}()
- for {
-  select {
-  case v := <-c:
-   fmt.Println("sssssssssssssssssssss", v)
-  }
- }
+    g
+o func() { c <- 1 }()
+	go func() { c <- 2 }()
+	go func() { c <- 3 }()
+	go func() { c <- 4 }()
+	go func() { c <- 5 }()
+	go func() { c <- 6 }()
+	go func() {
+		for {
+		}
+	}()
+	go func() { c <- 8 }()
+	go func() { c <- 9 }()
+	go func() { c <- 10 }()
+
+	for {
+		select {
+		case v := <-c:
+			fmt.Println("sssssssssssssssssssss", v)
+
+		}
+
+	}
+
 }
 #+END_SRC
 #+BEGIN_QUOTE
 go run a.go
-sssssssssssssssssssss 7
+sssssssssssssssssssss 10 p.runnext先被执行
 sssssssssssssssssssss 1
 sssssssssssssssssssss 2
 sssssssssssssssssssss 3
 sssssssssssssssssssss 4
 sssssssssssssssssssss 5
 sssssssssssssssssssss 6
+# 并不会打印 8 9  ，因为7的时候for没有函数调用 不会让出cpu ,没法被抢占
 #+END_QUOTE
