@@ -1,0 +1,142 @@
+# -*- coding:utf-8 -*-
+#+LANGUAGE:  zh
+#+TITLE:     goroutine调度 拾遗
+#+AUTHOR:    jixiuf
+#+EMAIL:     jixiuf@qq.com
+#+DATE:     2019-01-23 三
+#+DESCRIPTION:goroutine调度
+#+KEYWORDS:
+#+TAGS:
+#+FILETAGS:
+#+OPTIONS:   H:2 num:nil toc:t \n:t @:t ::t |:t ^:nil -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil
+#+LATEX_HEADER: \usepackage{fontspec}
+#+LATEX_HEADER: \setmainfont{PingFang SC}
+* 参考链接
+https://segmentfault.com/a/1190000015464889
+
+https://segmentfault.com/a/1190000016611742
+https://zhuanlan.zhihu.com/p/30353139
+
+* 拾遗go的调度本质上是一个协作式调度器,后来加入了些抢占机制，但并不能
+保障一定能抢占的到sysmon 线程会定期扫goroutine ,如果running>10ms则将其
+标记为可被抢占注意只是标记为，需要在这个goroutine调用非内联函数时才能
+真正的触发把扫行权交出去。
+
+
+* 系统调用阻塞时(同步系统调用)
+    当G被阻塞在某个系统调用上时(并不是所有的系统调用都是阻塞的)，此时G
+会阻塞在_Gsyscall状态，M也处于 block on syscall 状态，此时的M可被操作
+系统抢占调度(即让出cpu),执行该G的M会与P解绑(注意此时G仍然与M绑在一起，
+等着系统调用的返回)，而P则尝试与其它idle的M绑定，继续执行其它G。如果没
+有其它idle的M，但P的Local队列中仍然有G需要执行，则创建一个新的M(即P总
+会给它分配一个M，不会让它闲着)；
+
+    当系统调用完成后，G会重新尝试获取一个idle的P进入它的Local队列恢复
+执行，如果没有idle的P，G会被标记为runnable加入到Global队列
+* net poller
+    除了G P M ，脚色golang 专门有个net poller 用来处理网络IO，即如果某
+G1想要进行网络系统调用，因此它会从P的队列中移除，并被移动到网络轮询器
+并且处理异步网络系统调用。然后，M可以从其关联P的 local 队列中执行另外
+的 Goroutine
+
+异步网络系统调用由网络轮询器完成后，G1被移回到P的 local 队列 中
+
+* 用户态阻塞/唤醒
+  1. channel操作
+
+  2. network I/O
+
+    golang已经用netpoller实现了goroutine网络I/O阻塞不会导致M被阻塞，仅阻塞G，
+
+    对应的G会被放置到某个wait队列(如channel的waitq)
+
+* 调度器跟踪调试
+    G ODEBUG=scheddetail=1,schedtrace=1000 ./program
+
+    #+BEGIN_SRC go
+        SCHED 0ms: gomaxprocs=8 idleprocs=7 threads=2 spinningthreads=0 idlethreads=0 runqueue=0 gcwaiting=0 nmidlelocked=0 stopwait=0 sysmonwait=0
+        P0: status=1 schedtick=0 syscalltick=0 m=0 runqsize=0 gfreecnt=0
+        P1: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+        P2: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+        P3: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+        P4: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+        P5: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+        P6: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+        P7: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+        M1: p=-1 curg=-1 mallocing=0 throwing=0 preemptoff= locks=1 dying=0 helpgc=0 spinning=false blocked=false lockedg=-1
+        M0: p=0 curg=1 mallocing=0 throwing=0 preemptoff= locks=1 dying=0 helpgc=0 spinning=false blocked=false lockedg=1
+        G1: status=8() m=0 lockedm=0
+    #+END_SRC
+
+* goroutine的创建
+  proc.go newproc
+  #+BEGIN_SRC go
+  func newproc(siz int32, fn *funcval) {
+
+  func newproc1(fn *funcval, argp *uint8, narg int32, callergp *g, callerpc uintptr) {
+	runqput(_p_, newg, true)
+
+    // runqput tries to put g on the local runnable queue.
+    // If next is false, runqput adds g to the tail of the runnable queue.
+    // If next is true, runqput puts g in the _p_.runnext slot.
+    // If the run queue is full, runnext puts g on the global queue.
+    // Executed only by the owner P.
+func runqput(_p_ *p, gp *g, next bool) {
+	if randomizeScheduler && next && fastrand()%2 == 0 {
+		next = false
+	}
+
+	if next {
+	retryNext:
+		oldnext := _p_.runnext
+        //这里会把新创建的g放到_p_.runnext上,以更高优先级被执行(高于_p_.runq队列里的)
+		if !_p_.runnext.cas(oldnext, guintptr(unsafe.Pointer(gp))) {
+			goto retryNext
+		}
+		if oldnext == 0 {
+			return
+		}
+		// Kick the old runnext out to the regular run queue.
+		gp = oldnext.ptr()
+	}
+
+
+  #+END_SRC
+  这就能解释下面这段程序的打印顺序问题了
+#+BEGIN_SRC go
+package main
+import (
+ "fmt"
+ "runtime"
+)
+
+func main() {
+ runtime.GOMAXPROCS(1)
+ var c chan int = make(chan int, 0)
+
+ go func() { c <- 1 }()
+ go func() { c <- 2 }()
+ go func() { c <- 3 }()
+ go func() { c <- 4 }()
+ go func() { c <- 5 }()
+ go func() { c <- 6 }()
+ go func() {c <- 7}()
+ for {
+  select {
+  case v := <-c:
+   fmt.Println("sssssssssssssssssssss", v)
+  }
+ }
+}
+#+END_SRC
+#+BEGIN_QUOTE
+go run a.go
+sssssssssssssssssssss 7
+sssssssssssssssssssss 1
+sssssssssssssssssssss 2
+sssssssssssssssssssss 3
+sssssssssssssssssssss 4
+sssssssssssssssssssss 5
+sssssssssssssssssssss 6
+#+END_QUOTE
