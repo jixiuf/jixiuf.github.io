@@ -166,6 +166,35 @@ context中 如何存储数据的，看下代码， 其实很简单
         http.ListenAndServe(":8080", nil)
     }
   #+END_SRC
+* context 之WithCancel 使用注意事项，
+  假设有如下代码
+#+BEGIN_SRC go
+  parentCtx, parentCancel := WithCancel(context.Background())
+  childCtx, childCancel := WithCancel(parentCtx)
+  var reusultChan chan string = make(chan string, 1)
+  go doALongJob(reusultChan)
+  go func() {
+      time.Sleep(1 * time.Second)//只等一秒，一秒后 doALongJob 还不返回结果
+      //注意这里是对parentCancel()的调用，按照context设计的目的，
+      // 兼听childCtx.Done()的chan 也是可以收到parentCancel()被调用的事件的
+      parentCancel()
+  }()
+  select {
+  case <-childCtx.Done():				// 等待 childCtx 收到cancel事件
+       fmt.Println("canceled")
+  case result := <-reusultChan:
+  }
+#+END_SRC
+
+  结论：当parentCtx的cancel() 被调用的时候,<-child.Done()是能收到事件的
+  并且，如果parentCtx的cancel()已经被调用，以之为父创建的childctx
+  调用 <-childctx.Done() 会立即返回，使用的时候一定要注意这一点
+  WithTimeout应该也会类似的问题。
+  所以 一个已经触发了cancel()事件的ctx,不再适合一值传递下去
+  当需要WithCancel()或WithTimeout时,应该从context.Background()来创建，
+  它这样设计的目的，应该是允许一个ctx可以兼听多个cancel事件， 但凡收到一个事件便不再等待
+
+
 * withTimeout
 #+BEGIN_SRC go
   package main
