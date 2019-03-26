@@ -41,7 +41,10 @@ instead of pointer HEAD."
          (output (git-run "ls-tree" "-r" "--name-only"
                           (or branch "HEAD"))))
     (--map (expand-file-name it repo-dir)
-           (--filter (string-suffix-p org-file-ext it t)
+           (--filter (and (string-suffix-p org-file-ext it t)
+                          (not (string-match-p "author.org" it))
+                          (not (string-match-p "^c/.*" it))
+                          )
                      (split-string output "\n")))))
 
 (defun op/git-branch-name (repo-dir)
