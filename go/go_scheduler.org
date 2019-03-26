@@ -45,12 +45,9 @@ G1想要进行网络系统调用，则它会从P的队列中移除，并被移�
 异步网络系统调用由网络轮询器完成后，G1被移回到P的 local 队列 中
 
 * 用户态阻塞/唤醒
-  1. channel操作
-
-  2. network I/O
-
+**  channel操作
+**  network I/O
     golang已经用netpoller实现了goroutine网络I/O阻塞不会导致M被阻塞，仅阻塞G，
-
     对应的G会被放置到某个wait队列(如channel的waitq)
 
 * 调度器跟踪调试
