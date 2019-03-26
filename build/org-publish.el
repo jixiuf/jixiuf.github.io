@@ -216,6 +216,8 @@ its name and its root folder name under `op/repository-directory'."
                         (not (equal f ".git"))
                         (not (equal f "build"))
                         (not (equal f "author"))
+                        (not (equal f "c"))
+                        (not (equal f "erlang"))
                         (not (member f op/category-ignore-list))
                         (not (equal f "blog"))
                         (file-directory-p
