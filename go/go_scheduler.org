@@ -54,7 +54,7 @@ G1想要进行网络系统调用，因此它会从P的队列中移除，并被�
 * 调度器跟踪调试
     G ODEBUG=scheddetail=1,schedtrace=1000 ./program
 
-    #+BEGIN_SRC
+    #+BEGIN_SRC go
         SCHED 0ms: gomaxprocs=8 idleprocs=7 threads=2 spinningthreads=0 idlethreads=0 runqueue=0 gcwaiting=0 nmidlelocked=0 stopwait=0 sysmonwait=0
         P0: status=1 schedtick=0 syscalltick=0 m=0 runqsize=0 gfreecnt=0
         P1: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
@@ -69,3 +69,74 @@ G1想要进行网络系统调用，因此它会从P的队列中移除，并被�
         G1: status=8() m=0 lockedm=0
     #+END_SRC
 
+* goroutine的创建
+  proc.go newproc
+  #+BEGIN_SRC go
+  func newproc(siz int32, fn *funcval) {
+
+  func newproc1(fn *funcval, argp *uint8, narg int32, callergp *g, callerpc uintptr) {
+	runqput(_p_, newg, true)
+
+    // runqput tries to put g on the local runnable queue.
+    // If next is false, runqput adds g to the tail of the runnable queue.
+    // If next is true, runqput puts g in the _p_.runnext slot.
+    // If the run queue is full, runnext puts g on the global queue.
+    // Executed only by the owner P.
+func runqput(_p_ *p, gp *g, next bool) {
+	if randomizeScheduler && next && fastrand()%2 == 0 {
+		next = false
+	}
+
+	if next {
+	retryNext:
+		oldnext := _p_.runnext
+        //这里会把新创建的g放到_p_.runnext上,以更高优先级被执行(高于_p_.runq队列里的)
+		if !_p_.runnext.cas(oldnext, guintptr(unsafe.Pointer(gp))) {
+			goto retryNext
+		}
+		if oldnext == 0 {
+			return
+		}
+		// Kick the old runnext out to the regular run queue.
+		gp = oldnext.ptr()
+	}
+
+
+  #+END_SRC
+  这就能解释下面这段程序的打印顺序问题了
+#+BEGIN_SRC go
+package main
+import (
+ "fmt"
+ "runtime"
+)
+
+func main() {
+ runtime.GOMAXPROCS(1)
+ var c chan int = make(chan int, 0)
+
+ go func() { c <- 1 }()
+ go func() { c <- 2 }()
+ go func() { c <- 3 }()
+ go func() { c <- 4 }()
+ go func() { c <- 5 }()
+ go func() { c <- 6 }()
+ go func() {c <- 7}()
+ for {
+  select {
+  case v := <-c:
+   fmt.Println("sssssssssssssssssssss", v)
+  }
+ }
+}
+#+END_SRC
+#+BEGIN_QUOTE
+go run a.go
+sssssssssssssssssssss 7
+sssssssssssssssssssss 1
+sssssssssssssssssssss 2
+sssssssssssssssssssss 3
+sssssssssssssssssssss 4
+sssssssssssssssssssss 5
+sssssssssssssssssssss 6
+#+END_QUOTE
