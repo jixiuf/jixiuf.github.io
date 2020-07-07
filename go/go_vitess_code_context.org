@@ -166,6 +166,256 @@ context中 如何存储数据的，看下代码， 其实很简单
         http.ListenAndServe(":8080", nil)
     }
   #+END_SRC
+* context 之WithCancel 使用注意事项，
+  假设有如下代码
+#+BEGIN_SRC go
+  parentCtx, parentCancel := WithCancel(context.Background())
+  childCtx, childCancel := WithCancel(parentCtx)
+  var reusultChan chan string = make(chan string, 1)
+  go doALongJob(reusultChan)
+  go func() {
+      time.Sleep(1 * time.Second)//只等一秒，一秒后 doALongJob 还不返回结果
+      //注意这里是对parentCancel()的调用，按照context设计的目的，
+      // 兼听childCtx.Done()的chan 也是可以收到parentCancel()被调用的事件的
+      parentCancel()
+  }()
+  select {
+  case <-childCtx.Done():				// 等待 childCtx 收到cancel事件
+       fmt.Println("canceled")
+  case result := <-reusultChan:
+  }
+#+END_SRC
+
+  结论：当parentCtx的cancel() 被调用的时候,<-child.Done()是能收到事件的
+  并且，如果parentCtx的cancel()已经被调用，以之为父创建的childctx
+  调用 <-childctx.Done() 会立即返回，使用的时候一定要注意这一点
+  WithTimeout应该也会类似的问题。
+  所以 一个已经触发了cancel()事件的ctx,不再适合一值传递下去
+  当需要WithCancel()或WithTimeout时,应该从context.Background()来创建，
+  它这样设计的目的，应该是允许一个ctx可以兼听多个cancel事件， 但凡收到一个事件便不再等待
+
+以下代码是把context中 cancel相关的代码抽取出来，并加了一些注释，以便了解调用流程
+#+BEGIN_SRC go
+package main
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"sync"
+	"time"
+)
+
+// DeadlineExceeded is the error returned by context.Context.Err when the context's
+// deadline passes.
+
+// WithCancel returns a copy of parent with a new Done channel. The returned
+// context's Done channel is closed when the returned cancel function is called
+// or when the parent context's Done channel is closed, whichever happens first.
+//
+// Canceling this context releases resources associated with it, so code should
+// call cancel as soon as the operations running in this context.Context complete.
+func WithCancel(parent context.Context) (ctx context.Context, cancel context.CancelFunc) {
+	c := newCancelCtx(parent)
+	propagateCancel(parent, &c)
+	return &c, func() { c.cancel(true, context.Canceled) }
+}
+
+// newCancelCtx returns an initialized cancelCtx.
+func newCancelCtx(parent context.Context) cancelCtx {
+	return cancelCtx{Context: parent}
+}
+
+// propagateCancel arranges for child to be canceled when parent is.
+func propagateCancel(parent context.Context, child canceler) {
+	if parent.Done() == nil {
+		fmt.Println("parent is never canceled")
+		return // parent is never canceled
+	}
+	fmt.Println("checkparent")
+	if p, ok := parentCancelCtx(parent); ok {
+		p.mu.Lock()
+		if p.err != nil {
+			// parent has already been canceled
+			fmt.Println("checkparent parent has already been canceled")
+			child.cancel(false, p.err)
+		} else {
+			if p.children == nil {
+				p.children = make(map[canceler]struct{})
+			}
+			p.children[child] = struct{}{}
+			fmt.Println("checkparent put child into parent.childrens")
+		}
+		p.mu.Unlock()
+	} else {
+		fmt.Println("checkparent  do not understand here ")
+		go func() {
+			select {
+			case <-parent.Done():
+				fmt.Println("candgo")
+				child.cancel(false, parent.Err())
+			case <-child.Done():
+				fmt.Println("done")
+			}
+		}()
+	}
+}
+
+// parentCancelCtx follows a chain of parent references until it finds a
+// *cancelCtx. This function understands how each of the concrete types in this
+// package represents its parent.
+func parentCancelCtx(parent context.Context) (*cancelCtx, bool) {
+	for {
+		switch c := parent.(type) {
+		case *cancelCtx:
+			return c, true
+		default:
+			return nil, false
+		}
+	}
+}
+
+// removeChild removes a context from its parent.
+func removeChild(parent context.Context, child canceler) {
+	p, ok := parentCancelCtx(parent)
+	if !ok {
+		return
+	}
+	p.mu.Lock()
+	if p.children != nil {
+		delete(p.children, child)
+	}
+	p.mu.Unlock()
+}
+
+// A canceler is a context type that can be canceled directly. The
+// implementations are *cancelCtx and *timerCtx.
+type canceler interface {
+	cancel(removeFromParent bool, err error)
+	Done() <-chan struct{}
+}
+
+// closedchan is a reusable closed channel.
+var closedchan = make(chan struct{})
+
+func init() {
+	close(closedchan)
+}
+
+// A cancelCtx can be canceled. When canceled, it also cancels any children
+// that implement canceler.
+type cancelCtx struct {
+	context.Context
+
+	mu       sync.Mutex            // protects following fields
+	done     chan struct{}         // created lazily, closed by first cancel call
+	children map[canceler]struct{} // set to nil by the first cancel call
+	err      error                 // set to non-nil by the first cancel call
+}
+
+func (c *cancelCtx) Done() <-chan struct{} {
+	c.mu.Lock()
+	if c.done == nil {
+		c.done = make(chan struct{})
+	}
+	d := c.done
+	c.mu.Unlock()
+	return d
+}
+
+func (c *cancelCtx) Err() error {
+	c.mu.Lock()
+	err := c.err
+	c.mu.Unlock()
+	return err
+}
+
+func (c *cancelCtx) String() string {
+	return fmt.Sprintf("%v.WithCancel", c.Context)
+}
+
+// cancel closes c.done, cancels each of c's children, and, if
+// removeFromParent is true, removes c from its parent's children.
+func (c *cancelCtx) cancel(removeFromParent bool, err error) {
+	fmt.Println("cancel() is called removeFromParent:", removeFromParent)
+	if err == nil {
+		panic("context: internal error: missing cancel error")
+	}
+	c.mu.Lock()
+	if c.err != nil {
+		c.mu.Unlock()
+		fmt.Println("already canceled")
+		return // already canceled
+	}
+	c.err = err
+	if c.done == nil {
+		fmt.Println("nobody care whether the cancelCtx is done,so do not need call close chan to notify")
+		c.done = closedchan
+	} else {
+		fmt.Println("closeddone")
+		close(c.done)
+	}
+	for child := range c.children {
+		// NOTE: acquiring the child's lock while holding parent's lock.
+		child.cancel(false, err)
+	}
+	c.children = nil
+	c.mu.Unlock()
+
+	if removeFromParent {
+		removeChild(c.Context, c)
+	}
+}
+
+func doALongJob(r chan string) {
+	time.Sleep(time.Second * 5)
+	fmt.Println("job is done")
+	r <- "经历了漫长的过程，用户等到了想要的数据"
+	fmt.Println("doALongJob is end")
+}
+func handleTest(w http.ResponseWriter, req *http.Request) {
+	start := time.Now()
+	defer req.Body.Close()
+	ctx, cancel := WithCancel(context.Background())
+	fmt.Println("trying create child cancelctx")
+	ctx, cancel2 := WithCancel(ctx)
+	go func() {
+		// 我 （别的进程 ） 可以让本进程取消等待数据的返回
+		time.Sleep(1 * time.Second)
+		fmt.Println("parent.ancelctx() 不再等待")
+		fmt.Println("trying call parent.cancel()")
+		cancel()
+	}()
+	go func() {
+		// 我 （别的进程 ） 可以让本进程取消等待数据的返回
+		time.Sleep(2 * time.Second)
+		fmt.Println("child.cancel()is called,donot want to wait")
+		// 如果此处没有调用cancel() ,浏览器上会一直等到 想过的结果
+		cancel2()
+	}()
+
+	// 这里缓冲1个， 即 ，就算我放弃从resultChan 读数据，doALongJob处依然可以往里面写入一个数据，从而正常退出
+	var reusultChan chan string = make(chan string, 1)
+	go doALongJob(reusultChan)
+	select {
+	case <-ctx.Done():
+		fmt.Println("走到ctx.Done()，分支，说明用户不愿意继续等待了 with err:", ctx.Err())
+		w.Write([]byte("after seconds,got the result:" + time.Since(start).String()))
+		w.Write([]byte("走到ctx.Done()，分支，说明用户不愿意继续等待了 with err:" + ctx.Err().Error()))
+	case result := <-reusultChan:
+		w.Write([]byte("after seconds,got the result:" + time.Since(start).String()))
+		w.Write([]byte(result))
+		fmt.Println(result)
+	}
+
+}
+func main() {
+	http.HandleFunc("/", handleTest)
+	http.ListenAndServe(":8080", nil)
+}
+
+#+END_SRC
+
 * withTimeout
 #+BEGIN_SRC go
   package main
