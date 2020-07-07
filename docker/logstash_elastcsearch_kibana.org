@@ -146,6 +146,8 @@
     1462637474 00:11:14  elasticsearch yellow          1         1      5   5    0    0        5             0                  -                 50.0%
     #+END_QUOTE
 
+***  查看各线程拥堵情况
+     GET /_cat/thread_pool?v
 *** 获取node 列表
     #+BEGIN_SRC sh
     curl 'localhost:9200/_cat/nodes?v'
@@ -1026,6 +1028,45 @@
         path.logs: /data/zjh/es/log
         network.host: 0.0.0.0
         http.port: 9200
+        indices.memory.index_buffer_size: 30%
+        thread_pool:
+            write:
+                size: 32
+                queue_size: 4000
+
+
+    #+END_QUOTE
+    #+BEGIN_QUOTE
+    -Xms31g
+    -Xmx31g
+
+    -XX:+UseG1GC
+    -XX:MaxGCPauseMillis=200
+    -XX:+AlwaysPreTouch
+    -Xss1m
+    -Djava.awt.headless=true
+    -Dfile.encoding=UTF-8
+    -Djna.nosys=true
+    -XX:-OmitStackTraceInFastThrow
+    -Dio.netty.noUnsafe=true
+    -Dio.netty.noKeySetOptimization=true
+    -Dio.netty.recycler.maxCapacityPerThread=0
+    -Dlog4j.shutdownHookEnabled=false
+    -Dlog4j2.disable.jmx=true
+    -Djava.io.tmpdir=${ES_TMPDIR}
+    -XX:+HeapDumpOnOutOfMemoryError
+    -XX:HeapDumpPath=data
+    -XX:ErrorFile=logs/hs_err_pid%p.log
+    8:-XX:+PrintGCDetails
+    8:-XX:+PrintGCDateStamps
+    8:-XX:+PrintTenuringDistribution
+    8:-XX:+PrintGCApplicationStoppedTime
+    8:-Xloggc:logs/gc.log
+    8:-XX:+UseGCLogFileRotation
+    8:-XX:NumberOfGCLogFiles=32
+    8:-XX:GCLogFileSize=64m
+    9-:-Xlog:gc*,gc+age=trace,safepoint:file=logs/gc.log:utctime,pid,tags:filecount=32,filesize=64m
+    9-:-Djava.locale.providers=COMPAT
     #+END_QUOTE
     https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-service.html
     centos7 上 配置成service
