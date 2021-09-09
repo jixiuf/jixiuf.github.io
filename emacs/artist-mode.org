@@ -29,7 +29,7 @@
   | Flood-fill | 填充工具，填充                                                                              | 填充                                                                              |
   |            |                                                                                             |                                                                                   |
 * org 整合
-  #+BEGIN_SRC ditaa :file ../img/blue.png   :cmdline -r -S
+  #+BEGIN_SRC ditaa :file ../img/blue.png   :cmdline -r -S :eval no
   +---------+
   | cBLU    |
   |         |

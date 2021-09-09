@@ -41,21 +41,18 @@
  user-mail-address "jixiuf@qq.com")
 (setq load-prefer-newer t)              ;当el文件比elc文件新的时候,则加载el,即尽量Load最新文件文件
 
+(defun vmacs-project-root ()
+  "Thin (zero) wrapper over projectile to find project root."
+  (let ((proj (project-current)))
+    (when proj
+      (if (fboundp 'project-root)
+          (project-root proj)
+        (car (project-roots proj))))))
 (setq user-emacs-directory (expand-file-name "."))
-
-;;  第三方package相关配置
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
-;; (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t) ; Org-mode's repository
-;; make sure to have downloaded archive description.
-;; Or use package-archive-contents as suggested by Nicolas Dudebout
-(or (file-exists-p package-user-dir) (package-refresh-contents))
-;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.  If you don't want it,
-;; just comment it out by adding a semicolon to the start of the line.
-;; You may delete these explanatory comments.
-(package-initialize)
-
+(setq origin-default-direct default-directory)
+(setq default-directory (expand-file-name  "./build/elpa" (vmacs-project-root)))
+(normal-top-level-add-subdirs-to-load-path)
+(setq default-directory origin-default-direct)
 (if (equal system-type 'gnu/linux)
     (setq dired-listing-switches "--time-style=+%y-%m-%d/%H:%M  --group-directories-first -alhG")
   (setq dired-listing-switches "-alhG"))
@@ -68,6 +65,9 @@
 
 ;;; the following is only needed if you install org-page manually
 (require 'org-page)
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)))
 
 (setq org-confirm-babel-evaluate nil)
 
@@ -137,7 +137,7 @@
 
 
 
-(setq op/category-ignore-list  '("themes" "assets" "daily" "style" "img" "js" "author" "download"
+(setq op/category-ignore-list  '("themes" "assets" "daily" "style" "img" "js" "author" "download" ".github"
                                  "docker" "build"
                                  "nginx" "cocos2dx" "mac"
                                  "Linux" "autohotkey" "c"   "emacs" "emacs_tutorial" "erlang" "git" "go" "java" "mysql"
