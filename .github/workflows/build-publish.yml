@@ -9,14 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-      with:
-        fetch-depth: 1
-        ref: 'source'
     - name: build
       uses: docker://iquiw/alpine-emacs
       if: github.event.deleted == false
       with:
-        args: emacs -nw  -q -l ./build/org-publish.el --batch --funcall toggle-debug-on-error  --eval "(publish-my-note-all)" --eval '(with-current-buffer "*Messages*"(shell-command-on-region (point-min)(point-max) "cat >/tmp/emacs-org-page.log"))'
+        args: sh -c "apk add git;git checkout master;git checkout source;emacs -nw  -q -l ./build/org-publish.el --batch --funcall toggle-debug-on-error  --funcall publish-my-note-all"
     - name: deploy
       uses: peaceiris/actions-gh-pages@v1.1.0
       if: success()
