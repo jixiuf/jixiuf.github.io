@@ -65,21 +65,18 @@
 
 ;;; the following is only needed if you install org-page manually
 (require 'org-page)
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((emacs-lisp . t)))
 
 (setq org-confirm-babel-evaluate nil)
 
 (setq op/site-main-title "拾遗笔记")
 (setq op/site-sub-title "")
 (setq op/personal-github-link "http://github.com/jixiuf")
-(setq op/repository-directory "../")    ;must ends with /
+(setq op/repository-directory (vmacs-project-root))    ;must ends with /
 (setq op/site-domain "http://jixiuf.github.io")
 ;;; for commenting, you can choose either disqus or duoshuo
 (setq op/personal-disqus-shortname "jixiuf")
 (setq op/personal-duoshuo-shortname "jixiuf")
-(setq op/theme-root-directory (expand-file-name "./org-page-themes"))
+(setq op/theme-root-directory (expand-file-name "./build/org-page-themes" (vmacs-project-root)))
 (setq op/theme 'jixiuf_theme)
 (setq op/highlight-render 'htmlize)
 ;;; the configuration below are optional
@@ -87,8 +84,10 @@
 
 
 ;; (require 'org-exp-blocks nil t)           ;#+BEGIN_DITAA hello.png -r -S -E 要用到
-(setq org-ditaa-jar-path (expand-file-name "./ditaa.jar"))
+(setq org-ditaa-jar-path (expand-file-name "./build/ditaa.jar" (vmacs-project-root)))
 (with-eval-after-load 'org-exp-blocks  (add-to-list 'org-babel-load-languages '(ditaa . t)))
+;; (org-babel-do-load-languages 'org-babel-load-languages '((emacs-lisp . t)))
+
 
 ;; (declare-function org-publish "ox-publish")
 ;; (declare-function yas-global-mode "yasnippet")
