@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>consul集群拾遗 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="consul集群拾遗" />
+    <meta name="keywords" content="Go" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>consul集群拾遗</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org44250e2">consul 的一些角色</a></li>
+<li><a href="#org50e30cc">配置文件模版</a>
+<ul>
+<li><a href="#org9c2333f">几个简单的命令</a></li>
+</ul>
+</li>
+<li><a href="#org2ad2040">ACL 权限</a>
+<ul>
+<li><a href="#org51a2738">Anonymous Token 匿名用户的访问权限</a></li>
+<li><a href="#orga888a65">Master Token 绝对权限,什么都不用配置就具有所有权限</a></li>
+<li><a href="#orgbbbc4cb">其他权限需要你自己配置了</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org44250e2" class="outline-2">
+<h2 id="org44250e2">consul 的一些角色</h2>
+<div class="outline-text-2" id="text-org44250e2">
+<p>
+Consul Cluster有Server和Client两种角色。不管是Server还是Client，统称为<br />
+Agent，Consul Client是相对无状态的，只负责转发RPC到Server，资源开销很<br />
+少。Server是一个有一组扩展功能的代理，这些功能包括参与Raft选举，维护集<br />
+群状态，响应RPC查询，与其他数据中心交互WAN gossip和转发查询给leader或<br />
+者远程数据中心。在每个数据中心，client和server是混合的。一般建议有3-5<br />
+台server。这是基于有故障情况下的可用性和性能之间的权衡结果，因为越多的<br />
+机器加入达成共识越慢，Server之间会选举出一个leader。然而，并不限制<br />
+client的数量，它们可以很容易的扩展到数千或者数万台。<br />
+</p>
+
+<p>
+服务可能有几十上百或者更多个，这些服务分布在各个独立的项目（微服务）中，<br />
+而某一个微服务又部署在一台以上的虚机或者物理机上。在各自提供服务的项目<br />
+中如果写死consul集群的IP和端口的时候就会将所有的服务都注册在同一个<br />
+consul集群的server上，虽然当这个server挂掉的时候集群依然能够提供服务，<br />
+但是将所有的服务注册在某一个节点上本身就是不合理的。这样在注册的时候增<br />
+加Nginx负载将注册服务的请求平均分布到集群中不同的consul节点上，同样在<br />
+获取服务的时候也要经过Nginx这一层进行负载<br />
+</p>
+
+<p>
+    在server前面挡一层nginx 或slb可能不是好的做法，另一种方式是在每个<br />
+ECS或docker内置一个consul client,而容器内的服务只与本容器内的consul<br />
+client交互， 由consul client与consul server集群交互。<br />
+</p>
+
+<p>
+容器内的consul client负责watch 服务，当服务当掉，consul client负责通知到集群<br />
+当consul client 当掉，consul 集群会把与它同ip的服务踢掉<br />
+</p>
+
+
+<ul class="org-ul">
+<li>start.sh 脚本<br /></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">!/bin/</span><span style="color: #FBDE2D;">sh</span>
+<span style="color: #40E0D0;">leader</span>=<span style="color: #ffa07a;">"10.163.146.174"</span>
+<span style="color: #40E0D0;">privateIP</span>=<span style="font-weight: bold;">`ifconfig | perl -nle 's/dr:(\S+)/print $1/e'|grep "^10\."|tr -d "\n"`</span>
+sed <span style="color: #ffa07a;">"s/#leader#/$leader/g"</span> conf_template_json|sed <span style="color: #ffa07a;">"s/#privateIP#/$privateIP/g"</span> &gt;conf.json
+/data/consul/consul agent -server -config-dir /data/consul/
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">curl -XPUT --data 'pong' --header "X-Consul-Token: "tokenssssssssssssss" http://top1:8500/v1/kv/ping</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">curl -XGET --data 'ping' --header "X-Consul-Token: "tokenssssssssssssss" http://top1:8500/v1/kv/ping</span>
+
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org50e30cc" class="outline-2">
+<h2 id="org50e30cc">配置文件模版</h2>
+<div class="outline-text-2" id="text-org50e30cc">
+<div class="org-src-container">
+<pre class="src src-js">{
+    <span style="color: #ffa07a;">"datacenter"</span>         : <span style="color: #ffa07a;">"iget-topology-aliyun"</span>,
+    <span style="color: #ffa07a;">"data_dir"</span>           : <span style="color: #ffa07a;">"/data/consul/data"</span>,
+    <span style="color: #ffa07a;">"log_level"</span>          : <span style="color: #ffa07a;">"INFO"</span>,
+    <span style="color: #ffa07a;">"server"</span>             : <span style="color: #D8FA3C;">true</span>,
+    <span style="color: #ffa07a;">"bootstrap_expect"</span>   : 2,
+    <span style="color: #ffa07a;">"bind_addr"</span>          : <span style="color: #ffa07a;">"#privateIP#"</span>,
+    <span style="color: #ffa07a;">"client_addr"</span>        : <span style="color: #ffa07a;">"0.0.0.0"</span>,
+    <span style="color: #ffa07a;">"rejoin_after_leave"</span> : <span style="color: #D8FA3C;">true</span>,
+    <span style="color: #ffa07a;">"retry_join"</span>         : [<span style="color: #ffa07a;">"#leader#"</span>],
+    <span style="color: #ffa07a;">"retry_interval"</span>     : <span style="color: #ffa07a;">"5s"</span>,
+    <span style="color: #ffa07a;">"retry_max"</span>          : 2,
+    <span style="color: #ffa07a;">"enable_syslog"</span>      : <span style="color: #D8FA3C;">true</span>,
+    <span style="color: #ffa07a;">"ui"</span>                 : <span style="color: #D8FA3C;">true</span>,
+    <span style="color: #ffa07a;">"encrypt"</span>            : <span style="color: #ffa07a;">"tgYw4Me7aJAEgjzY6bX2FQ=="</span>,
+    <span style="color: #ffa07a;">"acl_datacenter"</span>     :<span style="color: #ffa07a;">"iget-topology-aliyun"</span>,
+    <span style="color: #ffa07a;">"acl_default_policy"</span> :<span style="color: #ffa07a;">"deny"</span>,
+    <span style="color: #ffa07a;">"acl_down_policy"</span>    :<span style="color: #ffa07a;">"deny"</span>,
+    <span style="color: #ffa07a;">"acl_master_token"</span>   :<span style="color: #ffa07a;">"master-tokens"</span>,
+    <span style="color: #ffa07a;">"acl_token"</span>: <span style="color: #ffa07a;">"client-tokens"</span>,
+    <span style="color: #ffa07a;">"acl_agent_token"</span>:<span style="color: #ffa07a;">"agent-tokens-&#33410;&#28857;&#38388;&#21516;&#27493;&#25968;&#25454;&#39564;&#35777;&#26435;&#38480;&#29992;"</span>
+
+}
+</pre>
+</div>
+<ul class="org-ul">
+<li>server： 以server身份启动。<br /></li>
+<li>bootstrap-expect：集群要求的最少server数量，当低于这个数量，集群即失效,当大于这个，则开始选举leader组集群<br /></li>
+<li>data-dir：data存放的目录，更多信息请参阅consul数据同步机制<br /></li>
+<li>node：节点id，在同一集群不能重复。<br /></li>
+<li>bind：监听的ip地址。<br /></li>
+<li>client 客户端的ip地址<br /></li>
+<li>encrypt  节点之间通信，避免其他集群节点乱入 ,可以使用consul keygen 生成<br /></li>
+<li>几个tokens 可以用 uuidgen生成<br /></li>
+</ul>
+</div>
+<div id="outline-container-org9c2333f" class="outline-3">
+<h3 id="org9c2333f">几个简单的命令</h3>
+<div class="outline-text-3" id="text-org9c2333f">
+<p>
+consul members 查看各节点信息<br />
+consul info 查看具体信息，比如谁是leader等<br />
+curl -XPUT &#x2013;data 'pong' &#x2013;header "X-Consul-Token: "tokenssssssssssssss" <a href="http://top1:8500/v1/kv/ping">http://top1:8500/v1/kv/ping</a><br />
+curl -XGET &#x2013;data 'ping' &#x2013;header "X-Consul-Token: "tokenssssssssssssss" <a href="http://top1:8500/v1/kv/ping">http://top1:8500/v1/kv/ping</a><br />
+consul  kv put hello world<br />
+consul  kv get hello<br />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2ad2040" class="outline-2">
+<h2 id="org2ad2040">ACL 权限</h2>
+<div class="outline-text-2" id="text-org2ad2040">
+<p>
+启动 5个节点分别使用上面的配置启动之后,访问任一节点的8500端口即可web方式管理consul<br />
+ 在 设置中 输入上面配置的acl_master_token ,即具有的相应的管理权限<br />
+</p>
+
+
+<div id="orgb4da2fd" class="figure">
+<p><img src="/assets/blog/go_consul.html/go_consul-2018-01-10-22-23-35.png" alt="go_consul-2018-01-10-22-23-35.png" /><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org51a2738" class="outline-3">
+<h3 id="org51a2738">Anonymous Token 匿名用户的访问权限</h3>
+<div class="outline-text-3" id="text-org51a2738">
+<ol class="org-ol">
+<li>如下 对所有的key具有只读限制，只 以lock/ 为前缀的key 有写权限<br /></li>
+<li>对node 信息具有只读权限 可以使用consul members 查看各节点信息而不用输入tokens (consul members -token tokensssssssssss)<br /></li>
+<li><p>
+对consul service 具有只读权限<br />
+</p>
+<blockquote>
+<p>
+key "" {<br />
+policy = "read"<br />
+}<br />
+key "lock/" {<br />
+policy = "write"<br />
+}<br />
+node "" {policy  = "read"}<br />
+service "consul" {policy  = "read"}<br />
+</p>
+</blockquote></li>
+</ol>
+</div>
+</div>
+<div id="outline-container-orga888a65" class="outline-3">
+<h3 id="orga888a65">Master Token 绝对权限,什么都不用配置就具有所有权限</h3>
+</div>
+<div id="outline-container-orgbbbc4cb" class="outline-3">
+<h3 id="orgbbbc4cb">其他权限需要你自己配置了</h3>
+<div class="outline-text-3" id="text-orgbbbc4cb">
+</div>
+<ul class="org-ul">
+<li><a id="org366b79d"></a>比如我配的agent<br />
+<div class="outline-text-4" id="text-org366b79d">
+<p>
+这个token 我配到 acl_agent_token对应的字段上了，用于node各节点间同步一些信息<br />
+配置完这个之后token才会生成，生成后需要你把consul停掉，然后配置到acl_agent_token这个字段上再重启<br />
+</p>
+<blockquote>
+<p>
+node "" {policy = "write"}<br />
+service "" {policy = "read"}<br />
+</p>
+</blockquote>
+</div>
+</li>
+<li><a id="org7933b86"></a>比如我配置的client<br />
+<div class="outline-text-4" id="text-org7933b86">
+<p>
+比如我把这个token 配到 acl_token字段上，可以通过设置权限来控制默认kv 的权限<br />
+比如我设置成<br />
+</p>
+<blockquote>
+<p>
+key "key_2" { policy = "read" }<br />
+key "key_3" { policy = "deny" }<br />
+key "" {policy = "write"}<br />
+</p>
+</blockquote>
+<div class="org-src-container">
+<pre class="src src-sh"> &#21017;&#36825;&#20960;&#20010;&#21629;&#20196; &#19981;&#24517;&#20256;token &#23601;&#21487;&#20197;&#25191;&#34892;&#25104;&#21151;
+curl -XPUT --data <span style="color: #ffa07a;">'pong'</span>  http://top1:8500/v1/kv/ping
+curl -XGET --data <span style="color: #ffa07a;">'ping'</span>  http://top1:8500/v1/kv/ping
+consul  kv put hello world
+consul  kv get hello
+</pre>
+</div>
+<blockquote>
+<p>
+而把权限设置成这样，上面几个命令就会出403  Permission denied<br />
+key "" {policy = "deny"}<br />
+</p>
+</blockquote>
+</div>
+</li>
+
+<li><a id="org7aa885c"></a>当然也可以提供一个token 给程序用，用来精细控制各个业务的权限<br /></li>
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2018-01-10</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info">N/A</span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/go_consul.html";
+          var disqus_url = "http://jixiuf.github.io/blog/go_consul.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; qq &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

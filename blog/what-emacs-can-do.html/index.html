@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>Emacs可以做什么(功能演示) - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>Emacs可以做什么(功能演示)</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org43b3c07">Tips: dropbox 里的视频不要用迅雷下载， 似乎下不了(PS. 似乎国内现在封了dropbox，试从微盘vdist.weibo.com下载相应的视频链接)</a></li>
+<li><a href="#orgd9fce64">AutoComplete</a></li>
+<li><a href="#orged87a84">AutoJavaComplete</a></li>
+<li><a href="#orgb274a42">auto-complete-clang</a></li>
+<li><a href="#orga6607d8">yasnippet  模版</a></li>
+<li><a href="#orgabce6b7">yasnippet and auto-insert</a></li>
+<li><a href="#org18a6e1a">hippie-expand</a></li>
+<li><a href="#org3de18f8">Iedit</a></li>
+<li><a href="#org81a8b78">bm.el</a></li>
+<li><a href="#orgf497daf">Helm</a></li>
+<li><a href="#orgef69c74">Helm Imenu</a></li>
+<li><a href="#org15907e9">Helm-occur</a></li>
+<li><a href="#org5b83672">helm-grep and Emacs-wgrep</a></li>
+<li><a href="#org3b82b0b">helm-ls-git helm-ls-hg</a></li>
+<li><a href="#org0229f3e">helm-etags-plus ctags-update.el</a></li>
+<li><a href="#orgee879b1">emacs-helm-gtags</a></li>
+<li><a href="#org9096b99">eshell</a></li>
+<li><a href="#org70281a2">ace-jump-mode</a></li>
+<li><a href="#org717b898">sqlparser</a></li>
+<li><a href="#org916f7ad">golden-ratio.el</a></li>
+<li><a href="#org3974ba0">dired</a></li>
+<li><a href="#orgcbb9367">VC (version control) emacs自带的用于进行svn git cvs hg 等各种版本管理工具的一个统一的接口</a></li>
+<li><a href="#org7b50a95">Ediff</a></li>
+<li><a href="#orge1af14c">magit</a></li>
+<li><a href="#orgdbcf8f1">org-mode</a></li>
+<li><a href="#org4ee481c">org-agenda org-mode TODO list</a></li>
+<li><a href="#org86fdf39">mail</a></li>
+<li><a href="#orgce83d5d">calc emacs里的计算器</a></li>
+<li><a href="#org698aa85">Emacs 一些可以提高效率的小tips</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org43b3c07" class="outline-2">
+<h2 id="org43b3c07">Tips: dropbox 里的视频不要用迅雷下载， 似乎下不了(PS. 似乎国内现在封了dropbox，试从微盘vdist.weibo.com下载相应的视频链接)</h2>
+<div class="outline-text-2" id="text-org43b3c07">
+<p>
+微盘里也上传一份供下载<br />
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GG5/1412260686">http://vdisk.weibo.com/s/A2UdJFfhA_GG5/1412260686</a><br />
+优酷上也上传了一些，供在线观看(清晰度相对差些）<br />
+<a href="http://i.youku.com/u/UMjU4NzMzNDA=/videos">http://i.youku.com/u/UMjU4NzMzNDA=/videos</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgd9fce64" class="outline-2">
+<h2 id="orgd9fce64">AutoComplete</h2>
+<div class="outline-text-2" id="text-orgd9fce64">
+<p>
+<a href="http://www.emacswiki.org/emacs/AutoComplete">http://www.emacswiki.org/emacs/AutoComplete</a><br />
+Video Demo:<br />
+<a href="http://v.youku.com/v_show/id_XMzMxMDg0NDIw.html">http://v.youku.com/v_show/id_XMzMxMDg0NDIw.html</a><br />
+<a href="http://youtu.be/rGVVnDxwJYE">http://youtu.be/rGVVnDxwJYE</a><br />
+<a href="http://cx4a.org/software/auto-complete/demo.html">http://cx4a.org/software/auto-complete/demo.html</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-orged87a84" class="outline-2">
+<h2 id="orged87a84">AutoJavaComplete</h2>
+<div class="outline-text-2" id="text-orged87a84">
+<p>
+AutoComplete 的一个插件，基于TAG 用于java补全<br />
+虽然比Eclipse差些， 但总还可以用，再加上emacs 其他一些补全机制<br />
+足可以用<br />
+<a href="https://github.com/emacs-java/auto-java-complete">https://github.com/emacs-java/auto-java-complete</a><br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/f8dr9utzhh0usay/auto-java-complete.mp4.7z">https://www.dropbox.com/s/f8dr9utzhh0usay/auto-java-complete.mp4.7z</a><br />
+或<br />
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GG9">http://vdisk.weibo.com/s/A2UdJFfhA_GG9</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgb274a42" class="outline-2">
+<h2 id="orgb274a42">auto-complete-clang</h2>
+<div class="outline-text-2" id="text-orgb274a42">
+<p>
+AutoComplete 用于c c++ 补全的插件<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/ks3wylqijyapyky/autocomplete-clang.mp4.7z">https://www.dropbox.com/s/ks3wylqijyapyky/autocomplete-clang.mp4.7z</a><br />
+或<br />
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFI">http://vdisk.weibo.com/s/A2UdJFfhA_GFI</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-orga6607d8" class="outline-2">
+<h2 id="orga6607d8">yasnippet  模版</h2>
+<div class="outline-text-2" id="text-orga6607d8">
+<p>
+<a href="https://github.com/capitaomorte/yasnippet">https://github.com/capitaomorte/yasnippet</a><br />
+Video Demo:<br />
+<a href="http://v.youku.com/v_show/id_XMzI0NDYxNDQ=.html">http://v.youku.com/v_show/id_XMzI0NDYxNDQ=.html</a><br />
+<a href="http://youtu.be/ZCGmZK4V7Sg">http://youtu.be/ZCGmZK4V7Sg</a><br />
+<a href="http://yasnippet.googlecode.com/files/yas_demo.avi">http://yasnippet.googlecode.com/files/yas_demo.avi</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgabce6b7" class="outline-2">
+<h2 id="orgabce6b7">yasnippet and auto-insert</h2>
+<div class="outline-text-2" id="text-orgabce6b7">
+<p>
+yasnippet 与auto-insert 结合，  将新创建文件时自动在文件里插入一定的模版<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/47d4ujlqao0j6ou/yasnippet-auto-insert.mkv.7z">https://www.dropbox.com/s/47d4ujlqao0j6ou/yasnippet-auto-insert.mkv.7z</a><br />
+或<br />
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFF">http://vdisk.weibo.com/s/A2UdJFfhA_GFF</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org18a6e1a" class="outline-2">
+<h2 id="org18a6e1a">hippie-expand</h2>
+<div class="outline-text-2" id="text-org18a6e1a">
+<p>
+emacs 自带的一种补全机制，可以补全 变量名（当从前打开的buffer,所有打开的<br />
+buffer,剪切板),可以补全文件名<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/ltheog1cp6quciv/hippie-expand.mkv.7z">https://www.dropbox.com/s/ltheog1cp6quciv/hippie-expand.mkv.7z</a><br />
+或<br />
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFM">http://vdisk.weibo.com/s/A2UdJFfhA_GFM</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org3de18f8" class="outline-2">
+<h2 id="org3de18f8">Iedit</h2>
+<div class="outline-text-2" id="text-org3de18f8">
+<p>
+显示光标下匹配的word或变量<br />
+同步的更改光标下匹配的word或变量<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/px380psaksx8277/iedit.mkv.7z">https://www.dropbox.com/s/px380psaksx8277/iedit.mkv.7z</a><br />
+或 <a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFq">http://vdisk.weibo.com/s/A2UdJFfhA_GFq</a><br />
+演示视频里演示了 如何同时更改本文件里所有hello变量为hello另一个变量<br />
+及如何只同时更改test()方法里的hello变量为另一个变量的功能(其他区域的hello不受<br />
+影响）<br />
+其中主要功能为Iedit实现<br />
+其中只修改test()函数里的hello变量  使用了emacs 自带的 narrow功能（C-xnn)即只显<br />
+示选中的部分的文字，隐藏未选中部分<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org81a8b78" class="outline-2">
+<h2 id="org81a8b78">bm.el</h2>
+<div class="outline-text-2" id="text-org81a8b78">
+<p>
+可视化 书签,在书签间快速跳转<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/z2dqtwq05so4u02/bm-bookmark.mkv.7z">https://www.dropbox.com/s/z2dqtwq05so4u02/bm-bookmark.mkv.7z</a><br />
+或<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFr">http://vdisk.weibo.com/s/A2UdJFfhA_GFr</a><br />
+演示视频展示了  在当前buffer(文件）的三个位置设置书签 ，然后在各个书签间来回跳<br />
+转的功能， （跳转过去后 会自动把当前行所在位置停留在窗口中间)<br />
+当然书签也可以在不同的文件上设置 ，在不同文件间跳转<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf497daf" class="outline-2">
+<h2 id="orgf497daf">Helm</h2>
+<div class="outline-text-2" id="text-orgf497daf">
+<p>
+Helm 的功能很多， 主要实现了通过一个或多个关键字从各种侯选项（可以是buffer,文<br />
+件，剪切环里的内容,最近打开的文件等）中过滤出某几个，<br />
+然后执行相应的操作(如 切换到某个buffer ,打开某个文件，将选中的剪切板里的内容插<br />
+入到光标处等）<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/45lu4bvrd1zxusx/helm.mkv.7z">https://www.dropbox.com/s/45lu4bvrd1zxusx/helm.mkv.7z</a><br />
+或<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFB">http://vdisk.weibo.com/s/A2UdJFfhA_GFB</a><br />
+</p>
+<ol class="org-ol">
+<li>视频展示了 如何快速的切换到某个文件（从 所有Buffers(打开的文件） Recentf(最近<br /></li>
+</ol>
+<p>
+打开过的文件）<br />
+</p>
+<ol class="org-ol">
+<li>Kill Ring 是emacs 的剪切版，  所有剪切版上出现的内容会列出来让你从中选择<br />
+视频中有展示 如何将剪切版中的内容插入到当前位置<br /></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgef69c74" class="outline-2">
+<h2 id="orgef69c74">Helm Imenu</h2>
+<div class="outline-text-2" id="text-orgef69c74">
+<p>
+列出当前所编辑文件中各个函数/变量 并跳转<br />
+以emacs源码中的sha256.c(c语言） 及 helm-imenu.el（emacs lisp语言)文件为例<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/zq6zk562nmgypve/helm-imenu.mkv.7z">https://www.dropbox.com/s/zq6zk562nmgypve/helm-imenu.mkv.7z</a><br />
+或<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GG3">http://vdisk.weibo.com/s/A2UdJFfhA_GG3</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org15907e9" class="outline-2">
+<h2 id="org15907e9">Helm-occur</h2>
+<div class="outline-text-2" id="text-org15907e9">
+<p>
+根据关键字列出当前文件中包含关键字的行， 并跳转<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/9krjogmt9ssk8bm/helm-occur.mkv.7z">https://www.dropbox.com/s/9krjogmt9ssk8bm/helm-occur.mkv.7z</a><br />
+或<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFO">http://vdisk.weibo.com/s/A2UdJFfhA_GFO</a><br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5b83672" class="outline-2">
+<h2 id="org5b83672">helm-grep and Emacs-wgrep</h2>
+<div class="outline-text-2" id="text-org5b83672">
+<p>
+helm-grep.el<br />
+grep 的helm 版， 根据关键字过滤某个文件（如果是一个文件，可以直接用helm-occur)<br />
+  或多个文件，<br />
+  或某个目录<br />
+  或某个目录（包括子目录）<br />
+  并跳转到指定的行<br />
+  (可以是交互式的,即每输入一个字母，过滤后的结果就跟着变化）<br />
+  （也可以将过滤后的结果保存到一个buffer中， 然后在这个buffer中的某一行回车后<br />
+  就跳转到相应的行）<br />
+  同时有了Emacs-wgrep ,则对上述buffer 内容的更改 则会反映到这些文件中，以实现<br />
+  在多个文件中更改某个变量的目录<br />
+  Video Demo:<br />
+  <a href="https://www.dropbox.com/s/jvju9gwyctwxg6a/helm-grep-wgrep.mkv.7z">https://www.dropbox.com/s/jvju9gwyctwxg6a/helm-grep-wgrep.mkv.7z</a><br />
+</p>
+<ol class="org-ol">
+<li>视频中展示了以"joseph"为关键字搜索某目录下的文件，并快速跳转到指定行的操作<br /></li>
+<li>将上述过滤的结果保存到一个临时buffer中，在这个临时buffer中的任意一行回车即<br /></li>
+</ol>
+<p>
+可跳转到指定文件位置 ,在这个buffer中修改其中的内容 ，其相应的文件内容也会跟<br />
+着修改 ,结合前面的Iedit功能 ，则可以实现同时修改这些文件的文件，比如将所有关<br />
+键字"joseph" 替换成"joseph-new"，<br />
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org3b82b0b" class="outline-2">
+<h2 id="org3b82b0b">helm-ls-git helm-ls-hg</h2>
+<div class="outline-text-2" id="text-org3b82b0b">
+<p>
+列出git 或hg 仓库里的文件， 从中过滤中某个文件 打开<br />
+快速打开项目中文件的一种方法<br />
+以 helm-ls-git 为例<br />
+<a href="https://www.dropbox.com/s/6kpqsvxh4d59ojl/helm-ls-git.mkv.7z">https://www.dropbox.com/s/6kpqsvxh4d59ojl/helm-ls-git.mkv.7z</a><br />
+或<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFP">http://vdisk.weibo.com/s/A2UdJFfhA_GFP</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org0229f3e" class="outline-2">
+<h2 id="org0229f3e">helm-etags-plus ctags-update.el</h2>
+<div class="outline-text-2" id="text-org0229f3e">
+<p>
+使用Exuberant Ctags(ctags) 实现函数的跳转（支持c c++ java等多种语言）<br />
+helm-etags-plus 支持多个TAGS文件，<br />
+ctags-update.el 则可以自动更新TAGS文件，<br />
+以emacs 的源代码为例演示如何使用<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/xroh50ptv5iuw4x/helm-etags-plus.mp4.7z">https://www.dropbox.com/s/xroh50ptv5iuw4x/helm-etags-plus.mp4.7z</a><br />
+或<br />
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFA">http://vdisk.weibo.com/s/A2UdJFfhA_GFA</a><br />
+视频主要展示了函数间的跳转功能，当发现有多个同名函数/变量时 会列出所有所项供<br />
+你选择 ，加上helm 关键字过滤的功能， 可以很容易的跳转到目标函数上，<br />
+虽然比不上eclipse VS 等IDE跳转的那么精确， 但已经足够用了<br />
+ctags etags global 这些工具并不完善， 但emacs 对其进行包装后， 基本可以实现<br />
+快速跳转的功能<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgee879b1" class="outline-2">
+<h2 id="orgee879b1">emacs-helm-gtags</h2>
+<div class="outline-text-2" id="text-orgee879b1">
+<p>
+GNU Global with helm for emacs<br />
+使用 GNU Global 来实现函数的跳转，查找哪些地方调用了某函数等功能<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/duuapzy1tuivqas/emacs-helm-gtags.mkv.7z">https://www.dropbox.com/s/duuapzy1tuivqas/emacs-helm-gtags.mkv.7z</a><br />
+或<br />
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFt">http://vdisk.weibo.com/s/A2UdJFfhA_GFt</a><br />
+同helm-etags-plus 功能类似<br />
+只是其依赖的是GNU Global 而非ctags etags 而已<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9096b99" class="outline-2">
+<h2 id="org9096b99">eshell</h2>
+<div class="outline-text-2" id="text-org9096b99">
+<p>
+emacs 实现的一个shell ,<br />
+可以在编辑文件时快速的跳到此文件所在的目录 ，然后执行相应的shell命令<br />
+可以利用到emacs自身的补全机会，<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/pc3shb7resaz9k1/eshell.mp4.7z">https://www.dropbox.com/s/pc3shb7resaz9k1/eshell.mp4.7z</a><br />
+或<br />
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFl">http://vdisk.weibo.com/s/A2UdJFfhA_GFl</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org70281a2" class="outline-2">
+<h2 id="org70281a2">ace-jump-mode</h2>
+<div class="outline-text-2" id="text-org70281a2">
+<p>
+无笔标快速定位的方法之一：<br />
+比如 :按下M-m（Alt-m)之后,<br />
+等侯你按下一个字母(比如m),然后它会用另外一组红色face的字母 标出<br />
+所有以此字母(m)开头的单词,可以多次操作,直到光标定位到你想要的位置<br />
+下面以 快速跳转到各个字母m处进行演示(注意窗口最下面提示我输入一个字母<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/mgsmfhsdpzgcw9v/ace-jump-mode.mp4.7z">https://www.dropbox.com/s/mgsmfhsdpzgcw9v/ace-jump-mode.mp4.7z</a><br />
+或<br />
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFN">http://vdisk.weibo.com/s/A2UdJFfhA_GFN</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org717b898" class="outline-2">
+<h2 id="org717b898">sqlparser</h2>
+<div class="outline-text-2" id="text-org717b898">
+<p>
+支持mysql oracle sqlserver<br />
+主要实现编写sql语句时可以实时的从数据据中查询相应的信息 ，帮助编写sql语句，<br />
+比如 进行补全 表名 列名等<br />
+以mysql 为例<br />
+<a href="https://www.dropbox.com/s/voo5zxcijq2hk93/sqlparser-mysql-complete.mp4.7z">https://www.dropbox.com/s/voo5zxcijq2hk93/sqlparser-mysql-complete.mp4.7z</a><br />
+或<br />
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GGh">http://vdisk.weibo.com/s/A2UdJFfhA_GGh</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org916f7ad" class="outline-2">
+<h2 id="org916f7ad">golden-ratio.el</h2>
+<div class="outline-text-2" id="text-org916f7ad">
+<p>
+多窗口操作时 ，比较烦人的一件事情就是调整窗口的大小<br />
+golden-ratio.el 则按照黄金分隔（0.618）的比例自动调整窗口的大小<br />
+使光标所在的窗口无论是水平还是竖直方向都占整个比例的0.618，<br />
+<a href="https://www.dropbox.com/s/vozuebnknsxjjj5/golden-ratio-el.mp4.7z">https://www.dropbox.com/s/vozuebnknsxjjj5/golden-ratio-el.mp4.7z</a><br />
+或<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFn">http://vdisk.weibo.com/s/A2UdJFfhA_GFn</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org3974ba0" class="outline-2">
+<h2 id="org3974ba0">dired</h2>
+<div class="outline-text-2" id="text-org3974ba0">
+<p>
+emacs 管理文件的方式，<br />
+1.在这里更改文件名字就行更改一个文件的内容一样，<br />
+2.删除文件<br />
+3.快速当前目录想要的文件（只显示匹配的文件）<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/gs4zncq9idnecnp/dired.mp4.7z">https://www.dropbox.com/s/gs4zncq9idnecnp/dired.mp4.7z</a><br />
+或<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFU">http://vdisk.weibo.com/s/A2UdJFfhA_GFU</a><br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgcbb9367" class="outline-2">
+<h2 id="orgcbb9367">VC (version control) emacs自带的用于进行svn git cvs hg 等各种版本管理工具的一个统一的接口</h2>
+<div class="outline-text-2" id="text-orgcbb9367">
+<p>
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/rw53o0ee6eoiwap/vc.mp4.7z">https://www.dropbox.com/s/rw53o0ee6eoiwap/vc.mp4.7z</a><br />
+或<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFQ">http://vdisk.weibo.com/s/A2UdJFfhA_GFQ</a><br />
+C-x v v     vc-next-action &#x2013; perform the next logical control operation on file 会根据当前文件状态决定该做什么<br />
+  1.如果当前的文件(work file)不在任何一个version control 管理下,则询问你创建什么样的仓库,如svn git等.<br />
+  2.如果在管理下,则register the file. 即git add filename.<br />
+  3.如果work file 与库中的文件一样,do nothing.<br />
+  4.如果你对work file 进行的修改则进行checkin(即commit)操作,它会打开一个*VC-LOG*buffer让你输入日志,关于*VC-LOG* 见下面的注释<br />
+C-x v =     vc-diff &#x2013; diff with other revisions<br />
+  对未提交的文件与最新的版本对应的文件进行diff操作,C-u可以选择用哪两个版本,不仅可以单文件diff,<br />
+  可以是fileset,如何对多文件进行操作看vc-dir mode `C-xvd' 类似于dired, ibuffer.<br />
+C-x v u     vc-revert-buffer &#x2013; undo checkout  放弃对文件的修改,即重新update 一下.<br />
+  查看日志 `*vc-change-log*' buffer<br />
+C-x v l     vc-print-log &#x2013; show log (not in ChangeLog format) 显示日志,只显示当前文件有关的日志<br />
+    这个打开的日志buffer 功能绝对不止显示日志这么简单，<br />
+    你可以按下C-hb 查看一下它的键绑定，<br />
+    比如= 是进行diff比较，默认是最新的版本，与你光标下的版本进行比较<br />
+    也可以用m ,mark 两个版本后，然后= ,将其进行比较<br />
+C-x v L     `vc-print-root-log' 显示日志,显示所有日志<br />
+    在*VC-change-log*buffer 中可以进行以下操作<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7b50a95" class="outline-2">
+<h2 id="org7b50a95">Ediff</h2>
+<div class="outline-text-2" id="text-org7b50a95">
+<p>
+ediff 在VC 那一节里有演示， 通常情况下， ediff 会与版本管理控制一起使用，<br />
+可以对同一个文件两个不同版本进行比较 ，也可以在出现冲突的时候用于解决冲突<br />
+这里就演示一下 what-emacs-can-do.org 这个文件各个版本之间用ediff 进行比较<br />
+Video Demo:<br />
+<a href="https://www.dropbox.com/s/l9sxfvuhe6t6zos/ediff.mp4.7z">https://www.dropbox.com/s/l9sxfvuhe6t6zos/ediff.mp4.7z</a><br />
+或<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GG2">http://vdisk.weibo.com/s/A2UdJFfhA_GG2</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-orge1af14c" class="outline-2">
+<h2 id="orge1af14c">magit</h2>
+<div class="outline-text-2" id="text-orge1af14c">
+<p>
+magit 是emacs专门针对git的一个版本控制插件<br />
+<a href="https://github.com/magit/magit">https://github.com/magit/magit</a><br />
+<a href="https://github.com/magit/magit/wiki">https://github.com/magit/magit/wiki</a><br />
+Video demo:<br />
+<a href="http://v.youku.com/v_show/id_XNzk1NjI5OTM2.html">http://v.youku.com/v_show/id_XNzk1NjI5OTM2.html</a><br />
+<a href="http://vimeo.com/2871241">http://vimeo.com/2871241</a><br />
+<a href="http://shelby.tv/video/vimeo/2871241/meet-magit">http://shelby.tv/video/vimeo/2871241/meet-magit</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgdbcf8f1" class="outline-2">
+<h2 id="orgdbcf8f1">org-mode</h2>
+<div class="outline-text-2" id="text-orgdbcf8f1">
+<p>
+当前文件就是用org-mode 进行编辑的，<br />
+用Tab 键进行展开或折叠,<br />
+可以将org file 导出成html<br />
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">tab</td>
+<td class="org-left">col2</td>
+</tr>
+
+<tr>
+<td class="org-left">hello this is a tab</td>
+<td class="org-left">another line</td>
+</tr>
+
+<tr>
+<td class="org-left">eeee</td>
+<td class="org-left">fff</td>
+</tr>
+</tbody>
+</table>
+<p>
+<a href="http://orgmode.org/worg/org-tutorials/index.html">http://orgmode.org/worg/org-tutorials/index.html</a><br />
+</p>
+
+<p>
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFx">http://vdisk.weibo.com/s/A2UdJFfhA_GFx</a><br />
+或者<br />
+<a href="https://www.dropbox.com/s/4iew0stcupnevk9/org-mode.mp4.7z">https://www.dropbox.com/s/4iew0stcupnevk9/org-mode.mp4.7z</a><br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4ee481c" class="outline-2">
+<h2 id="org4ee481c">org-agenda org-mode TODO list</h2>
+<div class="outline-text-2" id="text-org4ee481c">
+<p>
+org mode 用于日程管理<br />
+(global-set-key (kbd "C-c a")  'org-agenda)<br />
+(define-key global-map [(control meta ?r)] 'org-capture)<br />
+比如C-cat 列出所有todo list<br />
+Control+Alt+r 添加一条新的todo<br />
+<a href="https://www.dropbox.com/s/wfpvt4ydhi56w57/org-mode-todolist.mp4.7z">https://www.dropbox.com/s/wfpvt4ydhi56w57/org-mode-todolist.mp4.7z</a><br />
+或者<br />
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFR">http://vdisk.weibo.com/s/A2UdJFfhA_GFR</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org86fdf39" class="outline-2">
+<h2 id="org86fdf39">mail</h2>
+<div class="outline-text-2" id="text-org86fdf39">
+<p>
+使用 mew 发邮件<br />
+<a href="https://www.dropbox.com/s/37n7jv55yvzomot/emacs-mew-send-mail.mp4.7z">https://www.dropbox.com/s/37n7jv55yvzomot/emacs-mew-send-mail.mp4.7z</a><br />
+或者<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFs">http://vdisk.weibo.com/s/A2UdJFfhA_GFs</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgce83d5d" class="outline-2">
+<h2 id="orgce83d5d">calc emacs里的计算器</h2>
+<div class="outline-text-2" id="text-orgce83d5d">
+<p>
+<a href="https://www.dropbox.com/s/2xb0lorud0hypvs/emacs-calc.mp4.7z">https://www.dropbox.com/s/2xb0lorud0hypvs/emacs-calc.mp4.7z</a><br />
+或者<br />
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_GFX">http://vdisk.weibo.com/s/A2UdJFfhA_GFX</a><br />
+可以用calc 的功能<br />
+如计算1+2 : 1 enter 2 enter <del>,即先输入数，再输入运算符，</del>-*/^<br />
+d2 将当前int 转为二进制<br />
+d6 转为16进制<br />
+d8 转为8进制<br />
+d0 转为十进制<br />
+当我们只是想简单的对一系列数字进行代数运算时，使用逆波兰表达式不是很直观，因此， calc 提供了一个更加直接的指令：<br />
+' （就是分号旁边的那个按键）<br />
+比如，在 calc 中按“'”，然后输入算式：<br />
+(3^2 + 4^2) ^ 0.5<br />
+</p>
+
+<p>
+二进制数的输入方法<br />
+2#01010101<br />
+8#131324123<br />
+</p>
+
+<p>
+另外，与二进制处理相关的函数绑定在以b开头的键上<br />
+如bL,br 左移右移<br />
+ba bo bn  ,and or not<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org698aa85" class="outline-2">
+<h2 id="org698aa85">Emacs 一些可以提高效率的小tips</h2>
+<div class="outline-text-2" id="text-org698aa85">
+<p>
+<a href="http://v.youku.com/v_show/id_XNzk1ODA5OTY4.html">http://v.youku.com/v_show/id_XNzk1ODA5OTY4.html</a><br />
+<a href="http://vdisk.weibo.com/s/A2UdJFfhA_iOO">http://vdisk.weibo.com/s/A2UdJFfhA_iOO</a><br />
+</p>
+<ol class="org-ol">
+<li>我的快捷键 M-w 快速选中当前行(选中后minibuffer 会有已选中的提示)<br />
+M-w 复制一个区域，但是如果没有区域被选中，则复制当前行<br /></li>
+<li>一键删除光标后面的内容C-k<br /></li>
+<li>快速选中函数 ,C-g 取消选中后 光标仍然回到未选中前的位置<br />
+与功能1相结合 即复制整个函数， 与功能2相结合 即删除整个函数<br /></li>
+<li>在下一行插入一空行， 在上一行插入一空行，光标并移动到空行上<br /></li>
+<li>快速跳转到行首（C-a)  行尾(C-e),<br />
+当行首有空格时C-a跳到行首 ，当已经在行首 再次按下C-a  则跳转到本行第一个非<br />
+空字符处，多次C-a 在这两个位置来回跳转<br />
+与 功能2相结合 C-a C-k两键即可删除整行内容<br /></li>
+</ol>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2016-06-26</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/emacs/">Emacs</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/what-emacs-can-do.html";
+          var disqus_url = "http://jixiuf.github.io/blog/what-emacs-can-do.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; qq &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

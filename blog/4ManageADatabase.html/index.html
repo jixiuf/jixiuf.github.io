@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>4ManageADatabase.org - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="4ManageADatabase.org" />
+    <meta name="keywords" content="oracle database db" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>4ManageADatabase.org</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org4f87afe">学习目标</a></li>
+<li><a href="#org09bb7b4">Planing for your database is the first step of managing a database</a>
+<ul>
+<li><a href="#org07fcadc">Define the purpose of your database (规划)</a></li>
+<li><a href="#org4d0b6f5">defind the type of your database ,同上一条</a></li>
+<li><a href="#org827616c">outline a database architectural design  (如何存储，几块硬盘等)</a></li>
+</ul>
+</li>
+<li><a href="#org1373932">Create your database</a>
+<ul>
+<li><a href="#orgbb39509">图使用开界面的工具创建数据库，DBCA ,运行dbca 命令即可。</a></li>
+<li><a href="#orgdb72243">手工方式创建。</a></li>
+</ul>
+</li>
+<li><a href="#org3faa19a">User  Oracle Data Migration Assistant  to migrate from an earlier version database</a></li>
+<li><a href="#org3b920d8">oracle 推荐的arch (OFA : Optimal Flexible Arch)</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org4f87afe" class="outline-2">
+<h2 id="org4f87afe">学习目标</h2>
+<div class="outline-text-2" id="text-org4f87afe">
+<ul class="org-ul">
+<li>list the prerequisites necessary  for database creation.<br /></li>
+<li>create a database using  Oracle Database Configuration Assistant (DBCA)<br /></li>
+<li>create a daatabase manually<br /></li>
+<li>create a database  using Oracle Managered Files (OMF)<br /></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org09bb7b4" class="outline-2">
+<h2 id="org09bb7b4">Planing for your database is the first step of managing a database</h2>
+<div class="outline-text-2" id="text-org09bb7b4">
+</div>
+<div id="outline-container-org07fcadc" class="outline-3">
+<h3 id="org07fcadc">Define the purpose of your database (规划)</h3>
+<div class="outline-text-3" id="text-org07fcadc">
+<ul class="org-ul">
+<li>oltp 联机事务处理 (大量并发，短小事务)<br /></li>
+<li>olap 数据仓库  (少量并发，大事务)<br /></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org4d0b6f5" class="outline-3">
+<h3 id="org4d0b6f5">defind the type of your database ,同上一条</h3>
+</div>
+<div id="outline-container-org827616c" class="outline-3">
+<h3 id="org827616c">outline a database architectural design  (如何存储，几块硬盘等)</h3>
+</div>
+</div>
+<div id="outline-container-org1373932" class="outline-2">
+<h2 id="org1373932">Create your database</h2>
+<div class="outline-text-2" id="text-org1373932">
+</div>
+<div id="outline-container-orgbb39509" class="outline-3">
+<h3 id="orgbb39509">图使用开界面的工具创建数据库，DBCA ,运行dbca 命令即可。</h3>
+</div>
+<div id="outline-container-orgdb72243" class="outline-3">
+<h3 id="orgdb72243">手工方式创建。</h3>
+<div class="outline-text-3" id="text-orgdb72243">
+</div>
+<ul class="org-ul">
+<li><a id="orgcdc062a"></a>指定 $ORACLE<sub>SID</sub> 的值<br /></li>
+<li><a id="org67113cf"></a>指定一些环境变量的值<br />
+<div class="outline-text-4" id="text-org67113cf">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">ORACLE<sub>BASE</sub></td>
+<td class="org-left">ORACLE<sub>HOME</sub></td>
+<td class="org-left">ORA<sub>NLS33</sub></td>
+<td class="org-left">PATH</td>
+<td class="org-left">LD<sub>LIBRARY</sub><sub>PATH</sub></td>
+</tr>
+</tbody>
+</table>
+</div>
+</li>
+<li><a id="org455b112"></a>指定 认证方法<br />
+<ul class="org-ul">
+<li><a id="orgc261ed2"></a>with a password file<br /></li>
+<li><a id="orgf1d31d7"></a>OS authentication<br />
+<div class="outline-text-5" id="text-orgf1d31d7">
+<p>
+在linux 上，只要属于dba 组的用户，就有权限创建database.<br />
+</p>
+</div>
+</li>
+</ul>
+</li>
+<li><a id="org01283dd"></a>如何删除一个database<br />
+<ul class="org-ul">
+<li><a id="org392a9a5"></a>使用dbca图形界面删除<br /></li>
+<li><a id="orgc2e1499"></a>手动删除<br />
+<ul class="org-ul">
+<li><a id="org46066bf"></a>删除 $ORACLE<sub>HOME</sub>/dbs/ 目录下相应原parameter file ,<br />
+<div class="outline-text-6" id="text-org46066bf">
+<p>
+如，以orcl database 的删除为例，删除此目录下的所有带orcl 的文件<br />
+</p>
+</div>
+</li>
+<li><a id="org4711507"></a>删除 $ORACLE<sub>BASE</sub>/oradata/$ORACLE<sub>SID目录</sub><br /></li>
+<li><a id="orgb23b7e8"></a>删除 $ORACLE<sub>BASE</sub>/admin/$ORACLE<sub>SID目录</sub><br /></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org3faa19a" class="outline-2">
+<h2 id="org3faa19a">User  Oracle Data Migration Assistant  to migrate from an earlier version database</h2>
+<div class="outline-text-2" id="text-org3faa19a">
+<p>
+(数据迁移)<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org3b920d8" class="outline-2">
+<h2 id="org3b920d8">oracle 推荐的arch (OFA : Optimal Flexible Arch)</h2>
+<div class="outline-text-2" id="text-org3b920d8">
+<ul class="org-ul">
+<li>Establish a directory structure  where any database  file can be stored<br />
+on any disk resource<br /></li>
+<li>separate objects  with different  behavior  into different tablespace<br /></li>
+<li>Maximuse database reliablity and performance by separating database<br />
+components across disk resource .(比如将online redo log与 data file放到<br />
+不同磁盘上)<br /></li>
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-07-10</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/oracle/">Oracle</a>, <a href="/tags/db/">DB</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/4ManageADatabase.html";
+          var disqus_url = "http://jixiuf.github.io/blog/4ManageADatabase.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

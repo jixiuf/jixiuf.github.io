@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>mysql压力测试 实战 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="mysql压力测试 实战" />
+    <meta name="keywords" content=":Mysql: :DB:" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>mysql压力测试 实战</h1>
+<p>
+关于mysql的压力测试工具mysqlslap用法在<a href="/blog/benchmark.html">这里</a>.<br />
+建表及存诸过程的语句 create_table.sql<br />
+mysqlslap 有&#x2013;create参数<br />
+&#x2013;create ="用于生成一个表，"后绪的查询<br />
+&#x2013;query 用这个表做测试,这里一般是insert ,或select 或update 语句<br />
+&#x2013;create 可以是几条sql语句 ，也可以是一个文件名，里面写满sql语句<br />
+但是这条语句太长，放在一个文件里,又提示$$分隔符有问题，所以只好手动建表<br />
+mysqlslap<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #FBDE2D;">create</span> database if <span style="color: #FBDE2D;">not</span> <span style="color: #FBDE2D;">exists</span> mysqlslap ;
+use mysqlslap;
+<span style="color: #FBDE2D;">drop</span> <span style="color: #FBDE2D;">table</span> <span style="color: #FF6400;">if</span> <span style="color: #FBDE2D;">exists</span> tbl_test;
+<span style="color: #FBDE2D;">CREATE</span> <span style="color: #FBDE2D;">TABLE</span> `tbl_test` (
+   `id` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">NOT</span> <span style="color: #FBDE2D;">NULL</span> AUTO_INCREMENT,
+   `onOffType` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `accountId` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `accountType` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `playerId` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `headHeroId` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `playerLevel` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `playerName` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `logTime` datetime <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `clientVersion` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `clientType` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `issuers` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `flashPlayerVersion` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `connectType` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `gameServerName` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `ipAddr` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   <span style="color: #FBDE2D;">PRIMARY</span> <span style="color: #FBDE2D;">KEY</span> (`id`)
+ ) engine=myisam;
+
+ DELIMITER $$
+
+<span style="color: #FBDE2D;">drop</span> <span style="color: #FBDE2D;">procedure</span> <span style="color: #FF6400;">if</span> <span style="color: #FBDE2D;">exists</span> `insert_tbl_test`$$
+
+<span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">procedure</span> `insert_tbl_test`(
+<span style="color: #FBDE2D;">IN</span> inaccountId <span style="color: #8DA6CE;">int</span>(11),<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> inaccountType <span style="color: #8DA6CE;">int</span>(11),<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> inplayerId <span style="color: #8DA6CE;">int</span>(11),<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> inheadHeroId <span style="color: #8DA6CE;">int</span>(11),<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> inplayerLevel <span style="color: #8DA6CE;">int</span>(11),<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> inplayerName <span style="color: #8DA6CE;">varchar</span>(255),<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> inlogTime datetime,<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> inclientVersion <span style="color: #8DA6CE;">varchar</span>(255),<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> inclientType <span style="color: #8DA6CE;">varchar</span>(255),<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> inissuers <span style="color: #8DA6CE;">varchar</span>(255),<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> inflashPlayerVersion <span style="color: #8DA6CE;">int</span>(11),<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> inconnectType <span style="color: #8DA6CE;">int</span>(11),<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> ingameServerName <span style="color: #8DA6CE;">varchar</span>(255),<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> inipAddr <span style="color: #8DA6CE;">varchar</span>(255),<span style="color: #AEAEAE;">/**/</span>
+<span style="color: #FBDE2D;">IN</span> inonOffType <span style="color: #8DA6CE;">int</span>(11) <span style="color: #AEAEAE;">/**/</span>
+)
+<span style="color: #FBDE2D;">BEGIN</span>
+<span style="color: #FBDE2D;">insert</span> <span style="color: #FBDE2D;">into</span> `tbl_test`(
+`accountId`, <span style="color: #AEAEAE;">/**/</span>
+`accountType`, <span style="color: #AEAEAE;">/**/</span>
+`playerId`, <span style="color: #AEAEAE;">/**/</span>
+`headHeroId`, <span style="color: #AEAEAE;">/**/</span>
+`playerLevel`, <span style="color: #AEAEAE;">/**/</span>
+`playerName`, <span style="color: #AEAEAE;">/**/</span>
+`logTime`, <span style="color: #AEAEAE;">/**/</span>
+`clientVersion`, <span style="color: #AEAEAE;">/**/</span>
+`clientType`, <span style="color: #AEAEAE;">/**/</span>
+`issuers`, <span style="color: #AEAEAE;">/**/</span>
+`flashPlayerVersion`, <span style="color: #AEAEAE;">/**/</span>
+`connectType`, <span style="color: #AEAEAE;">/**/</span>
+`gameServerName`, <span style="color: #AEAEAE;">/**/</span>
+`ipAddr`, <span style="color: #AEAEAE;">/**/</span>
+`onOffType` <span style="color: #AEAEAE;">/**/</span>
+) <span style="color: #FBDE2D;">values</span>(
+inaccountId,<span style="color: #AEAEAE;">/**/</span>
+inaccountType,<span style="color: #AEAEAE;">/**/</span>
+inplayerId,<span style="color: #AEAEAE;">/**/</span>
+inheadHeroId,<span style="color: #AEAEAE;">/**/</span>
+inplayerLevel,<span style="color: #AEAEAE;">/**/</span>
+inplayerName,<span style="color: #AEAEAE;">/**/</span>
+inlogTime,<span style="color: #AEAEAE;">/**/</span>
+inclientVersion,<span style="color: #AEAEAE;">/**/</span>
+inclientType,<span style="color: #AEAEAE;">/**/</span>
+inissuers,<span style="color: #AEAEAE;">/**/</span>
+inflashPlayerVersion,<span style="color: #AEAEAE;">/**/</span>
+inconnectType,<span style="color: #AEAEAE;">/**/</span>
+ingameServerName,<span style="color: #AEAEAE;">/**/</span>
+inipAddr,<span style="color: #AEAEAE;">/**/</span>
+ inonOffType <span style="color: #AEAEAE;">/**/</span>
+);
+<span style="color: #FBDE2D;">END</span>$$
+DELIMITER ;
+
+</pre>
+</div>
+
+<p>
+向表中插入用的sql<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #AEAEAE;">/* &#20351;&#29992;&#23384;&#20648;&#36807;&#31243; */</span>
+<span style="color: #FBDE2D;">call</span> insert_tbl_test(1,1,1,1,1,<span style="color: #ffa07a;">'name'</span>,<span style="color: #ffa07a;">'1989-01-26'</span>,<span style="color: #ffa07a;">'ver'</span>,<span style="color: #ffa07a;">'t'</span>,<span style="color: #ffa07a;">'dd'</span>,1,1,<span style="color: #ffa07a;">'name'</span>,<span style="color: #ffa07a;">'localhost'</span>,1);
+ <span style="color: #AEAEAE;">/* &#25110; */</span>
+ <span style="color: #FBDE2D;">insert</span> <span style="color: #FBDE2D;">into</span> tbl_test(  `accountId`,  `accountType`,  `playerId`,  `headHeroId`,  `playerLevel`,  `playerName`,  `logTime`,  `clientVersion`,  `clientType`,  `issuers`,  `flashPlayerVersion`,  `connectType`,  `gameServerName`,  `ipAddr`,  `onOffType`  ) <span style="color: #FBDE2D;">values</span>(1,1,1,1,1,<span style="color: #ffa07a;">'name'</span>,<span style="color: #ffa07a;">'1989-01-26'</span>,<span style="color: #ffa07a;">'ver'</span>,<span style="color: #ffa07a;">'t'</span>,<span style="color: #ffa07a;">'dd'</span>,1,1,<span style="color: #ffa07a;">'name'</span>,<span style="color: #ffa07a;">'localhost'</span>,1);
+</pre>
+</div>
+<p>
+测试用语句,在测试这前要用上面create_table.sql建表及存储过程。<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">mysqlslap --query=<span style="color: #ffa07a;">"call insert_tbl_test(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)"</span> --concurrency=50  --number-of-queries 10000 --iterations=3 --engine=myisam -uroot -proot
+</pre>
+</div>
+<p>
+开50个连接共执行10000次插入操作，<br />
+进行3次测试以便数据得到max、min、avg几个值，准确一点.<br />
+并且分别测在myisam,ARCHIVE,InnoDB 引擎上的差异<br />
+测试结果没太大差别<br />
+</p>
+<blockquote>
+<p>
+mysqlslap &#x2013;query="call insert_tbl_test(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)" &#x2013;concurrency=50  &#x2013;number-of-queries 10000 &#x2013;iterations=3 &#x2013;engine=myisam -uroot -proot<br />
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.528 seconds<br />
+    Minimum number of seconds to run all queries: 1.503 seconds<br />
+    Maximum number of seconds to run all queries: 1.545 seconds<br />
+    Number of clients running queries: 50<br />
+    Average number of queries per client: 200<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 1.790 seconds<br />
+    Minimum number of seconds to run all queries: 1.535 seconds<br />
+    Maximum number of seconds to run all queries: 2.289 seconds<br />
+    Number of clients running queries: 50<br />
+    Average number of queries per client: 200<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine InnoDB<br />
+    Average number of seconds to run all queries: 1.578 seconds<br />
+    Minimum number of seconds to run all queries: 1.544 seconds<br />
+    Maximum number of seconds to run all queries: 1.625 seconds<br />
+    Number of clients running queries: 50<br />
+    Average number of queries per client: 200<br />
+</p>
+</blockquote>
+
+<p>
+下面不使用存储过程，而直接用insert语句的效果<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">mysqlslap --query=<span style="color: #ffa07a;">"insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)"</span> --concurrency=50  --number-of-queries 10000 --iterations=3 --engine=myisam -uroot -proot
+</pre>
+</div>
+<blockquote>
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.209 seconds<br />
+    Minimum number of seconds to run all queries: 1.188 seconds<br />
+    Maximum number of seconds to run all queries: 1.234 seconds<br />
+    Number of clients running queries: 50<br />
+    Average number of queries per client: 200<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 1.255 seconds<br />
+    Minimum number of seconds to run all queries: 1.178 seconds<br />
+    Maximum number of seconds to run all queries: 1.393 seconds<br />
+    Number of clients running queries: 50<br />
+    Average number of queries per client: 200<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine InnoDB<br />
+    Average number of seconds to run all queries: 1.245 seconds<br />
+    Minimum number of seconds to run all queries: 1.241 seconds<br />
+    Maximum number of seconds to run all queries: 1.250 seconds<br />
+    Number of clients running queries: 50<br />
+    Average number of queries per client: 200<br />
+</p>
+</blockquote>
+<p>
+另我不解的是直接insert竟然比使用存储过程快，不知何解<br />
+</p>
+
+<p>
+测试开不同连接数的执行速度<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">mysqlslap --query=<span style="color: #ffa07a;">"insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)"</span> --concurrency=5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100  --number-of-queries 10000 --iterations=3 --engine=myisam -uroot -proot
+</pre>
+</div>
+<blockquote>
+<p>
+  mysqlslap &#x2013;query="insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)" &#x2013;concurrency=5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100  &#x2013;number-of-queries 10000 &#x2013;iterations=3 &#x2013;engine=myisam -uroot -proot<br />
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.758 seconds<br />
+    Minimum number of seconds to run all queries: 1.730 seconds<br />
+    Maximum number of seconds to run all queries: 1.783 seconds<br />
+    Number of clients running queries: 5<br />
+    Average number of queries per client: 2000<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.681 seconds<br />
+    Minimum number of seconds to run all queries: 1.455 seconds<br />
+    Maximum number of seconds to run all queries: 1.819 seconds<br />
+    Number of clients running queries: 10<br />
+    Average number of queries per client: 1000<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.269 seconds<br />
+    Minimum number of seconds to run all queries: 1.230 seconds<br />
+    Maximum number of seconds to run all queries: 1.317 seconds<br />
+    Number of clients running queries: 15<br />
+    Average number of queries per client: 666<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.181 seconds<br />
+    Minimum number of seconds to run all queries: 1.148 seconds<br />
+    Maximum number of seconds to run all queries: 1.202 seconds<br />
+    Number of clients running queries: 20<br />
+    Average number of queries per client: 500<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.245 seconds<br />
+    Minimum number of seconds to run all queries: 1.233 seconds<br />
+    Maximum number of seconds to run all queries: 1.251 seconds<br />
+    Number of clients running queries: 25<br />
+    Average number of queries per client: 400<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.188 seconds<br />
+    Minimum number of seconds to run all queries: 1.174 seconds<br />
+    Maximum number of seconds to run all queries: 1.206 seconds<br />
+    Number of clients running queries: 30<br />
+    Average number of queries per client: 333<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.348 seconds<br />
+    Minimum number of seconds to run all queries: 1.180 seconds<br />
+    Maximum number of seconds to run all queries: 1.452 seconds<br />
+    Number of clients running queries: 35<br />
+    Average number of queries per client: 285<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.193 seconds<br />
+    Minimum number of seconds to run all queries: 1.183 seconds<br />
+    Maximum number of seconds to run all queries: 1.213 seconds<br />
+    Number of clients running queries: 40<br />
+    Average number of queries per client: 250<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.201 seconds<br />
+    Minimum number of seconds to run all queries: 1.192 seconds<br />
+    Maximum number of seconds to run all queries: 1.213 seconds<br />
+    Number of clients running queries: 45<br />
+    Average number of queries per client: 222<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.219 seconds<br />
+    Minimum number of seconds to run all queries: 1.184 seconds<br />
+    Maximum number of seconds to run all queries: 1.276 seconds<br />
+    Number of clients running queries: 50<br />
+    Average number of queries per client: 200<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.200 seconds<br />
+    Minimum number of seconds to run all queries: 1.191 seconds<br />
+    Maximum number of seconds to run all queries: 1.209 seconds<br />
+    Number of clients running queries: 55<br />
+    Average number of queries per client: 181<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.211 seconds<br />
+    Minimum number of seconds to run all queries: 1.192 seconds<br />
+    Maximum number of seconds to run all queries: 1.245 seconds<br />
+    Number of clients running queries: 60<br />
+    Average number of queries per client: 166<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.297 seconds<br />
+    Minimum number of seconds to run all queries: 1.231 seconds<br />
+    Maximum number of seconds to run all queries: 1.412 seconds<br />
+    Number of clients running queries: 65<br />
+    Average number of queries per client: 153<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.459 seconds<br />
+    Minimum number of seconds to run all queries: 1.432 seconds<br />
+    Maximum number of seconds to run all queries: 1.483 seconds<br />
+    Number of clients running queries: 70<br />
+    Average number of queries per client: 142<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.520 seconds<br />
+    Minimum number of seconds to run all queries: 1.487 seconds<br />
+    Maximum number of seconds to run all queries: 1.539 seconds<br />
+    Number of clients running queries: 75<br />
+    Average number of queries per client: 133<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.647 seconds<br />
+    Minimum number of seconds to run all queries: 1.506 seconds<br />
+    Maximum number of seconds to run all queries: 1.876 seconds<br />
+    Number of clients running queries: 80<br />
+    Average number of queries per client: 125<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.519 seconds<br />
+    Minimum number of seconds to run all queries: 1.500 seconds<br />
+    Maximum number of seconds to run all queries: 1.532 seconds<br />
+    Number of clients running queries: 85<br />
+    Average number of queries per client: 117<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.507 seconds<br />
+    Minimum number of seconds to run all queries: 1.491 seconds<br />
+    Maximum number of seconds to run all queries: 1.530 seconds<br />
+    Number of clients running queries: 90<br />
+    Average number of queries per client: 111<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.556 seconds<br />
+    Minimum number of seconds to run all queries: 1.500 seconds<br />
+    Maximum number of seconds to run all queries: 1.661 seconds<br />
+    Number of clients running queries: 95<br />
+    Average number of queries per client: 105<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine myisam<br />
+    Average number of seconds to run all queries: 1.521 seconds<br />
+    Minimum number of seconds to run all queries: 1.508 seconds<br />
+    Maximum number of seconds to run all queries: 1.534 seconds<br />
+    Number of clients running queries: 100<br />
+    Average number of queries per client: 100<br />
+</p>
+</blockquote>
+<p>
+从结果来看，20连接，速度提升，开到70个连接时速度下隆,大楖在40左右时速度最好。<br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">mysqlslap --query=<span style="color: #ffa07a;">"insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)"</span> --concurrency=5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100  --number-of-queries 10000 --iterations=3 --engine=ARCHIVE -uroot -proot
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #FBDE2D;">CREATE</span> <span style="color: #FBDE2D;">TABLE</span> `tbl_test` (
+   `id` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">NOT</span> <span style="color: #FBDE2D;">NULL</span> AUTO_INCREMENT,
+   `onOffType` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `accountId` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `accountType` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `playerId` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `headHeroId` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `playerLevel` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `playerName` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `logTime` datetime <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `clientVersion` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `clientType` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `issuers` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `flashPlayerVersion` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `connectType` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `gameServerName` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `ipAddr` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   <span style="color: #FBDE2D;">PRIMARY</span> <span style="color: #FBDE2D;">KEY</span> (`id`)
+ ) engine=ARCHIVE;
+</pre>
+</div>
+<blockquote>
+<p>
+jixiuf@jf erlang/lib $  mysqlslap &#x2013;query="insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)" &#x2013;concurrency=5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100  &#x2013;number-of-queries 10000 &#x2013;iterations=3 &#x2013;engine=ARCHIVE -uroot -proot<br />
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.894 seconds<br />
+    Minimum number of seconds to run all queries: 0.879 seconds<br />
+    Maximum number of seconds to run all queries: 0.905 seconds<br />
+    Number of clients running queries: 5<br />
+    Average number of queries per client: 2000<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.813 seconds<br />
+    Minimum number of seconds to run all queries: 0.812 seconds<br />
+    Maximum number of seconds to run all queries: 0.815 seconds<br />
+    Number of clients running queries: 10<br />
+    Average number of queries per client: 1000<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.784 seconds<br />
+    Minimum number of seconds to run all queries: 0.759 seconds<br />
+    Maximum number of seconds to run all queries: 0.802 seconds<br />
+    Number of clients running queries: 15<br />
+    Average number of queries per client: 666<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.790 seconds<br />
+    Minimum number of seconds to run all queries: 0.752 seconds<br />
+    Maximum number of seconds to run all queries: 0.852 seconds<br />
+    Number of clients running queries: 20<br />
+    Average number of queries per client: 500<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.747 seconds<br />
+    Minimum number of seconds to run all queries: 0.736 seconds<br />
+    Maximum number of seconds to run all queries: 0.758 seconds<br />
+    Number of clients running queries: 25<br />
+    Average number of queries per client: 400<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.728 seconds<br />
+    Minimum number of seconds to run all queries: 0.721 seconds<br />
+    Maximum number of seconds to run all queries: 0.741 seconds<br />
+    Number of clients running queries: 30<br />
+    Average number of queries per client: 333<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.749 seconds<br />
+    Minimum number of seconds to run all queries: 0.744 seconds<br />
+    Maximum number of seconds to run all queries: 0.761 seconds<br />
+    Number of clients running queries: 35<br />
+    Average number of queries per client: 285<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.708 seconds<br />
+    Minimum number of seconds to run all queries: 0.691 seconds<br />
+    Maximum number of seconds to run all queries: 0.721 seconds<br />
+    Number of clients running queries: 40<br />
+    Average number of queries per client: 250<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.688 seconds<br />
+    Minimum number of seconds to run all queries: 0.687 seconds<br />
+    Maximum number of seconds to run all queries: 0.691 seconds<br />
+    Number of clients running queries: 45<br />
+    Average number of queries per client: 222<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.682 seconds<br />
+    Minimum number of seconds to run all queries: 0.673 seconds<br />
+    Maximum number of seconds to run all queries: 0.688 seconds<br />
+    Number of clients running queries: 50<br />
+    Average number of queries per client: 200<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.750 seconds<br />
+    Minimum number of seconds to run all queries: 0.673 seconds<br />
+    Maximum number of seconds to run all queries: 0.879 seconds<br />
+    Number of clients running queries: 55<br />
+    Average number of queries per client: 181<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.825 seconds<br />
+    Minimum number of seconds to run all queries: 0.668 seconds<br />
+    Maximum number of seconds to run all queries: 1.138 seconds<br />
+    Number of clients running queries: 60<br />
+    Average number of queries per client: 166<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.680 seconds<br />
+    Minimum number of seconds to run all queries: 0.676 seconds<br />
+    Maximum number of seconds to run all queries: 0.686 seconds<br />
+    Number of clients running queries: 65<br />
+    Average number of queries per client: 153<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.691 seconds<br />
+    Minimum number of seconds to run all queries: 0.690 seconds<br />
+    Maximum number of seconds to run all queries: 0.695 seconds<br />
+    Number of clients running queries: 70<br />
+    Average number of queries per client: 142<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.723 seconds<br />
+    Minimum number of seconds to run all queries: 0.686 seconds<br />
+    Maximum number of seconds to run all queries: 0.756 seconds<br />
+    Number of clients running queries: 75<br />
+    Average number of queries per client: 133<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.746 seconds<br />
+    Minimum number of seconds to run all queries: 0.710 seconds<br />
+    Maximum number of seconds to run all queries: 0.799 seconds<br />
+    Number of clients running queries: 80<br />
+    Average number of queries per client: 125<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.715 seconds<br />
+    Minimum number of seconds to run all queries: 0.707 seconds<br />
+    Maximum number of seconds to run all queries: 0.723 seconds<br />
+    Number of clients running queries: 85<br />
+    Average number of queries per client: 117<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.737 seconds<br />
+    Minimum number of seconds to run all queries: 0.723 seconds<br />
+    Maximum number of seconds to run all queries: 0.759 seconds<br />
+    Number of clients running queries: 90<br />
+    Average number of queries per client: 111<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.796 seconds<br />
+    Minimum number of seconds to run all queries: 0.754 seconds<br />
+    Maximum number of seconds to run all queries: 0.859 seconds<br />
+    Number of clients running queries: 95<br />
+    Average number of queries per client: 105<br />
+</p>
+
+<p>
+Benchmark<br />
+    Running for engine ARCHIVE<br />
+    Average number of seconds to run all queries: 0.751 seconds<br />
+    Minimum number of seconds to run all queries: 0.738 seconds<br />
+    Maximum number of seconds to run all queries: 0.760 seconds<br />
+    Number of clients running queries: 100<br />
+    Average number of queries per client: 100<br />
+</p>
+</blockquote>
+<p>
+很明显使用ARCHIVE在insert 方面 要比 myisam 快将近一倍<br />
+连接数在40~65之间时插入速度达到最大<br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">mysqlslap --query=<span style="color: #ffa07a;">"insert into tbl_test(  accountId,  accountType,  playerId,  headHeroId,  playerLevel,  playerName,  logTime,  clientVersion,  clientType,  issuers,  flashPlayerVersion,  connectType,  gameServerName,  ipAddr,  onOffType  ) values(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)"</span> --concurrency=5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100  --number-of-queries 10000 --iterations=3 --engine=InnoDB -uroot -proot
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #FBDE2D;">CREATE</span> <span style="color: #FBDE2D;">TABLE</span> `tbl_test` (
+   `id` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">NOT</span> <span style="color: #FBDE2D;">NULL</span> AUTO_INCREMENT,
+   `onOffType` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `accountId` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `accountType` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `playerId` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `headHeroId` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `playerLevel` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `playerName` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `logTime` datetime <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `clientVersion` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `clientType` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `issuers` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `flashPlayerVersion` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `connectType` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `gameServerName` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   `ipAddr` <span style="color: #8DA6CE;">varchar</span>(255) <span style="color: #FBDE2D;">DEFAULT</span> <span style="color: #FBDE2D;">NULL</span>,
+   <span style="color: #FBDE2D;">PRIMARY</span> <span style="color: #FBDE2D;">KEY</span> (`id`)
+ ) engine= InnoDB;
+</pre>
+</div>
+<p>
+我不贴 InnoDB的测试数据了，我没耐心等了, InnoDB支持事务 ，全表锁，插入奇慢无比。<br />
+</p>
+
+<p>
+最后补充一点：<br />
+照常来说 建表语句 应该在 &#x2013;create语句中的，这样指定 &#x2013;engine可以指定多个engine,以逗号隔开，<br />
+直接出测试结果 ，不必每次手动建表建表.<br />
+</p>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-04-22</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/db/">DB</a>, <a href="/tags/mysql/">Mysql</a>, <a href="/tags/sql/">SQL</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/benchmark_demo.html";
+          var disqus_url = "http://jixiuf.github.io/blog/benchmark_demo.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

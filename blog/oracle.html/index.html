@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>oracle拾遗 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="oracle拾遗" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>oracle拾遗</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org145fe32">查看表空间信息</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org145fe32" class="outline-2">
+<h2 id="org145fe32">查看表空间信息</h2>
+<div class="outline-text-2" id="text-org145fe32">
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #FBDE2D;">SELECT</span> tbs  &#34920;&#31354;&#38388;&#21517;,
+<span style="color: #F8F8F8;">sum</span>(totalM) &#24635;&#20849;&#22823;&#23567;<span style="color: #FBDE2D;">M</span>,
+<span style="color: #F8F8F8;">sum</span>(usedM) &#24050;&#20351;&#29992;&#31354;&#38388;<span style="color: #FBDE2D;">M</span>,
+<span style="color: #F8F8F8;">sum</span>(remainedM) &#21097;&#20313;&#31354;&#38388;<span style="color: #FBDE2D;">M</span>,
+<span style="color: #F8F8F8;">sum</span>(usedM)/<span style="color: #F8F8F8;">sum</span>(totalM)*100 &#24050;&#20351;&#29992;&#30334;&#20998;&#27604;,
+<span style="color: #F8F8F8;">sum</span>(remainedM)/<span style="color: #F8F8F8;">sum</span>(totalM)*100 &#21097;&#20313;&#30334;&#20998;&#27604;
+<span style="color: #FBDE2D;">FROM</span> (
+   <span style="color: #FBDE2D;">SELECT</span> b.file_id&#12288;&#12288;ID,
+   b.Tablespace_name&#12288;&#12288;tbs,
+   b.file_name&#12288;&#12288;&#12288;&#12288;&#12288;<span style="color: #FBDE2D;">name</span>,
+   b.bytes/1024/1024&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;totalM,
+   (b.bytes-<span style="color: #F8F8F8;">sum</span>(nvl(a.bytes,0)))/1024/1024&#12288;&#12288;&#12288;usedM,
+   <span style="color: #F8F8F8;">sum</span>(nvl(a.bytes,0))/1024/1024&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;remainedM,
+   <span style="color: #F8F8F8;">sum</span>(nvl(a.bytes,0))/(b.bytes)*100&#12288;&#21097;&#20313;&#30334;&#20998;&#27604; ,
+   (100 - (<span style="color: #F8F8F8;">sum</span>(nvl(a.bytes,0))/(b.bytes)*100))&#12288;&#24050;&#20351;&#29992;&#30334;&#20998;&#27604;
+   <span style="color: #FBDE2D;">FROM</span> dba_free_space a,dba_data_files b
+   <span style="color: #FBDE2D;">WHERE</span> a.file_id=b.file_id
+   <span style="color: #FBDE2D;">GROUP</span> <span style="color: #FBDE2D;">BY</span> b.Tablespace_name,b.file_name,b.file_id,b.bytes
+   <span style="color: #FBDE2D;">ORDER</span> <span style="color: #FBDE2D;">BY</span> b.Tablespace_name
+)
+<span style="color: #FBDE2D;">GROUP</span> <span style="color: #FBDE2D;">BY</span> tbs;
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-04-29</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/db/">DB</a>, <a href="/tags/oracle/">Oracle</a>, <a href="/tags/sql/">SQL</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/oracle.html";
+          var disqus_url = "http://jixiuf.github.io/blog/oracle.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

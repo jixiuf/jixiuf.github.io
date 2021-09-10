@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>erlang distel - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="erlang 的调试 distel" />
+    <meta name="keywords" content="erlang distel" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>erlang distel</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orge578de3">参考链接</a></li>
+<li><a href="#org6b4ba38">关于调试</a></li>
+<li><a href="#orga8781f5">关于我对distel 的增强 https://github.com/jixiuf/distel</a></li>
+<li><a href="#org6c9dd95">screenshot</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orge578de3" class="outline-2">
+<h2 id="orge578de3">参考链接</h2>
+<div class="outline-text-2" id="text-orge578de3">
+<p>
+distel 的源代码在这里 <a href="https://github.com/massemanet/distel">https://github.com/massemanet/distel</a><br />
+这个是我从massemanet fork 出来的一版 <a href="https://github.com/jixiuf/distel">https://github.com/jixiuf/distel</a><br />
+我关于erlang的配置在这里<a href="https://github.com/jixiuf/emacs_conf/raw/master/site-lisp/joseph/joseph-erlang.el">https://github.com/jixiuf/emacs_conf/raw/master/site-lisp/joseph/joseph-erlang.el</a><br />
+<a href="http://bc.tech.coop/blog/070528.html">http://bc.tech.coop/blog/070528.html</a><br />
+<a href="http://renzhi.ca/2010/08/04/debugging-erlang-programs-in-emacs/">http://renzhi.ca/2010/08/04/debugging-erlang-programs-in-emacs/</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org6b4ba38" class="outline-2">
+<h2 id="org6b4ba38">关于调试</h2>
+<div class="outline-text-2" id="text-org6b4ba38">
+<p>
+distel 一直有个bug就是不能设置断点<br />
+<a href="http://renzhi.ca/2010/08/04/debugging-erlang-programs-in-emacs/">http://renzhi.ca/2010/08/04/debugging-erlang-programs-in-emacs/</a><br />
+里面有提到如何处理.<br />
+虽然这个调试工具可以用，但是工作的不是很好。建议用erlang 自带的调试工具，也<br />
+是图形界面.<br />
+debugger:start().<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orga8781f5" class="outline-2">
+<h2 id="orga8781f5">关于我对distel 的增强 <a href="https://github.com/jixiuf/distel">https://github.com/jixiuf/distel</a></h2>
+<div class="outline-text-2" id="text-orga8781f5">
+<p>
+关于我的这个fork 的一些改进<br />
+</p>
+<ul class="org-ul">
+<li>对distel 的补全机制进行了重写。<br />
+使用(completing-read) 进行补全,也就是说在emacs24上，你可以不用emacs 默认的<br />
+补全机制，你如果知道git://github.com/emacs-helm/helm.git的heml-mode(前身是anything.el)<br />
+或许你会知道这种补全机制的好处。<br />
+<ul class="org-ul">
+<li>对C-cC-dF erl-find-module 进行了重写，添加了补全机制，即它会列出所有可用<br />
+的module 让你从中选择，而不必输入整个模块名。<br /></li>
+<li>对C-cC-dh (erl-find-doc-under-point)打开当前光标下函数的文档，当然你要装<br />
+emacs-w3m,(这是默认就有的，我没进行增强，在这里提一下它。).<br /></li>
+<li>对C-cC-dH (erl-find-doc)进行增强，同样也添加了补全机制,提示你输入module<br />
+名字，然后用w3m浏览此module 对应的文档.<br /></li>
+</ul></li>
+<li><p>
+distel 的另一卖点是函数的跳转<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">my-erlang-mode-hook</span> ()
+  (local-set-key <span style="color: #ffa07a;">"\M-."</span>  'erl-find-source-under-point )
+  (local-set-key <span style="color: #ffa07a;">"\M-,"</span>  'erl-find-source-unwind))
+(add-hook 'erlang-mode-hook 'my-erlang-mode-hook)
+</pre>
+</div>
+<p>
+但是它只能进行函数间的跳转。（即你把光标移动到函数名上，然后按下M-. 即Alt+.）<br />
+就会打开相应的源码文件跳转在函数的定义处。<br />
+我对此功能的增强是<br />
+</p>
+<ul class="org-ul">
+<li>跳转到头文件<br />
+-include_lib("kernel/include/file.hrl").<br />
+比如，我把光标移动到这样一个路径下"kernel/include/file.hrl" 按下M-.<br />
+会打开file.hrl文件 。<br /></li>
+</ul>
+<ul class="org-ul">
+<li>跳转到宏定义处<br />
+这个就不多详细解释了 ，也集成到了M-.功能中<br /></li>
+</ul></li>
+<li><p>
+函数名与模块名的补全，这个是 distel 的又一卖点，你如果用过eclipse或VS等IDE<br />
+工具，一定不会对此陌生。<br />
+我把这个功能绑在Ctl-Return 这个键上。<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"> (<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">my-erlang-mode-hook2</span> ()
+    (local-set-key  [(control return)]  'erl-complete)
+ )
+(add-hook 'erlang-mode-hook 'my-erlang-mode-hook2)
+</pre>
+</div>
+<p>
+我对这个功能的增强是:<br />
+ 对 include_lib 输入头文件名进行补全。注意只对include_lib 有效，对include无<br />
+ 效<br />
+ 使用方法:<br />
+ -include_lib("光标位置在此，按下Ctrl-Return").<br />
+ 这样会列出所有erlang安装目录下可用的头文件，你可以输入几个字母从中进行过滤.<br />
+ 下面附上几张效果图<br />
+</p></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org6c9dd95" class="outline-2">
+<h2 id="org6c9dd95">screenshot</h2>
+<div class="outline-text-2" id="text-org6c9dd95">
+
+<div id="orgbb785f7" class="figure">
+<p><img src="/assets/blog/distel.html/2012-04-21-212041scrot.png" alt="2012-04-21-212041scrot.png" /><br />
+</p>
+</div>
+
+
+<div id="orgfd3af83" class="figure">
+<p><img src="/assets/blog/distel.html/2012-04-21-214841scrot.png" alt="2012-04-21-214841scrot.png" /><br />
+</p>
+</div>
+
+
+<div id="orgcf6be52" class="figure">
+<p><img src="/assets/blog/distel.html/2012-04-21-214947scrot.png" alt="2012-04-21-214947scrot.png" /><br />
+</p>
+</div>
+
+
+<div id="orgaa95f14" class="figure">
+<p><img src="/assets/blog/distel.html/2012-04-21-215010scrot.png" alt="2012-04-21-215010scrot.png" /><br />
+</p>
+</div>
+
+
+<div id="orgb5bf780" class="figure">
+<p><img src="/assets/blog/distel.html/2012-04-21-215028scrot.png" alt="2012-04-21-215028scrot.png" /><br />
+</p>
+</div>
+
+
+<div id="orga4474cc" class="figure">
+<p><img src="/assets/blog/distel.html/2012-04-21-215108scrot.png" alt="2012-04-21-215108scrot.png" /><br />
+</p>
+</div>
+
+
+<div id="orgf14c942" class="figure">
+<p><img src="/assets/blog/distel.html/2012-04-21-215159scrot.png" alt="2012-04-21-215159scrot.png" /><br />
+</p>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-03-16</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/erlang/">Erlang</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/distel.html";
+          var disqus_url = "http://jixiuf.github.io/blog/distel.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

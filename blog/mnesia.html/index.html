@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>mnesia拾遗 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="mnesia.org" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>mnesia拾遗</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org625b3dd">Mnesia 的几个参数</a>
+<ul>
+<li><a href="#org952e07c">dc_dump_limit</a></li>
+<li><a href="#org4927a1e">dump_log_write_threshold</a></li>
+<li><a href="#orgaf35a45">dump_log_time_threshold 默认3min</a></li>
+<li><a href="#orgddce340">WARNING ** Mnesia is overloaded: {dump_log,time_threshold}</a></li>
+</ul>
+</li>
+<li><a href="#orgabb7e17">Link</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org625b3dd" class="outline-2">
+<h2 id="org625b3dd">Mnesia 的几个参数</h2>
+<div class="outline-text-2" id="text-org625b3dd">
+<p>
+mnesia有 LATEST.LOG 日志文件 及 *.DAT, *.DCD *.DCL 等数据文件<br />
+mnesia是先向 LATEST.LOG写日志，当日志达到dump_log_write_threshold参数(默认<br />
+100条)或时间到dump_log_time_threshold(默认3min)时，会将这100条日志操作apply到数据文件上，<br />
+dump操作应该就是 LOG-&gt;DAT转移的过程<br />
+</p>
+</div>
+<div id="outline-container-org952e07c" class="outline-3">
+<h3 id="org952e07c">dc_dump_limit</h3>
+<div class="outline-text-3" id="text-org952e07c">
+<p>
+This variable controls how often disc_copies tables are dumped from memory.<br />
+The default value is 4, which means if the size of the log is greater than<br />
+the size of table / 4, then a dump occurs. To make table dumps happen more<br />
+often, increase the value. I've found setting this to 40 works well for my<br />
+purposes.<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org4927a1e" class="outline-3">
+<h3 id="org4927a1e">dump_log_write_threshold</h3>
+<div class="outline-text-3" id="text-org4927a1e">
+<p>
+默认每执行100次write ,才会dump 到硬盘一次,<br />
+调大这个值,即增大dump的间隔,即，如果你write很频繁，可以试着调大此值，<br />
+同时也需要更大的内存支持<br />
+This variable defines the maximum number of writes to the transaction log<br />
+before a new dump is performed. The default value is 100, so a new<br />
+transaction log dump is performed after every 100 writes. If you're doing<br />
+hundreds or thousands of writes in a short period of time, then there's no<br />
+way mnesia can keep up. I set this value to 50000, which is a huge<br />
+increase, but I have enough RAM to handle it. If you're worried that this<br />
+high value means the transaction log will rarely get dumped when there's<br />
+very few writes occuring, there's also a dump_log_time_threshold<br />
+configuration variable, which by default dumps the log every 3 minutes.<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgaf35a45" class="outline-3">
+<h3 id="orgaf35a45">dump_log_time_threshold 默认3min</h3>
+<div class="outline-text-3" id="text-orgaf35a45">
+<p>
+跟dump_log_write_threshold配合的一个参数，<br />
+每3min执行一次dump操作,主要是当write数据很不频繁，达不到<br />
+dump_log_write_threshold的值，到了时间仍然进行dump操作，<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgddce340" class="outline-3">
+<h3 id="orgddce340">WARNING ** Mnesia is overloaded: {dump_log,time_threshold}</h3>
+<div class="outline-text-3" id="text-orgddce340">
+<p>
+连续多次收到这样一条消息的原因，这里有说明<br />
+<a href="http://erlang.2086793.n4.nabble.com/my-mnesia-is-lazy-td2114608.html">http://erlang.2086793.n4.nabble.com/my-mnesia-is-lazy-td2114608.html</a><br />
+you start mnesia and then you put your laptop to sleeep or do nothing.<br />
+</p>
+
+<p>
+you come back the next day, open your laptop and you find mnesia<br />
+complains about being overloaded.<br />
+</p>
+
+<p>
+It basically is because you didn't do any transactions for a day.<br />
+</p>
+
+<p>
+It has nothing to do with being overloaded and mnesia should<br />
+differentiate this case.<br />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgabb7e17" class="outline-2">
+<h2 id="orgabb7e17">Link</h2>
+<div class="outline-text-2" id="text-orgabb7e17">
+<p>
+<a href="http://streamhacker.com/2008/12/10/how-to-eliminate-mnesia-overload-events/">http://streamhacker.com/2008/12/10/how-to-eliminate-mnesia-overload-events/</a><br />
+<a href="http://www.erlang.org/doc/apps/mnesia/Mnesia_chap7.html">http://www.erlang.org/doc/apps/mnesia/Mnesia_chap7.html</a><br />
+<a href="http://erlang.2086793.n4.nabble.com/my-mnesia-is-lazy-td2114608.html">http://erlang.2086793.n4.nabble.com/my-mnesia-is-lazy-td2114608.html</a><br />
+</p>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2013-01-21</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/erlang/">Erlang</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/mnesia.html";
+          var disqus_url = "http://jixiuf.github.io/blog/mnesia.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

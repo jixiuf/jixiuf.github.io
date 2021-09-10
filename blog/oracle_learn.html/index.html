@@ -1,0 +1,2619 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>oracle plsql 笔记 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="oracle拾遗" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>oracle plsql 笔记</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orga574e02">misc</a></li>
+<li><a href="#orgd117cef">用户管理 :</a>
+<ul>
+<li><a href="#org1a9890b">登陆：</a></li>
+<li><a href="#orgc981022">创建用户 create user jixiuf identified by jixiuf_passwd;</a></li>
+<li><a href="#orge9fe5d7">切换用户 conn system/root;  disconnect</a></li>
+<li><a href="#org95549ff">权限分系统权限和对象权限，系统权限是用户对数据库的控制权，对象权限是用户对其它用户所拥有数据对象的操作权限</a></li>
+<li><a href="#orgcc1d9ab">使用profile 管理用户口令，profile 是口令限制，资源限制的命令集合，当建立数据库时，oracle 会自动建立名称为default 的profile ,当建立用户没有指定profile，则默认用此项分配给用户</a></li>
+</ul>
+</li>
+<li><a href="#orgf73a87e">备份与恢复(导入导出)</a>
+<ul>
+<li><a href="#org17e2c3a">exp</a></li>
+<li><a href="#org29844fa">导入 imp  (选项： userid tables fromuser touser file=d:/a.dmp full=y inctype=complete增量备份  rows=n不导入数据  ignore=y若表存在则只导数据)</a></li>
+</ul>
+</li>
+<li><a href="#org2275bae">--------------------&#x2013;&#x2014;数据字典-----------------------------------------------------</a></li>
+<li><a href="#orgd24b414">-----------&#x2013;&#x2014;表空间-----------------------------------</a></li>
+<li><a href="#org8ad5737">索引 index ------------------------------------------------------------------------------------</a></li>
+<li><a href="#org287c277">-------------------------&#x2013;&#x2014;ps/sql-----------------------------------------------</a></li>
+<li><a href="#orgbffbc7e">触发器 user_triggers------------------------------------------------------------------------------</a></li>
+<li><a href="#org84071db">变量类型------------------------------------------------------------------------------</a></li>
+<li><a href="#org999d4d0">抽象数据类型(面向对象的特性)-------------------------------------------------------------------</a></li>
+<li><a href="#orgacfc377">4 游标（隐式游标，显式游标。游标cursor 与游标变量ref cursor不同，前者有如是常量，后者是变量，）</a></li>
+<li><a href="#orgf355440">动态SQL-------------------------------------------------------------------------------------------------------------&#x2013;&#x2014; Except for multi-row queries(返回多条记录的查询), the dynamic string</a></li>
+<li><a href="#org235e17e">-动态sql 与 bulk collect 集合操作 --------------------------------------------</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orga574e02" class="outline-2">
+<h2 id="orga574e02">misc</h2>
+<div class="outline-text-2" id="text-orga574e02">
+<p>
+start d:/a.sql<br />
+@    d:/a.sql<br />
+</p>
+
+<p>
+edit [d:/a.sql]<br />
+</p>
+
+<p>
+spool d:/a.sql 将屏上内容 输出到指定文件<br />
+spool off<br />
+</p>
+
+
+<p>
+set linesize 320<br />
+set pagesize 100<br />
+set autoprint on<br />
+set serveroutput on<br />
+variable v1 refcursor<br />
+</p>
+
+<p>
+exp imp 备份 恢<br />
+</p>
+
+
+<p>
+只读事务<br />
+ set transaction read only<br />
+ 用处，设置只读事务后，其他用户提交的事务在这里不可见，用处就是用于统计，但又不想取得统计时发生的事务提交<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd117cef" class="outline-2">
+<h2 id="orgd117cef">用户管理 :</h2>
+<div class="outline-text-2" id="text-orgd117cef">
+</div>
+<div id="outline-container-org1a9890b" class="outline-3">
+<h3 id="org1a9890b">登陆：</h3>
+<div class="outline-text-3" id="text-org1a9890b">
+<p>
+sqlplus scott/tiger<br />
+sqlplus system/root as sysdba<br />
+</p>
+
+<p>
+system sys sysdba scott;; sys 超级管理员， 具有角色dba ; system 是系统管理员，角色dbaoper ,比sys 低一级，没有create database 权限<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc981022" class="outline-3">
+<h3 id="orgc981022">创建用户 create user jixiuf identified by jixiuf_passwd;</h3>
+<div class="outline-text-3" id="text-orgc981022">
+<p>
+create user userName identified by yourPasswrod default tablespace users temporary tablespace temp quota 50M on users  quota 400K on temp;<br />
+create user userName identified by yourPasswrod default tablespace ts1  temporary tablespace ts2  unlimited on ts1 ;<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge9fe5d7" class="outline-3">
+<h3 id="orge9fe5d7">切换用户 conn system/root;  disconnect</h3>
+<div class="outline-text-3" id="text-orge9fe5d7">
+<p>
+显示当前用户 show user<br />
+更改密码 password userName<br />
+删除用户:drop   user jixiuf [cascade] ，如果 jixiuf 用户已经创建过一些表，加cascade 级联删除<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org95549ff" class="outline-3">
+<h3 id="org95549ff">权限分系统权限和对象权限，系统权限是用户对数据库的控制权，对象权限是用户对其它用户所拥有数据对象的操作权限</h3>
+<div class="outline-text-3" id="text-org95549ff">
+<p>
+对象权限 ：如select ,update delete ,create index<br />
+系统 权限 ：如create session 即连接到数据库<br />
+grant [系统特权名][角色]  to [用户名列表 ][public] [with admin option ]<br />
+</p>
+
+
+<p>
+grant connect to jixiuf ; 角色connect赋予jixiuf  此用户可以连接到数据库 connect,resource,dba 三个重要角色 ,拥有resource 可以在表空间建表， grant resource to jixiuf<br />
+</p>
+
+<p>
+授权：<br />
+grant select on tableName to jixiuf[ with grant option];  具有了select * from userName.tableName<br />
+grant select,update,delete on userName.tableName to jixiuf ;<br />
+grant all on userName.table to jixiuf; 增删改查权<br />
+如果是对象权限 可以加with grant option ，<br />
+若是系统权限  则带with admin option 如:<br />
+grant connnect to jixiuf with admin option;<br />
+收回权限 ：<br />
+revoke  select on emp from jixiuf;<br />
+如若加了with grant option 则revoke 级联收回其他人的权限 ，with admin option 好像不收回<br />
+</p>
+
+<p>
+建立角色：<br />
+    create role r1 [not identified] ;  常用<br />
+    create role r2 [identified by password];<br />
+角色授权<br />
+     系统权限<br />
+        grant create session to r1 [with admin option];<br />
+        grant conecton to r1 ;把connect 角色的权限copy 一份给r1;select * from  ROLE_ROLE_PRIVS;<br />
+    对象权限<br />
+        GRANT SELECT ON SCOTT.EMP TO R1;<br />
+数据字典：        SELECT * FROM DICT WHERE TABLE_NAME LIKE '%ROLE%';<br />
+</p>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-orgcc1d9ab" class="outline-3">
+<h3 id="orgcc1d9ab">使用profile 管理用户口令，profile 是口令限制，资源限制的命令集合，当建立数据库时，oracle 会自动建立名称为default 的profile ,当建立用户没有指定profile，则默认用此项分配给用户</h3>
+<div class="outline-text-3" id="text-orgcc1d9ab">
+<p>
+(1) 帐户锁定：<br />
+指定用户登陆时最多可以输入口令的次数，指定锁定时间，用dba 身份执行此命令<br />
+</p>
+
+<p>
+  create profile profile_name_lock_user limit failed_login_attempts 3 password_lock_time 2;<br />
+  最多尝试3次，3次登陆不成功则不能继续登陆，不成功后允许下次登陆时间为2天后<br />
+  alter user jixiuf profile  profile_name_lock_user;<br />
+  create user jixiuf identified by jixiudf profile profile_name_lock_user;<br />
+  解锁：alter user jixiuf acoount unlock;<br />
+  定期修改密码<br />
+  create profile change_password limit password_life_time 10 password_grace_time 2<br />
+  一个密码用10天后必须修改，宽限期2天，这两天会提示用户修改密码<br />
+修改密码alter user jixiuf identified by newpassword<br />
+  口令历史：用户不能使用以前用过的密码<br />
+  create profile password_history limit password_life_time 10 password_grace_time 2 password_reuse_time 15 ; 15天后可以重用以前的密码<br />
+  删 除profile<br />
+  drop profile password_history ；对用户作的限制作废<br />
+</p>
+
+<p>
+  conn system/root<br />
+  shutdown ;<br />
+      ORA-01031: insufficient privileges<br />
+conn system/root as sysdba 只有作为sysdba 登陆时才有startup shutdown  权限<br />
+shutdown ; 关闭数据库<br />
+startup; 启动数据库<br />
+</p>
+
+<p>
+----------------------------&#x2013;&#x2014;备份与恢复------------------------------------------------&#x2013;&#x2014;<br />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf73a87e" class="outline-2">
+<h2 id="orgf73a87e">备份与恢复(导入导出)</h2>
+<div class="outline-text-2" id="text-orgf73a87e">
+</div>
+<div id="outline-container-org17e2c3a" class="outline-3">
+<h3 id="org17e2c3a">exp</h3>
+<div class="outline-text-3" id="text-org17e2c3a">
+<p>
+导出: 三类 ,导出表，导出方案(一个用户对应一个方案)，导出数据库 用exp 命令<br />
+在导入和导出的时候 要用到C:/oracle/product/10.1.0/Db_1/BIN/exp.exe<br />
+exp help=y 有帮助提示<br />
+</p>
+
+<p>
+（1）导出表( 也可以直接输入 exp 命令，以交互式进行备份)<br />
+     1导出自已的表：<br />
+	 exp userid=scott/tiger@orcl  tables=(tableName1,tableName2) file=d:/tableName.dmp;<br />
+     2 导出别人的表<br />
+	  exp userid=scott/tiger@orcl  tables=(userName.tableName1,userName.tableName2) file=d:/tableName.dmp;<br />
+     3 导出表结构，（加一个rows=n  ） n means no<br />
+	  exp userid=scott/tiger@orcl  tables=(userName.tableName1,userName.tableName2) file=d:/a.dmp rows=n<br />
+</p>
+
+<p>
+4直接导出方式 :比常规导出速度快（加一个direct=y ,专门用于导出大表）<br />
+     exp userid=scott/tiger@orcl  tables=(userName.tableName1,userName.tableName2) file=d:/a.dmp direct=y<br />
+</p>
+
+
+<p>
+(2) 导出方案<br />
+    1导出自己方案<br />
+	    exp userid=scott/tiger@orcl owner=scott file=d:/scott.dmp<br />
+    2 导出其他的人方案<br />
+	    exp userid=system/root@orcl owner=(system,scott) file=d:/scott.dmp<br />
+(3) 导出数据库( 须具有dba 权限，或者exp_full_database 权限  full=y inctype=complete 增量备份(第一次complete)<br />
+	    exp userid=system/root@orcl  full=y inctype=complete file=d:/scott.dmp<br />
+</p>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org29844fa" class="outline-3">
+<h3 id="org29844fa">导入 imp  (选项： userid tables fromuser touser file=d:/a.dmp full=y inctype=complete增量备份  rows=n不导入数据  ignore=y若表存在则只导数据)</h3>
+<div class="outline-text-3" id="text-org29844fa">
+<p>
+1 导入表<br />
+     (1) 导入自已的表<br />
+	   imp userid=scott/tiger@orcl file=d:/scott.dmp tables=emp;<br />
+	   imp  userid=system/root@orcl file=d:/d.dmp fromuser=scott touser=jixiuf tables=emp;<br />
+	把scott.emp 导入到用户jixiuf 名下(前提是emp 没有外键关联到其他表，否则，因为它关联的表并不在jixiuf中，1法实现主外键关联)<br />
+    (2) 只导入表的结构<br />
+	 imp userid=scott/tiger@orcl tables=(emp) file=d:/scott.dmp rows=n<br />
+     (3) 导入数据：<br />
+	 imp userid=scott/tiger@orcl tables=(emp) file=d:/scott.dmp  ignore=y<br />
+</p>
+
+<p>
+2 导入 方案<br />
+   (1)导入自身方案<br />
+       imp userid=scott/tiger  file=d:/scott.dmp<br />
+   (2) 导入他人方案<br />
+	imp userid=system/root fromuser=scott touser=jixiuf  file=d:/scott.dmp<br />
+   (3)导入数据库<br />
+	imp userid=system/root full=y file=d:/scott.dmp<br />
+</p>
+
+
+<p>
+注意导入的数据可能会与已有的数据重复（如果原来的数据没丢失，却运行了导入一次命令 则可能数据重复 ，慎!!!）<br />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org2275bae" class="outline-2">
+<h2 id="org2275bae">--------------------&#x2013;&#x2014;数据字典-----------------------------------------------------</h2>
+<div class="outline-text-2" id="text-org2275bae">
+<p>
+user_xxx, all_xxx ,dba_xxx 如user_tables  dba_roles<br />
+dba_users,dba_sys_privs dba_tab_privs dba_col_privs dba_role_privs<br />
+select username ,user_id ,password from dba_users; 查用户的信息<br />
+select * from dba_role_privs where grantee='JIXIUF'; 查jixiuf所具有的role<br />
+select * from dba_roles 查oracle 具有的role<br />
+查一个角色具有的权限（系统权限，对象权限）<br />
+desc dba_sys_privs<br />
+  select * from dba_sys_privs where grantee='CONNECT'; 或者select * from  role_sys_privs where role='CONNECT'  后者以as sysdba 连接，才可以显示全，？？？<br />
+  select * from dba_tab_privs where grantee='RESOURCE';<br />
+</p>
+
+<p>
+  数据字典的数据字典dict<br />
+select * from dict where commonts like '%TABLES%'<br />
+</p>
+
+
+<p>
+SELECT * FROM GLOBAL_NAME; 查询当前使用的数据库orcl<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd24b414" class="outline-2">
+<h2 id="orgd24b414">-----------&#x2013;&#x2014;表空间-----------------------------------</h2>
+<div class="outline-text-2" id="text-orgd24b414">
+<p>
+段 区 块<br />
+create tablespace tsName1 datafile 'd:/a.dbf' size 20m uniform  size 128k  大小20M  区的大小 128k<br />
+</p>
+
+<p>
+create table t(id int) tablespace tsName1;<br />
+select * from all_tables where tablespace_name='TSNAME1';<br />
+表空间状态, online offline 联机(可读写)，脱机(不可读写，系统维护) 只读表空间<br />
+alter tablespace tsName1 offline<br />
+alter tablespace tsName1  read only;<br />
+alter tablespace tsName1  read write;<br />
+删除表空间<br />
+drop tablespace tsname1 [ including contents [  and datafiles ] ]<br />
+扩展表空间<br />
+  1 增加数据件<br />
+    alter tablespace tsname1 add datafile 'd:/b.dbf' size 10M<br />
+  2  增加datafile的大小<br />
+    alter tablespace tsname1   'd:/b.dbf' resize 30M (?????)<br />
+  3  设置file 自动增长<br />
+alter tablespace tsname1  'd:/a.dbf' autoextend on next 10m maxsize 500m<br />
+</p>
+
+<p>
+移动datafile  (磁盘损坏，但datafile 区域未坏，可移而用之)<br />
+    1 select tablespace_name from dba_data_files where file_name='D:/A.DBF';<br />
+            tableSpaceName1<br />
+    2 alter tablespace tableSpaceName1 offline<br />
+    3 host move d:/a.dbf c:/a.dbf<br />
+    4 alter tablespace tableSpaceName1 rename datafile 'd:/a.dbf' to 'c:/a.dbf'<br />
+    t alter tablespace tableSpaceName1 online<br />
+</p>
+
+<p>
+相应数据字典：<br />
+dba_tablespaces  dba_data_files<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8ad5737" class="outline-2">
+<h2 id="org8ad5737">索引 index ------------------------------------------------------------------------------------</h2>
+<div class="outline-text-2" id="text-org8ad5737">
+<p>
+1键压缩index<br />
+</p>
+
+<p>
+&#x2013;因job 列有很多重复信息(即很多人的job是同一类型的)，于是普通 的索引就会导致job 重复生成索引<br />
+为此可以压缩（job，name） 以节省空间，即同一个job 只建一个（无重复现象），而后即的name 共享前缀项 job，整个（job，name）索引可以节省 compress 表示压缩，而1表示压缩（job,name）第一项，即job项<br />
+create index idxemp on emp(job,ename) compress 1 ;<br />
+</p>
+
+<p>
+2 分区索引（索引存储在不同的分区）<br />
+     据表是否分区，分为<br />
+   2.1 本地索引 (本地前缀索引，本地无前缀索引)<br />
+    2.2全局索引(基于整个表建索引)<br />
+</p>
+
+
+<p>
+簇cluster---------------------------------------------------------------&#x2013;&#x2014;<br />
+</p>
+
+<p>
+有公共列的两个或多个表的集合（存储两个表的重复列）减少io节省空间，插入数据慢<br />
+簇表中的数据存储在公共数据块中(如有主外键关系的表)<br />
+簇键：簇中的唯一标识符，用于获取行<br />
+先建簇，后建组成簇的表<br />
+&#x2013; 公共字段可以不只一个<br />
+create cluster class_cluster (classNo number) tablespace users;<br />
+为簇建索引<br />
+create index cluster_index_class on cluster class_cluster;<br />
+&#x2013;表示classes 表的classNo_字段存储到class_cluster 中<br />
+create table classes (classNo_ number ,className varchar2(22)) cluster class_cluster(classNo_);<br />
+create table student (studentName varchar2(22),studentNo number, classNo number) cluster class_cluster (classNo);<br />
+</p>
+
+<p>
+以上两个表的classNo classNo_ 其实都是class_cluster 的<br />
+</p>
+
+
+<hr />
+<p>
+添加字段<br />
+alter table student add (desc_ varchar2(20));<br />
+</p>
+
+<p>
+修改字段长度:<br />
+alter table student modify (description_ varchar2(300));<br />
+</p>
+
+<p>
+删 除一个字段<br />
+alter table student drop column col_name;<br />
+</p>
+
+<p>
+修改表名 ;<br />
+rename studnt to stu;<br />
+</p>
+
+<p>
+修改日期格式<br />
+alter session set nls_date_format='yyyy-mm-dd';<br />
+</p>
+
+<p>
+添加 空值<br />
+insert into stud values (1,null);<br />
+</p>
+
+<p>
+更新<br />
+update student set sex='nu',name=''  where xh='';<br />
+删 除<br />
+delete from student<br />
+drop table student<br />
+truncate table student ,不写日志<br />
+alter table emp add constraint pk_p1 primary key (id);<br />
+alter table emp drop constraint pk_p1 ;<br />
+</p>
+
+<p>
+回滚<br />
+savepoint a;<br />
+delete from studnet ;<br />
+rollback to a;<br />
+</p>
+
+<p>
+字符合并两个竖线<br />
+select '姓名：'||name from emp;<br />
+</p>
+
+<p>
+字符函数<br />
+lower() upper() substr(str,pos,len) replace(str,oldStr,newStr)<br />
+     null&#x2013;&gt;default 如果comm 为null 则以0为默认值<br />
+     select nvl(comm,0) from emp;<br />
+</p>
+
+<p>
+日期函数 ：<br />
+select current_date,sysdate from dual;<br />
+select * from emp where sysdate&gt;add_months(hiredate,8) 查八个月以前的员工入职的<br />
+select sysdate-hiredate as 入职天数 from emp;<br />
+当月 最后一天<br />
+select hiredate,last_day(hiredate) from emp;<br />
+select to_char(hiredate,'yyyy-mm-dd hh24:mi:ss') from emp;<br />
+update emp set hiredate=to_date('1988-09-09', 'yyyy-mm-dd');<br />
+</p>
+
+<p>
+当前使用的数据库名：<br />
+select sys_context('USERENV','db_name') FROM DUAL;<br />
+当前使用的语言<br />
+select sys_context('USERENV','language') from dual;<br />
+select sys_context('USERENV','session_user') from dual;<br />
+select sys_context('USERENV','current_schema') from dual;<br />
+</p>
+
+<hr />
+</div>
+</div>
+
+
+
+<div id="outline-container-org287c277" class="outline-2">
+<h2 id="org287c277">-------------------------&#x2013;&#x2014;ps/sql-----------------------------------------------</h2>
+<div class="outline-text-2" id="text-org287c277">
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #FBDE2D;">procedure</span> <span style="color: #AEAEAE;">---------------------------------------------------------------------------</span>
+&#21487;&#20197;&#29992;<span style="color: #FBDE2D;">desc</span> &#26597;&#19968;&#20010;<span style="color: #FBDE2D;">procedure</span>
+<span style="color: #FBDE2D;">desc</span> sp_pro1;
+&#21487;&#20197;&#22312;<span style="color: #FBDE2D;">procedure</span> &#20013;&#20351;&#29992;<span style="color: #FBDE2D;">return</span> &#65292;&#32467;&#26463;&#27492;<span style="color: #FBDE2D;">procedure</span>
+user_source &#34920;&#20013;&#26377;&#26356;&#35814;&#32454;&#30340;&#20449;&#24687;
+<span style="color: #FBDE2D;">select</span> text <span style="color: #FBDE2D;">from</span> user_source <span style="color: #FBDE2D;">where</span> <span style="color: #FBDE2D;">name</span>=<span style="color: #ffa07a;">'SP_PRO1'</span>;
+
+
+pl/<span style="color: #FBDE2D;">sql</span> &#20197;&#22359;&#20026;&#21333;&#20301;
+<span style="color: #AEAEAE;">-----------------------------</span>
+<span style="color: #AEAEAE;">--&#27880;&#24847;&#65292;procedure &#30340;&#21517;&#31216;&#26159;sp_pro1 &#22914;&#26524;&#26377;&#21442;&#25968;&#65292;&#21017;&#22768;&#26126; &#22914;&#21516;</span>
+<span style="color: #AEAEAE;">--create  or replace procedure sp_pro1(name varchar2) is</span>
+<span style="color: #AEAEAE;">--&#26080;&#21442;&#25968;&#26102;&#21152;&#19978;&#25324;&#21495;&#22909;&#20687;&#32534;&#35793;&#19981;&#36890;&#36807;</span>
+<span style="color: #FBDE2D;">create</span>  <span style="color: #FBDE2D;">or</span> replace <span style="color: #FBDE2D;">procedure</span> <span style="color: #FF6400;">sp_pro1</span> <span style="color: #FBDE2D;">is</span>
+<span style="color: #AEAEAE;">--&#27492;&#22788;&#19981;&#38656;&#35201; declare &#20851;&#38190;&#23383;</span>
+   v_var_name varchar2(255);
+<span style="color: #FBDE2D;">begin</span>
+   <span style="color: #FBDE2D;">insert</span> <span style="color: #FBDE2D;">into</span> scott.t <span style="color: #FBDE2D;">values</span> (1);
+<span style="color: #FBDE2D;">end</span> ;
+<span style="color: #AEAEAE;">--&#27880;&#24847;end &#21518;&#30340;&#20998;&#21495;</span>
+/
+<span style="color: #AEAEAE;">--&#36755;&#20837;&#26012;&#26464;&#23436;&#25104;</span>
+
+<span style="color: #AEAEAE;">--&#35843;&#29992; call sp_pro1() ;&#25110;&#32773; exec sp_pro1()</span>
+
+<span style="color: #AEAEAE;">------------------------------------</span>
+<span style="color: #FBDE2D;">set</span> serveroutput <span style="color: #FBDE2D;">on</span>
+<span style="color: #FBDE2D;">begin</span>
+  dbms_output.put_line(<span style="color: #ffa07a;">'hello'</span>);
+<span style="color: #FBDE2D;">end</span>;
+/
+<span style="color: #AEAEAE;">----------------------------------</span>
+&#22359;
+
+<span style="color: #FBDE2D;">set</span> serveroutput <span style="color: #FBDE2D;">on</span>
+<span style="color: #FBDE2D;">declare</span>
+       v_ename varchar2(5);
+       v_empno varchar2(5);
+<span style="color: #FBDE2D;">begin</span>
+       <span style="color: #FBDE2D;">select</span> ename, empno <span style="color: #FBDE2D;">into</span> v_ename ,v_empno <span style="color: #FBDE2D;">from</span> emp <span style="color: #FBDE2D;">where</span> empno=&amp;<span style="color: #FBDE2D;">no</span>;
+       dbms_output.put_line(<span style="color: #ffa07a;">'&#23545;&#24212;&#30340;'</span>||v_empno||<span style="color: #ffa07a;">'&#30340; &#29992;&#25143;&#21517;&#65306;'</span>|| v_ename);
+
+<span style="color: #FBDE2D;">exception</span>
+      <span style="color: #FBDE2D;">when</span>
+           no_data_found
+      <span style="color: #FBDE2D;">then</span>
+           dbms_output.put_line(<span style="color: #ffa07a;">'&#23545;&#24212;&#25968;&#25454;&#26410;&#25214;&#21040;'</span>);
+
+<span style="color: #FBDE2D;">end</span>;
+/
+<span style="color: #AEAEAE;">------------------------------------------------------------</span>
+&#21487;&#20197;&#22312;&#19968;&#20010;<span style="color: #FBDE2D;">procedure</span> &#20013;&#35843;&#29992;&#21478;&#19968;&#20010;<span style="color: #FBDE2D;">procedure</span> &#22914;:
+<span style="color: #FBDE2D;">procedure</span> sp_getSal(p_ename <span style="color: #FBDE2D;">in</span>  varchar2,p_returnSal <span style="color: #FBDE2D;">out</span>  <span style="color: #FBDE2D;">number</span>) <span style="color: #FBDE2D;">is</span>
+ <span style="color: #FBDE2D;">begin</span>
+    <span style="color: #FBDE2D;">select</span> sal <span style="color: #FBDE2D;">into</span> p_returnSal <span style="color: #FBDE2D;">from</span> emp <span style="color: #FBDE2D;">where</span> ename=p_ename;
+ <span style="color: #FBDE2D;">end</span>;
+
+
+
+  <span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace <span style="color: #FBDE2D;">procedure</span> <span style="color: #FF6400;">call_sp_getSal</span> <span style="color: #FBDE2D;">is</span>
+  v_ename emp.ename%<span style="color: #FBDE2D;">type</span>:=<span style="color: #ffa07a;">'SCOTT'</span>;
+ v_returnSal emp.sal%<span style="color: #FBDE2D;">type</span>;
+ <span style="color: #FBDE2D;">BEGIN</span>
+ <span style="color: #AEAEAE;">--&#27492;&#22788;&#35843;&#29992;&#20102;sp_getSal&#36807;&#31243;</span>
+ sp_getSal(v_ename,v_returnSal);
+   dbms_output.put_line(v_returnSal);
+   <span style="color: #FBDE2D;">end</span>;
+   /
+
+
+   <span style="color: #FBDE2D;">call</span> call_sp_getSal();
+<span style="color: #AEAEAE;">-------------java &#35843;procedure-----------------</span>
+
+<span style="color: #AEAEAE;">--&#25454;&#29992;&#25143;&#21517;&#21435;&#20462;&#25913;&#24037;&#36164;</span>
+<span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace <span style="color: #FBDE2D;">procedure</span> <span style="color: #FF6400;">sp_updateSalDependOnEname</span>(p_ename varchar2,p_newSal <span style="color: #FBDE2D;">number</span>) <span style="color: #FBDE2D;">is</span>
+<span style="color: #FBDE2D;">begin</span>
+    <span style="color: #FBDE2D;">update</span> emp <span style="color: #FBDE2D;">set</span> sal=p_newSal <span style="color: #FBDE2D;">where</span> ename=p_ename;
+<span style="color: #FBDE2D;">end</span>;
+/
+
+import java.<span style="color: #FBDE2D;">sql</span>.CallableStatement;
+import java.<span style="color: #FBDE2D;">sql</span>.<span style="color: #FBDE2D;">Connection</span>;
+import java.<span style="color: #FBDE2D;">sql</span>.DriverManager;
+//&#39318;&#20808;&#35201;&#22312;oracle &#20013;&#36816;&#34892;&#19979;&#38754;&#30340;&#20195;&#30721;&#65292;&#21019;&#24314;sp_updateSalDependOnEname&#23384;&#20648;&#36807;&#31243;
+//java &#35843;oracle &#23384;&#20648;&#36807;&#31243;
+//// <span style="color: #AEAEAE;">--&#25454;&#29992;&#25143;&#21517;&#21435;&#20462;&#25913;&#24037;&#36164;</span>
+/<span style="color: #AEAEAE;">/--&#25454;&#29992;&#25143;&#21517;&#21435;&#20462;&#25913;&#24037;&#36164;</span>
+//<span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace <span style="color: #FBDE2D;">procedure</span> sp_updateSalDependOnEname(p_ename varchar2,p_newSal <span style="color: #FBDE2D;">number</span>) <span style="color: #FBDE2D;">is</span>
+//<span style="color: #FBDE2D;">begin</span>
+//    <span style="color: #FBDE2D;">update</span> emp <span style="color: #FBDE2D;">set</span> sal=p_newSal <span style="color: #FBDE2D;">where</span> ename=p_ename;
+//<span style="color: #FBDE2D;">end</span>;
+///
+<span style="color: #FBDE2D;">public</span> <span style="color: #FBDE2D;">class</span> OracleJDBCTest {
+
+    <span style="color: #FBDE2D;">public</span> <span style="color: #FBDE2D;">static</span> void main(String[] args) throws <span style="color: #FBDE2D;">Exception</span> {
+        <span style="color: #FBDE2D;">Class</span>.forName("oracle.jdbc.driver.OracleDriver").newInstance();
+        <span style="color: #FBDE2D;">Connection</span> conn = DriverManager
+                .getConnection("jdbc:oracle:thin:@127.0.0.1:1521:ORCL","scott","tiger");
+        CallableStatement stmt = conn
+                .prepareCall("{<span style="color: #FBDE2D;">call</span> sp_updateSalDependOnEname(?,?) }");
+        stmt.setString(1, "SCOTT");
+        stmt.setInt(2, 300);
+        stmt.<span style="color: #FBDE2D;">execute</span>();
+        stmt.<span style="color: #FBDE2D;">close</span>();
+
+    }
+
+}
+&#26377;&#36820;&#22238;&#20540;&#30340;&#23384;&#20648;&#36807;&#31243; <span style="color: #AEAEAE;">---------------------------------------------------------------------</span>
+ <span style="color: #AEAEAE;">--&#27880;&#24847;&#20851;&#38190;&#23383; in out &#65292;&#21442;&#25968;&#20013;  &#40664;&#35748;&#20026;in &#26377;( in  ,out ,in out &#19977;&#31181;&#27169;&#24335;&#65292;&#26368;&#21518;&#19968;&#31181;&#34920;&#31034;&#36825;&#20010;&#21442;&#25968;&#21487;&#20197;&#24448;&#37324;&#20256;&#19968;&#20010;&#20540; &#65292;&#24182;&#19988; &#36820;&#22238;&#20540; &#20063;&#21487;&#20197;&#25918;&#21040;&#36825;&#20010;&#21442;&#25968;&#37324;&#38754;&#65292;&#20174;&#32780;&#23454;&#29616;&#20256;&#20837;&#20256;&#20986;&#21482;&#29992;&#19968;&#20010;&#21442;&#25968;&#23601;&#21487;&#20197;&#23454;&#29616;)</span>
+//&#20256;&#20837;&#29992;&#25143;&#21517;&#65292;&#36820;&#22238;&#20854;&#24037;&#36164;&#21040;p_returnSal &#21442;&#25968;&#20013;
+  <span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace <span style="color: #FBDE2D;">procedure</span> <span style="color: #FF6400;">sp_getSal</span>(p_ename <span style="color: #FBDE2D;">in</span>  varchar2,p_returnSal  <span style="color: #FBDE2D;">out</span>  <span style="color: #FBDE2D;">number</span>) <span style="color: #FBDE2D;">is</span>
+ <span style="color: #FBDE2D;">begin</span>
+    <span style="color: #FBDE2D;">select</span> sal <span style="color: #FBDE2D;">into</span> p_returnSal <span style="color: #FBDE2D;">from</span> emp <span style="color: #FBDE2D;">where</span> ename=p_ename;
+ <span style="color: #FBDE2D;">end</span>;
+ /
+
+
+    <span style="color: #FBDE2D;">public</span> <span style="color: #FBDE2D;">static</span> void main(String[] args) throws <span style="color: #FBDE2D;">Exception</span> {
+        <span style="color: #FBDE2D;">Class</span>.forName("oracle.jdbc.driver.OracleDriver").newInstance();
+        <span style="color: #FBDE2D;">Connection</span> conn = DriverManager.getConnection(
+                "jdbc:oracle:thin:@127.0.0.1:1521:ORCL", "scott", "tiger");
+        CallableStatement stmt = conn.prepareCall("{<span style="color: #FBDE2D;">call</span> sp_getSal(?,?) }");
+        stmt.setString(1, "SCOTT");
+        stmt.registerOutParameter(2, oracle.jdbc.OracleTypes.<span style="color: #FBDE2D;">NUMBER</span>);
+        stmt.<span style="color: #FBDE2D;">execute</span>();
+        <span style="color: #8DA6CE;">int</span> sal = stmt.getInt(2);
+        <span style="color: #FBDE2D;">System</span>.<span style="color: #FBDE2D;">out</span>.println("scott&#30340;&#24037;&#36164;&#65306;" + sal);
+        stmt.<span style="color: #FBDE2D;">close</span>();
+
+    }
+ <span style="color: #AEAEAE;">--------------------------------------------------------------------</span>
+ &#26377;&#36820;&#22238;&#20540; &#30340;<span style="color: #FBDE2D;">procedure</span> &#65292;&#19988;&#36820;&#22238;&#30340;&#26159;&#19968;&#20010;&#32467;&#26524;&#38598;&#65292;&#32780;&#19981;&#26159;&#19968;&#20010;&#20540; &#65292;
+ &#38656;&#35201; &#29992;&#21040;package ,package &#20013;&#19968;&#20010;&#20010;&#28216;&#26631;&#21464;&#37327;&#31867;&#22411;
+ <span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace package <span style="color: #FF6400;">pack_return</span> <span style="color: #FBDE2D;">is</span>
+   <span style="color: #FBDE2D;">type</span> emp_cursor <span style="color: #FBDE2D;">is</span> <span style="color: #8DA6CE;">ref</span> <span style="color: #FBDE2D;">cursor</span>;
+   <span style="color: #FBDE2D;">end</span>;
+   /
+ <span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace <span style="color: #FBDE2D;">procedure</span> <span style="color: #FF6400;">sp_getEmps</span>(p_deptno <span style="color: #FBDE2D;">number</span>, p_cursor <span style="color: #FBDE2D;">out</span> pack_return.emp_cursor) <span style="color: #FBDE2D;">is</span>
+ <span style="color: #FBDE2D;">begin</span>
+       <span style="color: #FBDE2D;">open</span> p_cursor <span style="color: #FBDE2D;">for</span> <span style="color: #FBDE2D;">select</span> * <span style="color: #FBDE2D;">from</span> emp <span style="color: #FBDE2D;">where</span> deptno=p_deptno;
+ <span style="color: #FBDE2D;">end</span> ;
+/
+<span style="color: #FBDE2D;">public</span> <span style="color: #FBDE2D;">static</span> void main(String[] args) throws <span style="color: #FBDE2D;">Exception</span> {
+        <span style="color: #FBDE2D;">Class</span>.forName("oracle.jdbc.driver.OracleDriver").newInstance();
+        <span style="color: #FBDE2D;">Connection</span> conn = DriverManager.getConnection(
+                "jdbc:oracle:thin:@127.0.0.1:1521:ORCL", "scott", "tiger");
+        CallableStatement stmt = conn.prepareCall("{<span style="color: #FBDE2D;">call</span> sp_getEmps(?,?) }");
+        stmt.setInt(1, 20);
+        stmt.registerOutParameter(2, oracle.jdbc.OracleTypes.<span style="color: #FBDE2D;">CURSOR</span>);
+        stmt.<span style="color: #FBDE2D;">execute</span>();
+        ResultSet rs = (ResultSet) stmt.getObject(2);
+
+        <span style="color: #FBDE2D;">System</span>.<span style="color: #FBDE2D;">out</span>.println("&#23646;&#20110;20&#21495;&#37096;&#38376;&#30340;&#21592;&#24037;&#26377;");
+        while (rs.<span style="color: #FBDE2D;">next</span>()) {
+            String <span style="color: #FBDE2D;">name</span> = rs.getString("ename");
+            <span style="color: #8DA6CE;">int</span> sal = rs.getInt("sal");
+            <span style="color: #8DA6CE;">Date</span> hireDate = rs.getDate("hiredate");
+            <span style="color: #FBDE2D;">System</span>.<span style="color: #FBDE2D;">out</span>.println("&#22995;&#21517;&#65306;" + <span style="color: #FBDE2D;">name</span> + "&#24037;&#36164;&#65306;" + sal + "&#19978;&#23703;&#26085;&#26399;" + hireDate);
+
+        }
+
+        stmt.<span style="color: #FBDE2D;">close</span>();
+
+    }
+
+
+&#36807;&#31243;&#35843;&#29992;&#20013;&#30340;&#20107;&#21153;&#22788;&#29702; pragma autonomous_transaction&#33258;&#20027;&#20107;&#21153;&#22788;&#29702;   <span style="color: #AEAEAE;">------------------------------------------------------------------------------</span>
+<span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace <span style="color: #FBDE2D;">procedure</span> <span style="color: #FF6400;">initDataForTestTranasction</span> <span style="color: #FBDE2D;">is</span>
+<span style="color: #FBDE2D;">begin</span>
+      <span style="color: #FBDE2D;">delete</span> <span style="color: #FBDE2D;">from</span> dept <span style="color: #FBDE2D;">where</span> deptno <span style="color: #FBDE2D;">in</span> (55,66);
+      <span style="color: #FBDE2D;">insert</span> <span style="color: #FBDE2D;">into</span> dept <span style="color: #FBDE2D;">values</span> (55,<span style="color: #ffa07a;">'init'</span> ,<span style="color: #ffa07a;">'test'</span>);
+      <span style="color: #FBDE2D;">insert</span> <span style="color: #FBDE2D;">into</span> dept <span style="color: #FBDE2D;">values</span> (66,<span style="color: #ffa07a;">'init66'</span> ,<span style="color: #ffa07a;">'test'</span>);
+      <span style="color: #FBDE2D;">COMMIT</span>;
+<span style="color: #FBDE2D;">end</span>;
+/
+ <span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace  <span style="color: #FBDE2D;">procedure</span> <span style="color: #FF6400;">p3</span> <span style="color: #FBDE2D;">is</span>
+ <span style="color: #FBDE2D;">begin</span>
+    <span style="color: #FBDE2D;">update</span> dept <span style="color: #FBDE2D;">set</span> dname=<span style="color: #ffa07a;">'p3'</span> <span style="color: #FBDE2D;">where</span> deptno=55;
+    <span style="color: #AEAEAE;">--&#27880;&#24847;&#36825;&#26465;&#22238;&#28378;&#35821;&#21477;&#65292;&#27979;&#35797;&#22312;p4() &#20013;&#35843;&#29992;p3()  &#23427;&#22238;&#28378;&#21040;&#20309;&#22788;</span>
+ <span style="color: #FBDE2D;">rollback</span> ;
+ <span style="color: #FBDE2D;">end</span>;
+ /
+
+ <span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace <span style="color: #FBDE2D;">procedure</span> <span style="color: #FF6400;">p4</span> <span style="color: #FBDE2D;">is</span>
+   v_dname dept.dname%<span style="color: #FBDE2D;">type</span>;
+ <span style="color: #FBDE2D;">begin</span>
+      initDataForTestTranasction();<span style="color: #AEAEAE;">--&#21021;&#22987;&#21270;&#27979;&#35797;&#25968;&#25454;</span>
+     <span style="color: #FBDE2D;">update</span> dept <span style="color: #FBDE2D;">set</span>  dname=<span style="color: #ffa07a;">'p4'</span> <span style="color: #FBDE2D;">where</span> deptno=66 ;
+     p3();
+
+
+<span style="color: #AEAEAE;">--&#27979;&#35797;</span>
+     <span style="color: #FBDE2D;">select</span> dname <span style="color: #FBDE2D;">into</span> v_dname <span style="color: #FBDE2D;">from</span> dept  <span style="color: #FBDE2D;">where</span> deptno=55;
+     dbms_output.put_line( <span style="color: #ffa07a;">' &#20869;&#23618;&#20107;&#21153;&#35821;&#21477;&#32467;&#26524;  55.dname='</span>|| v_dname);
+     <span style="color: #FBDE2D;">select</span> dname <span style="color: #FBDE2D;">into</span> v_dname <span style="color: #FBDE2D;">from</span> dept  <span style="color: #FBDE2D;">where</span> deptno=66;
+     dbms_output.put_line( <span style="color: #ffa07a;">'&#22806;&#23618;&#35821;&#21477;&#32467;&#26524;      66.dname='</span>|| v_dname);
+
+     dbms_output.put_line( <span style="color: #ffa07a;">'&#22914;&#26524;66.dname=init66&#27809;&#21464;,&#21017;&#65292;&#20869;&#23618;p3() &#37324;&#30340;&#20107;&#21153;&#35821;&#21477;&#20063;&#22238;&#28378;&#20102;&#22806;&#23618;p4&#30340;&#35821;&#21477;'</span>);
+     dbms_output.put_line( <span style="color: #ffa07a;">'&#22914;&#26524; 66.dname=p4 ,&#21017;p3()&#20869;&#30340;&#22238;&#28378;&#35821;&#21477;&#26410;&#24433;&#21709;&#22806;&#23618;&#30340;&#35821;&#21477;'</span>);
+
+ <span style="color: #FBDE2D;">end</span>;
+/
+ <span style="color: #FBDE2D;">call</span> p4();
+&#20026;&#20102;&#20445;&#35777;&#36807;&#31243;p3 &#30340;&#22238;&#28378;&#35821;&#21477;&#21482;&#24433;&#21709;&#36807;&#31243;p3&#26412;&#36523;&#65292;&#21487;&#20197;&#21033;&#29992;&#33258;&#20027;&#20107;&#21153;&#22788;&#29702;  pragma autonomous_transaction
+&#34920;&#31034; p4&#20013;&#35843;&#29992;p3()  &#20250;&#21551;&#21160;&#19968;&#20010;&#26032;&#20107;&#21153;, &#22240;&#20026;&#24320;&#21551;&#20102;&#19968;&#20010;&#26032;&#20107;&#21153;&#65292;&#25152;&#20197;&#38656;&#35201;&#22312;&#36807;&#31243;&#20018;&#26377;&#26174;&#24335;&#30340;&#20107;&#21153;&#25552;&#20132;&#25110;&#22238;&#28378;
+
+  <span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace  <span style="color: #FBDE2D;">procedure</span> <span style="color: #FF6400;">p3</span> <span style="color: #FBDE2D;">is</span>
+   pragma autonomous_transaction;
+ <span style="color: #FBDE2D;">begin</span>
+    <span style="color: #FBDE2D;">update</span> dept <span style="color: #FBDE2D;">set</span> dname=<span style="color: #ffa07a;">'p3'</span> <span style="color: #FBDE2D;">where</span> deptno=55;
+ <span style="color: #FBDE2D;">rollback</span> ;
+ <span style="color: #FBDE2D;">end</span>;
+ /
+ &#20877;&#27425;&#35843;&#29992;<span style="color: #FBDE2D;">call</span> p4();    p3()&#20869;&#30340;&#22238;&#28378;&#35821;&#21477;&#65292;&#26410;&#24433;&#21709;&#21040;p4&#30340;&#35821;&#21477;&#65292;
+
+
+&#36825;&#31181;&#35299;&#20915;&#26041;&#26696;&#65292;&#26377;&#19968;&#20010;&#38382;&#39064;&#65292;&#21363;&#27515;&#38145;&#65292;&#21363;&#22806;&#23618;&#20107;&#21153;&#65292;&#19982;&#20869;&#23618;&#20107;&#21153;&#22788;&#29702;&#30340;&#26159;&#21516;&#19968;&#34892;&#25968;&#25454;&#65292;&#21017;&#20250;&#20986;&#29616;&#27515;&#38145;(&#22914;&#26524;&#22788;&#29702;&#30340;&#19981;&#26159;&#21516;&#19968;&#26465;&#25968;&#25454;&#65292;&#21017;&#19981;&#20250;&#27515;&#38145;)
+&#26426;&#29702;  1&#22806;&#23618;&#20107;&#21153;&#26242;&#20572;
+              2 &#24320;&#21551;&#20869;&#23618;&#20107;&#21153;
+                  |
+                  |
+                 /|/
+              3 &#20851;&#38381;&#20869;&#23618;&#20107;&#21153;
+     4 &#37325;&#21551;&#22806;&#23618;&#20107;&#21153;&#36827;&#34892;&#22788;&#29702;
+     5&#20851;&#38381;&#22806;&#23618;&#20107;&#21153;&#65292;
+1&#22788;&#20250;&#38145;&#23450;&#19968;&#20123;&#25968;&#25454;(&#22240;&#20026;&#22806;&#23618;&#20107;&#21153;&#36824;&#26410;&#25552;&#20132;)&#65292;&#32780;&#22914;&#26524;2&#65292;3 &#20043;&#38388;&#22788;&#29702;&#30340;&#25968;&#25454;&#26159;1&#38145;&#23450;&#30340;&#65292;&#21017;&#20250;&#20986;&#29616;&#27515;&#38145;
+&#27979;&#35797;&#27515;&#38145;
+  <span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace <span style="color: #FBDE2D;">procedure</span> <span style="color: #FF6400;">p5</span> <span style="color: #FBDE2D;">is</span>
+   v_dname dept.dname%<span style="color: #FBDE2D;">type</span>;
+ <span style="color: #FBDE2D;">begin</span>
+      initDataForTestTranasction();<span style="color: #AEAEAE;">--&#21021;&#22987;&#21270;&#27979;&#35797;&#25968;&#25454;</span>
+     <span style="color: #AEAEAE;">--update dept set  dname='p4' where deptno=66 ;</span>
+     <span style="color: #AEAEAE;">--&#25226;&#27492;&#22788;&#25913;&#20026;55 &#65292;&#21363;&#22806;&#23618;p4()&#22788;&#29702;&#25968;&#25454;55 &#65292;&#20869;&#23618;p3()&#20063;&#22788;&#29702;&#30456;&#21516;&#30340;&#34892;&#65292;&#21017;&#20250;&#27515;&#38145;</span>
+     <span style="color: #FBDE2D;">update</span> dept <span style="color: #FBDE2D;">set</span>  dname=<span style="color: #ffa07a;">'p4'</span> <span style="color: #FBDE2D;">where</span> deptno=55 ;
+     p3();
+
+     <span style="color: #AEAEAE;">--&#27979;&#35797;</span>
+     <span style="color: #FBDE2D;">select</span> dname <span style="color: #FBDE2D;">into</span> v_dname <span style="color: #FBDE2D;">from</span> dept  <span style="color: #FBDE2D;">where</span> deptno=55;
+     dbms_output.put_line( <span style="color: #ffa07a;">' &#20869;&#23618;&#20107;&#21153;&#35821;&#21477;&#32467;&#26524;  55.dname='</span>|| v_dname);
+     <span style="color: #FBDE2D;">select</span> dname <span style="color: #FBDE2D;">into</span> v_dname <span style="color: #FBDE2D;">from</span> dept  <span style="color: #FBDE2D;">where</span> deptno=66;
+     dbms_output.put_line( <span style="color: #ffa07a;">'&#22806;&#23618;&#35821;&#21477;&#32467;&#26524;      66.dname='</span>|| v_dname);
+
+     dbms_output.put_line( <span style="color: #ffa07a;">'&#22914;&#26524;66.dname=init66&#27809;&#21464;,&#21017;&#65292;&#20869;&#23618;p3() &#37324;&#30340;&#20107;&#21153;&#35821;&#21477;&#20063;&#22238;&#28378;&#20102;&#22806;&#23618;p4&#30340;&#35821;&#21477;'</span>);
+     dbms_output.put_line( <span style="color: #ffa07a;">'&#22914;&#26524; 66.dname=p4 ,&#21017;p3()&#20869;&#30340;&#22238;&#28378;&#35821;&#21477;&#26410;&#24433;&#21709;&#22806;&#23618;&#30340;&#35821;&#21477;'</span>);
+ <span style="color: #FBDE2D;">end</span>;
+/
+ <span style="color: #FBDE2D;">call</span> p5();<span style="color: #AEAEAE;">-- &#27979;&#35797;&#27515;&#38145;</span>
+
+
+&#20010;&#20154;&#24863;&#35273;&#65292;&#22914;&#26524;&#35201;&#26377;&#20107;&#21153;&#30340;&#22238;&#28378;&#26368;&#22909;&#35774;&#32622;&#22238;&#28378;&#28857;,&#24182;&#19988;&#26174;&#24335;&#25552;&#20132;&#25110;&#22238;&#28378;
+
+&#22914;p3&#25913;&#20026;&#22914;&#19979;&#25152;&#31034;&#65292;&#21017;<span style="color: #FBDE2D;">call</span> p5();&#20063;&#19981;&#20250;&#20986;&#29616;&#27515;&#38145;(&#22240;&#20026;&#26377;&#26126;&#30830;&#30340;&#22238;&#28378;&#21040;&#20309;&#22788;&#30340;&#35821;&#21477;)
+
+   <span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace  <span style="color: #FBDE2D;">procedure</span> <span style="color: #FF6400;">p3</span> <span style="color: #FBDE2D;">is</span>
+ <span style="color: #FBDE2D;">begin</span>
+  <span style="color: #FBDE2D;">savepoint</span> a;
+    <span style="color: #FBDE2D;">update</span> dept <span style="color: #FBDE2D;">set</span> dname=<span style="color: #ffa07a;">'p3'</span> <span style="color: #FBDE2D;">where</span> deptno=55;
+ <span style="color: #FBDE2D;">rollback</span>  <span style="color: #FBDE2D;">to</span> a ;
+ <span style="color: #FBDE2D;">end</span>;
+ /
+
+
+
+
+
+
+
+&#21487;&#20197;&#22312;&#19968;&#20010;&#36807;&#31243;&#20013;&#35843;&#29992;&#21478;&#19968;&#20010;&#36807;&#31243;&#65292;&#20174;&#32780;&#23454;&#29616;&#36807;&#31243; &#30340;&#37325;&#29992;
+<span style="color: #AEAEAE;">--------------------------------------</span>
+
+<span style="color: #AEAEAE;">-----------------function----------------------------------------------------------------</span>
+<span style="color: #AEAEAE;">------------------------------ &#21442;&#25968;&#20063;&#21487;&#20197;&#26159; out&#30340;&#20294;&#19981;&#22810;&#29992;( in , out ,in out )&#65292;&#22240;&#26377;return -----------------------------------------------------------</span>
+<span style="color: #AEAEAE;">--&#36755;&#20837;&#38599;&#21592;&#22995;&#21517;&#65292;&#36820;&#22238;&#38599;&#21592;&#24180;&#34218;</span>
+<span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace <span style="color: #FBDE2D;">function</span>  <span style="color: #FF6400;">fun_getSal</span>(p_ename varchar2)
+    <span style="color: #FBDE2D;">return</span> <span style="color: #FBDE2D;">number</span> <span style="color: #FBDE2D;">is</span>  yearSal <span style="color: #FBDE2D;">number</span>(7,2);
+    <span style="color: #FBDE2D;">begin</span>
+        <span style="color: #FBDE2D;">select</span> sal*12+nvl(comm,0)*12 <span style="color: #FBDE2D;">into</span> yearSal <span style="color: #FBDE2D;">from</span> emp <span style="color: #FBDE2D;">where</span> ename=p_ename;
+        <span style="color: #FBDE2D;">return</span> yearSal;
+    <span style="color: #FBDE2D;">end</span>;
+
+<span style="color: #AEAEAE;">--------------    &#35843;&#29992; --</span>
+
+    <span style="color: #AEAEAE;">--&#22768;&#26126; &#20840;&#23616;&#21464;&#37327; &#29992;&#20110;&#23384;&#20648;fun_getSal() &#30340;&#36820;&#22238;&#20540;</span>
+    var v <span style="color: #FBDE2D;">number</span>
+             <span style="color: #AEAEAE;">--&#35843;&#29992;  &#27880;&#24847;&#21464;&#37327;v  &#21069;&#30340;&#20882;&#21495;&#65292;&#34920;&#31034;v &#20840;&#23616;&#21464;&#37327;</span>
+    <span style="color: #FBDE2D;">call</span> fun_getSal(<span style="color: #ffa07a;">'SCOTT'</span>) <span style="color: #FBDE2D;">into</span> :v ;
+            <span style="color: #AEAEAE;">--&#25171;&#21360;&#32467;&#26524;</span>
+    print v;
+    <span style="color: #AEAEAE;">---------------java &#35843;&#29992;</span>
+        import java.<span style="color: #FBDE2D;">sql</span>.<span style="color: #FBDE2D;">Connection</span>;
+        import java.<span style="color: #FBDE2D;">sql</span>.DriverManager;
+        import java.<span style="color: #FBDE2D;">sql</span>.PreparedStatement;
+        import java.<span style="color: #FBDE2D;">sql</span>.ResultSet;
+        <span style="color: #FBDE2D;">public</span> <span style="color: #FBDE2D;">class</span> OracleFunctionTest {
+            <span style="color: #FBDE2D;">public</span> <span style="color: #FBDE2D;">static</span> void main(String[] args) throws <span style="color: #FBDE2D;">Exception</span> {
+                <span style="color: #FBDE2D;">Class</span>.forName("oracle.jdbc.driver.OracleDriver").newInstance();
+                <span style="color: #FBDE2D;">Connection</span> conn = DriverManager.getConnection(
+                        "jdbc:oracle:thin:@127.0.0.1:1521:ORCL", "scott", "tiger");
+                PreparedStatement stmt = conn.prepareStatement("<span style="color: #FBDE2D;">select</span> fun_getSal(?) <span style="color: #FBDE2D;">from</span> dual");
+                stmt.setString(1, "SCOTT");
+                ResultSet rs = stmt.executeQuery();
+                rs.<span style="color: #FBDE2D;">next</span>();
+                <span style="color: #8DA6CE;">int</span> yearSal = rs.getInt(1);
+                stmt.<span style="color: #FBDE2D;">close</span>();
+                <span style="color: #FBDE2D;">System</span>.<span style="color: #FBDE2D;">out</span>.println("scott &#30340;&#24180;&#34218;" + yearSal);
+            }
+
+        }
+
+
+<span style="color: #AEAEAE;">-----------&#21253;------------------------------------------------------------------------------</span>
+<span style="color: #AEAEAE;">----------------------------------------------------------------------------------------</span>
+<span style="color: #AEAEAE;">--&#36923;&#36753;&#19978;&#32452;&#21512;procedure function  &#21450;&#20854;&#20182;&#25968;&#25454;&#23545;&#35937;</span>
+<span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace package <span style="color: #FF6400;">pack_test</span> <span style="color: #FBDE2D;">is</span>
+      <span style="color: #FBDE2D;">procedure</span> sp_updateSalDependOnEname(p_ename varchar2,p_newSal <span style="color: #FBDE2D;">number</span>);
+      <span style="color: #FBDE2D;">function</span> fun_getSal(p_ename varchar2) <span style="color: #FBDE2D;">return</span> <span style="color: #FBDE2D;">number</span>;
+<span style="color: #FBDE2D;">end</span> ;
+
+
+<span style="color: #AEAEAE;">---------------------------------------</span>
+<span style="color: #AEAEAE;">--&#32473;&#21253;&#23454;&#29616;&#21253;&#20307;&#65292; (&#20808;&#24314;&#21253;&#22836;&#65292;&#20877;&#24314;&#21253;&#20307;)</span>
+<span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace package body <span style="color: #FF6400;">pack_test</span> <span style="color: #FBDE2D;">is</span>
+    <span style="color: #FBDE2D;">procedure</span> sp_updateSalDependOnEname(p_ename varchar2,p_newSal <span style="color: #FBDE2D;">number</span>)
+         <span style="color: #FBDE2D;">is</span>
+            <span style="color: #FBDE2D;">begin</span>
+                <span style="color: #FBDE2D;">update</span> emp <span style="color: #FBDE2D;">set</span> sal=p_newSal <span style="color: #FBDE2D;">where</span> ename=p_ename;
+                dbms_output.put_line(<span style="color: #ffa07a;">'------jixiuf&#25968;&#25454;&#24050;&#26356;&#26032;---'</span>);
+            <span style="color: #FBDE2D;">end</span>;
+
+     <span style="color: #FBDE2D;">function</span>  fun_getSal(p_ename varchar2) <span style="color: #FBDE2D;">return</span> <span style="color: #FBDE2D;">number</span>
+         <span style="color: #FBDE2D;">is</span>
+                yearSal <span style="color: #FBDE2D;">number</span>(7,2);
+            <span style="color: #FBDE2D;">begin</span>
+                <span style="color: #FBDE2D;">select</span> sal*12+nvl(comm,0)*12 <span style="color: #FBDE2D;">into</span> yearSal <span style="color: #FBDE2D;">from</span> emp <span style="color: #FBDE2D;">where</span> ename=p_ename;
+                <span style="color: #FBDE2D;">return</span> yearSal;
+            <span style="color: #FBDE2D;">end</span>;
+
+<span style="color: #FBDE2D;">end</span>;
+/
+
+&#35843;&#29992; <span style="color: #FBDE2D;">call</span>  pack_test.sp_updateSalDependOnEname(<span style="color: #ffa07a;">'SCOTT'</span>,1);
+
+&#19968;&#20123;&#20869;&#32622;&#21253;:
+1 ,dbms_output &#21253;&#30340;&#36807;&#31243;
+   enable ,disable ,put ,put_line,new_line,get_line,get_lines
+
+   <span style="color: #FBDE2D;">begin</span>
+     dbms_output.put(<span style="color: #ffa07a;">'1111111'</span>);<span style="color: #AEAEAE;">--&#21482;&#26159;&#25226;&#23427;&#21644;&#21040;&#32531;&#20914;&#21306;&#65292;&#36755;&#19981;&#20986;&#26469;&#65292;&#35201;&#29992;put_line</span>
+     dbms_output.put_line(<span style="color: #ffa07a;">'22222'</span>); <span style="color: #AEAEAE;">--&#36825;&#26679;&#20250;&#25226;&#32531;&#20914;&#21306;&#30340;111111,&#19982;22222&#19968;&#36215;&#36755;&#20986;</span>
+   <span style="color: #FBDE2D;">end</span>;
+   dbms_lob.<span style="color: #AEAEAE;">--------------------------------------------------------------------------------</span>
+2dbms_lob &#25805;&#20316;&#22823;&#22411;&#23545;&#35937;  (&#26222;&#36890;&#29992;&#25143;&#23545;&#20854;&#27809;&#26377;&#25805;&#20316;&#26435;&#38480;,&#35201;&#29992;<span style="color: #FBDE2D;">system</span> )
+       apend ,compare copy erase fileclose fileexists filegetname getlength
+
+       conn <span style="color: #FBDE2D;">system</span>/root ;
+      1  <span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">table</span> downFileList(
+               id <span style="color: #FBDE2D;">number</span> <span style="color: #FBDE2D;">primary</span> <span style="color: #FBDE2D;">key</span>,
+               <span style="color: #FBDE2D;">name</span> varchar2(40) <span style="color: #FBDE2D;">not</span> <span style="color: #FBDE2D;">null</span>,<span style="color: #AEAEAE;">--&#25991;&#20214;&#21517;</span>
+               filelocation bfile, <span style="color: #AEAEAE;">/*&#25991;&#20214;&#23384;&#25918;&#20301;&#32622; binary file lob */</span>
+               description <span style="color: #8DA6CE;">clob</span>   <span style="color: #AEAEAE;">/*&#25991;&#20214;&#25551;&#36848;*/</span>
+               );
+       2&#27880;&#20876;&#30446;&#24405;
+          <span style="color: #FBDE2D;">create</span> <span style="color: #FBDE2D;">or</span> replace directory filedir1 <span style="color: #FBDE2D;">as</span> <span style="color: #ffa07a;">'c:/filedir_for_oracle'</span>;
+           <span style="color: #AEAEAE;">--create or replace directory  &#30446;&#24405;&#21517; as '&#26412;&#22320;&#25110;&#32593;&#32476;&#30446;&#24405;&#21517;';</span>
+            <span style="color: #AEAEAE;">--&#26684;&#24335; '//&#26381;&#21153;&#22120;&#21517;/&#30446;&#24405;&#21517;'</span>
+       3  &#25554;&#20837;&#25968;&#25454;
+       &#27880;&#24847;&#20989;&#25968; bfilename(param1,param2)  ,param1 &#26159;&#19978;&#36848;&#21019;&#24314;&#30340;directory:filedir1 , &#31532;&#20108;&#20010;&#21442;&#25968;&#26159;&#25991;&#20214;&#21517;  &#20063;&#23601;&#26159;c:/filedir_for_oracle/oracle&#25945;&#31243;.txt
+          <span style="color: #FBDE2D;">insert</span> <span style="color: #FBDE2D;">into</span> downFileList <span style="color: #FBDE2D;">values</span> (1001,<span style="color: #ffa07a;">'orcle&#25945;&#31243;'</span>,bfilename( <span style="color: #F8F8F8;">upper</span>(<span style="color: #ffa07a;">'filedir1'</span>),<span style="color: #ffa07a;">'oracle&#25945;&#31243;.txt'</span>  ),<span style="color: #ffa07a;">'abcdefg&#24040;&#37327;&#23383;&#31526;&#65292;&#25551;&#36848;&#27492;&#20070;abc'</span>);
+
+          4  <span style="color: #FBDE2D;">select</span> id ,<span style="color: #FBDE2D;">name</span> ,description <span style="color: #FBDE2D;">from</span> downFilelist ;
+          &#23454;&#38469;c:/filedir_for_oracle/oracle&#25945;&#31243;.txt &#24182;&#19981;&#23384;&#22312;&#65292;bfile &#31867;&#22411;&#21482;&#26159;&#19968;&#20010;&#25351;&#21521;&#20316;&#29992;&#65292;&#26631;&#35760;
+
+
+     5 dbms_lob &#30340;&#20351;&#29992;
+       5.1 <span style="color: #FBDE2D;">read</span> (p1,p2,p3 ,p_out_4);
+
+               <span style="color: #FBDE2D;">declare</span>
+                 v_tmpDesc <span style="color: #8DA6CE;">clob</span>;
+                 v_start <span style="color: #FBDE2D;">number</span>:=1;
+                 v_length <span style="color: #FBDE2D;">number</span>:=5;<span style="color: #AEAEAE;">--&#35835;5&#20010;&#23383;&#31526;</span>
+                 v_out_desc varchar2(100);
+               <span style="color: #FBDE2D;">begin</span>
+               <span style="color: #FBDE2D;">savepoint</span> a;
+               <span style="color: #FBDE2D;">select</span> description <span style="color: #FBDE2D;">into</span> v_tmpDesc <span style="color: #FBDE2D;">from</span> downFileList <span style="color: #FBDE2D;">where</span> id=1001;
+                <span style="color: #AEAEAE;">--&#20174;v_tmpDesc &#20013;&#35835;&#21462;v_length&#20010;&#23383;&#31526;&#65292;&#20174;v_start &#20301;&#32622;&#24320;&#22987;&#35835;&#65292;&#25918;&#21040;v_out_desc&#20013;</span>
+                dbms_lob.<span style="color: #FBDE2D;">read</span>(v_tmpDesc,v_length,v_start,v_out_desc);
+                dbms_output.put_line(<span style="color: #ffa07a;">'&#25130;&#21462;&#30340;&#23383;&#31526;&#65306;'</span>||v_out_desc);
+
+                <span style="color: #FBDE2D;">commit</span> ;
+               <span style="color: #FBDE2D;">end</span>;
+
+        5.2 getlength;
+                <span style="color: #FBDE2D;">declare</span>
+                         v_tmpDesc <span style="color: #8DA6CE;">clob</span>;
+                v_length <span style="color: #FBDE2D;">number</span>;
+                <span style="color: #FBDE2D;">begin</span>
+                       <span style="color: #FBDE2D;">select</span> description <span style="color: #FBDE2D;">into</span> v_tmpDesc <span style="color: #FBDE2D;">from</span> downFileList <span style="color: #FBDE2D;">where</span> id=1001;
+                       v_length:=dbms_lob.getlength(v_tmpDesc);
+                       dbms_output.put_line(<span style="color: #ffa07a;">'&#22823;&#22411;&#23545;&#35937;description &#23383;&#31526;&#30340;&#38271;&#24230;'</span>||v_length);
+                <span style="color: #FBDE2D;">end</span>;
+        5.3 <span style="color: #FBDE2D;">write</span>
+             <span style="color: #FBDE2D;">declare</span>
+                 v_tmpDesc <span style="color: #8DA6CE;">clob</span>;
+                 v_length <span style="color: #FBDE2D;">number</span>:=5;
+                 v_newStr varchar2(255):=<span style="color: #ffa07a;">'&#26032;&#30340;&#20869;&#23481;&#21704;abce'</span>;
+             <span style="color: #FBDE2D;">begin</span>
+                       <span style="color: #FBDE2D;">select</span> description <span style="color: #FBDE2D;">into</span> v_tmpDesc <span style="color: #FBDE2D;">from</span> downFileList <span style="color: #FBDE2D;">where</span> id=1001 <span style="color: #FBDE2D;">for</span> <span style="color: #FBDE2D;">update</span>;
+                       dbms_output.put_line(<span style="color: #ffa07a;">'old: '</span>||v_tmpDesc);
+                       <span style="color: #AEAEAE;">--&#27880;&#24847;&#26032;&#28155;&#21152;&#30340;&#20869;&#23481;</span>
+                       <span style="color: #AEAEAE;">--&#20462;&#25913;v_tmpDesc&#30340;&#20869;&#23481; &#65292;&#20462;&#25913;&#30340;&#20301;&#32622;&#20026;1~1+length(v_newStr), &#20462;&#25913;&#21518;&#30340;&#20869;&#23481;&#20026;v_newStr</span>
+                       <span style="color: #AEAEAE;">--&#20294;&#26159;&#19981;&#26126;&#30333;&#30340;&#26159;&#20462;&#25913;&#30340;&#26159;v_tmpDesc ,&#20026;&#20160;&#20040;&#25968;&#25454;&#24211;&#20013;&#30340;&#20869;&#23481;&#20250;&#36319;&#30528;&#21464;&#65292;&#38590;&#36947;&#26159;&#24341;&#29992;,&#25110;&#32773;&#26159;&#22240;&#20026;for update &#30340;&#20351;&#29992;</span>
+                       dbms_lob.<span style="color: #FBDE2D;">write</span>(v_tmpDesc,<span style="color: #FBDE2D;">length</span>(v_newStr),1,v_newStr);
+                       dbms_output.put_line(<span style="color: #ffa07a;">'new: '</span>||v_tmpDesc);
+                       <span style="color: #FBDE2D;">commit</span>;
+
+             <span style="color: #FBDE2D;">end</span>;
+             /
+         5.4 append(dest_lob,appended_newStr);
+                  <span style="color: #FBDE2D;">declare</span>
+                     v_tmpDesc <span style="color: #8DA6CE;">clob</span>;
+                     v_length <span style="color: #FBDE2D;">number</span>:=5;
+                     v_newStr varchar2(255):=<span style="color: #ffa07a;">'append&#26032;&#30340;&#20869;&#23481;&#21704;abce'</span>;
+                 <span style="color: #FBDE2D;">begin</span>
+                           <span style="color: #FBDE2D;">select</span> description <span style="color: #FBDE2D;">into</span> v_tmpDesc <span style="color: #FBDE2D;">from</span> downFileList <span style="color: #FBDE2D;">where</span> id=1001 <span style="color: #FBDE2D;">for</span> <span style="color: #FBDE2D;">update</span>;
+                           dbms_output.put_line(<span style="color: #ffa07a;">'old: '</span>||v_tmpDesc);
+                           <span style="color: #AEAEAE;">--&#27880;&#24847;&#26032;&#28155;&#21152;&#30340;&#20869;&#23481;</span>
+                           dbms_lob.append(v_tmpDesc,v_newStr);
+                           dbms_output.put_line(<span style="color: #ffa07a;">'new: '</span>||v_tmpDesc);
+                           <span style="color: #FBDE2D;">commit</span>;
+                 <span style="color: #FBDE2D;">end</span>;
+                 /
+          5.5 erase(<span style="color: #8DA6CE;">clob</span>,<span style="color: #FBDE2D;">length</span>,startPos) ,&#21024;&#38500;
+          5.6  copy (dest_lob,src_lob,<span style="color: #FBDE2D;">length</span>,destStartPos,srcStartPos)
+                copy(<span style="color: #ffa07a;">'abcedef'</span>,<span style="color: #ffa07a;">'ABCDEFG'</span> ,3,2,1)
+
+                      <span style="color: #FBDE2D;">declare</span>
+                      dest <span style="color: #8DA6CE;">clob</span>:=<span style="color: #ffa07a;">'abcde'</span>;
+                      src <span style="color: #8DA6CE;">clob</span>:=<span style="color: #ffa07a;">'ABCDE'</span>;
+                     v_length <span style="color: #FBDE2D;">number</span>:=3;
+                 <span style="color: #FBDE2D;">begin</span>
+                           dbms_output.put_line(<span style="color: #ffa07a;">'old: '</span>||dest);
+                                 dbms_lob.copy(dest,src,v_length,2,1);
+                           dbms_output.put_line(<span style="color: #ffa07a;">'new: '</span>||dest);
+                           <span style="color: #FBDE2D;">commit</span>;
+                 <span style="color: #FBDE2D;">end</span>;
+                 /
+
+            5.7 &#23545;&#25991;&#20214;&#30340;&#25805;&#20316; BFILE   (dba_directories)
+                fileclose fileexists filegetname getlength
+         <span style="color: #AEAEAE;">--&#27979;&#35797;&#25991;&#20214;&#26159;&#21542;&#23384;&#22312;</span>
+         <span style="color: #FBDE2D;">select</span>  id,<span style="color: #FBDE2D;">name</span>, dbms_lob.fileExists(fileLocation) <span style="color: #FBDE2D;">from</span> downfileList;
+
+         <span style="color: #FBDE2D;">declare</span>
+          v_bfile bfile;
+          v_exists <span style="color: #FBDE2D;">number</span>(1);<span style="color: #AEAEAE;">--&#25991;&#20214;&#26159;&#21542;&#23384;&#22312;</span>
+          v_isOpen <span style="color: #FBDE2D;">number</span>(1);<span style="color: #AEAEAE;">--&#25991;&#20214;&#26159;&#21542;&#25171;&#24320;</span>
+          v_outputLength <span style="color: #FBDE2D;">number</span>:=5;<span style="color: #AEAEAE;">--&#36755;&#20986;&#23383;&#31526;&#30340;&#38271;&#24230;</span>
+          v_start <span style="color: #FBDE2D;">number</span>:=1;<span style="color: #AEAEAE;">--&#20174;&#31532;&#20960;&#20010;&#23383;&#31526;&#24320;&#22987;&#36755;&#20986;</span>
+          v_dirAlias <span style="color: #8DA6CE;">varchar</span>(20);<span style="color: #AEAEAE;">--&#30446;&#24405;</span>
+          v_fileName varchar2(30);
+          v_outputStr long ;
+         <span style="color: #FBDE2D;">begin</span>
+                <span style="color: #FBDE2D;">select</span> filelocation <span style="color: #FBDE2D;">into</span> v_bfile <span style="color: #FBDE2D;">from</span> downfilelist <span style="color: #FBDE2D;">where</span> id=1001;
+                <span style="color: #AEAEAE;">--&#33719;&#24471;&#25991;&#20214;&#21517;&#65292;&#25918;&#21040;v_fileName ,&#30446;&#24405;&#21517;&#25918;&#21040;v_dirAlias</span>
+
+                dbms_lob.fileGetName(v_bfile,v_dirAlias,v_fileName);
+                <span style="color: #AEAEAE;">--&#27979;&#35797;&#25991;&#20214;&#26159;&#21542;&#23384;&#22312;</span>
+                 v_exists:=dbms_lob.fileExists(v_bfile);
+                 if v_exists=1 <span style="color: #FBDE2D;">then</span>
+                         dbms_output.put_line(<span style="color: #ffa07a;">'&#25991;&#20214;'</span>||v_fileName||<span style="color: #ffa07a;">'&#23384;&#22312;'</span>);
+                 <span style="color: #FBDE2D;">else</span>
+                         dbms_output.put_line(<span style="color: #ffa07a;">'&#25991;&#20214;'</span>||v_fileName||<span style="color: #ffa07a;">'&#19981;&#23384;&#22312;&#65292;&#35831;&#22312;'</span>||v_dirAlias||<span style="color: #ffa07a;">'&#25152;&#25351;&#30446;&#24405;&#19979;&#21019;&#24314;&#27492;&#25991;&#20214;'</span>);
+                         <span style="color: #FBDE2D;">goto</span> end_flag;
+                 <span style="color: #FBDE2D;">end</span> if ;
+
+                 <span style="color: #AEAEAE;">--&#25171;&#24320;&#25991;&#20214;</span>
+                 v_isOpen :=dbms_lob.fileIsOpen(v_bfile);
+                     if v_isOpen=1 <span style="color: #FBDE2D;">then</span>
+                         dbms_output.put_line(<span style="color: #ffa07a;">'&#25991;&#20214;'</span>||v_fileName||<span style="color: #ffa07a;">'&#24050;&#25171;&#24320;'</span>);
+                 <span style="color: #FBDE2D;">else</span>
+                         dbms_output.put_line(<span style="color: #ffa07a;">'&#25991;&#20214;&#26410;&#25171;&#24320;,&#27491;&#22312;&#25171;&#24320;&#25991;&#20214;...'</span>);
+                         dbms_lob.fileOpen(v_bfile);
+
+                 <span style="color: #FBDE2D;">end</span> if ;
+         <span style="color: #AEAEAE;">--&#36755;&#20986;&#23383;&#31526;</span>
+          dbms_lob.<span style="color: #FBDE2D;">read</span>(v_bfile,v_outputLength,v_start,v_outputStr);
+          dbms_output.put_line(<span style="color: #ffa07a;">'&#36755;&#20986;&#30340;&#38271;&#24230;&#20026;'</span>||v_outputLength||<span style="color: #ffa07a;">'&#20869;&#23481;&#20026;&#65306;'</span>||v_outputStr);
+
+
+         <span style="color: #AEAEAE;">--&#20851;&#38381;&#25991;&#20214;</span>
+        dbms_lob.fileclose(v_bfile);
+          dbms_output.put_line(<span style="color: #ffa07a;">'&#25171;&#23436;&#25910;&#24037;,&#27491;&#22312;&#20851;&#38381;&#25991;&#20214;...'</span>);
+
+                 &lt;&lt;end_flag&gt;&gt;
+                 <span style="color: #FBDE2D;">null</span>;
+         <span style="color: #FBDE2D;">end</span>;
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgbffbc7e" class="outline-2">
+<h2 id="orgbffbc7e">触发器 user_triggers------------------------------------------------------------------------------</h2>
+<div class="outline-text-2" id="text-orgbffbc7e">
+<p>
+1   三部分<br />
+    1 触发事件<br />
+    2可选的触发器约束条件<br />
+    3触发器动作<br />
+2  可以创建如下语句所触发的trigger<br />
+   1 DML语句（insert update delete）<br />
+   2 ddl     (create alter drop)<br />
+   3 数据库操作（serverError ,logon ,logoff ,startup ,shutdown）<br />
+3可创建触发器的对象 table view 用户模式，数据库实例<br />
+4 触发器类型<br />
+  dml 触发器 系统触发器，替代触发器(instead of )<br />
+5 执行DML语句的顺序<br />
+    1 执行before 语句级的<br />
+    2 对于 受语句影响的每一行，执行DML<br />
+    3 执行after语句级的触发器<br />
+6 两个特殊值 ：new 新值，old旧值   可以通过new old 两个对象取得更改前后的数据<br />
+7 触发器谓词<br />
+   1 inserting updating deleting<br />
+</p>
+
+
+<p>
+二 创建DML trigger<br />
+   create or replace trigger triggerName<br />
+   before|after     insert|delete|update  of 列名<br />
+    on tableName [for each row]<br />
+    when 条件<br />
+    pl/sql块<br />
+&#x2013;for each row 表示 是行级触发器（每一行都会引起触发）,否则默认表级触发器(更新多条数据只触发一次，)<br />
+</p>
+
+
+
+<p>
+1 before trigger<br />
+</p>
+
+<p>
+create or replace trigger tg_test1<br />
+ before insert   on dept<br />
+ begin<br />
+ dbms_output.put_line('哈哈before insert trigger 被触发了 ');<br />
+ end;<br />
+</p>
+
+<p>
+2 行级触发器 表级触发器<br />
+ create or replace trigger tg_test1<br />
+  after update   on dept  for each row<br />
+  begin<br />
+  dbms_output.put_line('哈哈 after update  trigge 被 触发了,且是行级触发器 ');<br />
+  end;<br />
+</p>
+
+<p>
+update dept set dname=dname||'aaa' ;<br />
+</p>
+
+<p>
+ 3 new old  (for each row 情况下才有这两个对象)<br />
+create or replace trigger tg_test1<br />
+   before insert   on dept   for each row<br />
+ begin<br />
+     dbms_output.put_line('哈哈before insert trigger 被触发了 ,取得新插入的数据');<br />
+     dbms_output.put_line(:new.deptno);<br />
+     dbms_output.put_line(:new.dname);<br />
+     dbms_output.put_line(:new.loc);<br />
+ end;<br />
+</p>
+
+<p>
+insert into dept values (22,'成龙' ,'香港');<br />
+</p>
+
+<p>
+4 when 特定条件下触发<br />
+</p>
+
+<p>
+   create or replace trigger tg_test1<br />
+  after delete   on dept   for each row<br />
+  when (old.deptno=22) &#x2013;注意when 里面的old ,new 不带冒号<br />
+begin<br />
+    dbms_output.put_line('哈哈before insert trigger 被触发了 ,取得被删的数据');<br />
+    dbms_output.put_line(:old.dname||:old.deptno);<br />
+</p>
+
+<p>
+end;<br />
+</p>
+
+<p>
+delete from dept where deptno=22;<br />
+</p>
+
+<p>
+5 谓词inserting updating deleting<br />
+</p>
+
+
+<p>
+   create or replace trigger tg_test1<br />
+   &#x2013;注意这里，混合触发器<br />
+	  before insert or update or delete<br />
+   on dept   for each row<br />
+begin<br />
+       if inserting then<br />
+	       dbms_output.put_line('此次为insert 触发');<br />
+       elsif updating then<br />
+	       dbms_output.put_line('此次为update 触发');<br />
+       elsif deleting then<br />
+		dbms_output.put_line('此次为delete触发');<br />
+       end if ;<br />
+</p>
+
+<p>
+end;<br />
+</p>
+
+<p>
+insert into dept values (44,'','');<br />
+update  dept set ename='aa' where deptno=44;<br />
+delete from dept where deptno=44;<br />
+</p>
+
+<p>
+6 instead of 触发器（不能作用在表上，可以在视图上）<br />
+如果视图是多个表连接而成，故其不能插入数据，可以通过 此trigger 对其相应的表插入数据，实现视图的插入操作<br />
+</p>
+
+<p>
+&#x2013;向dept 中    insert 如果deptno 不存在则插入，若已存在则更新<br />
+create or replace trigger instead_of_test<br />
+  instead of insert on dept_view<br />
+</p>
+
+<p>
+     for each row<br />
+ declare<br />
+         v_count number;<br />
+begin<br />
+ select count(*) into v_count from dept where deptno=:new.deptno;<br />
+        if v_count=0 then<br />
+            insert into dept values (:new.deptno,:new.dname,:new.loc);<br />
+        elsif v_count=1 then<br />
+            update dept set dname=:new.dname,loc=:new.loc where deptno=:new.deptno;<br />
+       end if ;<br />
+end;<br />
+/<br />
+insert into dept_view values (10, 'a','b');&#x2013;如已有<br />
+insert into dept_view values (99, '99a','99b');&#x2013;<br />
+</p>
+
+<p>
+7变异表<br />
+ 如果一个表进行了insert update delete 等使表发生变化的语句 ，则不能在触发器里使用count(*) sum 等统计语句 ，因为表发生了变化 ，称为变异表<br />
+ create or replace trigger tg_change<br />
+ after delete on emp<br />
+ for each row<br />
+ declare<br />
+ v_count number;<br />
+ begin<br />
+    dbms_output.put_line('因为是after delete ,执行count(<b>)统计操作是在delete 之后，即在一张变异表上操作，必然有错');<br />
+    select count(</b>) into v_count from emp ;<br />
+ end;<br />
+ delete from emp where empno=7902;<br />
+</p>
+
+<p>
+8维护trigger<br />
+如果执行某项操作不想触发trigger  可暂时禁用之<br />
+alter trigger tg_test1 disable;<br />
+alter trigger tg_test1 enable;<br />
+drop trigger tg_test1;<br />
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-org84071db" class="outline-2">
+<h2 id="org84071db">变量类型------------------------------------------------------------------------------</h2>
+<div class="outline-text-2" id="text-org84071db">
+<p>
+1 标量（普通变量），2 record（结构体） ,3 集合（数组,map 等）<br />
+</p>
+
+
+<p>
+1 标量（scalar）-常用类型<br />
+            varName  [constant] datatype [not null] :=[default exp]<br />
+            v_userName varchar2(255) :='defaultName';<br />
+     %TYPE  类型 (一种根据从数据库中相应字段类型而变的标量)<br />
+           使用例 子：<br />
+            create or replace procedure sp_updateSalDependOnEname is<br />
+                   v_ename varchar2(25) :='defaultName';<br />
+                    &#x2013;v_empno 类型就是表emp 的empno 的类型<br />
+                   v_empno  emp.empno%TYPE;<br />
+             begin<br />
+                  update emp set ename='scott' where rownum=1;<br />
+                  select empno into v_empno from emp where rownum=1;<br />
+                    dbms_output.put_line('v_ename:'||v_ename ||'  empno:'||v_empno);<br />
+            end;<br />
+</p>
+
+<p>
+2 记录record（复合类型） 类似于C中的结构体 ,表中的一行<br />
+</p>
+
+<p>
+ 定义 记录类型  type_emp; 现在type_emp 地位等同于varchar2 number<br />
+type type_emp is record ( v_name emp.ename%type ,v_no emp.empno%type);<br />
+</p>
+
+
+<p>
+     declare<br />
+      type type_emp is record ( v_name emp.ename%type ,v_no emp.empno%type);<br />
+     emp_instance type_emp ;<br />
+     begin<br />
+     select ename,empno into emp_instance from emp where rownum=1;<br />
+     dbms_output.put_line('用户名：'||emp_instance.v_name||'用户编号：'||emp_instance.v_no);<br />
+    end;<br />
+    /<br />
+2.1 %rowtype  一类特殊的record, 数据类型为一张表的结构<br />
+declare<br />
+&#x2013;表示tbl_type 为一个结构如同表emp 结构的一个record<br />
+   tbl_type emp%rowtype;<br />
+   begin<br />
+   &#x2013; 只能存储一条记录<br />
+     select * into tbl_type from emp where rownum=1;<br />
+      dbms_output.put_line(tbl_type.ename||tbl_type.empno);<br />
+   end;<br />
+</p>
+
+
+
+<p>
+ dept_info dept%ROWTYPE;<br />
+  INSERT INTO dept VALUES ;<br />
+  UPDATE dept SET ROW = dept_info WHERE deptno = 30;<br />
+  &#x2013;returning 子句，<br />
+UPDATE employees SET salary = salary * 1.1 WHERE employee_id = emp_id<br />
+      RETURNING last_name, salary INTO emp_info;<br />
+</p>
+
+
+
+<p>
+3 集合<br />
+         1  Nested Tables 嵌套表 （数组）<br />
+                TYPE type_name IS TABLE OF element_type [NOT NULL];<br />
+        2  Varrays  可变数组(有上限)<br />
+                 type varray_instance_type  is varray (100) of number [not null] ;<br />
+        3   Associative Arrays （类似map ）  关联数组 (定义比nested table 多一个index语句 )<br />
+                  TYPE type_name IS TABLE OF element_type [NOT NULL]  INDEX BY [PLS_INTEGER | BINARY_INTEGER | VARCHAR2(size_limit)];<br />
+                 &#x2013;index by binary_integer 表示 数组 的下标以整数表示<br />
+                type table_type  is table of varchar2(255) index by binary_integer; &#x2013;这种像数组，table_type(0) ,table_type(1) &#x2026;.<br />
+                TYPE table_type IS TABLE OF NUMBER INDEX BY VARCHAR2(64); &#x2013;这种才像map，  table_type('land') := 100000;<br />
+</p>
+
+
+<p>
+CREATE TYPE ProjectList AS VARRAY(50) OF VARCHAR2(16);&#x2013;此种语法，会在数据库中存储， user_types  中可查到<br />
+type projectlist is varray(50) of varchar2(16) ;     &#x2013;此种语法用于编程，声明一种类型，程序结束就不存在了<br />
+</p>
+
+<p>
+集合 类型，有一些属性(好象集合类型都有)COUNT (数组长度)，,first(表中第一行的索引)  last<br />
+  函数     DELETE（删除一个元素）  因为varray 不允许操作单个元素，故无此法，只能操作整个数组<br />
+		 三种用法<br />
+		  1 delete(i); 删除第i条记录()<br />
+		  2  delete (i,j) 删除从第i到j条记录<br />
+		  3  delete  删除整个表<br />
+	   exists (若指定的元素存在则为true)  ,<br />
+		用法  exists(i) 第i条记录是否存在<br />
+	   next ,<br />
+		 用法 next(i)    返回第index=i 的下一个元素的下标(元素可能不连续存放,所以未必next(i)==i+1)，    但是当i为最后一条数据时，next(i)=null  ,可以据此判断是否遍历完了<br />
+	   prior()  与next 相反，逆向遍历<br />
+	   trim();   减少集合长度<br />
+	   extend(); 扩展 集合长度，<br />
+		 EXTEND appends one null element to a collection.<br />
+		 EXTEND(n) appends n null elements to a collection.<br />
+		 EXTEND(n,i) appends n copies of the ith element to a collection.<br />
+</p>
+
+<p>
+与集合操作有关的 sql  语句<br />
+ bulk collect into  语句  (在动态sql部分有bulk collect into 语句更详细 的使用方法 如forall )<br />
+</p>
+
+
+<p>
+3.1   Nested Tables 嵌套表(类似数组) --------------------------------------------------------------&#x2013;&#x2014;<br />
+type table_type_emp_ename  is table of emp.ename%type ;<br />
+create or replace type  table_type_emp_ename is table of varchar2(255);<br />
+</p>
+
+<p>
+实例：<br />
+1&#x2013;创建基类型 对象，相当于pl/sql 里的record<br />
+create or replace type DetailObj as object (<br />
+	goodsId number,<br />
+	count_ number,<br />
+	name varchar2(33)<br />
+	) not final ; &#x2013;not final 表示 此object可以被under ，即继承<br />
+2 创建 nested table<br />
+create or replace type NestDetailType is table  of DetailObj;<br />
+</p>
+
+<p>
+3 建表<br />
+   create table stockTable (<br />
+	    orderId number,<br />
+	    inDate date,<br />
+	    detail_ NestDetailType<br />
+	   ) nested table detail_ store as detail_real_Table ;<br />
+&#x2013; nested table detail_ store as detail_realTable  表示，表中的detail_嵌套表类型字段中的数据，实际存储在detail_real_Table中<br />
+4 insert<br />
+  insert into stockTable values (<br />
+	  1,sysdate,<br />
+	  NestDetailType(<br />
+	      DetailObj(111,34,'product1'),<br />
+	      DetailObj(112,324,'product2'),<br />
+	      DetailObj(113,314,'product3')<br />
+	      )<br />
+	  );<br />
+  5 select<br />
+     5.1 select * from stockTable;<br />
+     5.2 table() 函数        应该是将集合类型转化为可以select  的<br />
+	  select * from table(select detail_  from stockTable);<br />
+ 6 update   &#x2013;这一句在varray 中是不允许的，因为varray 是不可以操作其中的单个元素的，只能操作varray 整体<br />
+      update table(select detail_ from stockTable where orderId=1)  dt set dt.count_=dt.count_+1 where   name='product1' ;<br />
+ 7 delete   &#x2013;当然也可以使用table()函数<br />
+    delete from table(select detail_ from stocktable )  dt where dt.goodsid=111; &#x2013;删除嵌套表中的某一条记录<br />
+    delete from stockTable where orderid=1;<br />
+</p>
+
+
+
+<p>
+3.2可变数组varray ------------------------------------------------------------------------&#x2013;&#x2014;<br />
+一个字段里存多条数据<br />
+&#x2013;基类型<br />
+  type dt is varray(199) of varchar2(200);<br />
+create or replace type baseType as object (name varchar2(22),id number);<br />
+&#x2013;在pl/sql 中应该用record 吧  type baseType is record  (name varchar2(22),id number);<br />
+&#x2013;100 表示最大长度 ,基于基类型的可变数组<br />
+create or replace type detailType as varray(100) of baseType;<br />
+create or replace type dt as varray(100) of varchar2(22);<br />
+</p>
+
+<p>
+&#x2013;存货单<br />
+create table storeOrder<br />
+(<br />
+ id number not null primary key,<br />
+ inDate date,<br />
+ &#x2013;明细清单<br />
+ detail detailType<br />
+ );<br />
+</p>
+
+<p>
+插入数据<br />
+ insert into storeOrder values (1,sysdate,<br />
+         detailType(<br />
+             baseType('name1',111),<br />
+             baseType('name2',222),<br />
+             baseType('name3',333)<br />
+             )<br />
+         );<br />
+</p>
+
+<p>
+insert into storeOrder values (2,sysdate,<br />
+	detailType(<br />
+	    baseType('name11',111),<br />
+	    baseType('name22',222),<br />
+	    baseType('name33',333)<br />
+	    )<br />
+	);<br />
+</p>
+
+
+<p>
+ select * from x;<br />
+ 一个函数，用于以普通表的形式显示数据table() 其参数是一条记录，不能是多条<br />
+     select * from table(select s.detail from storeOrder s where s.id=1);<br />
+update storeOrder set detail =detailType(     baseType('name1111',11111),<br />
+             baseType('name2222',22222),<br />
+             baseType('name3333',33333)) where id=1;<br />
+只能 更新整个detail 而不能更新detail 中的数据 (致命缺点，一般很少被更改的数据使用这种可变数组 )<br />
+    可以通过procedure 实现<br />
+</p>
+
+<p>
+declare<br />
+p_detail detailType :=detailType(      baseType('name11',111), baseType('name22',222), baseType('name33',333) );<br />
+p_base baseType;<br />
+begin<br />
+</p>
+
+<p>
+select detail  into p_detail from storeOrder  where id=1 ;<br />
+  for  i in p_detail.first..p_detail.last<br />
+  loop<br />
+  p_base:=p_detail(i);<br />
+      dbms_output.put_line(p_base.name||'      '||p_base.id);<br />
+  end loop;<br />
+     p_base:=baseType('name4',4);<br />
+</p>
+
+<p>
+select p_base into p_detail(p_detail.last) from dual; &#x2013;只能更改，不能添加 ，思路 或可先建 一个比参数多一个的detail<br />
+</p>
+
+<p>
+      for  i in p_detail.first..p_detail.last<br />
+loop<br />
+p_base:=p_detail(i);<br />
+    dbms_output.put_line(p_base.name||'      '||p_base.id);<br />
+end loop;<br />
+</p>
+
+<p>
+end;<br />
+</p>
+
+
+<p>
+--------&#x2013;&#x2014;varray 使用first last exists(i) next 遍历处理数据，因为varray 不能单独处理每个元素，而只能处理整个数组，所以不能用delete(i) ----------------------------------&#x2013;&#x2014;<br />
+好像不能使用select &#x2026; into  varray_type 语句 ，<br />
+</p>
+
+<p>
+declare<br />
+     type table_type_emp_ename  is varray(100) of emp.ename%type;<br />
+     ename_array   table_type_emp_ename:=table_type_emp_ename('aaa','bbb','ccc');<br />
+     empno      emp.empno%type;<br />
+     v_index binary_integer;<br />
+     v_tmp number(10):=1;<br />
+begin<br />
+</p>
+
+<p>
+dbms_output.put_line('第一条数据：ename_array.first='||ename_array.first||' value <code>'||ename_array(ename_array.first));
+    dbms_output.put_line('最后一条数据：ename_array.last</code>'||ename_array.last||' value ='||ename_array(ename_array.last));<br />
+dbms_output.put_line('此表数组中共有记录数为：'||ename_array.COUNT);<br />
+</p>
+
+<p>
+dbms_output.put_line('next() 的用法  遍历 ' );<br />
+</p>
+
+<p>
+      v_index:=ename_array.first;<br />
+      while v_index is not null<br />
+    loop<br />
+       dbms_output.put_line(ename_array(v_index));<br />
+       v_index:=ename_array.next(v_index);<br />
+    end loop;<br />
+dbms_output.put_line(' end of next() 的用法 ' );<br />
+dbms_output.put_line(' varray 不能使用delete（）' );<br />
+&#x2013;        ename_array.delete(ename_array.first);<br />
+dbms_output.put_line('第二种遍历方式');<br />
+    v_tmp:=ename_array.first;<br />
+loop<br />
+    exit when false=ename_array.exists(v_tmp) ;<br />
+    dbms_output.put_line(v_tmp||ename_array(v_tmp));<br />
+    v_tmp:=v_tmp+1;<br />
+end loop;<br />
+</p>
+
+<p>
+end;<br />
+/<br />
+</p>
+
+
+
+<p>
+3.3 Associative Arrays  (table)------------------------------------------------------------&#x2013;&#x2014;<br />
+适用于内存操作，不可以将之存到表中（与nested table 的区别 ）<br />
+</p>
+
+<p>
+declare<br />
+     type table_type_emp_ename  is table of emp.ename%type index by binary_integer;<br />
+     ename_array   table_type_emp_ename;<br />
+     empno      emp.empno%type;<br />
+     v_index binary_integer;<br />
+     v_tmp number(10):=1;<br />
+begin<br />
+     select ename bulk collect into ename_array from emp ;<br />
+  &#x2013;  select ename into ename_array(3) from emp where empno=7369;<br />
+    dbms_output.put_line('第一条数据：ename_array.first='||ename_array.first||' value <code>'||ename_array(ename_array.first));
+            dbms_output.put_line('最后一条数据：ename_array.last</code>'||ename_array.last||' value ='||ename_array(ename_array.last));<br />
+    dbms_output.put_line('此表数组中共有记录数为：'||ename_array.COUNT);<br />
+    for i in ename_array.first..ename_array.last<br />
+    loop<br />
+	   dbms_output.put_line('index='||i||' value ='||ename_array(i));<br />
+    end loop;<br />
+</p>
+
+<p>
+dbms_output.put_line('删除2个元素' );<br />
+ename_array.delete(ename_array.first);<br />
+ename_array.delete(ename_array.first+3);<br />
+</p>
+
+<p>
+dbms_output.put_line('next() 的用法  遍历 ' );<br />
+</p>
+
+<p>
+  v_index:=ename_array.first;<br />
+  while v_index is not null<br />
+loop<br />
+   dbms_output.put_line(v_index||'     '||ename_array(v_index));<br />
+   v_index:=ename_array.next(v_index);<br />
+</p>
+
+<p>
+	end loop;<br />
+    dbms_output.put_line(' end of next() 的用法 ' );<br />
+end;<br />
+/<br />
+</p>
+
+<p>
+3.4 对象表(感觉不太重要，有点面向对象特性)---------------------------------------------------------&#x2013;&#x2014;<br />
+             对象表中每一行都是一个行对象 ，包含对象标识符oid ，普通表有rowid<br />
+              ref操作符用于引用 行对象<br />
+              defef操作符用于返回行对象的值<br />
+         1&#x2013;创  对象，<br />
+        create or replace type TeacherObj as object (<br />
+               id number,<br />
+                name varchar2(33)<br />
+                ) ;<br />
+        2    创建对象表<br />
+       create table teacherTable of TeacherObj;<br />
+       create table student (<br />
+               id number,<br />
+               name varchar2(20),<br />
+               &#x2013;表明teacherid 是一个引用外键，类型是TeacherObj  ,范围只能是teacherTable 表中存在的行对象<br />
+               teacherId ref TeacherObj  scope is teacherTable<br />
+               );<br />
+</p>
+
+<p>
+3   insert into teachertable values (1,'老张');<br />
+     insert into student select 111,'小于', ref(t) from teacherTable t where t.id=1 ;<br />
+</p>
+
+<p>
+ 4  ref 操作符,取得行对象的惟一标识符<br />
+    select ref(t) from  teacherTable t;<br />
+ 5 deref<br />
+   select s.id ,s.name ,deref(s.teacherid) as teacher from student s where id=111;<br />
+6  value() 看两者区别 ，以对象的形式返回<br />
+   select value(t) from teacherTable t ;<br />
+    select * from teacherTable t;<br />
+</p>
+
+<p>
+3.4.1  对象视图-------------------------------&#x2013;&#x2014;<br />
+   可以将普通关系表‘转换’为对象表<br />
+</p>
+
+
+<p>
+2 创建 关系表对应的对象<br />
+   create type deptObj is object (<br />
+      deptno number,<br />
+      dname varchar2(14),<br />
+      loc varchar2(13)<br />
+	   );<br />
+   3 创建对象视图<br />
+   &#x2013; with object oid (deptno) 根据表中的id字段决定对象的oid<br />
+     create view deptObjView of deptObj with object oid (deptno) as select * from dept;<br />
+   4 select<br />
+       select v.*,ref(v) from deptObjView v;<br />
+   5    make_ref()<br />
+   create view  emp_view as select make_ref(deptObjView ,deptno) as  deptOid, e.* from    emp e ;<br />
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org999d4d0" class="outline-2">
+<h2 id="org999d4d0">抽象数据类型(面向对象的特性)-------------------------------------------------------------------</h2>
+<div class="outline-text-2" id="text-org999d4d0">
+<p>
+ 1 type  数据字典 user_types<br />
+create or replace type addressType as object<br />
+( province varchar2(22),city varchar2(20));<br />
+</p>
+
+
+<p>
+create table stu (addr addressType,stuName varchar2(22));<br />
+insert into stu values (addressType('山东','临沂'),'tom');<br />
+select * from stu;<br />
+select stuName, s.addr.province, s.addr.city from stu s; 要使用别名<br />
+ update stu  s set s.addr.province='' where s.addr.city='临沂' ;<br />
+</p>
+
+
+<p>
+ 2 继承  (USER_DEPENDENCIES  依赖性， ,user_tab_columns )<br />
+  create or replace type Person as object<br />
+  (<br />
+   name varchar2(29),<br />
+   sex char(2)<br />
+   ) not final ;<br />
+/<br />
+  create or replace type studentType under Person<br />
+  ( studentNo number<br />
+   );<br />
+/<br />
+</p>
+
+<p>
+创建基于类型的表<br />
+create table student of studentType;<br />
+insert into student values ('小明','男',1);<br />
+insert into  student select studentType('慧慧','女',2) from dual;<br />
+update student set name='大明' where studentNo=1;<br />
+</p>
+
+
+<p>
+3有方法(function procedure)的对象<br />
+</p>
+
+<p>
+ create or replace type studentType2 as object<br />
+ (<br />
+name  varchar2(20),<br />
+member function getName return varchar2,<br />
+member procedure setName(p_name varchar2)<br />
+  );<br />
+ /<br />
+ create or replace type body studentType2 as<br />
+   member function getName   return varchar2 is<br />
+       begin<br />
+       return name;<br />
+       end ;<br />
+    member procedure setName(p_name varchar2) is<br />
+    begin<br />
+       name:=p_name;<br />
+    end;<br />
+end;<br />
+/<br />
+</p>
+
+<p>
+create table s2 of studentType2;<br />
+insert into s2 values ('name11111111');<br />
+</p>
+
+<p>
+测试代码<br />
+set serveroutput on<br />
+declare<br />
+ stu studentType2 ;<br />
+ begin<br />
+ stu:=studentType2('name11');<br />
+ stu.setName('name2');<br />
+ dbms_output.put_line(stu.getName());<br />
+   select name  into stu.name from s2 where name='name11111';<br />
+   insert into s2 select stu from dual;<br />
+ end;<br />
+/<br />
+</p>
+
+<hr />
+
+<p>
+3.8 当然可以将以上record ,和table 结合使用(结构体的数组)<br />
+  type table_type_emp_ename  is table of emp.ename%rowtype index by binary_integer;<br />
+  或者<br />
+   type type_emp is record ( v_name emp.ename%type ,v_no emp.empno%type);<br />
+    type table_type_emp_ename  is table of type_emp index by binary_integer;<br />
+</p>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-orgacfc377" class="outline-2">
+<h2 id="orgacfc377">4 游标（隐式游标，显式游标。游标cursor 与游标变量ref cursor不同，前者有如是常量，后者是变量，）</h2>
+<div class="outline-text-2" id="text-orgacfc377">
+<p>
+4.1  ·隐式游标（执行sql时，oracle自动创建一个隐式游标，） sql游标有以下属性 sql%rowcount ,sql%found ,sql%notfount  (sql%的前缀，让系统检查隐式游标区域，去获得相应信息) 同理可知显式游标，有%rowcount %found %notfound  %ROWTYPE????<br />
+</p>
+
+<p>
+declare<br />
+v_tmp number;<br />
+begin<br />
+	  update emp set sal=sal+10 ;<br />
+	  dbms_output.put_line('受上一句sql 影响的行数为(即update  了 多少行)：'||sql%rowcount);<br />
+</p>
+
+<p>
+	select empno  into v_tmp from emp where empno=7369 ;<br />
+		if sql%notfound then<br />
+		    dbms_output.put_line('没返回任何数据');<br />
+		  else<br />
+		    dbms_output.put_line('哈哈，select  了:'||sql%rowcount||'行');<br />
+		end if;<br />
+    end;<br />
+/<br />
+</p>
+
+<p>
+4.2 显式游标%FOUND, %ISOPEN %NOTFOUND, and %ROWCOUNT.<br />
+  declare<br />
+       cursor cursor_instance is select empno from emp ;<br />
+       v_empno number;<br />
+  begin<br />
+       open cursor_instance;<br />
+       &#x2013;这句话，放这儿cursor_instance%rowcount ==0<br />
+	 dbms_output.put_line('共有'||cursor_instance%rowcount||'行');<br />
+</p>
+
+<p>
+ &#x2013;注意这里也有notfound ，与隐式游标前面的sql% 不同，这里是自已定义的游标cursor_instance<br />
+loop<br />
+fetch cursor_instance into v_empno;<br />
+	   dbms_output.put_line(v_empno);<br />
+	   exit when cursor_instance%notfound ;<br />
+end loop;<br />
+      dbms_output.put_line('哈哈， 共有'||cursor_instance%rowcount||'行');<br />
+&#x2013;别忘了关闭<br />
+close cursor_instance;<br />
+</p>
+
+<p>
+end;<br />
+/<br />
+</p>
+
+
+
+<p>
+&#x2013;带参数的游标<br />
+	DECLARE<br />
+	  emp_name emp.ename%TYPE := 'SCOTT';<br />
+	  emp_salary   emp.sal%TYPE := 30000;<br />
+	  my_record emp%ROWTYPE;<br />
+	  CURSOR c1 (name VARCHAR2, max_wage NUMBER) IS<br />
+	    SELECT * FROM emp WHERE ename = name and sal &lt; max_wage;<br />
+	BEGIN<br />
+	&#x2013; Any of the following statements opens the cursor:<br />
+	&#x2013; OPEN c1('Austin', 3000);<br />
+	&#x2013; OPEN c1('Austin', emp_salary);<br />
+	&#x2013; OPEN c1(emp_name, 3000);<br />
+	&#x2013; OPEN c1(emp_name, emp_salary);<br />
+</p>
+
+<p>
+  OPEN c1(emp_name, emp_salary);<br />
+  LOOP<br />
+     FETCH c1 INTO my_record;<br />
+     EXIT WHEN c1%NOTFOUND;<br />
+     &#x2013; process data record<br />
+    dbms_output.put_line('Name = ' || my_record.ename ||<br />
+      ', salary = ' || my_record.sal);<br />
+  END LOOP;<br />
+END;<br />
+/<br />
+</p>
+
+
+<p>
+4.3 cursor for 循环，一类为cursor 而生的for 循环<br />
+(不必显示fetch close )<br />
+</p>
+
+<p>
+declare<br />
+&#x2013;注意这里的for update ,锁定cursor 当前行，以便下面进行更新<br />
+  cursor cursor_instance is select empno,ename,sal from emp for update   ;<br />
+   v_empno emp.empno%type;<br />
+  v_ename emp.ename%type;<br />
+  v_sal emp.sal%type;<br />
+begin<br />
+     for cursor_instance_index in cursor_instance<br />
+      loop<br />
+	 v_empno:=cursor_instance_index.empno;<br />
+	v_ename:=cursor_instance_index.ename;<br />
+	v_sal:=cursor_instance_index.sal*1.1;<br />
+	 dbms_output.put_line(v_empno||v_ename);<br />
+	 &#x2013;注意这里的where 语句 current of<br />
+	 update emp set sal =v_sal where  current of cursor_instance;<br />
+      end loop;<br />
+end;<br />
+/<br />
+</p>
+
+
+
+
+<p>
+5 参照变量 (类似 指针)<br />
+   分两种， 游标变量，对象类型变量<br />
+   (1)游标类型变量 ref cursor ;<br />
+       declare<br />
+                      &#x2013;定义一个类型<br />
+                type emp_cursor is ref cursor ;<br />
+                &#x2013;这种有返回值的只能open emp 表 ,或相同结构的表，<br />
+                &#x2013;type emp_cursor is ref cursor return emp%rowtype ;<br />
+                &#x2013;type emp_cursor is ref cursor return other_record_type ;<br />
+</p>
+
+<p>
+		&#x2013;定义emp_curse 的一个变量<br />
+	  emp_instance_cursor emp_cursor;<br />
+	  v_ename emp.ename%type;<br />
+	  v_sal emp.sal%type;<br />
+begin<br />
+      open emp_instance_cursor for select ename,sal from emp where deptno=20;<br />
+       loop<br />
+	      fetch  emp_instance_cursor into v_ename,v_sal;<br />
+	      exit when emp_instance_cursor%notfound;<br />
+	     dbms_output.put_line('用户：'||v_ename||'    工资：'||v_sal);<br />
+      end loop;<br />
+      close emp_instance_cursor;<br />
+end;<br />
+/<br />
+</p>
+
+
+
+
+
+
+
+
+<p>
+Cursor Expressions 游标表达示 (cursor 可以fetch 另一个cursor ，即cursor 嵌套)<br />
+</p>
+
+
+
+<p>
+DECLARE<br />
+   TYPE emp_cur_typ IS REF CURSOR;<br />
+   emp_cur emp_cur_typ;<br />
+   dept_name dept.dname%TYPE;<br />
+   emp_name emp.ename%TYPE;<br />
+    -&#x2014;第一个变量是 dname ，而第二个变量是一个游标，它是一个指向另一张表的指针 ,需要遍历才能取出其中数据<br />
+   CURSOR c1 IS SELECT<br />
+      dname,<br />
+</p>
+
+<p>
+   CURSOR<br />
+   (<br />
+      SELECT e.ename FROM emp e<br />
+      WHERE e.deptno = d.deptno<br />
+   ) employees<br />
+FROM dept d<br />
+   WHERE dname like 'A%';<br />
+</p>
+
+<p>
+BEGIN<br />
+   OPEN c1;<br />
+   LOOP<br />
+      FETCH c1 INTO dept_name, emp_cur;<br />
+      EXIT WHEN c1%NOTFOUND;<br />
+      dbms_output.put_line('Department: ' || dept_name);<br />
+      dbms_output.put_line('部门下的员工有：');<br />
+&#x2013; For each row in the result set, we can process the result<br />
+&#x2013; set from a subquery. We could pass the ref cursor to a procedure<br />
+&#x2013; instead of processing it here in the loop.<br />
+      LOOP<br />
+         FETCH emp_cur INTO emp_name;<br />
+         EXIT WHEN emp_cur%NOTFOUND;<br />
+         dbms_output.put_line('   Employee: ' || emp_name);<br />
+      END LOOP;<br />
+   END LOOP;<br />
+   CLOSE c1;<br />
+END;<br />
+/<br />
+</p>
+
+
+<p>
+一个综合实例<br />
+DECLARE<br />
+&#x2013;employees%rowtype 是一条记录类型，EmployeeSet 则是记录类型的数组了<br />
+   TYPE EmployeeSet IS TABLE OF emp%ROWTYPE;<br />
+   underpaid EmployeeSet; &#x2013; Holds set of rows from EMPLOYEES table.<br />
+&#x2013;注意，这两句的用法<br />
+   CURSOR c1 IS SELECT empno, ename FROM emp;<br />
+   TYPE NameSet IS TABLE OF c1%ROWTYPE;<br />
+   some_names NameSet;<br />
+</p>
+
+<p>
+BEGIN<br />
+</p>
+
+<p>
+SELECT * BULK COLLECT INTO underpaid FROM emp      WHERE sal &lt; 2500 ORDER BY sal DESC;<br />
+</p>
+
+
+<p>
+dbms_output.put_line(underpaid.COUNT || ' people make less than 2500.');<br />
+FOR i IN underpaid.FIRST .. underpaid.LAST<br />
+LOOP<br />
+   dbms_output.put_line(underpaid(i).empno || ' makes ' || underpaid(i).sal);<br />
+END LOOP;<br />
+</p>
+
+
+<p>
+   SELECT empno, ename BULK COLLECT INTO some_names FROM emp<br />
+      WHERE ROWNUM &lt; 11;<br />
+   FOR i IN some_names.FIRST .. some_names.LAST<br />
+   LOOP<br />
+      dbms_output.put_line('Employee = ' || some_names(i).empno || ' ' || some_names(i).ename);<br />
+   END LOOP;<br />
+END;<br />
+/<br />
+</p>
+
+<hr />
+<p>
+控制语句-----------------------------------------------------------------------&#x2013;&#x2014;<br />
+ if else 语句 ------------------------------------------------------------&#x2013;&#x2014;<br />
+ &#x2013;example<br />
+</p>
+
+<p>
+ create or replace  procedure sp_addSal10P(p_Name varchar2)<br />
+    is<br />
+    v_sal emp.sal%type ;<br />
+begin<br />
+</p>
+
+<p>
+      select sal into v_sal from emp where ename=p_Name;<br />
+         if v_sal&lt;2000 then<br />
+                update emp set sal=v_sal*1.1 where ename=p_Name;<br />
+               &#x2013;这里有then  且是elsif 非elseif<br />
+         elsif  v_sal&lt;3000  then<br />
+                update emp set sal=v_sal*1.01 where ename=p_Name;<br />
+              &#x2013;这里没有then<br />
+         else<br />
+                update emp set sal=v_sal*1.001 where ename=p_Name;<br />
+         end if ;<br />
+    end;<br />
+    /<br />
+case -------&#x2013;&#x2014;三种形式-------------------------------------------------&#x2013;&#x2014;<br />
+</p>
+
+<p>
+ declare v_sal number:=3;<br />
+ begin<br />
+       case<br />
+          when v_sal&lt;10 then<br />
+             null;<br />
+         when v_sal&lt;100 then<br />
+             null;<br />
+      end case;<br />
+  end;<br />
+/<br />
+</p>
+<hr />
+<p>
+   declare v_sal number:=3;<br />
+ begin<br />
+       case  v_sal<br />
+          when  3 then<br />
+          dbms_output.put_line(v_sal||'就是3 嘛');<br />
+         when 4 then<br />
+          dbms_output.put_line(v_sal||'明明就是4 嘛');<br />
+      end case;<br />
+  end;<br />
+/<br />
+</p>
+
+<p>
+&#x2013;case 可以作为 赋值语句------------------&#x2013;&#x2014;<br />
+</p>
+
+<p>
+  declare<br />
+  v_sal number:=3;<br />
+  v_newsal number;<br />
+begin<br />
+     v_newsal:= case  v_sal<br />
+	 when  3 then  3*10<br />
+	when 4 then  4*10<br />
+     end ;<br />
+     &#x2013; 注意这里是end 而非end case ; 而when 句末无分号<br />
+	 dbms_output.put_line(v_newsal);<br />
+ end;<br />
+</p>
+
+
+<p>
+loop  end loop;-------------------------------------------------------------------&#x2013;&#x2014;<br />
+         create or replace  procedure sp_addEmp<br />
+            is<br />
+            v_i number :=0;<br />
+        begin<br />
+            loop<br />
+                      insert into emp (empno,ename) values (v_i,'user_'||v_i);<br />
+                      v_i := v_i+1;<br />
+                      &#x2013;出口<br />
+               exit when v_i=10;<br />
+            end loop;<br />
+        end;<br />
+        /<br />
+</p>
+
+<p>
+while -------------------------------------------------------------------------&#x2013;&#x2014;<br />
+         create or replace  procedure sp_addEmp<br />
+            is<br />
+            v_i number :=10;<br />
+        begin<br />
+               while v_i&lt;20<br />
+               loop<br />
+                      insert into emp (empno,ename) values (v_i,'user_'||v_i);<br />
+                      v_i := v_i+1;<br />
+                end loop;<br />
+        end;<br />
+        /<br />
+</p>
+
+<p>
+for-------------------------------------------------------------------------&#x2013;&#x2014;<br />
+             create or replace  procedure sp_addEmp<br />
+                is<br />
+            begin<br />
+            &#x2013;受限制，一般不用for 因为步长始终为1，且须知始末<br />
+            &#x2013;其中的reverse 可少略，有reverse 表示 倒序，即 i=1000;i&#x2013;;<br />
+                for i in reverse  100..1000 loop<br />
+                          &#x2013;insert into emp (empno,ename) values (i,'user_'||i);<br />
+                          delete from emp where empno=i;<br />
+                end loop;<br />
+            end;<br />
+            /<br />
+</p>
+
+<hr />
+<p>
+ begin<br />
+ for item in (select ename  from emp)<br />
+loop<br />
+</p>
+
+<p>
+dbms_output.put_line(item.ename);<br />
+end loop;<br />
+end;<br />
+/<br />
+</p>
+
+<p>
+goto ------------------------------------------------------------&#x2013;&#x2014;<br />
+                 create or replace  procedure sp_addEmp<br />
+                    is<br />
+                    v_i number :=100;<br />
+                begin<br />
+                       while v_i&lt;200  loop<br />
+                              &#x2013;insert into emp (empno,ename) values (v_i,'user_'||v_i);<br />
+                              delete from emp where empno=v_i;<br />
+                               dbms_output.put_line('delete&#x2026; '||v_i);<br />
+                               if v_i=150 then<br />
+                                   goto end_loop_flag;<br />
+                               end if ;<br />
+                              v_i := v_i+1;<br />
+                    end loop;<br />
+                    <a id="org578af45"></a><br />
+                    -&#x2014;这是goto 结束标记，好像不能放到end 前面（即程序的最后一个语句 ），例如，有下句话，可编译通过 ,无下句话编译&#x2013;不通过<br />
+                                dbms_output.put_line('out of loop by using goto&#x2026; ');<br />
+                end;<br />
+                /<br />
+ null 语句     ----------------------------------------------------------------------------------&#x2013;&#x2014;<br />
+             一般在判断语句时使用提高语句可读性，表示不执行任何操作<br />
+              if a&lt;3 then<br />
+                null;<br />
+              else<br />
+                delete from emp ;<br />
+                rollback;<br />
+              end if ;<br />
+</p>
+
+
+
+<p>
+例外exception ------------------------------------------------------------------------------&#x2013;&#x2014;<br />
+ 分三类，预定义异常（常见异常），非预定义异常（一种特定的oracle 错误，但未被关联成预定义异常，可以将相应oracle 错误号，与自已声明的异常名称相关联），自定义异常<br />
+</p>
+
+
+<p>
+在begin  end 之间加exception<br />
+begin<br />
+exception<br />
+   when no_data_found then<br />
+     dbms_output.put_line(' 未找到数据');<br />
+end ;<br />
+</p>
+
+<p>
+&#x2013;几个常用 例外<br />
+case_not_found ,no_date_found , cursor_already_open,dup_val_on_index (index 上插入重复值 )<br />
+    invalid_cursor (从没打开的curosr 上读数据 ，关闭未打开的游标) ，invalid_number ,too_many_rows (select into vari_ 语句返回的不是一条记录) ,zero_devide ,value_error (长度超标)<br />
+</p>
+
+
+<p>
+declare v_sal emp.sal%type;<br />
+begin<br />
+      select sal into v_sal from emp where empno=7369;<br />
+      case<br />
+          when v_sal&lt;10 then<br />
+             null;<br />
+         when v_sal&lt;100 then<br />
+             null;<br />
+      end case;<br />
+</p>
+
+<p>
+      exception<br />
+       when case_not_found then<br />
+       dbms_output.put_line('case 未找到!!!!!');<br />
+end;<br />
+</p>
+
+<p>
+2非预定义异常<br />
+    declare<br />
+         ex_example exception ;<br />
+         &#x2013;将oracle -2292 号错误与ex_example 相关联， 外键错误 的异常<br />
+         pragma exception_init(ex_example, -2292);<br />
+     begin<br />
+               delete from dept where deptno=10;<br />
+     exception<br />
+      when ex_example  then<br />
+               dbms_output.put_line('哈哈，返回的错误号：'||sqlcode());<br />
+               dbms_output.put_line('哈哈，返回的错误信息：'||sqlerrm());<br />
+              dbms_output.put_line('哈哈，因为外键引用，无法完成册除');<br />
+ end;<br />
+</p>
+
+<p>
+3自定义例外------------&#x2013;&#x2014;<br />
+</p>
+
+<p>
+create or replace procedure ex_test(p_empno number ) is<br />
+  myex2 exception ;<br />
+   begin<br />
+ if   1=1 then<br />
+ &#x2013; 在这种情况下触发此exception<br />
+       raise myex2;<br />
+ end if ;<br />
+ exception<br />
+    when myex2 then<br />
+     dbms_output.put_line('1=1你都抛异常，实属胡闹');<br />
+       dbms_output.put_line('哈哈，返回的错误号：'||sqlcode());<br />
+   end ;<br />
+/<br />
+call ex_test(7611);<br />
+call ex_test(7369);<br />
+</p>
+
+<p>
+4 raise_application_error 允许用户创建自定义异常，发给应用程序显示，而不只是dbms_output.put_line();<br />
+</p>
+
+<p>
+declare<br />
+e exception;<br />
+begin<br />
+ if 1=1 then<br />
+  raise e;<br />
+  end if ;<br />
+exception<br />
+ when e then<br />
+   raise_application_error(-20001,'纯属胡闹');<br />
+</p>
+
+<p>
+end;<br />
+异常的一点补充<br />
+ when others then 语句 补获所有未被补的异常<br />
+  exception<br />
+   when myex then<br />
+     dbms_output.put_line('没有数据被更新');<br />
+    when others  then<br />
+    null;<br />
+</p>
+
+<p>
+sqlcode()函数返回oracle错误号，sqlerrm() 返回错误信息<br />
+</p>
+
+
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orgf355440" class="outline-2">
+<h2 id="orgf355440">动态SQL-------------------------------------------------------------------------------------------------------------&#x2013;&#x2014; Except for multi-row queries(返回多条记录的查询), the dynamic string</h2>
+<div class="outline-text-2" id="text-orgf355440">
+<p>
+                       can contain any SQL statement (不必包括末尾的分号) or<br />
+                       any PL/SQL block (包括末尾分号).<br />
+execute immediate stmt_sql<br />
+execute immediate stmt_sql [ using val1,val2]<br />
+execute immediate  stmt_sql [ using val1,val2] [returning into someVariable]   &#x2013;update insert delete 语句可以有returning 子句，返回一个值到某个变量中<br />
+execute immediate stmt_sql bulk collect into &#x2026;;  集合的动态sql  select<br />
+execute immediate stmt_sql   RETURNING BULK COLLECT INTO   &#x2013;          update delete insert<br />
+</p>
+
+
+
+
+<p>
+create table t2 (id int) ;<br />
+insert into t2 values (123);<br />
+insert into t2 values (1233);<br />
+declare<br />
+v_dept_name varchar2(255):='日本';<br />
+v_sql_stmt varchar2(2000);<br />
+v_sal number;<br />
+begin<br />
+ EXECUTE IMMEDIATE 'CREATE   TABLE bonu (id NUMBER, amt NUMBER)';<br />
+&#x2013;带参数的动态sql ,注意如果要往里面传值，必须用这种方式 ，因为单引号的存在会引起歧义，好像没有转义字符在oracle中<br />
+v_sql_stmt := 'INSERT INTO dept VALUES (:1, :2, :3)';<br />
+EXECUTE IMMEDIATE v_sql_stmt USING 14, '中国', '东亚';<br />
+EXECUTE IMMEDIATE v_sql_stmt USING 13, v_dept_name, '亚';<br />
+   plsql_block := 'BEGIN calc_stats(:x, :x, :y, :x); END;'<br />
+   EXECUTE IMMEDIATE plsql_block USING 4,7;<br />
+&#x2013;block  调用一个block块<br />
+v_sql_stmt:='begin   pack_test.SP_UPDATESALDEPENDONENAME(:1,:2); end; ';<br />
+execute immediate v_sql_stmt    using 'SCOTT',123;<br />
+</p>
+
+<p>
+&#x2013;更新数据<br />
+ v_sql_stmt := 'UPDATE emp SET sal = 2000 WHERE empno = :1<br />
+      RETURNING sal INTO :2';<br />
+   EXECUTE IMMEDIATE v_sql_stmt USING 7369 RETURNING INTO v_sal;<br />
+   dbms_output.put_line(v_sal);<br />
+</p>
+
+<p>
+ &#x2013;删除数据<br />
+ EXECUTE IMMEDIATE 'DELETE FROM t2 WHERE id = :abce'     USING 123;<br />
+&#x2013;打开游标<br />
+ v_sql_stmt := 'SELECT * FROM emp WHERE job = :j';<br />
+ OPEN emp_cv FOR sql_stmt USING my_job;<br />
+</p>
+
+<p>
+&#x2013;其他 情况<br />
+EXECUTE IMMEDIATE 'ALTER SESSION SET SQL_TRACE TRUE';<br />
+</p>
+
+<p>
+end;<br />
+</p>
+
+<p>
+null的处理 using 句不能直接用null 值 ，需如下处理<br />
+DECLARE<br />
+   a_null CHAR(1); &#x2013; set to NULL automatically at run time<br />
+BEGIN<br />
+   EXECUTE IMMEDIATE 'UPDATE emp SET comm = :x' USING a_null;<br />
+END;<br />
+/<br />
+</p>
+
+
+
+
+<p>
+&#x2013;动态sql 中procedure 的参数 in out mode需要显式指明 -----------------------------------------------------&#x2013;&#x2014;<br />
+CREATE PROCEDURE create_dept (<br />
+   deptno IN OUT NUMBER,<br />
+   dname  IN VARCHAR2,<br />
+   loc    IN VARCHAR2) AS<br />
+BEGIN<br />
+   SELECT deptno_seq.NEXTVAL INTO deptno FROM dual;<br />
+   INSERT INTO dept VALUES (deptno, dname, loc);<br />
+END;<br />
+/<br />
+</p>
+
+<p>
+To call the procedure from a dynamic PL/SQL block, you must specify the IN OUT mode for the bind argument associated with formal parameter deptno, as follows:<br />
+</p>
+
+<p>
+DECLARE<br />
+   plsql_block VARCHAR2(500);<br />
+   new_deptno NUMBER(2);<br />
+   new_dname  VARCHAR2(14) := 'ADVERTISING';<br />
+   new_loc    VARCHAR2(13) := 'NEW YORK';<br />
+BEGIN<br />
+   plsql_block := 'BEGIN create_dept(:a, :b, :c); END;';<br />
+   EXECUTE IMMEDIATE plsql_block<br />
+   ---------------&#x2013;&#x2014;注意这里的in out ，必须显式声明，保持与PROCEDURE create_dept（）中参数的一致<br />
+      USING IN OUT new_deptno, new_dname, new_loc;<br />
+   IF new_deptno &gt; 90 THEN &#x2026;<br />
+END;<br />
+/<br />
+</p>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org235e17e" class="outline-2">
+<h2 id="org235e17e">-动态sql 与 bulk collect 集合操作 --------------------------------------------</h2>
+<div class="outline-text-2" id="text-org235e17e">
+<p>
+%BULK_ROWCOUNT<br />
+</p>
+
+<p>
+bulk collect into<br />
+</p>
+
+<p>
+select ename bulk collect into someCollectionTypeVar from emp  ;<br />
+FETCH emp_cv BULK COLLECT INTO names, sals;  &#x2013;emp_cv 是一个指向name ,sal 两列数据的游标<br />
+SELECT employee_id, last_name, salary FROM employees BULK COLLECT INTO all_employee_ids, all_last_names, all_salaries;<br />
+</p>
+
+
+
+<p>
+DECLARE<br />
+   TYPE EmpCurTyp IS REF CURSOR;<br />
+   TYPE NameList IS TABLE OF emp.ename%TYPE;<br />
+   TYPE SalList IS TABLE OF emp.sal%TYPE;<br />
+   emp_cv EmpCurTyp;<br />
+   names  NameList;<br />
+   sals   SalList;<br />
+BEGIN<br />
+   OPEN emp_cv FOR SELECT ename, sal FROM emp WHERE sal &lt; 3000;<br />
+   FETCH emp_cv BULK COLLECT INTO names, sals;<br />
+   CLOSE emp_cv;<br />
+&#x2013; Now loop through the NAMES and SALS collections.<br />
+   FOR i IN names.FIRST .. names.LAST<br />
+   LOOP<br />
+      dbms_output.put_line('Name = ' || names(i) || ', salary = ' ||<br />
+	 sals(i));<br />
+   END LOOP;<br />
+END;<br />
+/<br />
+</p>
+
+
+
+
+<p>
+DECLARE<br />
+   TYPE EmpCurTyp IS REF CURSOR;<br />
+   TYPE NumList IS TABLE OF NUMBER;<br />
+   TYPE NameList IS TABLE OF VARCHAR2(15);<br />
+   emp_cv EmpCurTyp;<br />
+   empnos NumList;<br />
+   enames NameList;<br />
+   sals   NumList;<br />
+BEGIN<br />
+   OPEN emp_cv FOR 'SELECT empno, ename FROM emp';<br />
+     &#x2013;fetch 语句的bulk collect into 处理整个集合<br />
+&#x2013;  FETCH emp_cv BULK COLLECT INTOempnos, enames  LIMIT 7;  只处理7行，可以用循环多次执行此操作完成数据的处理<br />
+</p>
+
+<p>
+   FETCH emp_cv BULK COLLECT INTO empnos, enames;<br />
+   CLOSE emp_cv;<br />
+    &#x2013;将整个返回的sal 赋给一个集合 变量<br />
+   EXECUTE IMMEDIATE 'SELECT sal FROM emp'   BULK COLLECT INTO sals;<br />
+END;<br />
+/<br />
+</p>
+<hr />
+<p>
+&#x2013;update insert delete 语句可以有returning 子句<br />
+DECLARE<br />
+   TYPE NameList IS TABLE OF VARCHAR2(15);<br />
+   enames    NameList;<br />
+   sql_stmt  VARCHAR(200);<br />
+BEGIN<br />
+    &#x2013;update 的可能不只一条记录 所以   RETURNING BULK COLLECT INTO,或一条记录 则returning into<br />
+   sql_stmt := 'UPDATE emp SET sal = :1 RETURNING ename INTO :2';<br />
+   EXECUTE IMMEDIATE sql_stmt    USING 500 RETURNING BULK COLLECT INTO enames;<br />
+END;<br />
+/<br />
+ forall 循环，--------------------------------------------------&#x2013;&#x2014;<br />
+  To speed up INSERT, UPDATE, and DELETE statements . 使用forall 而不是for  loop end loop;<br />
+  To speed up SELECT statements, include the BULK COLLECT INTO clause in the SELECT statement instead of using INTO.<br />
+</p>
+
+<p>
+ forall 与for 的不同之处在于returning bulk collect into 时，<br />
+     forall 是继续向集全中追加 ，而for 则是替换了<br />
+DECLARE<br />
+   TYPE NumList IS TABLE OF NUMBER;<br />
+   TYPE NameList IS TABLE OF VARCHAR2(15);<br />
+   empnos NumList;<br />
+   enames NameList;<br />
+BEGIN<br />
+   empnos := NumList(1,2,3,4,5);<br />
+   &#x2013;注意这里没有loop end loop;  当然应该也可以用for loop end loop 实现<br />
+   FORALL i IN 1..5<br />
+      EXECUTE IMMEDIATE 'UPDATE emp SET sal = sal*1.1 WHERE empno = :1  RETURNING ename INTO :2' USING empnos(i) RETURNING BULK COLLECT INTO enames;<br />
+END;<br />
+/<br />
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<hr />
+<p>
+一个分页实例(java+oracle+pl/sql)<br />
+create table book(id number(18),name varchar2(30),description varchar2(500)   ,author char(30));<br />
+ create or replace procedure insertBook(p_id number,p_name varchar2 ,p_desc varchar2,p_author char)<br />
+     is<br />
+  begin<br />
+       insert into book  (id ,name ,description ,author) values (p_id,p_name,p_desc,p_author);<br />
+  end ;<br />
+  /<br />
+</p>
+<hr />
+<p>
+//分页语句<br />
+ select t2.* from (select rownum as r,t1.* from (select * from emp) t1)    t2 where t2.r&gt;2 and  t2.r&lt;5 ;<br />
+</p>
+
+<p>
+ create or replace package pack_cursor is<br />
+    type cursor_instance is ref cursor ;<br />
+end;<br />
+ /<br />
+</p>
+
+<p>
+create or replace procedure page(  p_tableName varchar2, p_orderbyCol varchar2 ,p_pageNow number ,p_pageSize number , p_rowSumCount out number, p_pageSumCount  out number ,   p_cursor out pack_cursor.cursor_instance  ) is<br />
+   v_begin number:=(p_pageNow-1)*p_pageSize+1;<br />
+   v_end number:=(p_pageNow)*p_pageSize+1 ;<br />
+   v_sql varchar2(1000):='select t2.* from (select rownum as r,t1.* from (select * from '||p_tableName ||'  order by '|| p_orderbyCol|| ') t1)    t2 where t2.r&gt;= '||v_begin||'  and  t2.r&lt; '|| v_end;<br />
+ begin<br />
+	       &#x2013;注意这一句 ，v_sql 是个变量，可以与java 中的反射机制，相联系<br />
+	&#x2013;  open p_cursor for select * from emp where deptno=p_deptno;<br />
+	open p_cursor for v_sql;<br />
+</p>
+
+<p>
+v_sql:='select count(*) from '||p_tableName ;<br />
+&#x2013;这一句，也关于反射机制，怎样将一个变量，作为一个sql 语句 执行<br />
+&#x2013;Dynamic SQL<br />
+execute immediate v_sql into p_rowSumCount ;<br />
+</p>
+
+<p>
+      if mod(p_rowSumCount ,p_pageSize)=0 then<br />
+	  p_pageSumCount:=p_rowSumCount/p_pageSize;<br />
+      else<br />
+	  p_pageSumCount:=p_rowSumCount/p_pageSize+1;<br />
+      end if ;<br />
+end ;<br />
+/<br />
+</p>
+
+<p>
+&#x2013;call page2('emp.ename,emp.deptno,emp.sal,dept.dname' ,'emp,dept','emp.deptno=dept.deptno' ,1,3,  &#x2026;)<br />
+&#x2013;   select * from   (  select rownum  as r ,t1.*  ( select  p_select from p_from where   p_where  order by p_order ) t1  )  where t2.r &gt;=1 and t2.r&lt;3 ;<br />
+  create or replace procedure page(  p_select varchar2, p_from varchar2 , p_where varchar2, p_order  varchar2,p_pageNow number ,p_pageSize number , p_rowSumCount out number, p_pageSumCount  out number ,   p_cursor out pack_cursor.cursor_instance  ) is<br />
+   v_begin number:=(p_pageNow-1)*p_pageSize+1;<br />
+   v_end number:=(p_pageNow)*p_pageSize+1 ;<br />
+   v_sql varchar2(1000):='select t2.* from (select rownum as r,t1.* from (select  '||p_select||'  from '||p_from ||'  where '||p_where||'  order by '|| p_order|| ') t1)    t2 where t2.r&gt;= '||v_begin||'  and  t2.r&lt; '|| v_end;<br />
+ begin<br />
+	       &#x2013;注意这一句 ，v_sql 是个变量，可以与java 中的反射机制，相联系<br />
+	&#x2013;  open p_cursor for select * from emp where deptno=p_deptno;<br />
+	open p_cursor for v_sql;<br />
+</p>
+
+<p>
+v_sql:='select count(*) from '||p_from ||' where '||p_where  ;<br />
+&#x2013;这一句，也关于反射机制，怎样将一个变量，作为一个sql 语句 执行<br />
+execute immediate v_sql into p_rowSumCount ;<br />
+</p>
+
+<p>
+      if mod(p_rowSumCount ,p_pageSize)=0 then<br />
+	  p_pageSumCount:=p_rowSumCount/p_pageSize;<br />
+      else<br />
+	  p_pageSumCount:=p_rowSumCount/p_pageSize+1;<br />
+      end if ;<br />
+end ;<br />
+/<br />
+</p>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-04-29</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/db/">DB</a>, <a href="/tags/oracle/">Oracle</a>, <a href="/tags/sql/">SQL</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/oracle_learn.html";
+          var disqus_url = "http://jixiuf.github.io/blog/oracle_learn.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

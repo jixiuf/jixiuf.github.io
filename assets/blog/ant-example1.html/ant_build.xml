@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project  basedir="." default="usage">
+  <!-- 如何使用本build文件,首先看一下文件头部的关于property部分的设置, -->
+  <!-- 将其调整为你本机相应的值, -->
+  <!--然后修改$TOMCAT_HOME/conf/tomcat-user.xml 
+      需要添加manager角色,并将manager角色加入到tomcat用户中
+      注意本配置文件是针对tomcat5.5的,有些配置不适合tomcat6
+      比如tomcat5.5下面的common目录,而6没有等.
+      另外deploy 和compile两个target 实际上只是一个空target
+      它调用其他的target 来完成任务,至于调用哪一个,你必须事先设置
+  -->
+  <!-- <property file="build.properties"/>
+       如果将将属性在一个proerties文件中进行配置,可以用这行代码
+       不过本人不太喜欢用两个文件,一旦分离,两文件形同废物.
+  -->
+  <property name="name" value="drp"/>
+  <property environment="env"/> <!-- 可以用${env.TOMCAT_HOME}引用环境变量 -->
+  <property name="tomcat.home" value="${env.TOMCAT_HOME}" />
+  <property name="tomcat.manager.url" value="http://localhost:8888/manager" />
+  <property name="tomcat.manager.username" value="tomcat" />
+  <property name="tomcat.manager.password" value="tomcat" />
+    <!--tomcat.manager.update 如果webapps下已经有相应的目录了,不是报错,而是更新之,
+        即用现在的application替换掉webapps下的同名目录
+       实际上是<deploy update="true"/>属性在起作用,只是间接的用这个值
+       设置其值罢了,不直接设置它的原因是其他地方会引用它,并根据它作相应的处理,
+       如下面的context.status target会更据这个值判断当前application
+       可不以进行发布. -->
+  <property name="tomcat.manager.update" value="true" />
+  <!-- 一个context文件,文件中的内容就一个Context标签 如果你不使用这种方式发布可以不用设置相应属性 -->
+  <property name="tomcat.manager.context.descriptor" location="/tmp/context.xml" />
+
+  <property name="src.dir"   location="./WEB-INF/src/"/>
+  <property name="web.dir"   location="./"/>
+  <property name="build.dir" location="${web.dir}/WEB-INF/classes"/>
+  
+  <path id="master-classpath">  
+    <fileset dir="${web.dir}/WEB-INF/lib">  
+      <include name="*.jar"/>  
+    </fileset>  
+    <fileset dir="${tomcat.home}/common/lib">  
+      <include name="servlet*.jar"/>  
+    </fileset>  
+    <pathelement path="${build.dir}"/>  
+  </path>
+  
+  <path id ="tomcat-ant-classpath" location="${tomcat.home}/server/lib/catalina-ant.jar"/>
+  
+  
+  <!-- ============================================================ -->  
+  <!-- Tomcat tasks - remove these if you don't have Tomcat installed -->  
+  <!-- ============================================================ -->  
+  <taskdef name="install" classname="org.apache.catalina.ant.InstallTask">  
+    <classpath refid="tomcat-ant-classpath"/>  
+  </taskdef>
+  <taskdef name="removeTask"  classname="org.apache.catalina.ant.RemoveTask">
+    <classpath refid="tomcat-ant-classpath"/>  
+  </taskdef>
+  <taskdef name="reload" classname="org.apache.catalina.ant.ReloadTask">  
+    <classpath refid="tomcat-ant-classpath"/>  
+  </taskdef>
+  <taskdef name="list" classname="org.apache.catalina.ant.ListTask">  
+    <classpath refid="tomcat-ant-classpath"/>  
+  </taskdef>
+  <taskdef name="start" classname="org.apache.catalina.ant.StartTask">  
+    <classpath refid="tomcat-ant-classpath"/>  
+  </taskdef>
+  <taskdef name="stop" classname="org.apache.catalina.ant.StopTask">  
+    <classpath refid="tomcat-ant-classpath"/>  
+  </taskdef>
+  <taskdef name="undeploy"  classname="org.apache.catalina.ant.UndeployTask">
+    <classpath refid="tomcat-ant-classpath"/>  
+  </taskdef>
+  <taskdef name="deploy"    classname="org.apache.catalina.ant.DeployTask">
+    <classpath refid="tomcat-ant-classpath"/>  
+  </taskdef>
+  <taskdef name="resources" classname="org.apache.catalina.ant.ResourcesTask">
+    <classpath refid="tomcat-ant-classpath"/>  
+  </taskdef>
+
+  <target name="clean" description="Clean up the build dir.">
+    <echo message="Cleaning up the build dir" />
+    <delete dir="${build.dir}" />
+    <mkdir dir="${build.dir}" />
+  </target>
+  
+  <target name="init" description="copy resources to build dir">
+    <echo >copy resource files from src dir to build dir</echo>
+    <mkdir dir="${build.dir}"/>
+    <copy todir="${build.dir}" preservelastmodified="true">
+      <fileset dir="${src.dir}">
+        <include name="**/*.*"/>
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
+  </target>
+  
+ <!--要想更改Xms Xmx必须加fork="true"属性,意思是让ant启动另一个jvm进行编译
+     如此才可以调整jvm堆栈的大小.
+     <compilerarg line="-Xlint:unchecked -J-Xms128m -J-Xmx512m" />
+     <compilerarg value="-Xlint:unchecked" />
+     另外line 与value 的不同的line 可以指定多个以空格分开的值
+     但是注意使用fork,需要多启动一个jvm开销是很大的,
+     另一个好的办法是试先设定好ant启动时的虚拟机的堆栈大小
+     可以通过在你的ant启动脚本里试先设好,然后调用ant命令来实现
+     set ANT_OPTS=-Xms128m -Xmx512m
+ -->
+  <target name="compile.fork" description="Compile source by staring a new jvm" depends="init">  
+    <javac destdir="${build.dir}" target="1.6" debug="true" includeantruntime="on"  
+           deprecation="false" optimize="true" failonerror="true"
+           fork="ture" memoryinitialsize="256m" memorymaximumsize="256m">  
+      <src path="${src.dir}"/>
+      <classpath refid="master-classpath"/>
+    </javac>  
+  </target>
+    
+  <target name="compile.nonfork" description="Compile source without starting a new jvm" depends="init">  
+    <javac destdir="${build.dir}" target="1.6" debug="true" includeantruntime="on"  
+           deprecation="false" optimize="true" failonerror="true" >  
+      <src path="${src.dir}"/>
+      <classpath refid="master-classpath"/>
+    </javac>  
+  </target>  
+
+  <target name="compile" description=
+          "Compile source by call compile.nonfork or compile.fork ,you must set it before you run it "
+          depends="compile.fork">
+    <!-- 只是简单的依赖compile.fork 或者依赖compile.nonfork
+         注意compile.fork 与compile.nonfork都是进行编译工作
+         不同一处在于前者会启动新的jvm进行编译,究竟使用哪种方式,自已抉择.
+    -->
+  </target>
+  
+  <target name="war" depends="compile" description="create war file.">
+    <war destfile="${name}.war"  
+         webxml="${web.dir}/WEB-INF/web.xml">  
+      <fileset dir="${web.dir}">  
+        <include name="**/*.*"/>
+        <exclude name="${name}.war"/>
+        <exclude name="${src.dir}"/>        
+      </fileset>  
+    </war>  
+  </target>
+  
+  <!-- install 表示将程序copy到tomcat_home/webapps目录下,
+       install 和deploy的不同,到目前为止我只发现
+       install可以安装目录
+       而deploy 只能安装war文件,
+       我所指的install, deploy 是tomcat 提供的cataline-ant.jar
+       包中的几个target(install deploy start stop undeploy 等)
+  -->
+  <!-- 一个项目在tomcat看来,可以有install start stop deploy reload undeploy几项操作
+       install是将一个application install到tomcat_home/webapps下
+       被install的可以是以下内容 可以是一个目录,通过war参数指定.
+       install只能运行一次,一旦application安装到webapps下,就不能再次install了
+       所以这种方式还不如手动<copy></copy>来无成.用上面注释掉的deploy方式来完成
+       因为有时稍做修改要重新拿去调试.再用这种install的方式略显麻烦
+       不过可以结合undeploy使用,首先从webapps undeploy之,然后将更改后的内容
+       install到webapps.deploy有个update属性,就是自动做这个处理.
+       这种方式感觉有损效率,它首选要全部删除,然后全部copy过去.
+       我认为效率最高的方式是在$TOMCAT_HOME/conf/server.xml文件中加入
+       <Context
+       reloadable="true"
+       antiResourceLocking="true""（这项为处理undeploy时无法删除已加载资源文件的问题）
+       antiJARLocking="true"（这项为了处理undeploy时无法删除已加载的jar文件的问题）
+       path="/jpetstore""（这项是工程路径）
+       docBase="D:/example/jpetstore/build/deployment/webapp" （工程所在实际位置，必须绝对路径，
+       原因在于org.apache.catalina.ant.DeployTask的源代码使用绝对路径处理包括localWar、
+       config两个属性）
+       debug="0"
+       />
+       然后我们只需要将内容编译在docBase(在docBase下直接做开发)相应目录下,然后调用reload就可以实现内容的重新加载
+       不需要删除复制(undeploy+install)(或者undeploy+deploy)的过程
+  -->
+  <!-- <target name="base.install" description="Install application in Tomcat"> -->
+  <!--   <install url="${tomcat.manager.url}" -->
+  <!--            username="${tomcat.manager.username}" -->
+  <!--            password="${tomcat.manager.password}" -->
+  <!--            path="/${name}" -->
+  <!--            war="${web.dir}" -->
+  <!--            /> -->
+  <!-- </target> -->
+  
+  <!-- 发布一个application,要发布什么内容通过war参数指定, -->
+  <!--war的值可以是一个war文件 -->
+  <!-- 关于install与deploy的不同,还没找到,估计是相同的
+       补充:后来发现install的war值可以是一个含有web结构的目录,
+       而deploy只能是war文件,是目录的话就报错.
+       deploy有一个update属性,意思是说,如果webapps目录下已经
+       有了一个同名的application,会选调用undeploy删除之,然后再deploy
+       此application, 不过install没有此属性
+  -->
+    
+  <!--     以下定义各种操作，注意if属性用于判断从context.status操作中得到的工程在服务器中的状态。 -->
+  <!-- 定义停止工程的操作： -->
+  
+  <!-- 首先运行context.status target ,这个target 会设置一些值,如context.deployable -->
+  <!-- ,意思是说当前applicatin可以进行deploy操作,也就是说可以进行下一步的发布
+       当前target 使用了config属性,所以只适用于使用context.xml的方式
+  -->
+  <target name="deploy.context" depends="compile,context.status" if="context.deployable"
+          description="deploy current application by a context.xml"
+          >
+    <deploy url="${tomcat.manager.url}"
+			username="${tomcat.manager.username}"
+			password="${tomcat.manager.password}"
+			path="/${name}"
+            update="${tomcat.manager.update}"
+            config="${tomcat.manager.context.descriptor}"
+  			/>
+    </target>
+    
+    <!--这种发布方式适用于以目录的形式直接copy到webapps下
+        此处war参数实际指向一个目录, 注意这里是使用的是install
+        首先运行undeploy,如果此application已经deployed
+        则首先undeploy之,然后才真正运行install进行deploy
+    -->
+  <target name="deploy.dir" depends="compile,undeploy"
+          description="deploy current application by copying web dir to webapps.">
+    <install url="${tomcat.manager.url}"
+             username="${tomcat.manager.username}"
+             password="${tomcat.manager.password}"
+             path="/${name}"
+             war="${web.dir}"/>
+    </target>
+    
+    <!-- 这种方式适用于以war包的方式发布 -->
+  <target name="deploy.war"
+          depends="context.status,war"
+          if="context.deployable"
+          description="deploy current application by a war file."
+          >
+    <deploy url="${tomcat.manager.url}"
+			username="${tomcat.manager.username}"
+			password="${tomcat.manager.password}"
+			update="${tomcat.manager.update}"
+			path="/${name}"
+			war="${name}.war"/>
+  </target>
+  
+    <!-- 这个target 不做任何事,只是简单的调用其的target
+     depends只能是deploy.war deploy.context deploy.dir 及 留空
+     意思是分别以
+     1 war包
+     2context.xml(需要额外的文件,配置的内容见本文件的附录)
+     3以dir的方式发布,即copy相应的目录到webapps目录下
+     4通过在$TOMCAT_HOME/conf/server.xml中加入Context标签的方式
+     此种方式,只要tomcat启动了就算发布完成,故不需要做任何事 -->
+  <target name="deploy"
+          depends=""
+          description="deploy current application.(you should set the depends property for this target before exec it.)"
+          >
+    
+  </target>
+
+  <!-- 重新加载applicatin -->
+  <!-- 重新加载此项目
+       注意这里仅仅是重新加载,但你需要保证重新要加载的内容已经在相应的目录里(如webapps)
+       因为有时候,我使用
+       <Context path="/drp" docBase="/tmp/drp_2010-6-4/WebRoot/" debug="0" reloadable="false"/>
+       的方式来发布服务,在这种情况下,我只要保证源代码重新编译过(编译好后的class文件已经在tomcat管理之下了)
+       ,即可以进行重新加载了.
+       而如果你将其发布到webapps目录下,你不仅要重新编译源码,还需要将编译好的内容copy到webapps
+       相应目录下,甚至先打包到war后copy,所以这里的depends我并没有写成war 等内容
+       你需要进行相应的更改,你甚至可以新建一个target ,让它依赖compile,war,及reload
+       来实现真正的一步reload.
+  -->
+  <target name="reload" description="Reload current application in Tomcat"
+          depends="compile,context.status" if="context.running">  
+    <reload url="${tomcat.manager.url}"  
+            username="${tomcat.manager.username}"  
+            password="${tomcat.manager.password}"  
+            path="/${name}"/>  
+  </target>
+
+  <!-- undeploy 这个application,即从TOMCAT_HOME/webapps中,将此applicatoin删除   -->
+  <target name="undeploy" description="undeploy current application if exists "
+          depends="context.status" if="context.undeployable" >  
+    <undeploy url="${tomcat.manager.url}"  
+              username="${tomcat.manager.username}"  
+              password="${tomcat.manager.password}"
+              path="/${name}"/>  
+  </target>
+  
+  <!-- 启动当前applicatoin  ,让tomcat开始对此application提供服务
+       start 与stop list我认为没太大用处
+  -->
+  <target name="start" description="Start current application if the application is stopped now"
+          depends="context.status" if="context.stopped">  
+    <start url="${tomcat.manager.url}"  
+           username="${tomcat.manager.username}"  
+           password="${tomcat.manager.password}"  
+           path="/${name}"/>  
+  </target>  
+  
+  <!-- 停止当前application,此时访问相应的url并不会显示页面,但是在TOMCAT_HOME/webapps -->
+  <!-- 目录下还有相应的内容,只是tomcat不给它提供服务了 -->
+  <target name="stop" description="Stop Current Tomcat application if it is running now."
+          depends="context.status" if="context.running">  
+    <stop url="${tomcat.manager.url}"  
+          username="${tomcat.manager.username}"  
+          password="${tomcat.manager.password}"  
+          path="/${name}"/>  
+  </target>
+  
+  <!-- 列出tomcat中发布的所有application -->
+  <target name="list" description="List all Tomcat applications">  
+    <list url="${tomcat.manager.url}"  
+          username="${tomcat.manager.username}"  
+          password="${tomcat.manager.password}"
+          />  
+  </target>
+  
+  <!-- End Tomcat tasks -->  
+  <target name="tomcat-start" description="starting tomcat...">
+    <java jar="${tomcat.home}/bin/bootstrap.jar" fork="true">
+      <jvmarg value="-Dcatalina.home=${tomcat.home}"/>
+    </java>
+  </target>
+  
+  <target name="tomcat-stop" description="stoping tomcat ...">
+    <java jar="${tomcat.home}/bin/bootstrap.jar" fork="true">
+      <jvmarg value="-Dcatalina.home=${tomcat.home}"/>
+      <arg line="stop"/>
+    </java>
+  </target>
+
+  <target name="tomcat-debug" description="starting tomcat in debug mode.">
+    <java jar="${tomcat.home}/bin/bootstrap.jar" fork="true">
+      <jvmarg value="-Dcatalina.home=${tomcat.home}"/>
+      <jvmarg value="-Xdebug"/>
+      <jvmarg value="-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"/>
+    </java>
+  </target>
+  
+  <!--这几个值不需要设置,每一次运行context.status任务,会自动填充这几个值,
+      比如context.notInstalled =true说明当前application还没install
+      下一步可以进行install等操作.=false的话,说明application已经被tomcat
+      管理了.
+      也就是说在某个target中,你可以让它依赖context.status,然后在其中判断这
+      几个属性的值,以便做出相应的操作.
+  -->
+
+  <target name="context.status"
+          description="get the status of current application.(don't run this target directly)">
+    <property name="running" value="/${name}:running"/>
+    <property name="stopped" value="/${name}:stopped"/>
+    
+	<!-- （这里首先由url、username、password及list组成url请求字符串
+         ，outputproperty把响应的字符串保存到ctx.status中，其中包括所有的工程及其它们的运行状态
+         注意list 的功能由 org.apache.catalina.ant.ListTask提供,上面我也提供了
+         关于list的一个target ,你可以运行ant list查看tomcat上所有application的状态
+    -->
+    <list url="${tomcat.manager.url}" outputproperty="ctx.status"
+          username="${tomcat.manager.username}" password="${tomcat.manager.password}"/>
+    
+    <!-- (使用是否包含子字符串的方式判断当前工程是否运行，结果保存在context.running中)
+         就是判断/${name}所指向的application是否运行,将结果记到context.running中
+    -->
+    <condition property="context.running">
+      <contains string="${ctx.status}" substring="${running}"/>
+    </condition>
+    
+    <!-- （使用是否包含子字符串的方式判断当前工程是否停止，结果保存在context.stopped中） -->
+    <condition property="context.stopped">
+      <contains string="${ctx.status}" substring="${stopped}"/>
+    </condition>
+    
+    <!-- （and标签是与运算，这里的意思是如果工程即不是运行状态，又不是停止状态， -->
+    <!-- 那么它就没有被list任务检测到，这表示它没有被安装，结果保存在context.notInstalled中） -->
+    <condition property="context.notInstalled">
+      <and>
+        <isfalse value="${context.running}"/>
+        <isfalse value="${context.stopped}"/>
+      </and>
+    </condition>
+
+    <condition property="context.deployable">
+      <or>
+        <istrue value="${context.notInstalled}"/>
+        <and>
+          <istrue value="${context.running}"/>
+          <istrue value="${tomcat.manager.update}"/>
+        </and>
+        <and>
+          <istrue value="${context.stopped}"/>
+          <istrue value="${tomcat.manager.update}"/>
+        </and>
+      </or>
+    </condition>
+    
+    <!-- （or标签是与运算，这里的意思是如果工程是运行状态或者停止状态，那么它已被安装，
+         是可以卸载的，结果保存在context.undeployable中 -->
+    <condition property="context.undeployable">
+      <or>
+        <istrue value="${context.running}"/>
+        <istrue value="${context.stopped}"/>
+      </or>
+    </condition>
+  </target>
+  
+<target name="usage" description="about how to use this file">
+  <echo> about how to use this file ,run ant -p </echo>
+</target>  
+</project>
+
+
+<!-- <?xml version="1.0" encoding="utf-8"?> -->
+<!-- <Context -->
+<!--     reloadable="true" -->
+<!--     antiResourceLocking="true" -->
+<!--     antiJARLocking="true" -->
+<!--     path="/drp" -->
+<!--     docBase="/tmp/drp_2010-6-4/" -->
+<!--     debug="1" /> -->

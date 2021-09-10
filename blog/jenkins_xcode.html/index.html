@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>jenkins打包xcode项目 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="jenkins打包xcode项目" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>jenkins打包xcode项目</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orga530cc8">jenkins 运行</a></li>
+<li><a href="#orgc287626">配置一个项目</a>
+<ul>
+<li><a href="#orgbcc1e32">丢弃旧的构建</a></li>
+<li><a href="#org908d1a0">选择使用源码管理，或者手动管理代码</a></li>
+<li><a href="#orge658570">构建触发器</a></li>
+<li><a href="#orgc5a7a45">xcode 相关配置</a></li>
+<li><a href="#orgfd4860d">上专到fir.im</a></li>
+<li><a href="#org45542b0">构建后的操作</a></li>
+</ul>
+</li>
+<li><a href="#orgcb9f5f5">xcodebuild 命令行下生成ipa文件</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orga530cc8" class="outline-2">
+<h2 id="orga530cc8">jenkins 运行</h2>
+<div class="outline-text-2" id="text-orga530cc8">
+<div class="org-src-container">
+<pre class="src src-sh">java -jar jenkins.war
+</pre>
+</div>
+<p>
+起动后 访问 localhost:8080<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgc287626" class="outline-2">
+<h2 id="orgc287626">配置一个项目</h2>
+<div class="outline-text-2" id="text-orgc287626">
+</div>
+<div id="outline-container-orgbcc1e32" class="outline-3">
+<h3 id="orgbcc1e32">丢弃旧的构建</h3>
+<div class="outline-text-3" id="text-orgbcc1e32">
+<p>
+策略：Log Rotation<br />
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">保持构建天数</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-left">保持构建的最大个数</td>
+<td class="org-right">10</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org908d1a0" class="outline-3">
+<h3 id="org908d1a0">选择使用源码管理，或者手动管理代码</h3>
+<div class="outline-text-3" id="text-org908d1a0">
+<p>
+我机器上已经用svn 下载了源码，我选择手动管理<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"> <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#25226;&#20195;&#30721;copy &#21040;jenkins &#30340;workspace</span>
+cp -r /Users/admin/Documents/SVN/game2/dev .
+chmod -R 777 .
+svn cleanup ./dev
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">revert changed file</span>
+svn revert -R ./dev
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">rm new files</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">svn status &#29366;&#24577;&#20026;&#8220;&#65311;&#8221;&#30340;&#25991;&#20214; &#30452;&#25509;&#21024;&#38500;&#65292;&#21363;&#26410;&#34987;&#31649;&#29702;&#30340;&#25991;&#20214;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">jenkins &#20284;&#20046;&#19981;&#33021;&#25903;&#25345;&#24102;&#31649;&#36947;&#30340;&#21629;&#20196;&#65292;&#36825;&#34892;&#38656;&#35201;&#20889;&#25104;&#19968;&#20010;&#33050;&#26412;&#65292;&#35843;&#30456;&#24212;&#30340;&#33050;&#26412;</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">svn status --no-ignore | grep '^\?' |  perl -ne 'print "$1\n" if $_ =~ /^\S+\s+(.*)$/' |  tr '\n' '\0' | xargs -0 rm -rf</span>
+svn up ./dev
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orge658570" class="outline-3">
+<h3 id="orge658570">构建触发器</h3>
+<div class="outline-text-3" id="text-orge658570">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Build periodically</td>
+<td class="org-left">定期运行此项目</td>
+</tr>
+</tbody>
+</table>
+<p>
+配置格式类似于cron<br />
+</p>
+<blockquote>
+<p>
+Examples:<br />
+</p>
+
+<p>
+H/15 * * * *<br />
+</p>
+
+<p>
+H(0-29)/10 * * * *<br />
+</p>
+
+<p>
+H 9-16/2 * * 1-5<br />
+</p>
+
+<p>
+H H 1,15 1-11 *<br />
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-orgc5a7a45" class="outline-3">
+<h3 id="orgc5a7a45">xcode 相关配置</h3>
+<div class="outline-text-3" id="text-orgc5a7a45">
+<ol class="org-ol">
+<li><p>
+配置Target:即xcode的target<br />
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Clean before build</td>
+<td class="org-left">勾上</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">Configuration</td>
+<td class="org-left">Release</td>
+<td class="org-left">或Debug</td>
+</tr>
+</tbody>
+</table>
+<p>
+不同的target可以配置不同的证书、bid等，打出的包供不同用途使用<br />
+</p></li>
+<li>Code signing &amp; OS X keychain options<br />
+选中Unlock Keychain<br />
+配置Keychain path为 ${HOME}/Library/Keychains/login.keychai 及密码，应该就是登录密码<br /></li>
+<li><p>
+Advanced Xcode build options<br />
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Xcode Project Directory</td>
+<td class="org-left">${WORKSPACE}/dev/client/cocos2d-x-2.2.6/projects/client/proj.ios/</td>
+</tr>
+
+<tr>
+<td class="org-left">Xcode Project File</td>
+<td class="org-left">client.xcodeproj</td>
+</tr>
+</tbody>
+</table></li>
+</ol>
+<ol class="org-ol">
+<li>上面的步骤相当于Xocde里Cmd-r run,生成app,下面则将生成的app导出成ipa<br /></li>
+</ol>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #F8F8F8;">cd</span> ${<span style="color: #40E0D0;">WORKSPACE</span>}/dev/client/cocos2d-x-2.2.6/projects/client/proj.ios/build/Release-iphoneos
+xcrun -sdk iphoneos PackageApplication -v ${<span style="color: #40E0D0;">WORKSPACE</span>}/dev/client/cocos2d-x-2.2.6/projects/client/proj.ios/build/Release-iphoneos/ZombieCave.app -o ${<span style="color: #40E0D0;">WORKSPACE</span>}/dev/client/cocos2d-x-2.2.6/projects/client/proj.ios/build/Release-iphoneos/zombiecave.ipa
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#25226;&#29983;&#25104;&#30340;ipa copy &#21040;&#26412;&#22320;site&#65292;&#20869;&#32593;&#20379;&#21035;&#20154;&#19979;&#36733;&#65288;&#38656;&#35201;&#26412;&#26426;&#21551;&#29992;apache&#26381;&#21153;&#65289;</span>
+[ -d ~/site/zombiecave/${<span style="color: #40E0D0;">BUILD_ID</span>} ] &amp;&amp; rm -rf ~/site/zombiecave/${<span style="color: #40E0D0;">BUILD_ID</span>}
+mkdir ~/site/zombiecave/${<span style="color: #40E0D0;">BUILD_ID</span>}
+cp zombiecave.ipa ~/site/zombiecave/${<span style="color: #40E0D0;">BUILD_ID</span>}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgfd4860d" class="outline-3">
+<h3 id="orgfd4860d">上专到fir.im</h3>
+<div class="outline-text-3" id="text-orgfd4860d">
+<ol class="org-ol">
+<li><p>
+fir.im Token 从fir.im上取<br />
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">ExInclude IPA/APK File Nam</td>
+<td class="org-left"><b>*/*unaligned</b>.apk,**/*unsigned*.apk</td>
+</tr>
+
+<tr>
+<td class="org-left">Build Notes</td>
+<td class="org-left">generated by jenkins</td>
+</tr>
+</tbody>
+</table></li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org45542b0" class="outline-3">
+<h3 id="org45542b0">构建后的操作</h3>
+<div class="outline-text-3" id="text-org45542b0">
+<p>
+可以选择执行另一个job的构建<br />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgcb9f5f5" class="outline-2">
+<h2 id="orgcb9f5f5">xcodebuild 命令行下生成ipa文件</h2>
+<div class="outline-text-2" id="text-orgcb9f5f5">
+<p>
+<a href="http://www.jianshu.com/p/3f43370437d2">http://www.jianshu.com/p/3f43370437d2</a><br />
+</p>
+
+<p>
+CODE_SIGN_IDENTITY =证书Identity获取：<br />
+打开你的钥匙串访问-&gt;选中其中一个证书-&gt;右键-&gt;显示简介，把标题复制出来就可以了。<br />
+格式是： iPhone Distribution: Beijing xxoo yyooxx Technology Service CO., Ltd. (UA11AAJJKK8)<br />
+</p>
+
+<p>
+PROVISIONING_PROFILE= 获取Provisioning文件UUID<br />
+在xcode8.0以上,Provisioning文件的位置是： ~/Library/MobileDevice/Provisioning\ Profiles<br />
+在终端上面进入的文件夹。使用/usr/bin/security可以把Provisioning文件解密<br />
+文件名的前缀应该就是uuid /usr/bin/security cms -D -i 098a87e3-11fe-463d-75aa-12345678adba.mobileprovision<br />
+或者 xcodebuild -target appStore -configuration Release -showBuildSettings|grep PROVISIONING_PROFILE<br />
+</p>
+
+<p>
+同样，如果你不需要的指定证书和Provisioning文件，可以把上面的两个参数去掉，它会根据你的Xcode配置去匹配。<br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">xcodebuild archive -scheme appStore <span style="color: #ffa07a;">\</span>
+        -target appStore <span style="color: #ffa07a;">\</span>
+        -configuration Release <span style="color: #ffa07a;">\</span>
+        -archivePath ./build/client.xcarchive <span style="color: #ffa07a;">\</span>
+        <span style="color: #40E0D0;">CODE_SIGN_IDENTITY</span>=<span style="color: #ffa07a;">"iPhone Distribution: Beijing Najia Technology Co., Ltd. (5SF425H5SS)"</span> <span style="color: #ffa07a;">\</span>
+        <span style="color: #40E0D0;">PROVISIONING_PROFILE</span>=<span style="color: #ffa07a;">"3a2c6078-652f-4f33-9a9c-2ea99b35e1e2"</span>
+
+
+xcodebuild -exportArchive -archivePath ./build/client.xcarchive <span style="color: #ffa07a;">\</span>
+        -exportPath ./build <span style="color: #ffa07a;">\</span>
+        -exportOptionsPlist exportOption.plist
+        <span style="color: #40E0D0;">CODE_SIGN_IDENTITY</span>=<span style="color: #ffa07a;">"iPhone Distribution: Beijing Najia Technology Co., Ltd. (5SF425H5SS)"</span> <span style="color: #ffa07a;">\</span>
+        <span style="color: #40E0D0;">PROVISIONING_PROFILE</span>=<span style="color: #ffa07a;">"3a2c6078-652f-4f33-9a9c-2ea99b35e1e2"</span>
+</pre>
+</div>
+<p>
+xcodebuild -target appStore -configuration Release -showBuildSettings|grep TEAM来获得teamid<br />
+method 可取 app-store, ad-hoc, package, enterprise, development,<br />
+</p>
+<blockquote>
+<p>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br />
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "<a href="http://www.apple.com/DTDs/PropertyList-1.0.dtd">http://www.apple.com/DTDs/PropertyList-1.0.dtd</a>"&gt;<br />
+&lt;plist version="1.0"&gt;<br />
+&lt;dict&gt;<br />
+    &lt;key&gt; compileBitcode&lt;/key&gt;<br />
+    &lt;false/&gt;<br />
+    &lt;key&gt;method&lt;/key&gt;<br />
+    &lt;string&gt;ad-hoc&lt;/string&gt;<br />
+    &lt;key&gt;teamID&lt;/key&gt;<br />
+    &lt;string&gt;5SF425H5SS&lt;/string&gt;<br />
+&lt;/dict&gt;<br />
+&lt;/plist&gt;<br />
+</p>
+</blockquote>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2016-12-21</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/jenkins/">Jenkins</a>, <a href="/tags/cocos2dx/">Cocos2dx</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/jenkins_xcode.html";
+          var disqus_url = "http://jixiuf.github.io/blog/jenkins_xcode.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

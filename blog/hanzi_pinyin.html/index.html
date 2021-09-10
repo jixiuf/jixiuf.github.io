@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>汉字拼音对应表 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="汉字拼音对应表" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>汉字拼音对应表</h1>
+<p>
+<a href="/assets/blog/hanzi_pinyin.html/hanzipinyin.txt">汉字拼音对应表</a>.txt<br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #FBDE2D;">CREATE</span> <span style="color: #FBDE2D;">OR</span> REPLACE DIRECTORY dat_dir_p
+<span style="color: #FBDE2D;">AS</span> <span style="color: #ffa07a;">'D:\pinyin\data'</span>;
+<span style="color: #FBDE2D;">CREATE</span> <span style="color: #FBDE2D;">OR</span> REPLACE DIRECTORY log_dir_p
+<span style="color: #FBDE2D;">AS</span> <span style="color: #ffa07a;">'D:\pinyin\log'</span>;
+<span style="color: #FBDE2D;">CREATE</span> <span style="color: #FBDE2D;">OR</span> REPLACE DIRECTORY bad_dir_p
+<span style="color: #FBDE2D;">AS</span> <span style="color: #ffa07a;">'D:\pinyin\bad'</span>;
+<span style="color: #AEAEAE;">-- &#29992;&#25143;&#35201;&#23545;&#36825;&#20960;&#20010;&#30446;&#24405;&#26377;&#20889;&#26435;&#38480;&#65292;</span>
+<span style="color: #AEAEAE;">-- &#25105;&#27979;&#35797; &#30340;&#26102;&#20505; &#27809;&#36890;&#36807; &#65292;&#22909;&#20320;&#26126;&#20960;&#20010;&#22810;&#38899;&#35789;&#30340;&#22788;&#29702;&#19978;&#26377;&#38382;&#39064;</span>
+
+<span style="color: #FBDE2D;">GRANT</span> <span style="color: #FBDE2D;">READ</span> <span style="color: #FBDE2D;">ON</span> DIRECTORY dat_dir_p <span style="color: #FBDE2D;">TO</span> itme;
+<span style="color: #FBDE2D;">GRANT</span> <span style="color: #FBDE2D;">READ</span>,<span style="color: #FBDE2D;">WRITE</span> <span style="color: #FBDE2D;">ON</span> DIRECTORY log_dir_p <span style="color: #FBDE2D;">TO</span> itme;
+<span style="color: #FBDE2D;">GRANT</span> <span style="color: #FBDE2D;">READ</span>,<span style="color: #FBDE2D;">WRITE</span> <span style="color: #FBDE2D;">ON</span> DIRECTORY bad_dir_p <span style="color: #FBDE2D;">TO</span> itme;
+
+
+<span style="color: #FBDE2D;">CONNECT</span> itme;
+
+<span style="color: #FBDE2D;">CREATE</span> <span style="color: #FBDE2D;">TABLE</span> <span style="color: #FF6400;">tb_hanzipinyin</span>
+(hangzi VARCHAR2(50),
+pinyin VARCHAR2(50)
+)
+ORGANIZATION <span style="color: #FBDE2D;">EXTERNAL</span>
+(
+<span style="color: #FBDE2D;">TYPE</span> ORACLE_LOADER
+<span style="color: #FBDE2D;">DEFAULT</span> DIRECTORY dat_dir_p
+ACCESS <span style="color: #FBDE2D;">PARAMETERS</span>
+(
+RECORDS delimited <span style="color: #FBDE2D;">BY</span> NEWLINE
+BADFILE bad_dir_p:<span style="color: #ffa07a;">'empxt%a_%p.bad'</span>
+LOGFILE log_dir_p:<span style="color: #ffa07a;">'empxt%a_%p.log'</span>
+FIELDS TERMINATED <span style="color: #FBDE2D;">BY</span> <span style="color: #ffa07a;">'#'</span>
+MISSING FIELD <span style="color: #FBDE2D;">VALUES</span> <span style="color: #FBDE2D;">are</span> <span style="color: #FBDE2D;">NULL</span>
+(hangzi,pinyin)
+
+)
+LOCATION (<span style="color: #ffa07a;">'hanzipinyin.txt'</span>)
+)
+PARALLEL
+REJECT <span style="color: #FBDE2D;">LIMIT</span> UNLIMITED;
+
+
+<span style="color: #FBDE2D;">SELECT</span> * <span style="color: #FBDE2D;">FROM</span> tb_hanzipinyin <span style="color: #FBDE2D;">WHERE</span> hangzi <span style="color: #FBDE2D;">LIKE</span> <span style="color: #ffa07a;">'&#21442;'</span>;
+
+<span style="color: #FBDE2D;">CREATE</span> <span style="color: #FBDE2D;">OR</span> REPLACE <span style="color: #FBDE2D;">FUNCTION</span> <span style="color: #FF6400;">hanzi_to_pinyin</span>(p_hanzi <span style="color: #FBDE2D;">in</span> VARCHAR2)
+  <span style="color: #FBDE2D;">RETURN</span> VARCHAR2 <span style="color: #FBDE2D;">IS</span>
+  v_return_pinyin VARCHAR2(20);
+  <span style="color: #FBDE2D;">BEGIN</span>
+    <span style="color: #FBDE2D;">SELECT</span> pinyin
+      <span style="color: #FBDE2D;">INTO</span> v_return_pinyin
+      <span style="color: #FBDE2D;">FROM</span> tb_hanzipinyin
+     <span style="color: #FBDE2D;">WHERE</span> hangzi = p_hanzi;
+  <span style="color: #FBDE2D;">RETURN</span>          v_return_pinyin;
+  <span style="color: #FBDE2D;">EXCEPTION</span>       <span style="color: #FBDE2D;">WHEN</span> OTHERS <span style="color: #FBDE2D;">THEN</span> <span style="color: #FBDE2D;">RETURN</span> <span style="color: #ffa07a;">'ERROR'</span>;
+<span style="color: #FBDE2D;">END</span>;
+
+<span style="color: #FBDE2D;">SELECT</span> hanzi_to_pinyin(<span style="color: #ffa07a;">'&#23567;'</span>) <span style="color: #FBDE2D;">FROM</span> DUAL;
+</pre>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-04-29</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/oracle/">Oracle</a>, <a href="/tags/db/">DB</a>, <a href="/tags/sql/">SQL</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/hanzi_pinyin.html";
+          var disqus_url = "http://jixiuf.github.io/blog/hanzi_pinyin.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

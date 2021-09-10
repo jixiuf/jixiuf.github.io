@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>nxml-mode补全 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="nxml-mode补全" />
+    <meta name="keywords" content="emacs nxml mode" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>nxml-mode补全</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgdc06f73">dtd 使用 trang</a></li>
+<li><a href="#orgf514120">xsd</a></li>
+<li><a href="#org54ed167">&lt;uri resource="f" uri="s"/&gt;</a></li>
+<li><a href="#org515026e">&lt;uri pattern="p" uri="s"/&gt;</a></li>
+<li><a href="#org41f2187">&lt;uri pattern="p" typeId="T"/&gt;</a></li>
+<li><a href="#org3b69057">&lt;documentElement prefix="N" localName="E" uri="s"/&gt;</a></li>
+<li><a href="#orga72ae5f">&lt;documentElement prefix="N" localName="E" typeId="T"/&gt;</a></li>
+<li><a href="#org8539ace">&lt;transformURI fromPattern="p" toPattern="q"/&gt;</a></li>
+<li><a href="#orgaed3ce2">&lt;namespace ns="N" uri="s"/&gt; 与* &lt;namespace ns="N" typeId="T"/&gt;</a></li>
+<li><a href="#orge5c8fee">如何定义一个typeId  &lt;typeId id="T" uri="s"/&gt;</a></li>
+<li><a href="#orgd9310b9">也可以包含另一个schemas 文件</a></li>
+</ul>
+</div>
+</div>
+<p>
+使用介绍 <a href="http://jamsa.javaeye.com/blog/38202">http://jamsa.javaeye.com/blog/38202</a><br />
+官方内容:<br />
+<a href="http://infohost.nmt.edu/tcc/help/pubs/nxml/schema-locating.html">http://infohost.nmt.edu/tcc/help/pubs/nxml/schema-locating.html</a><br />
+</p>
+
+<p>
+emacs nxml-mode 只支持rnc格式的xml 解析<br />
+dtd &#x2014;&gt;rnc<br />
+xsd-&#x2014;&gt;rng&#x2013;&#x2014;&gt;rnc<br />
+需要用到的转换工具trang.jar     dtd&#x2014;&gt;rnc         rng&#x2014;&gt;rnc<br />
+                 rngconv.jar    xsd -&#x2014;&gt;rnc<br />
+</p>
+
+<div id="outline-container-orgdc06f73" class="outline-2">
+<h2 id="orgdc06f73">dtd 使用 trang</h2>
+<div class="outline-text-2" id="text-orgdc06f73">
+<p>
+将生成的hibernate-mapping-3.0.rnc复制到emacs的nXML-mode安装目录。<br />
+     (add-to-list 'rng-schema-locating-files (expand-file-name "~/.emacs.d/script/nxml/schemas.xml"))<br />
+     我copy  到 "~/.emacs.d/script/nxml/" 这个目录也可<br />
+     修改nXML-mode安装目录下的schema/schema.xml。在文件中增加一种新的文件类型对质，在文件中加入：<br />
+</p>
+
+<p>
+xml 代码<br />
+</p>
+<ol class="org-ol">
+<li>&lt;typeId id="Hibernate HBM" uri="hibernate-mapping-3.0.rnc"/&gt;<br /></li>
+</ol>
+<p>
+在schema.xml文件中加入hbm的一种识别方式，这里将根据文件名以hbm.xml结尾，来识别这是一个Hibernate HBM类型的文件：<br />
+     &lt;uri pattern="*.hbm.xml" typeId="Hibernate HBM"/&gt;<br />
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orgf514120" class="outline-2">
+<h2 id="orgf514120">xsd</h2>
+<div class="outline-text-2" id="text-orgf514120">
+<p>
+rngconv 将 xsd转换成rng格式供emacs nxml-mode 编辑xml文件使用<br />
+</p>
+<ol class="org-ol">
+<li><p>
+java -jar rngconv.jar <a href="http://maven.apache.org/maven-v4_0_0.xsd">http://maven.apache.org/maven-v4_0_0.xsd</a> &gt;&gt; maven2.rng<br />
+java -jar trang.jar maven2.rng maven2.rnc<br />
+</p>
+
+<p>
+将maven2.rnc复制到nXML-mode安装目录中。修改schema.xml增加一种新的类型<br />
+    &lt;typeId id="Maven2" uri="maven2.rnc"/&gt;<br />
+</p></li>
+</ol>
+
+<p>
+修改schema.xml，加入自动识别pom文件的功能，这里不通过文件名来识别，而是使用namespace来识别<br />
+ &lt;namespace ns="<a href="http://maven.apache.org/POM/4.0.0">http://maven.apache.org/POM/4.0.0</a>" typeId="Maven2" /&gt;<br />
+pom.xml 的头部声明是这样的<br />
+ &lt;project xmlns="<a href="http://maven.apache.org/POM/4.0.0">http://maven.apache.org/POM/4.0.0</a>"<br />
+	xsi:schemaLocation="<a href="http://maven.apache.org/POM/4.0.0">http://maven.apache.org/POM/4.0.0</a> <a href="http://maven.apache.org/maven-v4_0_0.xsd">http://maven.apache.org/maven-v4_0_0.xsd</a>"<br />
+	xmlns:xsi="<a href="http://www.w3.org/2001/XMLSchema-instance">http://www.w3.org/2001/XMLSchema-instance</a>"&gt;<br />
+</p>
+
+
+<p>
+.<br />
+官方内容:<br />
+<a href="http://infohost.nmt.edu/tcc/help/pubs/nxml/schema-locating.html">http://infohost.nmt.edu/tcc/help/pubs/nxml/schema-locating.html</a><br />
+关于schemas.xml 内容的介绍:<br />
+下面是一系列匹配规则用于选择使用哪个schema locating file:<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org54ed167" class="outline-2">
+<h2 id="org54ed167">&lt;uri resource="f" uri="s"/&gt;</h2>
+<div class="outline-text-2" id="text-org54ed167">
+<p>
+表示将f 对s(s is a schema file) 进行关联. f 可以是一个 full URL 也可以是一个本地的文件<br />
+ 比如:&lt;uri resource="abc.xyz" uri="xyz.rnc"/&gt;<br />
+ 表示文件打开abc.xyz 时使用xyz.rnc 对其进行解析.<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org515026e" class="outline-2">
+<h2 id="org515026e">&lt;uri pattern="p" uri="s"/&gt;</h2>
+<div class="outline-text-2" id="text-org515026e">
+<p>
+  相对于 &lt;uri pattern="p" uri="s"/&gt; 中的resource 所指定的内容是一个特定的不<br />
+  具通用性.pattern 可以是一个regexp 匹配某一类的文件.<br />
+比如:  &lt;uri pattern="*.hbm.xml" uri="hibernate-mapping-3.0.rnc"/&gt;<br />
+所有以hbm.xml 结尾的文件,将使且hibernate-mapping-3.rnc 对其进行解析<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org41f2187" class="outline-2">
+<h2 id="org41f2187">&lt;uri pattern="p" typeId="T"/&gt;</h2>
+<div class="outline-text-2" id="text-org41f2187">
+<p>
+pattern 与前者相同,typeId 则是一个Id<br />
+比如:<br />
+  &lt;uri pattern="*.xsl" typeId="XSLT"/&gt;<br />
+  &lt;typeId id="XSLT" uri="xslt.rnc"/&gt;<br />
+  效果与<br />
+  &lt;uri pattern="*.xsl" uri="xslt.rnc"/&gt;同<br />
+  typeId 存在的必要仅仅是 多种匹配规则都使用同一个schema s 进行解析的时候<br />
+用,当然可以选择不用<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3b69057" class="outline-2">
+<h2 id="org3b69057">&lt;documentElement prefix="N" localName="E" uri="s"/&gt;</h2>
+<div class="outline-text-2" id="text-org3b69057">
+<p>
+即如果一个xml 文件的根元素是E ,并且其namespace是N的话,将使用 schema s<br />
+&lt;documentElement prefix="" localName="hibernate-mapping" uri="hibernate.rnc"/&gt;<br />
+比如:根元素是hibernate-mapping 前缀是空的文件,将使用hibernate.rnc 进行解<br />
+析<br />
+&lt;documentElement prefix="" localName="hibernate-mapping" uri="hibernate-mapping-3.0.rnc"/&gt;<br />
+</p>
+
+<p>
+  prefix参数可以省略,表示只要localName="E" 即可,不考虑namespace的影响<br />
+  &lt;documentElement  localName="hibernate-mapping" uri="hibernate-mapping-3.0.rnc"/&gt;<br />
+  &lt;documentElement prefix="" localName="hibernate-mapping" uri="hibernate-mapping-3.0.rnc"/&gt;<br />
+两者效果相同<br />
+另外,似乎prefix localName 两参数只是可省略的参数<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orga72ae5f" class="outline-2">
+<h2 id="orga72ae5f">&lt;documentElement prefix="N" localName="E" typeId="T"/&gt;</h2>
+<div class="outline-text-2" id="text-orga72ae5f">
+<p>
+有了前两个,这个应该不难理解<br />
+&lt;documentElement localName="stylesheet" typeId="XSLT"/&gt; ;所以root element<br />
+是stylesheep 的xml文件使用类型XSLT类型的schemas进行解析<br />
+</p>
+
+<p>
+这个对所有根元素为 xsl:transform 的xml文件使用类型XSLT类型的schemas进行解析<br />
+&lt;documentElement prefix="xsl" localName="transform" typeId="XSLT"/&gt;<br />
+</p>
+
+<p>
+&lt;typeId id="XSLT" uri="xslt.rnc"/&gt; ;这里对XSLT类型的schemas进行定义<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8539ace" class="outline-2">
+<h2 id="org8539ace">&lt;transformURI fromPattern="p" toPattern="q"/&gt;</h2>
+<div class="outline-text-2" id="text-org8539ace">
+<p>
+p 和q 里应该含有相同数量的"<b>" 他们是一一对应的<br />
+  &lt;transformURI fromPattern="</b>.xml" toPattern="*.rnc"/&gt;<br />
+  比如当你编辑 a.xml 时,它将寻找一个a.rnc 文件对其将行解析<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgaed3ce2" class="outline-2">
+<h2 id="orgaed3ce2">&lt;namespace ns="N" uri="s"/&gt; 与* &lt;namespace ns="N" typeId="T"/&gt;</h2>
+<div class="outline-text-2" id="text-orgaed3ce2">
+<p>
+&lt;namespace ns="<a href="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</a>" typeId="XHTML"/&gt;<br />
+&lt;namespace ns="<a href="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</a>" uri="xhtml.rnc"/&gt;<br />
+比如当你编辑 一个声明有 xmlns="<a href="http://www.w3.org/1999/xhtml%22%E7%9A%84xml">http://www.w3.org/1999/xhtml%22%E7%9A%84xml</a> 文件时,<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-html">&lt;<span style="color: #FF6400;">html</span> <span style="color: #40E0D0;">xmlns</span>=<span style="color: #ffa07a;">"http://www.w3.org/1999/xhtml"</span> <span style="color: #F8F8F8;">xml</span>:<span style="color: #40E0D0;">lang</span>=<span style="color: #ffa07a;">"en"</span> <span style="color: #40E0D0;">lang</span>=<span style="color: #ffa07a;">"en"</span>&gt;
+&lt;/<span style="color: #FF6400;">html</span>&gt;
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge5c8fee" class="outline-2">
+<h2 id="orge5c8fee">如何定义一个typeId  &lt;typeId id="T" uri="s"/&gt;</h2>
+<div class="outline-text-2" id="text-orge5c8fee">
+<p>
+&lt;typeId id="XSLT" uri="xslt.rnc"/&gt;<br />
+&lt;typeId id="XSLT<sub>alias</sub>" typeId="XSLT"/&gt;<br />
+对于定义了一个typeId 后可以在nxml-mode中<br />
+使用 `C-cC-sC-t' 列出所有的typeId ,以便使当前buffer用特定的typeId进行解析<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgd9310b9" class="outline-2">
+<h2 id="orgd9310b9">也可以包含另一个schemas 文件</h2>
+<div class="outline-text-2" id="text-orgd9310b9">
+<p>
+&lt;include rules="F"/&gt;<br />
+</p>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-10-22</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/emacs/">Emacs</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/nxml-mode.html";
+          var disqus_url = "http://jixiuf.github.io/blog/nxml-mode.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

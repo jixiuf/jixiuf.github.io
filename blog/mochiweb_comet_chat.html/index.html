@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>网上即时聊天原理(mochiweb+jquery实现) - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>网上即时聊天原理(mochiweb+jquery实现)</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org75be96d">1. 代码 位置</a></li>
+<li><a href="#orga6fee82">2. 操作:</a></li>
+<li><a href="#orge87506b">3. Comet</a></li>
+<li><a href="#orgb536d95">4. 代码讲解</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org75be96d" class="outline-2">
+<h2 id="org75be96d"><span class="section-number-2">1</span> 代码 位置</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+<a href="https://github.com/jixiuf/helloerlang/tree/master/mochiweb_comet_chat">https://github.com/jixiuf/helloerlang/tree/master/mochiweb_comet_chat</a>
+</p>
+</div>
+</div>
+<div id="outline-container-orga6fee82" class="outline-2">
+<h2 id="orga6fee82"><span class="section-number-2">2</span> 操作:</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+分别打开两个网页，然后，对textfield中输入内容，在另一个网页中会即时显现.
+</p>
+</div>
+</div>
+<div id="outline-container-orge87506b" class="outline-2">
+<h2 id="orge87506b"><span class="section-number-2">3</span> Comet</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Comet 是一项很时髦的技术。其目的很简单：由于历史原因，目前 HTTP 协议信息都是客
+户端向服务器要（Poll），服务器没有办法推送信息给客户端（Sever Push）。这在实现
+某些应用的时候就会遇到麻烦。例如：
+</p>
+<ul class="org-ul">
+<li>当邮件服务器收到新的邮件时，及时报告给用户，如果他在线的话（GMail 这样做了）</li>
+<li>当 Web Chat 服务器收到新的信息时，及时发送信息到相应的在线用户（Web Chat 的基本需求）。</li>
+<li>聊天时提示你对方正在输入（时下 IM 客户端很时髦的一个功能）。</li>
+</ul>
+
+<p>
+Comet 技术对服务端的要求还是很高的，Long Polling减少了网络流量，但是服务端的连
+接数并没有减少。因此基于 Comet 的应用，很容易在 Scale（伸缩性）上出现问题。使用
+Erlang + MochiWeb，还是很好的利用了 Erlang 可以轻松建立大量连接这个特性。需要指
+出的是，很可能 Comet 应用的时髦，将会很大程度上促进了业界对 Erlang 的关注。
+</p>
+</div>
+</div>
+<div id="outline-container-orgb536d95" class="outline-2">
+<h2 id="orgb536d95"><span class="section-number-2">4</span> 代码讲解</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+index.html
+</p>
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #FBDE2D;">function</span> <span style="color: #FF6400;">get</span>(){
+        $.ajax({
+            type: <span style="color: #ffa07a;">"GET"</span>,
+            url: <span style="color: #ffa07a;">"chat"</span>,
+            cache:<span style="color: #D8FA3C;">false</span>,
+            success:getMsg
+          });
+}
+<span style="color: #FBDE2D;">function</span> <span style="color: #FF6400;">getMsg</span>(<span style="color: #40E0D0;">data</span>){
+    $(<span style="color: #ffa07a;">"#history"</span>).append(<span style="color: #FBDE2D;">new</span> <span style="color: #8DA6CE;">Date</span>().toLocaleString()+<span style="color: #ffa07a;">":"</span>+data+<span style="color: #ffa07a;">"&lt;br/&gt;"</span>);
+    get();
+}
+
+</pre>
+</div>
+<p>
+在index.html 加载完比后，会先调用一次:
+</p>
+<div class="org-src-container">
+<pre class="src src-javascript">get();
+</pre>
+</div>
+<p>
+上面的函数是以GET方式向服务器端发起请求的代码，可以看出，在回调方法中，再次调
+用get() 方法，向服务器端发起请求。这跟那种每隔一定时间向服务器端请求一次看有
+没有新的消息的方式完全不一样。
+因为这种以GET方式发起的请求，在服务器端是阻塞的，即由服务器端来控制 ，如果没
+有新的消息就不返回（达到超时时间除外（代码中设为20s））。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript">$(<span style="color: #ffa07a;">'#send'</span>).click(
+    <span style="color: #FBDE2D;">function</span>(){
+        $.ajax({
+            type: <span style="color: #ffa07a;">"POST"</span>,
+            url: <span style="color: #ffa07a;">"chat"</span>,
+            cache:<span style="color: #D8FA3C;">false</span>,
+            data: <span style="color: #ffa07a;">"message="</span>+$(<span style="color: #ffa07a;">"#message"</span>).val(),
+            <span style="color: #FF6400;">success</span>: <span style="color: #FBDE2D;">function</span>(<span style="color: #40E0D0;">msg</span>){
+                $(<span style="color: #ffa07a;">"#status"</span>).empty(); <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">remove children</span>
+                $(<span style="color: #ffa07a;">"#status"</span>).append(<span style="color: #FBDE2D;">new</span> <span style="color: #8DA6CE;">Date</span>().toLocaleString()+<span style="color: #ffa07a;">":"</span>+msg); <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">add child</span>
+            }
+        });
+    }
+);
+});
+
+</pre>
+</div>
+<p>
+点击发送按钮的时候，会以POST方式,向服务器发送一条消息，
+服务器在接到这条消息后,会进行如下处理:
+</p>
+<div class="org-src-container">
+<pre class="src src-erlang">Data = Req:parse_post(),
+Room = get_the_room(),
+% post
+io:format("message from post:~p~n",[proplists:get_value("message", Data)]) ,
+Room ! {self(), post, list_to_binary(proplists:get_value("message", Data))},
+</pre>
+</div>
+<p>
+某进程接到上面发送的消息会，会查看room 中有哪些用户在等待，
+然后一一取出，将上面接收到的那条信息分别发送给他们 ，然后清空等待队列
+那些以GET方式请求的客户端到此时才返回（如果没有超时的话。）
+</p>
+<div class="org-src-container">
+<pre class="src src-erlang">{From, post, Message} -&gt;
+    From ! posted,
+    lists:foreach(fun(User) -&gt;
+					% broadcast the message
+			  User ! Message
+		  end, Users),
+    %% room(Users),
+    %% 所有等待的用户都会接收的消息，
+    %% 从队列中去掉他们
+    room([]),
+    io:format("~n",[]) ;
+%% room([]);
+
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-06-26</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/erlang/">Erlang</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/mochiweb_comet_chat.html";
+          var disqus_url = "http://jixiuf.github.io/blog/mochiweb_comet_chat.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; qq &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

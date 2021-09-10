@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>spring.rnc的作成 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="spring.rnc的作成" />
+    <meta name="keywords" content="spring rnc trang rngrnc nxml emacs" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>spring.rnc的作成</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org0701041">下载trang.jar rngconv.jar</a></li>
+<li><a href="#orga414449">2找到这几个文件,放到同一个目录</a></li>
+<li><a href="#org6c29891">具体操作</a></li>
+<li><a href="#org88ecfc5">spring-beans-3.0.xsd 转换成spring-beans-3.0.rnc</a></li>
+<li><a href="#org2593957">如何编辑applicationContext.xml 文件时,自动用spring-beans-3.0.rnc 对其进行解析</a></li>
+<li><a href="#orgc4d9e16">spring-aop-3.0.xsd 转换成spring-aop-3.0.rnc</a></li>
+<li><a href="#org39ce63e">合并成一个spring.rnc</a></li>
+</ul>
+</div>
+</div>
+<p>
+链接:<br />
+<a href="http://jamsa.javaeye.com/blog/38202">http://jamsa.javaeye.com/blog/38202</a><br />
+<a href="http://infohost.nmt.edu/tcc/help/pubs/nxml/schema-locating.html">http://infohost.nmt.edu/tcc/help/pubs/nxml/schema-locating.html</a><br />
+<a href="http://infohost.nmt.edu/tcc/help/pubs/rnc/def-patterns.html">http://infohost.nmt.edu/tcc/help/pubs/rnc/def-patterns.html</a><br />
+演示视频：<a href="http://screencast-repos.googlecode.com/files/emacs-can-do-what-nxml0springContext.mp4">http://screencast-repos.googlecode.com/files/emacs-can-do-what-nxml0springContext.mp4</a><br />
+我提供的关于spring-3.0.rnc struts 等一些rnc文件  <a href="https://github.com/jixiuf/emacs_conf/tree/master/script/nxml">https://github.com/jixiuf/emacs_conf/tree/master/script/nxml</a><br />
+关于如何作成spring-3.0.rnc<br />
+因为spring-3.0 的applicationContext.xml 使用xsd进行约束.<br />
+而要将xsd 转换成rnc 需要经过两步<br />
+xsd  &#x2013;&gt; rng &#x2013;&gt;rnc<br />
+先将xsd格式转换成rng格式,然后再转换在rnc<br />
+由xsd 转换成rng 的过程可以通过rngconv来实现<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">java -jar rngconv.jar spring-beans-3.0.xsd   &gt;spring-beans-3.0.rng
+</pre>
+</div>
+<p>
+而由rng转换成rnc 的过程可以通过trang来实现<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">java -jar trang.jar  spring-beans-3.0.rng spring-beans-3.0.rnc
+</pre>
+</div>
+
+<p>
+如果一切都正常的话,那面上面这些已经足够了,但是实际情况总是会出一些小问题<br />
+下面具体分说<br />
+</p>
+<div id="outline-container-org0701041" class="outline-2">
+<h2 id="org0701041">下载trang.jar rngconv.jar</h2>
+<div class="outline-text-2" id="text-org0701041">
+<p>
+首先你先要下载trang.jar rngconv.jar 等几个jar 包,当然可能会有几个依赖的jar<br />
+会一起用到,分别下载两个压缩包解压开找到jar 即可.<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orga414449" class="outline-2">
+<h2 id="orga414449">2找到这几个文件,放到同一个目录</h2>
+<div class="outline-text-2" id="text-orga414449">
+<div class="org-src-container">
+<pre class="src src-sh">spring-aop-3.0.xsd
+spring-beans-3.0.xsd
+spring-context-3.0.xsd
+spring-jdbc-3.0.xsd
+spring-jee-3.0.xsd
+spring-jms-3.0.xsd
+spring-lang-3.0.xsd
+spring-mvc-3.0.xsd
+spring-oxm-3.0.xsd
+spring-task-3.0.xsd
+spring-tool-3.0.xsd
+spring-tx-3.0.xsd
+spring-util-3.0.xsd
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org6c29891" class="outline-2">
+<h2 id="org6c29891">具体操作</h2>
+</div>
+<div id="outline-container-org88ecfc5" class="outline-2">
+<h2 id="org88ecfc5">spring-beans-3.0.xsd 转换成spring-beans-3.0.rnc</h2>
+<div class="outline-text-2" id="text-org88ecfc5">
+<p>
+当运行这条命令时,<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">java -jar rngconv.jar spring-beans-3.0.xsd   &gt;spring-beans-3.0.rng
+</pre>
+</div>
+<p>
+会出现这个错误<br />
+</p>
+
+<blockquote>
+<p>
+"schemaLocation" attribute is required for "xsd:import" element, but is not specified<br />
+  7:64@<a href="file:///tmp/spring-beans-3.0.xsd">file:///tmp/spring-beans-3.0.xsd</a><br />
+namespace "<a href="http://www.w3.org/XML/1998/namespace">http://www.w3.org/XML/1998/namespace</a>" is referenced but no schema definition of this namespace was found.<br />
+  7:64@<a href="file:///tmp/spring-beans-3.0.xsd">file:///tmp/spring-beans-3.0.xsd</a><br />
+failed to load the grammar<br />
+</p>
+</blockquote>
+
+<p>
+解决办法是:<br />
+打开spring-beans-3.0.xsd 注释掉下面这句,或者直接删除也可以<br />
+</p>
+<blockquote>
+<p>
+&lt;xsd:import namespace="<a href="http://www.w3.org/XML/1998/namespace%22/">http://www.w3.org/XML/1998/namespace%22/</a>&gt;<br />
+</p>
+</blockquote>
+<p>
+注意所有其他几个文件中的&lt;xsd:import /&gt;<br />
+namespace指向<a href="http://www.w3.org/XML/1998/namespace%E5%9C%B0%E5%9D%80%E7%9A%84">http://www.w3.org/XML/1998/namespace%E5%9C%B0%E5%9D%80%E7%9A%84</a> import 都可以这样处<br />
+理,但是不是指向这个地址的需要另作处理<br />
+</p>
+
+<p>
+再次运行这条命令,会成功生成rng文件<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">&#28982;&#21518;&#29992;&#36825;&#26465;&#21629;&#20196;&#29983;&#25104; rnc&#25991;&#20214;
+  java -jar trang.jar  spring-beans-3.0.rng spring-beans-3.0.rnc
+</pre>
+</div>
+<p>
+对于spring-bean-.3.0.xsd转换成rnc 的步骤是最简单的.<br />
+与此相同处理即可得到rnc  的是spring-tool-3.0.xsd<br />
+因为它们不依赖其他几个xsd<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2593957" class="outline-2">
+<h2 id="org2593957">如何编辑applicationContext.xml 文件时,自动用spring-beans-3.0.rnc 对其进行解析</h2>
+<div class="outline-text-2" id="text-org2593957">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(eval-after-load 'rng-loc
+  '(<span style="color: #FBDE2D;">progn</span>
+     (add-to-list 'rng-schema-locating-files (expand-file-name <span style="color: #ffa07a;">"~/.emacs.d/script/nxml/schemas.xml"</span>))
+     ))
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">nxml-mode-hook-fun</span> ()
+  <span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">&#40664;&#35748;&#32465;&#23450;&#30340;&#38190;&#26159;`</span><span style="color: #D8FA3C;">C-cC-sC-a</span><span style="color: #AEAEAE;">' ,&#23558;&#24403;&#21069;&#32534;&#36753;&#30340;&#25991;&#20214;&#19982;&#29305;&#23450;&#30340;rnc &#25991;&#20214;&#36827;&#34892;&#20851;&#32852;,&#21482;&#26377;</span>
+  <span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">&#20851;&#32852;&#21518;&#30340;xml &#25165;&#21487;&#20197;&#35299;&#26512;&#20854;&#35821;&#27861;&#35268;&#21017;&#36827;&#34892;&#34917;&#20840;</span>
+  (<span style="color: #FBDE2D;">require</span> '<span style="color: #D8FA3C;">rng-valid</span>)
+  (rng-auto-set-schema-and-validate)
+  )
+(add-hook 'nxml-mode-hook 'nxml-mode-hook-fun)
+</pre>
+</div>
+<p>
+  将spring-beans-3.0.rnc   复制到 ~/.emacs.d/script/nxml/目录下,与<br />
+  <a href="https://github.com/jixiuf/emacs_conf/tree/master/script/nxml">schemas.xml</a> 同目录<br />
+然后就是修改 <a href="https://raw.github.com/jixiuf/emacs_conf/master/script/nxml/schemas.xml"> "~/.emacs.d/script/nxml/schemas.xml"</a>文件,<br />
+然后在其中加入这样两句话,<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-xml">&lt;<span style="color: #FF6400;">namespace</span> <span style="color: #40E0D0;">ns</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/beans"</span> <span style="color: #40E0D0;">typeId</span>=<span style="color: #ffa07a;">"Spring3.0"</span> /&gt;
+ &lt;<span style="color: #FF6400;">typeId</span> <span style="color: #40E0D0;">id</span>=<span style="color: #ffa07a;">"Spring3.0"</span> <span style="color: #40E0D0;">uri</span>=<span style="color: #ffa07a;">"spring-3.0.rnc"</span>/&gt;
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-xml">&#36825;&#19968;&#21477;&#31561;&#25928;&#20110;&#19978;&#38754;&#20004;&#21477;
+ &lt;<span style="color: #FF6400;">namespace</span> <span style="color: #40E0D0;">ns</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/beans"</span>  <span style="color: #40E0D0;">uri</span>=<span style="color: #ffa07a;">"spring-3.0.rnc"</span> /&gt;
+</pre>
+</div>
+<p>
+关于schemas.xml的格式详见:<br />
+<a href="http://infohost.nmt.edu/tcc/help/pubs/nxml/schema-locating.html">http://infohost.nmt.edu/tcc/help/pubs/nxml/schema-locating.html</a><br />
+因为applicationContext.xml含有这样一句话,所以它会首先使用  spring-3.0.rnc对<br />
+文件进行解析<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-xml">&lt;<span style="color: #FF6400;">beans</span> <span style="color: #F8F8F8;">xmlns</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/beans"</span>&gt;
+</pre>
+</div>
+
+<p>
+当你打开一个 applicationContext.xml 时,<br />
+会报错<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">Debugger entered--Lisp error: (<span style="color: #ffc0cb;">error</span> <span style="color: #ffa07a;">"Expected `}' but got `+'"</span>)
+  signal(<span style="color: #ffc0cb;">error</span> (<span style="color: #ffa07a;">"Expected `}' but got `+'"</span>))
+  error(<span style="color: #ffa07a;">"%s"</span> <span style="color: #ffa07a;">"Expected `}' but got `+'"</span>)
+  nxml-display-file-parse-error((rng-c-incorrect-schema <span style="color: #ffa07a;">"/tmp/spring-beans-3.0.rnc"</span> 743 <span style="color: #ffa07a;">"Expected `}' but got `+'"</span>))
+  rng-set-schema-file(<span style="color: #ffa07a;">"/tmp/spring-beans-3.0.rnc"</span>)
+  rng-set-schema-file-and-validate(<span style="color: #ffa07a;">"/tmp/spring-beans-3.0.rnc"</span>)
+  call-interactively(rng-set-schema-file-and-validate nil nil)
+</pre>
+</div>
+<p>
+或<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">Debugger entered--Lisp error: (<span style="color: #ffc0cb;">error</span> <span style="color: #ffa07a;">"Invalid grammar content"</span>)
+  signal(<span style="color: #ffc0cb;">error</span> (<span style="color: #ffa07a;">"Invalid grammar content"</span>))
+  error(<span style="color: #ffa07a;">"%s"</span> <span style="color: #ffa07a;">"Invalid grammar content"</span>)
+  nxml-display-file-parse-error((rng-c-incorrect-schema <span style="color: #ffa07a;">"/tmp/spring-beans-3.0.rnc"</span> 1627 <span style="color: #ffa07a;">"Invalid grammar content"</span>))
+  rng-set-schema-file(<span style="color: #ffa07a;">"/tmp/spring-beans-3.0.rnc"</span>)
+  rng-set-schema-file-and-validate(<span style="color: #ffa07a;">"/tmp/spring-beans-3.0.rnc"</span>)
+  call-interactively(rng-set-schema-file-and-validate nil nil)
+</pre>
+</div>
+<p>
+并在 spring-beans-3.0.rnc  中定位出错误来,<br />
+大概定位在<br />
+</p>
+<blockquote>
+<p>
+(import | alias | bean)?+,<br />
+</p>
+</blockquote>
+<p>
+问题出在 "?+"这两个字符,将"?"删除,只留"+"号,保存后,<br />
+回到 applicationContext.xml 文件中按下C-cC-sC-a<br />
+又会出错,问题相同,删除相应问号后,应该就没问题了.估计直接将全文的"?+"替换为<br />
+"+"就可以.<br />
+</p>
+
+<p>
+最后,在 编辑applicationContext.xml 时,按Control+Return 可以,补全出相应的属<br />
+性名.<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgc4d9e16" class="outline-2">
+<h2 id="orgc4d9e16">spring-aop-3.0.xsd 转换成spring-aop-3.0.rnc</h2>
+<div class="outline-text-2" id="text-orgc4d9e16">
+<p>
+spring-aop-3.0.xsd比 spring-beans-3.0.xsd的处理要复杂一点<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">java -jar rngconv.jar spring-aop-3.0.xsd   &gt;spring-aop-3.0.rng
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #ffa07a;">"schemaLocation"</span> attribute is required for <span style="color: #ffa07a;">"xsd:import"</span> element, but is not specified
+  7:64@http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+<span style="color: #ffa07a;">"schemaLocation"</span> attribute is required for <span style="color: #ffa07a;">"xsd:import"</span> element, but is not specified
+  8:64@http://www.springframework.org/schema/tool/spring-tool-3.0.xsd
+namespace <span style="color: #ffa07a;">"http://www.w3.org/XML/1998/namespace"</span> is referenced but no schema definition of this namespace was found.
+  7:64@http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+failed to load the grammar
+</pre>
+</div>
+<p>
+解法:<br />
+将其中的这两句<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-xml">&lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/beans"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"</span>/&gt;
+&lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/tool"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/tool/spring-tool-3.0.xsd"</span>/&gt;
+</pre>
+</div>
+<p>
+换成:使用相对路径<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-xml">&lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/beans"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-beans-3.0.xsd"</span> /&gt;
+&lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/tool"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-tool-3.0.xsd"</span> /&gt;
+</pre>
+</div>
+<p>
+同时,不要忘了,将spring-tool-3.0.xsd文件中的 这句删掉<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-xml">&lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.w3.org/XML/1998/namespace"</span>/&gt;
+</pre>
+</div>
+<p>
+除此之外,处理方法与spring-beans-3.0.xsd同,<br />
+此次生成的rnc 文件,相对 spring-beans-3.0.rnc的优点是,不但可以补全像<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-xml">&lt;<span style="color: #FF6400;">bean</span> <span style="color: #40E0D0;">id</span>=<span style="color: #ffa07a;">"transactionManager"</span> <span style="color: #40E0D0;">class</span>=<span style="color: #ffa07a;">"org.springframework.orm.hibernate3.HibernateTransactionManager"</span>&gt;
+    &lt;<span style="color: #FF6400;">property</span> <span style="color: #40E0D0;">name</span>=<span style="color: #ffa07a;">"sessionFactory"</span>&gt;
+        &lt;<span style="color: #FF6400;">ref</span> <span style="color: #40E0D0;">local</span>=<span style="color: #ffa07a;">"sessionFactory"</span>/&gt;
+    &lt;/<span style="color: #FF6400;">property</span>&gt;
+&lt;/<span style="color: #FF6400;">bean</span>&gt;
+</pre>
+</div>
+<p>
+ 这样的元素<br />
+还可以补全带有aop前缀的元素<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-xml">&lt;<span style="color: #F8F8F8;">aop</span>:<span style="color: #FF6400;">config</span>&gt;
+    &lt;<span style="color: #F8F8F8;">aop</span>:<span style="color: #FF6400;">pointcut</span> <span style="color: #40E0D0;">id</span>=<span style="color: #ffa07a;">"allManagerMethod"</span> <span style="color: #40E0D0;">expression</span>=<span style="color: #ffa07a;">"execution (* org.jixiuf.drp.service.*.*(..))"</span>/&gt;
+</pre>
+</div>
+<p>
+同样的道理, spring-context-3.0.rnc 可以补全如下元素<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-xml">&lt;<span style="color: #F8F8F8;">context</span>:<span style="color: #FF6400;">annotation-config</span> /&gt;
+ &lt;<span style="color: #F8F8F8;">context</span>:<span style="color: #FF6400;">component-scan</span> <span style="color: #40E0D0;">base-package</span>=<span style="color: #ffa07a;">"org.jixiuf"</span> /&gt;
+</pre>
+</div>
+<p>
+但是,缺点是 spring-context-3.0.rnc spring-beans-3.0.rnc spring-aop-3.0.rnc<br />
+三个文件不能同时使用<br />
+,解决办法,就是将文章开头列出的几个文件,过行合并后,统一生成一个rnc文件<br />
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org39ce63e" class="outline-2">
+<h2 id="org39ce63e">合并成一个spring.rnc</h2>
+<div class="outline-text-2" id="text-org39ce63e">
+<p>
+通过修改 spring-aop-3.0.xsd,来包含其他几个文件来实现,这样生成的<br />
+spring-aop-3.0.rnc 就包含了其他几个xsd文件中的内容<br />
+修改后的 spring-aop-3.0.xsd头部如下<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-xml">&lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">schema</span> <span style="color: #F8F8F8;">xmlns</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/aop"</span>
+                <span style="color: #F8F8F8;">xmlns</span>:<span style="color: #40E0D0;">xsd</span>=<span style="color: #ffa07a;">"http://www.w3.org/2001/XMLSchema"</span>
+                <span style="color: #F8F8F8;">xmlns</span>:<span style="color: #40E0D0;">beans</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/beans"</span>
+                <span style="color: #F8F8F8;">xmlns</span>:<span style="color: #40E0D0;">tx</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/tx"</span>
+                <span style="color: #F8F8F8;">xmlns</span>:<span style="color: #40E0D0;">tool</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/tool"</span>
+                <span style="color: #F8F8F8;">xmlns</span>:<span style="color: #40E0D0;">context</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/context"</span>
+                <span style="color: #F8F8F8;">xmlns</span>:<span style="color: #40E0D0;">jdbc</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/jdbc"</span>
+                <span style="color: #F8F8F8;">xmlns</span>:<span style="color: #40E0D0;">jee</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/jee"</span>
+                <span style="color: #F8F8F8;">xmlns</span>:<span style="color: #40E0D0;">jms</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/jms"</span>
+                <span style="color: #F8F8F8;">xmlns</span>:<span style="color: #40E0D0;">lang</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/lang"</span>
+                <span style="color: #F8F8F8;">xmlns</span>:<span style="color: #40E0D0;">mvc</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/mvc"</span>
+                <span style="color: #F8F8F8;">xmlns</span>:<span style="color: #40E0D0;">oxm</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/oxm"</span>
+                <span style="color: #F8F8F8;">xmlns</span>:<span style="color: #40E0D0;">task</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/task"</span>
+                <span style="color: #F8F8F8;">xmlns</span>:<span style="color: #40E0D0;">util</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/util"</span>
+                <span style="color: #40E0D0;">targetNamespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/aop"</span>
+                <span style="color: #40E0D0;">elementFormDefault</span>=<span style="color: #ffa07a;">"qualified"</span>
+                <span style="color: #40E0D0;">attributeFormDefault</span>=<span style="color: #ffa07a;">"unqualified"</span>&gt;
+        &lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/tx"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-tx-3.0.xsd"</span> /&gt;
+        &lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/context"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-context-3.0.xsd"</span> /&gt;
+        &lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/jdbc"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-jdbc-3.0.xsd"</span> /&gt;
+        &lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/jee"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-jee-3.0.xsd"</span> /&gt;
+        &lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/jms"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-jms-3.0.xsd"</span> /&gt;
+        &lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/lang"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-lang-3.0.xsd"</span> /&gt;
+        &lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/mvc"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-mvc-3.0.xsd"</span> /&gt;
+        &lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/oxm"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-oxm-3.0.xsd"</span> /&gt;
+        &lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/task"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-task-3.0.xsd"</span> /&gt;
+        &lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/util"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-util-3.0.xsd"</span> /&gt;
+</pre>
+</div>
+<p>
+下面这几个文件不需要这么复杂,只需要将其中的<br />
+</p>
+<blockquote>
+<p>
+spring-context-3.0.xsd<br />
+spring-jdbc-3.0.xsd<br />
+spring-jee-3.0.xsd<br />
+spring-jms-3.0.xsd<br />
+spring-lang-3.0.xsd<br />
+spring-mvc-3.0.xsd<br />
+spring-oxm-3.0.xsd<br />
+spring-task-3.0.xsd<br />
+spring-tx-3.0.xsd<br />
+spring-util-3.0.xsd<br />
+</p>
+</blockquote>
+<div class="org-src-container">
+<pre class="src src-xml">&lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/beans"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"</span>/&gt;
+&lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/tool"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/tool/spring-tool-3.0.xsd"</span>/&gt;
+</pre>
+</div>
+
+<p>
+换成:使用相对路径<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-xml">&lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/beans"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-beans-3.0.xsd"</span> /&gt;
+&lt;<span style="color: #F8F8F8;">xsd</span>:<span style="color: #FF6400;">import</span> <span style="color: #40E0D0;">namespace</span>=<span style="color: #ffa07a;">"http://www.springframework.org/schema/tool"</span> <span style="color: #40E0D0;">schemaLocation</span>=<span style="color: #ffa07a;">"spring-tool-3.0.xsd"</span> /&gt;
+</pre>
+</div>
+
+<p>
+这两个文件,删除其中的<br />
+</p>
+<blockquote>
+<p>
+spring-tool-3.0.xsd<br />
+spring-beans-3.0.xsd<br />
+</p>
+</blockquote>
+<blockquote>
+<p>
+&lt;xsd:import namespace="<a href="http://www.w3.org/XML/1998/namespace%22/">http://www.w3.org/XML/1998/namespace%22/</a>&gt;<br />
+</p>
+</blockquote>
+<p>
+用这两条命令生成spring-3.0.rnc,生成之后还会出现 "?+" 这个问题,解决掉之后,即<br />
+可<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">java -jar rngconv.jar spring-aop-3.0.xsd   &gt;spring-aop-3.0.rng
+ java -jar trang.jar  spring-aop-3.0.rng spring-3.0.rnc
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-10-18</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/java/">Java</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/spring.html";
+          var disqus_url = "http://jixiuf.github.io/blog/spring.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

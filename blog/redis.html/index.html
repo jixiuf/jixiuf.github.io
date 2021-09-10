@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>redis拾遗 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="jixiuf" />
+    <meta name="description" content="redis拾遗" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>redis拾遗</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org1461de7">参考资料：</a></li>
+<li><a href="#org3bef39b">实用工具：</a></li>
+<li><a href="#orgf2a0bc8">优化点</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org1461de7" class="outline-2">
+<h2 id="org1461de7">参考资料：</h2>
+<div class="outline-text-2" id="text-org1461de7">
+<ol class="org-ol">
+<li>redis内存优化：<a href="https://cachecloud.github.io/2017/02/16/Redis%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/">https://cachecloud.github.io/2017/02/16/Redis%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/</a><br /></li>
+<li>Instagram的Redis实践 <a href="http://www.cnblogs.com/Laymen/articles/6803485.html">http://www.cnblogs.com/Laymen/articles/6803485.html</a><br /></li>
+<li>Efficient Redis Caching Through Hashing<br />
+<a href="https://sorentwo.com/2015/08/10/efficient-redis-caching-through-hashing.html">https://sorentwo.com/2015/08/10/efficient-redis-caching-through-hashing.html</a><br /></li>
+</ol>
+</div>
+</div>
+
+
+<div id="outline-container-org3bef39b" class="outline-2">
+<h2 id="org3bef39b">实用工具：</h2>
+<div class="outline-text-2" id="text-org3bef39b">
+<ol class="org-ol">
+<li>rdb ：分析redis内存占用情况<br />
+rdb -c memory ./hins3544773_data_20180130032206.rdb &#x2013;bytes 128 -f ~/work/temp/memory0130.csv<br />
+<img src="/assets/blog/redis.html/redis-2018-01-31-17-29-48.png" alt="redis-2018-01-31-17-29-48.png" /><br />
+ 比如首行 168 表示redis 实际分配了的多少内存，后面的57是key value 的大小,可以看到内存利用率并不高<br /></li>
+<li>redis内存分析<br />
+redis-memory-for-key -s r-2ze6ae913e05e3f4.redis.rds.aliyuncs.com -a XXX 80179951<br /></li>
+<li>redis-profile 优化建议<br />
+redis-profiler -k "user.*" -k "friends.*" -f memoryreport.html /var/redis/6379/dump.rdb<br /></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgf2a0bc8" class="outline-2">
+<h2 id="orgf2a0bc8">优化点</h2>
+<div class="outline-text-2" id="text-orgf2a0bc8">
+<p>
+        根据调研，目前redis内存优化，大的方面尽可能的让redis采用压缩方<br />
+式存储，比如ziplist/zipmap编码。(ziplist编码需要设置<br />
+hash-max-ziplist-entries 、 hash-max-ziplist-value这两个参数，需要重启<br />
+redis实例) ziplist 可以压缩内存约6~7倍，但cpu会增加2~3倍，需要做权衡<br />
+hash-max-ziplist-value 用来控制hash 的value 最大值，所有的value 都小于<br />
+此值时用ziplist大于则退化为hashtable,编码类型转换在Redis写入数据时自动<br />
+完成，这个转换过程是不可逆的，转换规则只能从小内存编码向大内存编码转换。<br />
+即一旦有一个value 长度大于hash-max-ziplist-value后， 会由ziplist转为<br />
+hashtable ,即使这个value 移除后，也不再转化为ziplist<br />
+</p>
+
+<p>
+hash使用ziplist的条件满足所有条件: value最大空间(字<br />
+节)&lt;=hash-max-ziplist-value field个数&lt;=hash-max-ziplist-entries<br />
+</p>
+
+<p>
+    由于Hash结构会在单个Hash元素在不足一定数量时进行压缩存储，所以可以<br />
+大量节约内存。这一点在上面的String结构里是不存在的。而这个一定数量是由<br />
+配置文件中的hash-zipmap-max-entries参数来控制的。经过开发者们的实验，<br />
+将hash-zipmap-max-entries设置为1000时，性能比较好，超过1000后HSET命令<br />
+就会导致CPU消耗变得非常大。<br />
+</p>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2018-01-31</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info">N/A</span>
+        <span title="author" class="post-info">jixiuf</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/redis.html";
+          var disqus_url = "http://jixiuf.github.io/blog/redis.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; qq &lt;dot&gt; com">jixiuf</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

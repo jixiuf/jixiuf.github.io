@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>linux 下字体相关 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="font.org" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>linux 下字体相关</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org603211a">列出可用的字体</a></li>
+<li><a href="#org2eccba9">更新字体信息,mkfontscale mkfontdir</a></li>
+<li><a href="#orge1ef5bc">linux 下我用的字体</a></li>
+<li><a href="#orgde658c1">emacs 下我用字体 dejavu 如下,</a></li>
+<li><a href="#orgfefd41d">终端我用rxvt-unicode ,使用字体</a></li>
+<li><a href="#org478f320">link</a></li>
+</ul>
+</div>
+</div>
+<p>
+linux 下与字体相关的命令<br />
+</p>
+<div id="outline-container-org603211a" class="outline-2">
+<h2 id="org603211a">列出可用的字体</h2>
+<div class="outline-text-2" id="text-org603211a">
+<p>
+xlsfontls<br />
+fc-list<br />
+mkfontscale<br />
+mkfontdir<br />
+xrdb ~/.Xdefaults<br />
+fc-cache<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org2eccba9" class="outline-2">
+<h2 id="org2eccba9">更新字体信息,mkfontscale mkfontdir</h2>
+<div class="outline-text-2" id="text-org2eccba9">
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #F8F8F8;">cd</span> /usr/share/fonts/windows_fonts/
+mkfontscale .
+mkfontdir .
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge1ef5bc" class="outline-2">
+<h2 id="orge1ef5bc">linux 下我用的字体</h2>
+<div class="outline-text-2" id="text-orge1ef5bc">
+<ul class="org-ul">
+<li>wqy-bitmapfont linux下的中文字体<br /></li>
+<li>media-fonts/corefonts 里面有 Courier New<br /></li>
+<li>dejavu<br /></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgde658c1" class="outline-2">
+<h2 id="orgde658c1">emacs 下我用字体 dejavu 如下,</h2>
+<div class="outline-text-2" id="text-orgde658c1">
+<p>
+dejavu的好处是 可以很容易的区分 0与o l与1<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq-default</span> window-system-default-frame-alist
+              '( (x <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">if frame created on x display</span>
+                  (background-color . <span style="color: #ffa07a;">"#0C1021"</span>)
+                  (background-mode . dark)
+                  (border-color . <span style="color: #ffa07a;">"black"</span>)
+                  (cursor-color . <span style="color: #ffa07a;">"green"</span>)
+                  (foreground-color . <span style="color: #ffa07a;">"#F8F8F8"</span>)
+                  (mouse-color . <span style="color: #ffa07a;">"sienna1"</span>)
+                  (font . <span style="color: #ffa07a;">"DejaVu Sans Mono:pixelsize=15"</span>))
+                 (nil <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">if on term</span>
+                  (background-color . <span style="color: #ffa07a;">"black"</span>)
+                  (foreground-color . <span style="color: #ffa07a;">"green"</span>)
+                  )))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgfefd41d" class="outline-2">
+<h2 id="orgfefd41d">终端我用rxvt-unicode ,使用字体</h2>
+<div class="outline-text-2" id="text-orgfefd41d">
+<div class="org-src-container">
+<pre class="src src-sh">cat ~/.Xdefaults
+URxvt.font:xft:Courier New:<span style="color: #40E0D0;">pixelsize</span>=18:<span style="color: #40E0D0;">antialias</span>=false,xft:WenQuanYi Bitmap Song:<span style="color: #40E0D0;">pixelsize</span>=16
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">cat /etx/X11/xorg.conf
+Section <span style="color: #ffa07a;">"Files"</span>
+        FontPath <span style="color: #ffa07a;">"/usr/share/fonts/truetype/dejavu"</span>
+        FontPath <span style="color: #ffa07a;">"/usr/share/fonts/truetype/corefonts"</span>
+        FontPath <span style="color: #ffa07a;">"/usr/share/fonts/wqy-bitmapfont"</span>
+EndSection%
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org478f320" class="outline-2">
+<h2 id="org478f320">link</h2>
+<div class="outline-text-2" id="text-org478f320">
+<p>
+<a href="http://hivelogic.com/articles/top-10-programming-fonts/">http://hivelogic.com/articles/top-10-programming-fonts/</a><br />
+文件有点老,但里面有linux两种字体系统的介绍(emacs现在已经支持xft了)<br />
+<a href="http://laokaddk.blog.51cto.com/368606/686817">http://laokaddk.blog.51cto.com/368606/686817</a><br />
+</p>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-12-21</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/linux/">Linux</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/font.html";
+          var disqus_url = "http://jixiuf.github.io/blog/font.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

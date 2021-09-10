@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>emacs 配置文件相关 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="000051-emacs-keybind.org" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>emacs 配置文件相关</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgd9f546b">emacs 配置文件相关</a></li>
+<li><a href="#org4c60808">执行Elisp代码</a></li>
+<li><a href="#org43cd0b2">我的配置在github.com 可以找到</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgd9f546b" class="outline-2">
+<h2 id="orgd9f546b">emacs 配置文件相关</h2>
+<div class="outline-text-2" id="text-orgd9f546b">
+<p>
+emacs 的配置文件可以有以下有个<br />
+  ~/.emacs<br />
+  ~/.emacs.d/init.el<br />
+  如果你的配置非常简单 你可以直接写在 ~/.emacs 这一个文件中<br />
+  但是 通常情况下 随着你对emacs 的了解越深入 你需要的配置去越来越多<br />
+  且需要安装一些第三方的插件 ，所以建议把emacs 相关的配置都配到<br />
+  ~/.emacs.d/及其子目录下 ，<br />
+  然后emacs 的初始配置配到 ~/.emacs.d/init.el 中<br />
+  比如 我的目录结构是这样的<br />
+.emacs.d<br />
+├── bin<br />
+├── cache<br />
+├── site-lisp<br />
+│   ├── actionscript-mode<br />
+│   ├── csharp-mode<br />
+│   ├── dired<br />
+│   ├── erlang<br />
+│   ├── golang<br />
+│   ├── hide<br />
+│   ├─joseph<br />
+我自己写的配置放到 ~/.emacs.d/site-lisp/joseph/目录下<br />
+  比如 ~/.emacs.d/site-lisp/joseph/joseph-common.el<br />
+   ~/.emacs.d/site-lisp/joseph/joseph-program.el<br />
+第三单插件到配置放到 ~/.emacs.d/site-lisp/的子目录下<br />
+比如 ~/.emacs.d/site-lisp/golang/go-mode.el<br />
+所以<br />
+  在~/.emacs.d/init.el 中加入以下代码<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">&#21152;&#36733;&#25105;&#33258;&#24049;&#20889;&#30340;&#37197;&#32622;</span>
+(add-to-list 'load-path <span style="color: #ffa07a;">"~/emacs/site-lisp/joseph/"</span>)
+(<span style="color: #FBDE2D;">require</span> '<span style="color: #D8FA3C;">joseph-common</span>)
+(<span style="color: #FBDE2D;">require</span> '<span style="color: #D8FA3C;">joseph-program</span>)
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">&#21152;&#36733;&#31532;&#19977;&#21333;&#30340;&#25552;&#20379;&#30340;&#19968;&#20123;&#25554;&#20214;</span>
+(add-to-list 'load-path <span style="color: #ffa07a;">"~/emacs/site-lisp/golang/"</span>)
+(<span style="color: #FBDE2D;">require</span> '<span style="color: #D8FA3C;">go-mode</span>)
+</pre>
+</div>
+<p>
+每次修改完配置文件保存后 重启emacs 即可使配置生效<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org4c60808" class="outline-2">
+<h2 id="org4c60808">执行Elisp代码</h2>
+<div class="outline-text-2" id="text-org4c60808">
+<p>
+在某条语句后面按C-x C-e (eval-last-sexp)可以执行那条语句<br />
+M-x eval-buffer 可以执行当前buffer内的Elisp代码<br />
+选中一个region后, M-x eval-region可以执行这个region内的代码<br />
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org43cd0b2" class="outline-2">
+<h2 id="org43cd0b2">我的配置在github.com 可以找到</h2>
+<div class="outline-text-2" id="text-org43cd0b2">
+<p>
+<a href="https://github.com/jixiuf/emacs_conf">https://github.com/jixiuf/emacs_conf</a><br />
+</p>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2015-10-18</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/emacs/">Emacs</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/000051-emacs-config.html";
+          var disqus_url = "http://jixiuf.github.io/blog/000051-emacs-config.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>对&quot;我的电脑&quot;  进行增强 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="对&quot;我的电脑&quot;  进行增强" />
+    <meta name="keywords" content="autohotkey explorer 我的电脑" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>对&quot;我的电脑&quot;  进行增强</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org0ba3e35">复制当前文件的路径</a></li>
+<li><a href="#org1db0676">Alt+h 一键显隐扩展名</a></li>
+<li><a href="#orgd526302">Ctl+Alt+c 在当前路径下打开Cmd.exe 窗口。</a></li>
+<li><a href="#orgff5510c">Alt+n 新建文本文件 Shift+= 新建文件夹</a></li>
+<li><a href="#org77d031f">焦点的移动</a></li>
+<li><a href="#org7a142e0">用键盘进行管理</a></li>
+<li><a href="#org7959315">Ctrl+e 用Emacs编辑器打开选中的文件</a></li>
+</ul>
+</div>
+</div>
+<p>
+这里不对代码进行过于详细的讲解。只贴代码，并简单描述其功能<a href="/blog/AutoHotKey_1.html"><br />
+AutoHotKey几个简单的小例子</a> 中已经有一个关于对资源管理器中实现Ctl+alt+h<br />
+<a href="/blog/AutoHotKey_1.html#sec-2_3">一键显隐 隐藏文件</a>的功能，这里再给出其他几个与资源管理器有关的功能增强。<br />
+</p>
+<div id="outline-container-org0ba3e35" class="outline-2">
+<h2 id="org0ba3e35">复制当前文件的路径</h2>
+<div class="outline-text-2" id="text-org0ba3e35">
+<p>
+这段代码实现<br />
+</p>
+<ul class="org-ul">
+<li>Alt+1 : copy 选中文件的名称<br /></li>
+<li>Alt+2 : copy 当前路径名<br /></li>
+<li>Alt+3 : copy 选中文件的完整路径名<br /></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-sh">SetTitleMatchMode Regex ;&#21487;&#20197;&#20351;&#29992;&#27491;&#21017;&#34920;&#36798;&#24335;&#23545;&#26631;&#39064;&#36827;&#34892;&#21305;&#37197;
+; &#19979;&#38754;&#30340;&#31383;&#21475;&#31867;&#20381;&#27425;&#20026;&#65306;&#26700;&#38754;&#12289;Win+D&#21518;&#30340;&#26700;&#38754;&#12289;&#25105;&#30340;&#30005;&#33041;&#12289;&#36164;&#28304;&#31649;&#29702;&#22120;&#12289;&#21478;&#23384;&#20026;&#31561;
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">IfWinActive ahk_class Progman|WorkerW|CabinetWClass|ExploreWClass|#32770</span>
+;;Alt+1 copy&#25991;&#20214;&#21517;
+!1::
+  send ^c
+  sleep,200
+  clipboard = %clipboard%
+  SplitPath, clipboard, name
+  clipboard = %
+  <span style="color: #FBDE2D;">return</span>
+;;alt+2 copy &#27492;&#25991;&#20214;&#25152;&#22312;&#30340;&#36335;&#24452;&#21517;
+!2::
+  send ^c
+  sleep,200
+  clipboard = %clipboard%
+  SplitPath, clipboard, , dir
+  clipboard = %dir%
+  <span style="color: #FBDE2D;">return</span>
+;;copy &#27492;&#25991;&#20214;&#30340;&#20840;&#36335;&#24452;&#21517;
+!3::
+  send ^c
+  sleep,200
+  clipboard = %clipboard%
+  <span style="color: #FBDE2D;">return</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">IfWinActive</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1db0676" class="outline-2">
+<h2 id="org1db0676">Alt+h 一键显隐扩展名</h2>
+<div class="outline-text-2" id="text-org1db0676">
+<div class="org-src-container">
+<pre class="src src-xahk">SetTitleMatchMode Regex ;可以使用正则表达式对标题进行匹配
+#IfWinActive ahk_class CabinetWClass|ExploreWClass
+;Alt+h TOGGLES FILE EXTENSIONS
+!h::
+RegRead, HiddenFiles_Status, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, HideFileExt
+If HiddenFiles_Status = 1
+     RegWrite, REG_DWORD, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, HideFileExt, 0
+Else
+   RegWrite, REG_DWORD, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, HideFileExt, 1
+WinGetClass, eh_Class,A
+If (eh_Class = "#32770" OR A_OSVersion = "WIN_VISTA")
+   send, {F5}
+Else PostMessage, 0x111, 28931,,, A
+Return
+#IfWinActive
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd526302" class="outline-2">
+<h2 id="orgd526302">Ctl+Alt+c 在当前路径下打开Cmd.exe 窗口。</h2>
+<div class="outline-text-2" id="text-orgd526302">
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #8DA6CE;">SetTitleMatchMode</span> <span style="color: #40E0D0;">Regex</span> ;&#21487;&#20197;&#20351;&#29992;&#27491;&#21017;&#34920;&#36798;&#24335;&#23545;&#26631;&#39064;&#36827;&#34892;&#21305;&#37197;
+<span style="color: #7fffd4;">#IfWinActive</span> ahk_class CabinetWClass|ExploreWClass
+; open <span style="color: #ffc0cb;">'</span>cmd<span style="color: #ffc0cb;">'</span> in the current directory
+^!c::OpenCmdInCurrent()
+<span style="color: #7fffd4;">#IfWinActive</span>
+
+; Opens the <span style="color: #8DA6CE;">command</span> <span style="color: #40E0D0;">shell</span> <span style="color: #ffc0cb;">'</span>cmd<span style="color: #ffc0cb;">'</span> in the directory browsed in Explorer.
+; <span style="color: #D8FA3C;">Note</span>: expecting to be run when the active window <span style="color: #8DA6CE;">is</span> <span style="color: #40E0D0;">Explorer</span>.
+;
+<span style="color: #FF6400;">OpenCmdInCurrent</span>()
+{
+ ControlGetText, full_path, Edit1, A
+ <span style="color: #8DA6CE;">IfInString</span> <span style="color: #40E0D0;">full_path</span>, \
+  {
+    Run, cmd /K cd /D <span style="color: #ffa07a;">"%full_path%"</span>
+  }
+  <span style="color: #FBDE2D;">else</span>
+  {
+    Run, cmd /K cd /D <span style="color: #ffa07a;">"C:\ "</span>
+  }
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgff5510c" class="outline-2">
+<h2 id="orgff5510c">Alt+n 新建文本文件 Shift+= 新建文件夹</h2>
+<div class="outline-text-2" id="text-orgff5510c">
+<div class="org-src-container">
+<pre class="src src-c">; create new text file
+<span style="color: #8DA6CE;">SetTitleMatchMode</span> <span style="color: #40E0D0;">Regex</span> ;&#21487;&#20197;&#20351;&#29992;&#27491;&#21017;&#34920;&#36798;&#24335;&#23545;&#26631;&#39064;&#36827;&#34892;&#21305;&#37197;
+<span style="color: #7fffd4;">#IfWinActive</span> ahk_class CabinetWClass|ExploreWClass
+
+;<span style="color: #ffa07a;">"+"</span>  like Emacs dired: create new folder 
++=::Send !fwf
+
+!n::
+InputBox, UserInput, New <span style="color: #8DA6CE;">File</span> <span style="color: #40E0D0;">Name</span>?, Please enter a New <span style="color: #8DA6CE;">File</span> <span style="color: #FF6400;">Name</span>(.txt), , 280, 100,,,,,.txt will be append
+<span style="color: #FBDE2D;">if</span> ErrorLevel
+{
+}<span style="color: #FBDE2D;">else</span>
+{
+  Send {Left}
+ControlGetText, ExplorePath, Edit1, <span style="color: #8DA6CE;">A</span>
+<span style="color: #40E0D0;">StringRight</span>, isEndsWithPathSeaprator, ExplorePath, 1
+<span style="color: #FBDE2D;">if</span> (isEndsWithPathSeaprator =<span style="color: #ffc0cb;">"</span><span style="color: #ffa07a;">\")</span>
+{
+  newFilePath=%ExplorePath%%UserInput%.txt
+}<span style="color: #FBDE2D;">else</span>
+{
+  newFilePath=%ExplorePath%\%UserInput%.txt
+}
+FileAppend,, %newFilepath%
+ControlFocus, SysListView321,A
+; Switch the <span style="color: #8DA6CE;">active</span> <span style="color: #40E0D0;">window</span><span style="color: #ffc0cb;">'</span>s keyboard layout/language to English:
+PostMessage, 0x50, 0, 0x4090409,, A  ; 0x50 is WM_INPUTLANGCHANGEREQUEST.
+SendInput {F5}%UserInput%  
+}
+<span style="color: #FBDE2D;">return</span>
+<span style="color: #7fffd4;">#IfWinActive</span> 
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org77d031f" class="outline-2">
+<h2 id="org77d031f">焦点的移动</h2>
+<div class="outline-text-2" id="text-org77d031f">
+<ul class="org-ul">
+<li>Ctrl+, 选中第一个文件<br /></li>
+<li>Ctrl+. 选中最后一个文件<br /></li>
+<li>ctrl+; 定位到左侧目录树<br /></li>
+<li>ctrl+L 定位在地址栏<br /></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #7fffd4;">#IfWinActive</span> ahk_class CabinetWClass|ExploreWClass
+;;Ctrl+, &#36873;&#20013;&#31532;&#19968;&#20010;&#25991;&#20214;
+^,::
+   ControlFocus, SysListView321,<span style="color: #8DA6CE;">A</span>
+    <span style="color: #40E0D0;">Send</span> {Home}
+<span style="color: #FBDE2D;">return</span>
+;;Ctrl+. &#36873;&#20013;&#26368;&#21518;&#19968;&#20010;&#25991;&#20214;
+^.::
+  ControlFocus, SysListView321,<span style="color: #8DA6CE;">A</span>
+  <span style="color: #40E0D0;">Send</span> {End}
+  <span style="color: #FBDE2D;">return</span>
+
+;;ctrl+; &#23450;&#20301;&#21040;&#30446;&#24405;&#26641;
+^;::
+  ControlFocus, SysTreeView321,A
+<span style="color: #FBDE2D;">return</span>
+
+ ;;ctrl+L &#23450;&#20301;&#22312;&#22320;&#22336;&#26639;
+^l:: ControlFocus, Edit1,A
+<span style="color: #7fffd4;">#IfWinActive</span> 
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org7a142e0" class="outline-2">
+<h2 id="org7a142e0">用键盘进行管理</h2>
+<div class="outline-text-2" id="text-org7a142e0">
+<p>
+一些绑定模拟Emacs 中Dired（Emacs中目录管理工具） 的操作。<br />
+</p>
+<ul class="org-ul">
+<li>Ctrl+n 向下移动<br /></li>
+<li>Ctrl+p 向上移动<br /></li>
+<li>Ctrl+f 向右移动<br /></li>
+<li>Ctrl+b 向左移动<br /></li>
+<li>Ctrl+h 如果在左侧的资源管理器中，表示折叠目录树<br /></li>
+<li>Ctrl+j 基本相当于回车（进入子目录后后选中第一个文件）<br /></li>
+<li>Ctrl+u 上层目录，并选中第一个文件<br /></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #7fffd4;">#IfWinActive</span> ahk_class ExploreWClass|CabinetWClass
+^n::Send {Down}
+^p::Send {Up}
+^j::
+  ControlGetFocus, focusedControl,A 
+    <span style="color: #FBDE2D;">if</span>(focusedControl=<span style="color: #ffa07a;">"SysListView321"</span>)
+  {
+    Send {Enter}
+    ControlFocus, SysListView321,<span style="color: #8DA6CE;">A</span>
+    <span style="color: #40E0D0;">Send</span> {Home}
+  }<span style="color: #FBDE2D;">else</span>
+  {
+    Send {Enter}
+  }
+<span style="color: #FBDE2D;">return</span>
+
+^f::Send {Right}
+
+^b::send {Left}
+^h::
+   ControlGetFocus, focusedControl,A 
+    <span style="color: #FBDE2D;">if</span>(focusedControl=<span style="color: #ffa07a;">"SysTreeView321"</span>)
+  {
+    send {Left}
+  }<span style="color: #FBDE2D;">else</span>
+  {
+    Send ^h
+  }
+<span style="color: #FBDE2D;">return</span>
+
+^u::
+   ControlGetFocus, focusedControl,A 
+    <span style="color: #FBDE2D;">if</span>(focusedControl=<span style="color: #ffa07a;">"SysListView321"</span>)
+  {
+    send     {backspace}
+    ControlFocus, SysListView321,A
+    Send {Home}
+  }
+<span style="color: #FBDE2D;">return</span>
+<span style="color: #7fffd4;">#IfWinActive</span> 
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org7959315" class="outline-2">
+<h2 id="org7959315">Ctrl+e 用Emacs编辑器打开选中的文件</h2>
+<div class="outline-text-2" id="text-org7959315">
+<div class="org-src-container">
+<pre class="src src-c">;;&#38656;&#35201; emacsclientw <span style="color: #8DA6CE;">&#22312;Path&#36335;&#24452;&#19979;</span>
+<span style="color: #FF6400;">openSelectedfileWithEamcs</span>()
+{
+  ControlGetFocus, focusedControl,A
+  <span style="color: #FBDE2D;">if</span> (focusedControl=<span style="color: #ffa07a;">"SysListView321"</span>)
+  {
+    <span style="color: #D8FA3C;">ClipSaved</span> := ClipboardAll
+    Send ^c
+    sleep,200
+    clipboard = %clipboard%
+    fullPath=%clipboard%
+    Clipboard := ClipSaved   
+    run , emacsclientw %fullPath%
+  }
+}
+<span style="color: #7fffd4;">#IfWinActive</span> ahk_class ExploreWClass|CabinetWClass
+^e:: openSelectedfileWithEamcs()
+<span style="color: #7fffd4;">#IfWinActive</span>
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-06-15</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/autohotkey/">AutoHotKey</a>, <a href="/tags/windows/">Windows</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/AutoHotKeyExplorer.html";
+          var disqus_url = "http://jixiuf.github.io/blog/AutoHotKeyExplorer.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

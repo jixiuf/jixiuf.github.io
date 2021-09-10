@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>emacs-some-func.org - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="emacs-some-func.org" />
+    <meta name="keywords" content="emacs " />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>emacs-some-func.org</h1>
+<p>
+这个函数，用于跳转到下一处空格的位置，如果是连续的多个空格，则跳转到所有空<br />
+格的开头及结尾。这个键我绑定在C-o上。<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;;;</span><span style="color: #AEAEAE;">###</span><span style="color: #ffc0cb;">autoload</span>
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">joseph-jump-to-space-forward</span>()
+  (<span style="color: #FBDE2D;">interactive</span>)
+  (<span style="color: #FBDE2D;">let</span> ((old-pos (point))
+        m-end m-begin
+        )
+    (<span style="color: #FBDE2D;">when</span> (re-search-forward <span style="color: #ffa07a;">"[ \t]+"</span>  nil t)
+      (<span style="color: #FBDE2D;">setq</span> m-begin (match-beginning 0))
+      (<span style="color: #FBDE2D;">setq</span> m-end (match-end 0))
+      (goto-char m-begin)
+      (<span style="color: #FBDE2D;">if</span> (equal old-pos m-end)
+          (<span style="color: #FBDE2D;">progn</span>
+            (re-search-forward <span style="color: #ffa07a;">"[ \t]+"</span>  nil t)
+            (goto-char (match-beginning 0)))
+        (<span style="color: #FBDE2D;">if</span> (equal m-begin old-pos)
+            (goto-char m-end)
+            )))))
+</pre>
+</div>
+<p>
+编写代码的时候添加或者删除注释是一个经常性的活动。默认emacs为这个工作已经做<br />
+的很好了.不论你在写什么语言。都是`M-;'进行注释与反注释。<br />
+即，如果你选中的区域已经被注释上了，则M-;取消注释。否则就是为你所中的区域添<br />
+加注释。如果你没选中内容，则在行末添加注释。我想做的是，如果没有选中内容，<br />
+则注释或者反注释当前行。如果在行末时，才在行末添加注释。<br />
+将这个函数绑定在M-;上即可。<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">&#20195;&#30721;&#27880;&#37322;&#24037;&#20316;&#65292;&#22914;&#26524;&#26377;&#36873;&#20013;&#21306;&#22495;&#65292;&#21017;&#27880;&#37322;&#25110;&#32773;&#21453;&#27880;&#37322;&#36825;&#20010;&#21306;&#22495;</span>
+<span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">&#22914;&#26524;&#65292;&#27809;&#36873;&#20013;&#21306;&#22495;&#65292;&#21017;&#27880;&#37322;&#25110;&#32773;&#27880;&#37322;&#24403;&#21069;&#34892;&#65292;&#22914;&#26524;&#20809;&#26631;&#22312;&#34892;&#26411;&#65292;&#21017;&#22312;&#34892;&#26411;&#28155;&#21152;&#25110;&#21024;&#38500;&#27880;&#37322;</span>
+<span style="color: #AEAEAE;">;;;</span><span style="color: #AEAEAE;">###</span><span style="color: #ffc0cb;">autoload</span>
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">joseph-comment-dwim-line</span> (<span style="color: #8DA6CE;">&amp;optional</span> arg)
+  <span style="color: #ffa07a;">"Replacement for the comment-dwim command.</span>
+<span style="color: #ffa07a;">If no region is selected and current line is not blank and we are not at the end of the line,</span>
+<span style="color: #ffa07a;">then comment current line.</span>
+<span style="color: #ffa07a;">Replaces default behaviour of comment-dwim, when it inserts comment at the end of the line."</span>
+  (<span style="color: #FBDE2D;">interactive</span> <span style="color: #ffa07a;">"*P"</span>)
+  (comment-normalize-vars)
+  (<span style="color: #FBDE2D;">if</span> (<span style="color: #FBDE2D;">and</span> (not (region-active-p)) (not (looking-at <span style="color: #ffa07a;">"[ \t]*$"</span>)))
+      (comment-or-uncomment-region (line-beginning-position) (line-end-position))
+    (comment-dwim arg)))
+</pre>
+</div>
+
+<p>
+写程序时在行尾添加分号,不必非得光标在行尾。<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(define-key java-mode-map <span style="color: #ffa07a;">";"</span>  'joseph-append-semicolon-at-eol)
+
+<span style="color: #AEAEAE;">;;;</span><span style="color: #AEAEAE;">###</span><span style="color: #ffc0cb;">autoload</span>
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">joseph-append-semicolon-at-eol</span>(<span style="color: #8DA6CE;">&amp;optional</span> arg)
+  <span style="color: #ffa07a;">"&#22312;&#24403;&#21069;&#34892;&#20219;&#20309;&#20301;&#32622;&#36755;&#20837;&#20998;&#21495;&#37117;&#22312;&#34892;&#23614;&#28155;&#21152;&#20998;&#21495;&#65292;&#38500;&#38750;&#26412;&#34892;&#26377;for &#36825;&#20010;&#20851;&#38190;&#23383;&#65292;</span>
+<span style="color: #ffa07a;">&#22914;&#26524;&#34892;&#23614;&#24050;&#32463;&#26377;&#20998;&#21495;&#21017;&#21024;&#38500;&#34892;&#23614;&#30340;&#20998;&#21495;&#65292;&#23558;&#20854;&#25554;&#20837;&#21040;&#24403;&#21069;&#20301;&#32622;,&#23601;&#26159;&#35828;&#36755;&#20837;&#20004;&#27425;&#20998;&#21495;&#21017;&#19981;&#22312;&#34892;&#23614;&#25554;&#20837;&#32780;&#26159;&#20687;&#27491;&#24120;&#24773;&#20917;&#19968;&#26679;."</span>
+  (<span style="color: #FBDE2D;">interactive</span> <span style="color: #ffa07a;">"*p"</span>)
+  (<span style="color: #FBDE2D;">let*</span> ( ( init_position (point))
+          (b (line-beginning-position))
+          (e (line-end-position))
+          (line_str (buffer-substring b e))
+          (semicolon_end_of_line (string-match <span style="color: #ffa07a;">";[ \t]*$"</span> line_str ))
+          )
+    (<span style="color: #FBDE2D;">if</span> semicolon_end_of_line <span style="color: #AEAEAE;">;;;;</span><span style="color: #AEAEAE;">&#22914;&#26524;&#34892;&#23614;&#24050;&#32463;&#26377;&#20998;&#21495;&#65292;&#21017;&#21024;&#38500;&#34892;&#23614;&#30340;&#20998;&#21495;&#65292;&#24182;&#22312;&#24403;&#21069;&#20301;&#32622;&#36755;&#20837;&#20998;&#21495;;;;;;;</span>
+        (<span style="color: #FBDE2D;">progn</span>
+          (<span style="color: #FBDE2D;">save-excursion</span>
+            (goto-char (+ semicolon_end_of_line b))
+            (delete-char 1) )
+          (insert <span style="color: #ffa07a;">";"</span>) )
+      <span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">&#22312;&#25972;&#34892;&#20869;&#23481;&#20013;&#25628;&#32034;&#26377;&#27809;&#26377;&#20851;&#38190;&#23383;for&#30340;&#23384;&#22312;,&#25110;&#32773;&#24403;&#21069;&#20301;&#32622;&#24050;&#32463;&#26159;&#34892;&#23614;,&#30452;&#25509;&#25554;&#20837;&#20998;&#21495;</span>
+      (<span style="color: #FBDE2D;">if</span>   (<span style="color: #FBDE2D;">or</span> (string-match <span style="color: #ffa07a;">"^[ \t]*$"</span> (buffer-substring init_position e))
+                (string-match <span style="color: #ffa07a;">"\\bfor\\b"</span> line_str))
+          (insert <span style="color: #ffa07a;">";"</span>)
+        (<span style="color: #FBDE2D;">save-excursion</span> <span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">&#22914;&#26524;&#25628;&#32034;&#19981;&#21040; for &#21017;&#22312;&#34892;&#23614;&#25554;&#20837;&#20998;&#21495;;</span>
+          (end-of-line)
+          (delete-trailing-whitespace)
+          (insert <span style="color: #ffa07a;">";"</span>)
+          )))))
+</pre>
+</div>
+
+<p>
+这个函数是将C-j 与C-o 的功能进行合并。<br />
+当光标在行首时，调用此函数，在上一行添加空行。当光标在行尾时，调用此命令则<br />
+在下一行添加空行。所以可以节省下一个快捷键<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;;;</span><span style="color: #AEAEAE;">###</span><span style="color: #ffc0cb;">autoload</span>
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">open-line-or-new-line-dep-pos</span>()
+  <span style="color: #ffa07a;">"if point is in head of line then open-line</span>
+<span style="color: #ffa07a;">if point is at end of line , new-line-and-indent"</span>
+  (<span style="color: #FBDE2D;">interactive</span>)
+  (<span style="color: #FBDE2D;">if</span> (<span style="color: #FBDE2D;">and</span> (= (point) (point-at-bol))
+           (not (looking-at <span style="color: #ffa07a;">"^[ \t]*$"</span>)))
+      (<span style="color: #FBDE2D;">progn</span>
+        (open-line 1)
+        (indent-for-tab-command))
+    (newline-and-indent)))
+</pre>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-07-04</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/emacs/">Emacs</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/emacs-some-func.html";
+          var disqus_url = "http://jixiuf.github.io/blog/emacs-some-func.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

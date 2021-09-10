@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>receive timeout - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="receive timeout" />
+    <meta name="keywords" content="erlang" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>receive timeout</h1>
+<div class="org-src-container">
+<pre class="src src-erlang">receive
+    Message1 [when Guard1] -&gt;
+	Actions1 ;
+    Message2 [when Guard2] -&gt;
+	Actions2 ;
+    ...
+after
+    TimeOutExpr -&gt;
+	ActionsT
+end
+</pre>
+</div>
+<p>
+例:<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-erlang">-module(tt).
+-export([start/0,value/1,loop/1,test/0]).
+
+
+start()-&gt;
+    spawn(tt,loop,[0])
+	.
+
+value(T) -&gt;
+    T!{self(),value},
+    receive
+	Val-&gt;
+	    Val
+    after 1000 -&gt;                               %一秒钟超时
+	    timeout
+    end
+	.
+loop (Val) -&gt;
+    receive
+	inc-&gt;
+	    loop(Val+1);
+	{From,value}-&gt;
+	    From! Val
+    end.
+
+test() -&gt;
+    P=tt:start(),
+    P!inc,
+    P!inc,
+    value(P).
+</pre>
+</div>
+
+<p>
+在超时表达式的参数中有两个值有特殊意义：<br />
+</p>
+<ul class="org-ul">
+<li>infinity<br /></li>
+</ul>
+
+<p>
+原子式infinity表示超时永远也不会发生。如果超时时间需要在运行时计算的话，这个<br />
+功能就很有用。我们可能会希望通过对一个表达式进行求值来得到超时长度：如果返回<br />
+值是infinity的话，则永久等待。<br />
+</p>
+
+<ul class="org-ul">
+<li>0<br /></li>
+</ul>
+<p>
+数值0表示超时会立即发生，不过在那之前系统仍然会首先尝试对邮箱中已有的消息进<br />
+    行匹配。(我估计含义是:如果已有的消息匹配成功,则不运行超时子句,若此时邮<br />
+    箱中没任何消息,则立即运行超时子句.)<br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-erlang">%% 比如,确定 鼠标双击或单击事件
+get_event() -&gt;
+    receive
+	{mouse, click} -&gt;
+	    receive
+		{mouse, click} -&gt;
+		    double_click
+	    after double_click_interval() -&gt;
+		single_click
+	    end
+	...
+    end.
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-erlang">%% 超时,sleep
+sleep(Time) -&gt;
+    receive
+	after Time -&gt;
+	    true
+    end.
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-erlang">%% flush_buffer()清空当前进程的邮箱：
+
+%% 只要邮箱中还有消息，第一个消息会被匹配到（未绑定变量AnyMessage会匹配到任何消
+%% 息，在这里就是第一个消息），然后flush_buffer会再次被调用，但是如果邮箱已经为
+%% 空了，那么函数会从超时子句中返回。
+
+flush_buffer() -&gt;
+    receive
+	AnyMessage -&gt;                           %注意首字母大写表示这是一个变量,所以可以否配任何传过来的消息.
+	    flush_buffer()
+	after 0 -&gt;
+	    true
+    end.
+
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-erlang">%% 消息的优先级也可以通过使用0作为超时长度来实现：
+
+%% 函数priority_receive会返回邮箱中第一个消息，
+%% 除非有消息interrupt发送到了邮箱中，此时将返回interrupt
+%% 即消息 interrupt 优先级较其他高.
+priority_receive() -&gt;
+    receive
+	interrupt -&gt;
+	    interrupt
+    after 0 -&gt;
+	receive
+	    AnyMessage -&gt;
+		AnyMessage
+	end
+    end
+
+</pre>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-11-12</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/erlang/">Erlang</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/timeout.html";
+          var disqus_url = "http://jixiuf.github.io/blog/timeout.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

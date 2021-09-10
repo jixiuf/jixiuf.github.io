@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>clone db in sqlserver  - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="clone db in sqlserver " />
+    <meta name="keywords" content="sql server " />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>clone db in sqlserver </h1>
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #AEAEAE;">-- sqlserver &#65292;&#26681;&#25454;&#24050;&#26377;&#25968;&#25454;&#24211;&#21019;&#24314;&#19968;&#20010;&#23436;&#20840;&#30456;&#21516;&#30340;&#25968;&#25454;&#24211;</span>
+<span style="color: #AEAEAE;">--  &#21407;&#29702;&#26159;&#20808;&#29992;backup &#35821;&#21477;&#23558;&#24403;&#21069;&#25968;&#25454;&#24211;&#22791;&#20221;&#25104;&#19968;&#20010;&#22791;&#20221;&#25991;&#20214;</span>
+<span style="color: #AEAEAE;">--  &#28982;&#21518;&#29992;restore &#21629;&#20196;&#24674;&#22797;&#12290;&#20013;&#38388;&#36807;&#31243;&#20013;&#65292;&#20250;&#23558;&#25968;&#25454;&#25991;&#20214;&#19982;&#26085;&#24535;&#25991;&#20214;</span>
+<span style="color: #AEAEAE;">-- &#30340;&#21517;&#23383;&#21450;&#25968;&#25454;&#24211;&#30340;&#21517;&#23383;&#36827;&#34892;&#26356;&#25913;&#65292;&#20174;&#32780;&#65292;&#23454;&#29616;clone .</span>
+
+USE master
+<span style="color: #FBDE2D;">GO</span>
+<span style="color: #AEAEAE;">--&#21407;&#22987;&#30340;&#25968;&#25454;&#24211;&#21517;&#31216;&#12290;&#27604;&#22914;&#27492;&#22788;&#25105;&#35774;&#25104;HAIHUA_MRP </span>
+<span style="color: #AEAEAE;">-- the original database (use 'SET @DB = NULL' to disable backup)</span>
+<span style="color: #FBDE2D;">DECLARE</span> @DB <span style="color: #8DA6CE;">varchar</span>(200)
+<span style="color: #FBDE2D;">SET</span> @DB = <span style="color: #ffa07a;">'meiji_0421_null'</span>
+
+<span style="color: #AEAEAE;">-- &#29983;&#25104;&#30340;&#22791;&#20221;&#25991;&#20214;&#30340;&#20301;&#32622;</span>
+<span style="color: #AEAEAE;">-- the backup filename</span>
+<span style="color: #FBDE2D;">DECLARE</span> @BackupFile <span style="color: #8DA6CE;">varchar</span>(2000)
+<span style="color: #FBDE2D;">SET</span> @BackupFile = <span style="color: #ffa07a;">'c:\meiji_jixf4.dat'</span>
+
+<span style="color: #AEAEAE;">-- &#26032;&#25968;&#25454;&#24211;&#30340;&#21517;&#23383;</span>
+<span style="color: #AEAEAE;">-- the new database name</span>
+<span style="color: #FBDE2D;">DECLARE</span> @TestDB <span style="color: #8DA6CE;">varchar</span>(200)
+<span style="color: #FBDE2D;">SET</span> @TestDB = <span style="color: #ffa07a;">'meiji_jixf4'</span>
+<span style="color: #AEAEAE;">-- &#26032;&#25968;&#25454;&#24211;&#25152;&#29992;&#21040;&#30340;&#26085;&#24535;&#25991;&#20214;&#21450;&#25968;&#25454;&#25991;&#20214;&#30340;&#21517;&#23383;&#65292;&#19981;&#21253;&#21547;&#21518;&#32512;&#23383;</span>
+<span style="color: #AEAEAE;">-- &#19979;&#25991;&#20250;&#33258;&#21160;&#36861;&#21152;&#21518;&#32512;&#21517;</span>
+<span style="color: #AEAEAE;">-- the new database files without .mdf/.ldf</span>
+<span style="color: #FBDE2D;">DECLARE</span> @RestoreFile <span style="color: #8DA6CE;">varchar</span>(2000)
+<span style="color: #FBDE2D;">SET</span> @RestoreFile = <span style="color: #ffa07a;">'c:\meiji_jixf4'</span>
+
+
+<span style="color: #AEAEAE;">-- ****************************************************************</span>
+<span style="color: #AEAEAE;">--                    no change below this line</span>
+<span style="color: #AEAEAE;">--  &#20197;&#19979;&#20869;&#23481;&#65292;&#19981;&#35201;&#20462;&#25913;</span>
+<span style="color: #AEAEAE;">-- ****************************************************************</span>
+
+
+<span style="color: #FBDE2D;">DECLARE</span> @query <span style="color: #8DA6CE;">varchar</span>(2000)
+
+<span style="color: #FBDE2D;">DECLARE</span> @DataFile <span style="color: #8DA6CE;">varchar</span>(2000)
+<span style="color: #FBDE2D;">SET</span> @DataFile = @RestoreFile + <span style="color: #ffa07a;">'.mdf'</span>
+
+<span style="color: #FBDE2D;">DECLARE</span> @LogFile <span style="color: #8DA6CE;">varchar</span>(2000)
+<span style="color: #FBDE2D;">SET</span> @LogFile = @RestoreFile + <span style="color: #ffa07a;">'.ldf'</span>
+
+IF @DB <span style="color: #FBDE2D;">IS</span> <span style="color: #FBDE2D;">NOT</span> <span style="color: #FBDE2D;">NULL</span>
+<span style="color: #FBDE2D;">BEGIN</span>
+<span style="color: #FBDE2D;">SET</span> @query = <span style="color: #ffa07a;">'BACKUP DATABASE '</span> + @DB + <span style="color: #ffa07a;">' TO DISK = '</span> + QUOTENAME(@BackupFile, <span style="color: #ffa07a;">''''</span>)
+<span style="color: #FBDE2D;">EXEC</span> (@query)
+<span style="color: #FBDE2D;">END</span>
+
+<span style="color: #AEAEAE;">-- RESTORE FILELISTONLY FROM DISK = 'C:\temp\backup.dat'</span>
+<span style="color: #AEAEAE;">-- RESTORE HEADERONLY FROM DISK = 'C:\temp\backup.dat'</span>
+<span style="color: #AEAEAE;">-- RESTORE LABELONLY FROM DISK = 'C:\temp\backup.dat'</span>
+<span style="color: #AEAEAE;">-- RESTORE VERIFYONLY FROM DISK = 'C:\temp\backup.dat'</span>
+
+IF <span style="color: #FBDE2D;">EXISTS</span>(<span style="color: #FBDE2D;">SELECT</span> * <span style="color: #FBDE2D;">FROM</span> sysdatabases <span style="color: #FBDE2D;">WHERE</span> <span style="color: #FBDE2D;">name</span> = @TestDB)
+<span style="color: #FBDE2D;">BEGIN</span>
+<span style="color: #FBDE2D;">SET</span> @query = <span style="color: #ffa07a;">'DROP DATABASE '</span> + @TestDB
+<span style="color: #FBDE2D;">EXEC</span> (@query)
+<span style="color: #FBDE2D;">END</span>
+
+<span style="color: #AEAEAE;">-- RESTORE HEADERONLY FROM DISK = @BackupFile</span>
+<span style="color: #AEAEAE;">-- DECLARE @File int</span>
+<span style="color: #AEAEAE;">-- SET @File = @@ROWCOUNT</span>
+
+<span style="color: #FBDE2D;">DECLARE</span> @<span style="color: #FBDE2D;">Data</span> <span style="color: #8DA6CE;">varchar</span>(500)
+<span style="color: #FBDE2D;">DECLARE</span> @Log <span style="color: #8DA6CE;">varchar</span>(500)
+
+<span style="color: #FBDE2D;">SET</span> @query = <span style="color: #ffa07a;">'RESTORE FILELISTONLY FROM DISK = '</span> + QUOTENAME(@BackupFile , <span style="color: #ffa07a;">''''</span>)
+
+<span style="color: #AEAEAE;">--- &#36825;&#24352;&#20020;&#26102;&#34920;&#30340;&#32467;&#26500;&#19982;SET @query = 'RESTORE FILELISTONLY FROM DISK = ' + QUOTENAME(@BackupFile , '''')</span>
+<span style="color: #AEAEAE;">--  &#21629;&#20196;&#30340;&#32467;&#26524;&#30456;&#21516;&#65292;&#30446;&#30340;&#21482;&#26159;&#20026;&#20102;&#20445;&#23384;&#19978;&#36848;&#32467;&#26524;&#21040;&#19968;&#24352;&#34920;&#65292;&#28982;&#21518;&#21462;&#24471;&#20854;&#20013;&#26085;&#24535;&#25991;&#20214;&#21450;&#25968;&#25454;&#25991;&#20214;&#30340;logicalName</span>
+<span style="color: #AEAEAE;">-- &#22240;&#20026;&#22312;restore &#26102;&#65292;&#20250;&#29992;&#21040;&#23427;&#23558;&#26085;&#24535;&#25991;&#20214;&#25968;&#25454;&#25991;&#20214;&#30340;&#20301;&#32622;&#36827;&#34892;&#26356;&#25913;</span>
+<span style="color: #FBDE2D;">CREATE</span> <span style="color: #FBDE2D;">TABLE</span> #restoretemp
+(
+LogicalName <span style="color: #8DA6CE;">varchar</span>(500),
+PhysicalName <span style="color: #8DA6CE;">varchar</span>(500),
+<span style="color: #FBDE2D;">type</span> <span style="color: #8DA6CE;">varchar</span>(10),
+FilegroupName <span style="color: #8DA6CE;">varchar</span>(200),
+<span style="color: #FBDE2D;">size</span> <span style="color: #8DA6CE;">int</span>,
+maxsize bigint,
+fileid <span style="color: #8DA6CE;">varchar</span>(200),
+createlsn <span style="color: #8DA6CE;">varchar</span>(200),
+droplsn  <span style="color: #8DA6CE;">varchar</span>(200),
+uniqueid <span style="color: #8DA6CE;">varchar</span>(200),
+readonlylsn  <span style="color: #8DA6CE;">varchar</span>(200),
+readwritelsn <span style="color: #8DA6CE;">varchar</span>(200),
+backupsizeinbytes bigint ,
+sourceblocksize <span style="color: #8DA6CE;">int</span> ,
+filegroupid <span style="color: #8DA6CE;">int</span> ,
+loggroupguid <span style="color: #8DA6CE;">varchar</span>(200),
+differentialbaselsn bigint,
+differentialbaseguid <span style="color: #8DA6CE;">varchar</span>(200),
+isreadonly <span style="color: #8DA6CE;">bit</span>,
+ispresent <span style="color: #8DA6CE;">bit</span>
+
+
+)
+<span style="color: #FBDE2D;">INSERT</span> #restoretemp <span style="color: #FBDE2D;">EXEC</span> (@query)
+
+<span style="color: #FBDE2D;">SELECT</span> @<span style="color: #FBDE2D;">Data</span> = LogicalName <span style="color: #FBDE2D;">FROM</span> #restoretemp <span style="color: #FBDE2D;">WHERE</span> <span style="color: #FBDE2D;">type</span> = <span style="color: #ffa07a;">'D'</span>
+<span style="color: #FBDE2D;">SELECT</span> @Log = LogicalName <span style="color: #FBDE2D;">FROM</span> #restoretemp <span style="color: #FBDE2D;">WHERE</span> <span style="color: #FBDE2D;">type</span> = <span style="color: #ffa07a;">'L'</span>
+
+PRINT @<span style="color: #FBDE2D;">Data</span>
+PRINT @Log
+
+TRUNCATE <span style="color: #FBDE2D;">TABLE</span> #restoretemp
+<span style="color: #FBDE2D;">drop</span> <span style="color: #FBDE2D;">table</span>  #restoretemp
+<span style="color: #FBDE2D;">SET</span> @query = <span style="color: #ffa07a;">'RESTORE DATABASE '</span> + @TestDB + <span style="color: #ffa07a;">' FROM DISK = '</span> + QUOTENAME(@BackupFile, <span style="color: #ffa07a;">''''</span>) + 
+<span style="color: #ffa07a;">' WITH MOVE '</span> + QUOTENAME(@<span style="color: #FBDE2D;">Data</span>, <span style="color: #ffa07a;">''''</span>) + <span style="color: #ffa07a;">' TO '</span> + QUOTENAME(@DataFile, <span style="color: #ffa07a;">''''</span>) + <span style="color: #ffa07a;">', MOVE '</span> +
+QUOTENAME(@Log, <span style="color: #ffa07a;">''''</span>) + <span style="color: #ffa07a;">' TO '</span> + QUOTENAME(@LogFile, <span style="color: #ffa07a;">''''</span>)  
+<span style="color: #FBDE2D;">EXEC</span> (@query)
+<span style="color: #FBDE2D;">GO</span>
+<span style="color: #AEAEAE;">------------------------------------------</span>
+<span style="color: #AEAEAE;">--&#31616;&#21333;&#30340;&#31034;&#20363;&#65292;&#19981;&#20855;&#36890;&#29992;&#65292;&#20294;&#20856;&#22411;&#65292;&#19978;&#38754;&#30340;&#20195;&#30721;&#22522;&#26412;&#20351;&#29992;&#36825;&#38754;&#20195;&#30721;</span>
+<span style="color: #AEAEAE;">-- backup database jixf to disk='d:jixf_data.bak'</span>
+<span style="color: #AEAEAE;">-- Restore FILELISTONLY FROM DISK='d:\jixf_data.bak'</span>
+<span style="color: #AEAEAE;">-- rESTORE DATABASE jixf2</span>
+<span style="color: #AEAEAE;">-- FROM DISK='d:\jixf_data.bak'</span>
+<span style="color: #AEAEAE;">-- WITH</span>
+<span style="color: #AEAEAE;">-- MOVE 'jixf' TO 'D:\jixf_data2.mdf',</span>
+<span style="color: #AEAEAE;">-- MOVE 'jixf_log' TO 'D:\jixf_data2_log.ldf'</span>
+
+<span style="color: #AEAEAE;">-- rESTORE DATABASE jixf2</span>
+<span style="color: #AEAEAE;">-- FROM DISK='d:\jixf_data.bak'</span>
+<span style="color: #AEAEAE;">-- WITH</span>
+<span style="color: #AEAEAE;">-- MOVE 'jixf' TO 'D:\jixf_data2.mdf',</span>
+<span style="color: #AEAEAE;">-- MOVE 'jixf_log' TO 'D:\jixf_data2_log.ldf',stats=5</span>
+
+<span style="color: #AEAEAE;">-- RESTORE HEADERONLY FROM DISK ='d:\jixf_data.bak'</span>
+
+
+
+<span style="color: #AEAEAE;">-- backup database  [HAIHUA_MRP_Test_jujt(20110905)] TO DISK = N'C:\HAIHUA_MRP_Test_jujt.bak'  </span>
+<span style="color: #AEAEAE;">-- go</span>
+
+<span style="color: #AEAEAE;">-- rESTORE DATABASE jixf23</span>
+<span style="color: #AEAEAE;">-- FROM</span>
+<span style="color: #AEAEAE;">-- DISK = N'C:\HAIHUA_MRP_Test_jujt.bak'</span>
+<span style="color: #AEAEAE;">-- WITH</span>
+<span style="color: #AEAEAE;">-- MOVE 'HAIHUA_MRP_TEST1' TO 'D:\jixf_data23.mdf',</span>
+<span style="color: #AEAEAE;">-- MOVE 'HAIHUA_MRP_TEST1_log' TO 'D:\jixf_data23_log.ldf',stats=5</span>
+
+
+<span style="color: #AEAEAE;">-- rESTORE DATABASE jixf23</span>
+<span style="color: #AEAEAE;">-- FROM DISK = N'C:\HAIHUA_MRP_Test_jujt.bak'</span>
+<span style="color: #AEAEAE;">-- WITH</span>
+<span style="color: #AEAEAE;">-- MOVE 'HAIHUA_MRP_TEST1' TO 'D:\jixf_data23.mdf',</span>
+<span style="color: #AEAEAE;">-- MOVE 'HAIHUA_MRP_TEST1_log' TO 'D:\jixf_data23_log.ldf',stats=5</span>
+
+<span style="color: #AEAEAE;">-- RESTORE HEADERONLY FROM DISK = N'C:\HAIHUA_MRP_Test_jujt.bak'</span>
+
+<span style="color: #AEAEAE;">-- 20110921</span>
+<span style="color: #AEAEAE;">-- rESTORE DATABASE HAIHUA_MRP_Test_WANGZL_20110921</span>
+<span style="color: #AEAEAE;">-- FROM</span>
+<span style="color: #AEAEAE;">-- DISK = N'c:\haihua\HAIHUA_MRP_TEST_20110921_BAK.bak'</span>
+<span style="color: #AEAEAE;">-- WITH</span>
+<span style="color: #AEAEAE;">-- MOVE 'HAIHUA_MRP_TEST1' TO 'c:\haihua\Temp\db\jixf_data56.mdf',</span>
+<span style="color: #AEAEAE;">-- MOVE 'HAIHUA_MRP_TEST1_log' TO 'c:\haihua\Temp\db\jixf_data56_log.ldf',stats=5</span>
+
+
+
+<span style="color: #AEAEAE;">-- rESTORE DATABASE HAIHUA_MRP_Test_WANGZL_20110921</span>
+<span style="color: #AEAEAE;">-- FROM </span>
+<span style="color: #AEAEAE;">-- DISK = N'c:\haihua\HAIHUA_MRP_TEST_20110921_BAK.bak'</span>
+<span style="color: #AEAEAE;">-- WITH</span>
+<span style="color: #AEAEAE;">-- MOVE 'HAIHUA_MRP_TEST1' TO  'c:\haihua\Temp\db\jixf_data56.mdf',</span>
+<span style="color: #AEAEAE;">-- MOVE 'HAIHUA_MRP_TEST1_log' TO 'c:\haihua\Temp\db\jixf_data56_log.ldf',stats=5</span>
+
+<span style="color: #AEAEAE;">-- RESTORE HEADERONLY FROM DISK =N'c:\haihua\HAIHUA_MRP_TEST_20110921_BAK.bak'</span>
+</pre>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-10-28</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/sql/">SQL</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/clonedb.html";
+          var disqus_url = "http://jixiuf.github.io/blog/clonedb.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>mysql 备份相关 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="mysql 备份相关" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>mysql 备份相关</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org98c59e1">针对全量备份的恢复过程</a></li>
+</ul>
+</div>
+</div>
+<p>
+<a href="http://www.percona.com/software/percona-xtrabackup">http://www.percona.com/software/percona-xtrabackup</a><br />
+percona-xtrabackup-2.2.8-5059.el6.x86_64.rpm<br />
+how to install<br />
+<a href="http://www.phperz.com/article/14/1221/42263.html">http://www.phperz.com/article/14/1221/42263.html</a><br />
+deps<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">sudo yum install -y perl-DBI
+sudo yum install -y perl-DBD-MySQL
+sudo yum install -y perl-Time-HiRes
+sudo yum install -y perl-IO-Socket-SSL
+</pre>
+</div>
+<p>
+#<a href="https://www.percona.com/doc/percona-xtrabackup/2.2/installation/yum_repo.html">https://www.percona.com/doc/percona-xtrabackup/2.2/installation/yum_repo.html</a><br />
+yum install <a href="http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm">http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm</a><br />
+yum list | grep percona|grep back<br />
+yum install percona-xtrabackup-22<br />
+</p>
+
+<p>
+<a href="http://devliangel.blog.51cto.com/469347/1374232">http://devliangel.blog.51cto.com/469347/1374232</a><br />
+<a href="http://blog.csdn.net/yongsheng0550/article/details/6682162">http://blog.csdn.net/yongsheng0550/article/details/6682162</a><br />
+<a href="https://www.tekovic.com/mysql-hot-backup-with-xtrabackup-on-centos">https://www.tekovic.com/mysql-hot-backup-with-xtrabackup-on-centos</a><br />
+crontab 定时运行<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">0 3 * * * innobackupex --defaults-file=/etc/mysql/my.cnf --host=127.0.0.1  -port=3306 --user=root --password=<span style="color: #ffa07a;">'rootpass'</span> /udisk/mysqlback/base
+0 3 * * * innobackupex --defaults-file=/etc/my.cnf  --user=root --password=<span style="color: #ffa07a;">'rootpass'</span> --port=3306 --socket=/tmp/mysql.sock  /data/backup/mysql/
+0 0 * * *   python /root/script/daily_backup.py
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#22870; &#20462;&#25913;&#26102;&#38388;&#26159;10&#22825;&#21069;&#30340;&#30446;&#24405;&#37117;&#21024;&#38500;&#65292;&#21363;&#21482;&#20445;&#30041;&#26368;&#21518;10&#22825;&#30340;&#25968;&#25454;</span>
+10 3 * * * find /udisk/mysqlback/base/ -maxdepth 1 -mtime +10 -exec rm  -rf {} <span style="color: #ffa07a;">\;</span>
+</pre>
+</div>
+
+<p>
+demo<br />
+全量备份<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">innobackupex --defaults-file=/etc/my.cnf  --user=root --password=<span style="color: #ffa07a;">'rootpass'</span> --host=127.0.0.1 --port=3306 --socket=/tmp/mysql.sock --no-timestamp /data/mysql_backup/2016-06-21_18-18-55  2&gt;/data/mysql_backup/log/2016-06-21_18-18-55.log
+innobackupex --defaults-file=/etc/my.cnf  --user=root --password=<span style="color: #ffa07a;">'rootpass'</span> --host=127.0.0.1 --port=3306 --socket=/tmp/mysql.sock  /data/backup/mysql/
+</pre>
+</div>
+<div id="outline-container-org98c59e1" class="outline-2">
+<h2 id="org98c59e1">针对全量备份的恢复过程</h2>
+<div class="outline-text-2" id="text-org98c59e1">
+<p>
+比如创建的备份在 /data/backup/mysql/2016-06-21_18-18-55/下<br />
+原mysql 数据文件在 /data/mysql/data/目录<br />
+</p>
+<ol class="org-ol">
+<li><p>
+停mysql 服务<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">service mysqld stop
+</pre>
+</div></li>
+<li><p>
+删除 mysql 现有的数据文件(删除前最好备份下)<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">copy /data/mysql/data /data/mysql/data.bak
+rm -rf /data/mysql/data/*
+</pre>
+</div></li>
+<li><p>
+apply-log，为了加快速度，一般建议设置&#x2013;use-memory，这个步骤完成之后，目录/data/backup/mysql/2016-06-21_18-18-55/下的备份文件已经准备就绪。<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">--use-memory=100M default</span>
+innobackupex --use-memory=500M  --user=root --password=<span style="color: #ffa07a;">'rootpass'</span> --apply-log /data/mysql_backup/2016-06-21_18-18-55
+</pre>
+</div></li>
+<li><p>
+copy-back<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">sudo innobackupex --defaults-file=/etc/my.cnf  --user=root --password=<span style="color: #ffa07a;">'rootpass'</span>  --copy-back  /data/mysql_backup/2016-06-21_18-18-55
+sudo chown mysql:mysql -R /data/mysql/data/
+</pre>
+</div></li>
+</ol>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2016-03-07</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/mysql/">Mysql</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/mysql-backup.html";
+          var disqus_url = "http://jixiuf.github.io/blog/mysql-backup.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

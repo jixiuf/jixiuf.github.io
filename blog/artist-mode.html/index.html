@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>emacs画文本图 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="emacs画文本图" />
+    <meta name="keywords" content="@Emacs artist-mode" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>emacs画文本图</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgbdc7443">emacs 自带artist-mode</a></li>
+<li><a href="#org649ee88">org 整合</a></li>
+<li><a href="#orge56ca17">Link</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgbdc7443" class="outline-2">
+<h2 id="orgbdc7443">emacs 自带artist-mode</h2>
+<div class="outline-text-2" id="text-orgbdc7443">
+<p>
+在一个新buffer ,或者 `C-xnn'后的buffer中 M-x:artist-mode<br />
+Shift+中键 选择画什么图形<br />
+Shift+ 右键  删除一个区域<br />
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">操作</td>
+<td class="org-left">无shift</td>
+<td class="org-left">shift</td>
+</tr>
+
+<tr>
+<td class="org-left">pen</td>
+<td class="org-left">单击，在鼠标点填充一个“填充符号”，默认为”.”；按下左键，拖动，抬起，绘制填充符号组成的线</td>
+<td class="org-left">单击，在鼠标点填充一个“o”；按下左键，拖动，抬起，绘制一条从初始点到最终点的直线</td>
+</tr>
+
+<tr>
+<td class="org-left">Line</td>
+<td class="org-left">任意方向的线</td>
+<td class="org-left">直线</td>
+</tr>
+
+<tr>
+<td class="org-left">Rectangle</td>
+<td class="org-left">矩形</td>
+<td class="org-left">正方形1</td>
+</tr>
+
+<tr>
+<td class="org-left">Poly-line</td>
+<td class="org-left">任意方向的多边形</td>
+<td class="org-left">每条线都是直线的多边形</td>
+</tr>
+
+<tr>
+<td class="org-left">Ellipses</td>
+<td class="org-left">椭圆</td>
+<td class="org-left">圆2</td>
+</tr>
+
+<tr>
+<td class="org-left">Text</td>
+<td class="org-left">文本</td>
+<td class="org-left">覆盖式文本</td>
+</tr>
+
+<tr>
+<td class="org-left">Spray-can</td>
+<td class="org-left">喷雾器3</td>
+<td class="org-left">设置喷雾器的大小</td>
+</tr>
+
+<tr>
+<td class="org-left">Erase</td>
+<td class="org-left">橡皮，擦掉一个字符</td>
+<td class="org-left">擦掉矩形内字符</td>
+</tr>
+
+<tr>
+<td class="org-left">Vaporize</td>
+<td class="org-left">擦除一行</td>
+<td class="org-left">擦除所有相连的行</td>
+</tr>
+
+<tr>
+<td class="org-left">Cut</td>
+<td class="org-left">剪切矩形</td>
+<td class="org-left">剪切正方形</td>
+</tr>
+
+<tr>
+<td class="org-left">copy</td>
+<td class="org-left">复制矩形</td>
+<td class="org-left">复制正方形</td>
+</tr>
+
+<tr>
+<td class="org-left">paste</td>
+<td class="org-left">粘贴</td>
+<td class="org-left">粘贴</td>
+</tr>
+
+<tr>
+<td class="org-left">Flood-fill</td>
+<td class="org-left">填充工具，填充</td>
+<td class="org-left">填充</td>
+</tr>
+
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org649ee88" class="outline-2">
+<h2 id="org649ee88">org 整合</h2>
+</div>
+<div id="outline-container-orge56ca17" class="outline-2">
+<h2 id="orge56ca17">Link</h2>
+<div class="outline-text-2" id="text-orge56ca17">
+<p>
+<a href="http://www.udpwork.com/item/1464.html">http://www.udpwork.com/item/1464.html</a><br />
+<a href="http://orgmode.org/worg/org-contrib/org-exp-blocks.html">http://orgmode.org/worg/org-contrib/org-exp-blocks.html</a><br />
+</p>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2013-01-17</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/emacs/">Emacs</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/artist-mode.html";
+          var disqus_url = "http://jixiuf.github.io/blog/artist-mode.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

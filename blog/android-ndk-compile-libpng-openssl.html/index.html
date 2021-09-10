@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>android ndk 编译libpng openssl - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="android ndk 编译libpng openssl" />
+    <meta name="keywords" content="ndk-build android" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>android ndk 编译libpng openssl</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgaa09039">openssl 编译</a></li>
+<li><a href="#org37b3c25">libpng编译</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgaa09039" class="outline-2">
+<h2 id="orgaa09039">openssl 编译</h2>
+<div class="outline-text-2" id="text-orgaa09039">
+<p>
+openssl-build 脚本用于编译openssl<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">!/bin/</span><span style="color: #FBDE2D;">bash</span><span style="color: #AEAEAE;"> -e</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">@author Aleksandar Gotev (alex.gotev@mobimesh.it)</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">Hints and code taken also from http://stackoverflow.com/questions/11929773/compiling-the-latest-openssl-for-android</span>
+
+<span style="color: #FBDE2D;">if</span> [ <span style="color: #ffa07a;">"$#"</span> -ne 6 ]
+<span style="color: #FBDE2D;">then</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"Usage:"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"./openssl-build &lt;ANDROID_NDK_PATH&gt; &lt;OPENSSL_SOURCES_PATH&gt; &lt;ANDROID_TARGET_API&gt; \\"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"                &lt;ANDROID_TARGET_ABI&gt; &lt;GCC_VERSION&gt; &lt;OUTPUT_PATH&gt;"</span>
+    <span style="color: #F8F8F8;">echo</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"Supported target ABIs: armeabi, armeabi-v7a, x86, x86_64, arm64-v8a"</span>
+    <span style="color: #F8F8F8;">echo</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"Example using GCC 4.8, NDK 10e, OpenSSL 1.0.2d and Android API 21 for armeabi-v7a."</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"./openssl-build /home/user/android-ndk-r10e \\"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"                /home/user/openssl-1.0.2d \\"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"                21 \\"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"                armeabi-v7a \\"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"                4.8 \\"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"                /home/user/output/armeabi-v7a"</span>
+    <span style="color: #FBDE2D;">exit</span> 1
+<span style="color: #FBDE2D;">fi</span>
+
+<span style="color: #40E0D0;">NDK_DIR</span>=$<span style="color: #40E0D0;">1</span>
+<span style="color: #40E0D0;">OPENSSL_BASE_FOLDER</span>=$<span style="color: #40E0D0;">2</span>
+<span style="color: #40E0D0;">OPENSSL_TARGET_API</span>=$<span style="color: #40E0D0;">3</span>
+<span style="color: #40E0D0;">OPENSSL_TARGET_ABI</span>=$<span style="color: #40E0D0;">4</span>
+<span style="color: #40E0D0;">OPENSSL_GCC_VERSION</span>=$<span style="color: #40E0D0;">5</span>
+<span style="color: #40E0D0;">OPENSSL_OUTPUT_PATH</span>=$<span style="color: #40E0D0;">6</span>
+
+<span style="color: #40E0D0;">NDK_MAKE_TOOLCHAIN</span>=<span style="color: #ffa07a;">"$NDK_DIR/build/tools/make-standalone-toolchain.sh"</span>
+<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>=<span style="color: #ffa07a;">"/tmp/openssl"</span>
+rm -rf <span style="color: #ffa07a;">"$OPENSSL_TMP_FOLDER"</span>
+mkdir -p <span style="color: #ffa07a;">"$OPENSSL_TMP_FOLDER"</span>
+cp -r ${<span style="color: #40E0D0;">OPENSSL_BASE_FOLDER</span>} ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+
+<span style="color: #FBDE2D;">function</span> <span style="color: #FF6400;">build_library</span> {
+    mkdir -p ${<span style="color: #40E0D0;">OPENSSL_OUTPUT_PATH</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">PATH</span>=$<span style="color: #40E0D0;">TOOLCHAIN_PATH</span>:$<span style="color: #40E0D0;">PATH</span>
+    make  &amp;&amp; make install
+    rm -rf ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"Build completed! Check output libraries in ${OPENSSL_OUTPUT_PATH}"</span>
+}
+
+<span style="color: #FBDE2D;">if</span> [ <span style="color: #ffa07a;">"$OPENSSL_TARGET_ABI"</span> == <span style="color: #ffa07a;">"armeabi-v7a"</span> ]
+<span style="color: #FBDE2D;">then</span>
+    ${<span style="color: #40E0D0;">NDK_MAKE_TOOLCHAIN</span>} --platform=android-${<span style="color: #40E0D0;">OPENSSL_TARGET_API</span>} <span style="color: #ffa07a;">\</span>
+                          --toolchain=arm-linux-androideabi-${<span style="color: #40E0D0;">OPENSSL_GCC_VERSION</span>} <span style="color: #ffa07a;">\</span>
+                          --install-dir=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-arm"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOLCHAIN_PATH</span>=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-arm/bin"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOL</span>=arm-linux-androideabi
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>=${<span style="color: #40E0D0;">TOOLCHAIN_PATH</span>}/${<span style="color: #40E0D0;">TOOL</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CC</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-gcc
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXX</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-g++
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LINK</span>=${<span style="color: #40E0D0;">CXX</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LD</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ld
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">AR</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ar
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">RANLIB</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ranlib
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">STRIP</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-strip
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_FLAGS</span>=<span style="color: #ffa07a;">"-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_LINK</span>=<span style="color: #ffa07a;">"-march=armv7-a -Wl,--fix-cortex-a8"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CPPFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXXFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -frtti -fexceptions "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LDFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_LINK} "</span>
+    <span style="color: #F8F8F8;">cd</span> ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+    ./Configure android-armv7 --openssldir=${<span style="color: #40E0D0;">OPENSSL_OUTPUT_PATH</span>}
+    build_library
+
+<span style="color: #FBDE2D;">elif</span> [ <span style="color: #ffa07a;">"$OPENSSL_TARGET_ABI"</span> == <span style="color: #ffa07a;">"arm64-v8a"</span> ]
+<span style="color: #FBDE2D;">then</span>
+    ${<span style="color: #40E0D0;">NDK_MAKE_TOOLCHAIN</span>} --platform=android-${<span style="color: #40E0D0;">OPENSSL_TARGET_API</span>} <span style="color: #ffa07a;">\</span>
+                          --toolchain=aarch64-linux-android-4.9 <span style="color: #ffa07a;">\</span>
+                          --install-dir=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-arm64"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOLCHAIN_PATH</span>=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-arm64/bin"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOL</span>=aarch64-linux-android
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>=${<span style="color: #40E0D0;">TOOLCHAIN_PATH</span>}/${<span style="color: #40E0D0;">TOOL</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CC</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-gcc
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXX</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-g++
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LINK</span>=${<span style="color: #40E0D0;">CXX</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LD</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ld
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">AR</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ar
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">RANLIB</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ranlib
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">STRIP</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-strip
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_FLAGS</span>=
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_LINK</span>=
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CPPFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXXFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -frtti -fexceptions "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LDFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_LINK} "</span>
+    <span style="color: #F8F8F8;">cd</span> ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+    ./Configure android --openssldir=${<span style="color: #40E0D0;">OPENSSL_OUTPUT_PATH</span>}
+    build_library
+
+<span style="color: #FBDE2D;">elif</span> [ <span style="color: #ffa07a;">"$OPENSSL_TARGET_ABI"</span> == <span style="color: #ffa07a;">"armeabi"</span> ]
+<span style="color: #FBDE2D;">then</span>
+    ${<span style="color: #40E0D0;">NDK_MAKE_TOOLCHAIN</span>} --platform=android-${<span style="color: #40E0D0;">OPENSSL_TARGET_API</span>} <span style="color: #ffa07a;">\</span>
+                          --toolchain=arm-linux-androideabi-${<span style="color: #40E0D0;">OPENSSL_GCC_VERSION</span>} <span style="color: #ffa07a;">\</span>
+                          --install-dir=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-arm"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOLCHAIN_PATH</span>=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-arm/bin"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOL</span>=arm-linux-androideabi
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>=${<span style="color: #40E0D0;">TOOLCHAIN_PATH</span>}/${<span style="color: #40E0D0;">TOOL</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CC</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-gcc
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXX</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-g++
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LINK</span>=${<span style="color: #40E0D0;">CXX</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LD</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ld
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">AR</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ar
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">RANLIB</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ranlib
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">STRIP</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-strip
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_FLAGS</span>=<span style="color: #ffa07a;">"-mthumb"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_LINK</span>=
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CPPFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXXFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -frtti -fexceptions "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LDFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_LINK} "</span>
+    <span style="color: #F8F8F8;">cd</span> ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+    ./Configure android --openssldir=${<span style="color: #40E0D0;">OPENSSL_OUTPUT_PATH</span>}
+    build_library
+
+<span style="color: #FBDE2D;">elif</span> [ <span style="color: #ffa07a;">"$OPENSSL_TARGET_ABI"</span> == <span style="color: #ffa07a;">"x86"</span> ]
+<span style="color: #FBDE2D;">then</span>
+    ${<span style="color: #40E0D0;">NDK_MAKE_TOOLCHAIN</span>} --platform=android-${<span style="color: #40E0D0;">OPENSSL_TARGET_API</span>} <span style="color: #ffa07a;">\</span>
+                          --toolchain=x86-${<span style="color: #40E0D0;">OPENSSL_GCC_VERSION</span>} <span style="color: #ffa07a;">\</span>
+                          --install-dir=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-x86"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOLCHAIN_PATH</span>=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-x86/bin"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOL</span>=i686-linux-android
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>=${<span style="color: #40E0D0;">TOOLCHAIN_PATH</span>}/${<span style="color: #40E0D0;">TOOL</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CC</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-gcc
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXX</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-g++
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LINK</span>=${<span style="color: #40E0D0;">CXX</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LD</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ld
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">AR</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ar
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">RANLIB</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ranlib
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">STRIP</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-strip
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_FLAGS</span>=<span style="color: #ffa07a;">"-march=i686 -msse3 -mstackrealign -mfpmath=sse"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_LINK</span>=
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CPPFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXXFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -frtti -fexceptions "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LDFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_LINK} "</span>
+    <span style="color: #F8F8F8;">cd</span> ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+    ./Configure android-x86 --openssldir=${<span style="color: #40E0D0;">OPENSSL_OUTPUT_PATH</span>}
+    build_library
+
+<span style="color: #FBDE2D;">elif</span> [ <span style="color: #ffa07a;">"$OPENSSL_TARGET_ABI"</span> == <span style="color: #ffa07a;">"x86_64"</span> ]
+<span style="color: #FBDE2D;">then</span>
+    ${<span style="color: #40E0D0;">NDK_MAKE_TOOLCHAIN</span>} --platform=android-${<span style="color: #40E0D0;">OPENSSL_TARGET_API</span>} <span style="color: #ffa07a;">\</span>
+                          --toolchain=x86_64-4.9 <span style="color: #ffa07a;">\</span>
+                          --install-dir=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-x86_64"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOLCHAIN_PATH</span>=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-x86_64/bin"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOL</span>=x86_64-linux-android
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>=${<span style="color: #40E0D0;">TOOLCHAIN_PATH</span>}/${<span style="color: #40E0D0;">TOOL</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CC</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-gcc
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXX</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-g++
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LINK</span>=${<span style="color: #40E0D0;">CXX</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LD</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ld
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">AR</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ar
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">RANLIB</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ranlib
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">STRIP</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-strip
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CPPFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXXFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -frtti -fexceptions "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LDFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_LINK} "</span>
+    <span style="color: #F8F8F8;">cd</span> ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+    ./Configure linux-x86_64 --openssldir=${<span style="color: #40E0D0;">OPENSSL_OUTPUT_PATH</span>}
+    build_library
+
+<span style="color: #FBDE2D;">else</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"Unsupported target ABI: $OPENSSL_TARGET_ABI"</span>
+    <span style="color: #FBDE2D;">exit</span> 1
+<span style="color: #FBDE2D;">fi</span>
+</pre>
+</div>
+<p>
+openssl-build用法 到openssl源码所在目录,生成3<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">./openssl-build &lt;ANDROID_NDK_PATH&gt; &lt;OPENSSL_SOURCES_PATH&gt; &lt;ANDROID_TARGET_API&gt; &lt;ANDROID_TARGET_ABI&gt; &lt;GCC_VERSION&gt; &lt;OUTPUT_PATH&gt;
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">GCC_VERSION &#27604;&#22914; 4.9 &#36825;&#20010;&#25968;&#20540;&#21487;&#20197;&#21040;/usr/local/opt/android-ndk/toolchains &#36825;&#20010;&#30446;&#24405;&#19979;&#26597;&#30475;</span>
+</pre>
+</div>
+<blockquote>
+<p>
+jixiuf@snowCat-MacPro android-ndk/toolchains (master) $ ll<br />
+total 0<br />
+drwxr-xr-x  3 jixiuf  staff   102B  3 30  2016 llvm<br />
+drwxr-xr-x  3 jixiuf  staff   102B  3 30  2016 x86_64-4.9<br />
+drwxr-xr-x  3 jixiuf  staff   102B  3 30  2016 x86-4.9<br />
+drwxr-xr-x  3 jixiuf  staff   102B  3 30  2016 mips64el-linux-android-4.9<br />
+drwxr-xr-x  3 jixiuf  staff   102B  3 30  2016 mipsel-linux-android-4.9<br />
+drwxr-xr-x  3 jixiuf  staff   102B  3 30  2016 aarch64-linux-android-4.9<br />
+drwxr-xr-x  3 jixiuf  staff   102B  3 30  2016 arm-linux-androideabi-4.9<br />
+</p>
+</blockquote>
+<div class="org-src-container">
+<pre class="src src-sh">  <span style="color: #AEAEAE;">#</span>
+bash openssl-build /usr/local/opt/android-ndk . 19 x86 4.9 /tmp/openssl-x86
+bash openssl-build /usr/local/opt/android-ndk . 19 armeabi-v7a 4.9 /tmp/openssl-armeabi-v7a/
+bash openssl-build /usr/local/opt/android-ndk . 19 armeabi 4.9 /tmp/openssl-armeabi/
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org37b3c25" class="outline-2">
+<h2 id="org37b3c25">libpng编译</h2>
+<div class="outline-text-2" id="text-org37b3c25">
+<div class="org-src-container">
+<pre class="src src-sh">bash ./libpng-build /usr/local/opt/android-ndk . 19 armeabi 4.9 /tmp/libpng-armeabi
+bash ./libpng-build /usr/local/opt/android-ndk . 19 x86 4.9 /tmp/libpng-x86
+ bash openssl-build /usr/local/opt/android-ndk . 19 armeabi-v7a 4.9 /tmp/openssl-a-v7a
+</pre>
+</div>
+<p>
+libpng-build<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">!/bin/</span><span style="color: #FBDE2D;">bash</span><span style="color: #AEAEAE;"> -e</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">@author Aleksandar Gotev (alex.gotev@mobimesh.it)</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">Hints and code taken also from http://stackoverflow.com/questions/11929773/compiling-the-latest-libpng-for-android</span>
+
+<span style="color: #FBDE2D;">if</span> [ <span style="color: #ffa07a;">"$#"</span> -ne 6 ]
+<span style="color: #FBDE2D;">then</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"Usage:"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"./libpng-build &lt;ANDROID_NDK_PATH&gt; &lt;OPENSSL_SOURCES_PATH&gt; &lt;ANDROID_TARGET_API&gt; \\"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"                &lt;ANDROID_TARGET_ABI&gt; &lt;GCC_VERSION&gt; &lt;OUTPUT_PATH&gt;"</span>
+    <span style="color: #F8F8F8;">echo</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"Supported target ABIs: armeabi, armeabi-v7a, x86, x86_64, arm64-v8a"</span>
+    <span style="color: #F8F8F8;">echo</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"Example using GCC 4.8, NDK 10e, OpenSSL 1.0.2d and Android API 21 for armeabi-v7a."</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"./libpng-build /home/user/android-ndk-r10e \\"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"                /home/user/libpng-1.0.2d \\"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"                21 \\"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"                armeabi-v7a \\"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"                4.8 \\"</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"                /home/user/output/armeabi-v7a"</span>
+    <span style="color: #FBDE2D;">exit</span> 1
+<span style="color: #FBDE2D;">fi</span>
+
+<span style="color: #40E0D0;">NDK_DIR</span>=$<span style="color: #40E0D0;">1</span>
+<span style="color: #40E0D0;">OPENSSL_BASE_FOLDER</span>=$<span style="color: #40E0D0;">2</span>
+<span style="color: #40E0D0;">OPENSSL_TARGET_API</span>=$<span style="color: #40E0D0;">3</span>
+<span style="color: #40E0D0;">OPENSSL_TARGET_ABI</span>=$<span style="color: #40E0D0;">4</span>
+<span style="color: #40E0D0;">OPENSSL_GCC_VERSION</span>=$<span style="color: #40E0D0;">5</span>
+<span style="color: #40E0D0;">OPENSSL_OUTPUT_PATH</span>=$<span style="color: #40E0D0;">6</span>
+
+<span style="color: #40E0D0;">NDK_MAKE_TOOLCHAIN</span>=<span style="color: #ffa07a;">"$NDK_DIR/build/tools/make-standalone-toolchain.sh"</span>
+<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>=<span style="color: #ffa07a;">"/tmp/libpng"</span>
+rm -rf <span style="color: #ffa07a;">"$OPENSSL_TMP_FOLDER"</span>
+mkdir -p <span style="color: #ffa07a;">"$OPENSSL_TMP_FOLDER"</span>
+cp -r ${<span style="color: #40E0D0;">OPENSSL_BASE_FOLDER</span>} ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+
+<span style="color: #FBDE2D;">function</span> <span style="color: #FF6400;">build_library</span> {
+    mkdir -p ${<span style="color: #40E0D0;">OPENSSL_OUTPUT_PATH</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">PATH</span>=$<span style="color: #40E0D0;">TOOLCHAIN_PATH</span>:$<span style="color: #40E0D0;">PATH</span>
+    ./configure --prefix  ${<span style="color: #40E0D0;">OPENSSL_OUTPUT_PATH</span>} --host $<span style="color: #40E0D0;">TOOL</span>
+    make  &amp;&amp; make install
+    rm -rf ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"Build completed! Check output libraries in ${OPENSSL_OUTPUT_PATH}"</span>
+}
+
+<span style="color: #FBDE2D;">if</span> [ <span style="color: #ffa07a;">"$OPENSSL_TARGET_ABI"</span> == <span style="color: #ffa07a;">"armeabi-v7a"</span> ]
+<span style="color: #FBDE2D;">then</span>
+    ${<span style="color: #40E0D0;">NDK_MAKE_TOOLCHAIN</span>} --platform=android-${<span style="color: #40E0D0;">OPENSSL_TARGET_API</span>} <span style="color: #ffa07a;">\</span>
+                          --toolchain=arm-linux-androideabi-${<span style="color: #40E0D0;">OPENSSL_GCC_VERSION</span>} <span style="color: #ffa07a;">\</span>
+                          --install-dir=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-arm"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOLCHAIN_PATH</span>=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-arm/bin"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOL</span>=arm-linux-androideabi
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>=${<span style="color: #40E0D0;">TOOLCHAIN_PATH</span>}/${<span style="color: #40E0D0;">TOOL</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CC</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-gcc
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXX</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-g++
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LINK</span>=${<span style="color: #40E0D0;">CXX</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LD</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ld
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">AR</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ar
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">RANLIB</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ranlib
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">STRIP</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-strip
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_FLAGS</span>=<span style="color: #ffa07a;">"-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_LINK</span>=<span style="color: #ffa07a;">"-march=armv7-a -Wl,--fix-cortex-a8"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CPPFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXXFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -frtti -fexceptions "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LDFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_LINK} "</span>
+    <span style="color: #F8F8F8;">cd</span> ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+    build_library
+
+<span style="color: #FBDE2D;">elif</span> [ <span style="color: #ffa07a;">"$OPENSSL_TARGET_ABI"</span> == <span style="color: #ffa07a;">"arm64-v8a"</span> ]
+<span style="color: #FBDE2D;">then</span>
+    ${<span style="color: #40E0D0;">NDK_MAKE_TOOLCHAIN</span>} --platform=android-${<span style="color: #40E0D0;">OPENSSL_TARGET_API</span>} <span style="color: #ffa07a;">\</span>
+                          --toolchain=aarch64-linux-android-4.9 <span style="color: #ffa07a;">\</span>
+                          --install-dir=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-arm64"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOLCHAIN_PATH</span>=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-arm64/bin"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOL</span>=aarch64-linux-android
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>=${<span style="color: #40E0D0;">TOOLCHAIN_PATH</span>}/${<span style="color: #40E0D0;">TOOL</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CC</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-gcc
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXX</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-g++
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LINK</span>=${<span style="color: #40E0D0;">CXX</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LD</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ld
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">AR</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ar
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">RANLIB</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ranlib
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">STRIP</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-strip
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_FLAGS</span>=
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_LINK</span>=
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CPPFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXXFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -frtti -fexceptions "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LDFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_LINK} "</span>
+    <span style="color: #F8F8F8;">cd</span> ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+    build_library
+
+<span style="color: #FBDE2D;">elif</span> [ <span style="color: #ffa07a;">"$OPENSSL_TARGET_ABI"</span> == <span style="color: #ffa07a;">"armeabi"</span> ]
+<span style="color: #FBDE2D;">then</span>
+    ${<span style="color: #40E0D0;">NDK_MAKE_TOOLCHAIN</span>} --platform=android-${<span style="color: #40E0D0;">OPENSSL_TARGET_API</span>} <span style="color: #ffa07a;">\</span>
+                          --toolchain=arm-linux-androideabi-${<span style="color: #40E0D0;">OPENSSL_GCC_VERSION</span>} <span style="color: #ffa07a;">\</span>
+                          --install-dir=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-arm"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOLCHAIN_PATH</span>=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-arm/bin"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOL</span>=arm-linux-androideabi
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>=${<span style="color: #40E0D0;">TOOLCHAIN_PATH</span>}/${<span style="color: #40E0D0;">TOOL</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CC</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-gcc
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXX</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-g++
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LINK</span>=${<span style="color: #40E0D0;">CXX</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LD</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ld
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">AR</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ar
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">RANLIB</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ranlib
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">STRIP</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-strip
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_FLAGS</span>=<span style="color: #ffa07a;">"-mthumb"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_LINK</span>=
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CPPFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXXFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -frtti -fexceptions "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LDFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_LINK} "</span>
+    <span style="color: #F8F8F8;">cd</span> ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+    build_library
+
+<span style="color: #FBDE2D;">elif</span> [ <span style="color: #ffa07a;">"$OPENSSL_TARGET_ABI"</span> == <span style="color: #ffa07a;">"x86"</span> ]
+<span style="color: #FBDE2D;">then</span>
+    ${<span style="color: #40E0D0;">NDK_MAKE_TOOLCHAIN</span>} --platform=android-${<span style="color: #40E0D0;">OPENSSL_TARGET_API</span>} <span style="color: #ffa07a;">\</span>
+                          --toolchain=x86-${<span style="color: #40E0D0;">OPENSSL_GCC_VERSION</span>} <span style="color: #ffa07a;">\</span>
+                          --install-dir=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-x86"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOLCHAIN_PATH</span>=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-x86/bin"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOL</span>=i686-linux-android
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>=${<span style="color: #40E0D0;">TOOLCHAIN_PATH</span>}/${<span style="color: #40E0D0;">TOOL</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CC</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-gcc
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXX</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-g++
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LINK</span>=${<span style="color: #40E0D0;">CXX</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LD</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ld
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">AR</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ar
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">RANLIB</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ranlib
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">STRIP</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-strip
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_FLAGS</span>=<span style="color: #ffa07a;">"-march=i686 -msse3 -mstackrealign -mfpmath=sse"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ARCH_LINK</span>=
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CPPFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXXFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -frtti -fexceptions "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LDFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_LINK} "</span>
+    <span style="color: #F8F8F8;">cd</span> ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+    build_library
+
+<span style="color: #FBDE2D;">elif</span> [ <span style="color: #ffa07a;">"$OPENSSL_TARGET_ABI"</span> == <span style="color: #ffa07a;">"x86_64"</span> ]
+<span style="color: #FBDE2D;">then</span>
+    ${<span style="color: #40E0D0;">NDK_MAKE_TOOLCHAIN</span>} --platform=android-${<span style="color: #40E0D0;">OPENSSL_TARGET_API</span>} <span style="color: #ffa07a;">\</span>
+                          --toolchain=x86_64-4.9 <span style="color: #ffa07a;">\</span>
+                          --install-dir=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-x86_64"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOLCHAIN_PATH</span>=<span style="color: #ffa07a;">"${OPENSSL_TMP_FOLDER}/android-toolchain-x86_64/bin"</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">TOOL</span>=x86_64-linux-android
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>=${<span style="color: #40E0D0;">TOOLCHAIN_PATH</span>}/${<span style="color: #40E0D0;">TOOL</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CC</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-gcc
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXX</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-g++
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LINK</span>=${<span style="color: #40E0D0;">CXX</span>}
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LD</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ld
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">AR</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ar
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">RANLIB</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-ranlib
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">STRIP</span>=$<span style="color: #40E0D0;">NDK_TOOLCHAIN_BASENAME</span>-strip
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CPPFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CXXFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 -frtti -fexceptions "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">CFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_FLAGS} -fpic -ffunction-sections -funwind-tables -fstack-protector -fno-strict-aliasing -finline-limit=64 "</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">LDFLAGS</span>=<span style="color: #ffa07a;">" ${ARCH_LINK} "</span>
+    <span style="color: #F8F8F8;">cd</span> ${<span style="color: #40E0D0;">OPENSSL_TMP_FOLDER</span>}
+    build_library
+
+<span style="color: #FBDE2D;">else</span>
+    <span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"Unsupported target ABI: $OPENSSL_TARGET_ABI"</span>
+    <span style="color: #FBDE2D;">exit</span> 1
+<span style="color: #FBDE2D;">fi</span>
+
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2016-11-14</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/android/">Android</a>, <a href="/tags/cocos2dx/">Cocos2dx</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/android-ndk-compile-libpng-openssl.html";
+          var disqus_url = "http://jixiuf.github.io/blog/android-ndk-compile-libpng-openssl.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

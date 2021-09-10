@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>拾遗笔记</title>
+    <link>http://jixiuf.github.io</link>
+    <description></description>
+    <pubDate>Fri, 10 Sep 2021 11:07:59 UTC</pubDate>
+    <lastBuildDate>Fri, 10 Sep 2021 11:07:59 UTC</lastBuildDate>
+    <docs>http://www.rssboard.org/rss-specification</docs>
+    <generator>Org-page static site generator (https://github.com/kelvinh/org-page)</generator>
+    <item>
+      <title>ext2文件系统</title>
+      <link>http://jixiuf.github.io/blog/ext2.html</link>
+      <description><![CDATA[ext2文件系统]]></description>
+      <pubDate>2021-09-10</pubDate>
+      <guid>http://jixiuf.github.io/blog/ext2.html</guid>
+    </item>
+    <item>
+      <title>linux 下字体相关</title>
+      <link>http://jixiuf.github.io/blog/font.html</link>
+      <description><![CDATA[font.org]]></description>
+      <pubDate>2021-09-10</pubDate>
+      <guid>http://jixiuf.github.io/blog/font.html</guid>
+    </item>
+    <item>
+      <title>Gentoo 拾遗</title>
+      <link>http://jixiuf.github.io/blog/gentoo.html</link>
+      <description><![CDATA[gentoo.org]]></description>
+      <pubDate>2021-09-10</pubDate>
+      <guid>http://jixiuf.github.io/blog/gentoo.html</guid>
+    </item>
+    <item>
+      <title>linux 下gbk utf8 转换</title>
+      <link>http://jixiuf.github.io/blog/iconv.html</link>
+      <description><![CDATA[linux 下gbk utf8 转换]]></description>
+      <pubDate>2021-09-10</pubDate>
+      <guid>http://jixiuf.github.io/blog/iconv.html</guid>
+    </item>
+    <item>
+      <title>iptables防火墙</title>
+      <link>http://jixiuf.github.io/blog/iptables.html</link>
+      <description><![CDATA[iptables防火墙]]></description>
+      <pubDate>2021-09-10</pubDate>
+      <guid>http://jixiuf.github.io/blog/iptables.html</guid>
+    </item>
+    <item>
+      <title>linux拾遗</title>
+      <link>http://jixiuf.github.io/blog/linux.html</link>
+      <description><![CDATA[linux拾遗]]></description>
+      <pubDate>2021-09-10</pubDate>
+      <guid>http://jixiuf.github.io/blog/linux.html</guid>
+    </item>
+    <item>
+      <title>linux IO性能测试    </title>
+      <link>http://jixiuf.github.io/blog/linux_io_benchmark.html</link>
+      <description><![CDATA[llinux_benchum.org]]></description>
+      <pubDate>2021-09-10</pubDate>
+      <guid>http://jixiuf.github.io/blog/linux_io_benchmark.html</guid>
+    </item>
+    <item>
+      <title>llvm逻辑卷管理</title>
+      <link>http://jixiuf.github.io/blog/llvm.html</link>
+      <description><![CDATA[llvm分区管理]]></description>
+      <pubDate>2021-09-10</pubDate>
+      <guid>http://jixiuf.github.io/blog/llvm.html</guid>
+    </item>
+    <item>
+      <title>LVS负载均衡</title>
+      <link>http://jixiuf.github.io/blog/lvs.html</link>
+      <description><![CDATA[LVS负载均衡]]></description>
+      <pubDate>2021-09-10</pubDate>
+      <guid>http://jixiuf.github.io/blog/lvs.html</guid>
+    </item>
+    <item>
+      <title>mac 上利用rvi抓iphone的包</title>
+      <link>http://jixiuf.github.io/blog/mac_iphone_wireshark_rvi.html</link>
+      <description><![CDATA[mac 上利用rvi抓iphone的包]]></description>
+      <pubDate>2021-09-10</pubDate>
+      <guid>http://jixiuf.github.io/blog/mac_iphone_wireshark_rvi.html</guid>
+    </item>
+  </channel>
+</rss>

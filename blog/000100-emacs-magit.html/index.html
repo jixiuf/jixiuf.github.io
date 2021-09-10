@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>emacs下的git工具 magit 简介 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="magit 系列教程" />
+    <meta name="keywords" content="Emacs Magit Git" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>emacs下的git工具 magit 简介</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgb735353">简介</a></li>
+<li><a href="#org19d4ec1">基本界面</a></li>
+<li><a href="#org2a653cd">(?)maigt 提示</a></li>
+<li><a href="#org7620205">Stage (git add )与 Unstage</a></li>
+<li><a href="#orgfbe862f">Commit(c)</a></li>
+<li><a href="#org01f60f4">Pull(F)(git pull)</a></li>
+<li><a href="#orga542336">Push(p)(git push)</a></li>
+<li><a href="#orgf45be1e">Log(l)查看日志</a></li>
+<li><a href="#org71dabae">cherry picking(a A)</a></li>
+<li><a href="#orged1da6b">Stashing(z)(git stash)</a></li>
+<li><a href="#org208d327">Discard or Delete(k 如果用evil-magit则为x)</a></li>
+<li><a href="#org160fc00">Resetting (x or evil-magit:o)</a></li>
+<li><a href="#org0b50ccf">Merge(m)</a></li>
+<li><a href="#orgbc4992b">Rebase(r)</a>
+<ul>
+<li><a href="#orgf1a2d7e">ri 交互式rebase (git rebase -i)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgb735353" class="outline-2">
+<h2 id="orgb735353">简介</h2>
+<div class="outline-text-2" id="text-orgb735353">
+<p>
+<a href="https://github.com/magit/magit">magit</a> 是emacs下对git 的封装,让你基本在emacs中即可完成对git仓库的管理<br />
+magit 并不是emacs自带的，需要单独安装<br />
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org19d4ec1" class="outline-2">
+<h2 id="org19d4ec1">基本界面</h2>
+<div class="outline-text-2" id="text-org19d4ec1">
+<p>
+运行 M-x:magit-status 打开当前git仓库 (如果当前没仓库会让你选择相应的路径)<br />
+可以看到以下内容<br />
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">当前处于哪个branch</td>
+<td class="org-left">Head</td>
+</tr>
+
+<tr>
+<td class="org-left">要push 到哪个远程branch</td>
+<td class="org-left">Push</td>
+</tr>
+
+<tr>
+<td class="org-left">哪些文件未被git管理</td>
+<td class="org-left">Untracked files</td>
+</tr>
+
+<tr>
+<td class="org-left">哪些文件修改了未stage</td>
+<td class="org-left">Unstaged Changes</td>
+</tr>
+
+<tr>
+<td class="org-left">哪些文件处于staged状态（即运行了git add ）</td>
+<td class="org-left">Staged Changes</td>
+</tr>
+
+<tr>
+<td class="org-left">哪些commit 未push到远程分支</td>
+<td class="org-left">Unpushed to</td>
+</tr>
+
+<tr>
+<td class="org-left">哪些提交 未拉取到本地</td>
+<td class="org-left">Unpulled  from</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+甚至可以查看具体文件修改了哪些内容<br />
+在相应的文件上回车则打开那个文件,在相应的修改部位回车则直接跳转到文件修改的位置<br />
+在相应的commit 上回车则能查看此次commit 都修改了哪些文件，具体的文件进行了哪些修改<br />
+</p>
+
+
+<div id="orgc04c5da" class="figure">
+<p><img src="/assets/blog/000100-emacs-magit.html/magit-status-tab.gif" alt="magit-status-tab.gif" /><br />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org2a653cd" class="outline-2">
+<h2 id="org2a653cd">(?)maigt 提示</h2>
+<div class="outline-text-2" id="text-org2a653cd">
+<p>
+magit status 中 ？键可提示magit命令绑定在哪些按键上<br />
+如c 为commit相关,p如push相关等<br />
+<img src="/assets/blog/000100-emacs-magit.html/magit-help.png" alt="magit-help.png" /><br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7620205" class="outline-2">
+<h2 id="org7620205">Stage (git add )与 Unstage</h2>
+<div class="outline-text-2" id="text-org7620205">
+<p>
+如果你修改了一个git管理的文件，但是未运行git add  则当前文件处于Unstaged状态<br />
+运行git add 之后则处于Stage状态。git commit 之后，则变成了一个commit 会处于 Unpushed 状态<br />
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">s</td>
+<td class="org-left">Stage</td>
+<td class="org-left">git add filename</td>
+<td class="org-left">从unstaged变成staged</td>
+</tr>
+
+<tr>
+<td class="org-left">u</td>
+<td class="org-left">Unstage</td>
+<td class="org-left">git reset HEAD filename</td>
+<td class="org-left">从staged 变成Unstaged</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+s 与u 命令可以作用于文件，也可以作用于整个Unstaged changes与Staged changes标题上<br />
+也可以作用于某个文件的一部分(展开一个文件你会看到@@开头的内容)<br />
+甚至你可以选中某个区域只提交选中区域的部分变更<br />
+操作时把光标移动到相应的位置即可<br />
+</p>
+
+
+<div id="org1179c1e" class="figure">
+<p><img src="/assets/blog/000100-emacs-magit.html/magit-stage-unstage-s-u.gif" alt="magit-stage-unstage-s-u.gif" /><br />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgfbe862f" class="outline-2">
+<h2 id="orgfbe862f">Commit(c)</h2>
+<div class="outline-text-2" id="text-orgfbe862f">
+<p>
+在magit status buffer中c键为git commit 相关操作<br />
+c后会弹出如下界面<br />
+<img src="/assets/blog/000100-emacs-magit.html/magit-commit-popup.png" alt="magit-commit-popup.png" /><br />
+最常用的操作是cc 即普通的Commit<br />
+我最常用的这三个命令<br />
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">cc</td>
+<td class="org-left">Commit</td>
+<td class="org-left">最普通的</td>
+<td class="org-left">git commit</td>
+</tr>
+
+<tr>
+<td class="org-left">ce</td>
+<td class="org-left">Extend</td>
+<td class="org-left">当前Staged的文件合并到上一次提交中</td>
+<td class="org-left">git commit &#x2013;amend &#x2013;no-edit</td>
+</tr>
+
+<tr>
+<td class="org-left">ca</td>
+<td class="org-left">Amend</td>
+<td class="org-left">只修改上次提交的日志</td>
+<td class="org-left">git commit &#x2013;amend</td>
+</tr>
+</tbody>
+</table>
+<p>
+执行相应的按键后会提示你输入日志<br />
+</p>
+
+<p>
+以下动图中依次展示了cc/ce/ca三个命令，每次执行完命令展示了对应的git commit($可查看magit执行了哪些命令)<br />
+<img src="/assets/blog/000100-emacs-magit.html/magit-commit.gif" alt="magit-commit.gif" /><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org01f60f4" class="outline-2">
+<h2 id="org01f60f4">Pull(F)(git pull)</h2>
+<div class="outline-text-2" id="text-org01f60f4">
+
+<div id="org870ede8" class="figure">
+<p><img src="/assets/blog/000100-emacs-magit.html/magit-pull-popup.png" alt="magit-pull-popup.png" /><br />
+</p>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Fu</td>
+<td class="org-left">pull from upstream</td>
+</tr>
+
+<tr>
+<td class="org-left">Fp</td>
+<td class="org-left">pull from pushremote</td>
+</tr>
+
+<tr>
+<td class="org-left">Fe</td>
+<td class="org-left">pull from elsewhere 提示你从哪pull</td>
+</tr>
+</tbody>
+</table>
+<p>
+如何理解Fu Fp的不同<br />
+比如github上userA有一个仓库r,userB fork了这个仓库<br />
+则对于userB来说 userA/r 是upstream ,而 userB/r 则为pushremote<br />
+即一般来说我们把代码push 到pushremote内，而不是直接push 到upstream上<br />
+通常的应用场景是我们把未成型的代码临时push 到pushremote上，等这个功能彻底完善后才push到upstream上<br />
+</p>
+
+<p>
+另外只有设置了pushremote分支，magit status buffer 才会展示有哪些commit未pull 或未push<br />
+将相应的分支设为upstream 或pushremote需要在branch管理内设置(快捷键b)(对应bu bp来设置,如下图)<br />
+<img src="/assets/blog/000100-emacs-magit.html/magit-branch.png" alt="magit-branch.png" /><br />
+</p>
+</div>
+</div>
+<div id="outline-container-orga542336" class="outline-2">
+<h2 id="orga542336">Push(p)(git push)</h2>
+<div class="outline-text-2" id="text-orga542336">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">pu</td>
+<td class="org-left">push to upstram</td>
+<td class="org-left">最普通的git push</td>
+</tr>
+
+<tr>
+<td class="org-left">pe</td>
+<td class="org-left">push to elsewhere</td>
+<td class="org-left">会提示你push到哪个远程分支</td>
+</tr>
+
+<tr>
+<td class="org-left">po</td>
+<td class="org-left">push another branch to</td>
+<td class="org-left">会提示你push哪个分支</td>
+</tr>
+
+<tr>
+<td class="org-left">pT</td>
+<td class="org-left">push a tag</td>
+<td class="org-left">push 一个tag标签</td>
+</tr>
+
+<tr>
+<td class="org-left">pt</td>
+<td class="org-left">push all tag</td>
+<td class="org-left">push 所有tag标签</td>
+</tr>
+</tbody>
+</table>
+<p>
+同时可以加相应的switch 选项，比如想强制push 上去加-F ，即p-Fu 或 p-Fe 等<br />
+  <img src="/assets/blog/000100-emacs-magit.html/magit-push-popup.png" alt="magit-push-popup.png" /><br />
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgf45be1e" class="outline-2">
+<h2 id="orgf45be1e">Log(l)查看日志</h2>
+<div class="outline-text-2" id="text-orgf45be1e">
+<p>
+查看日志相关操作绑定在l上<br />
+如查看当前分支的日志为ll<br />
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">ll</td>
+<td class="org-left">查看当前分支的日志</td>
+</tr>
+
+<tr>
+<td class="org-left">lo</td>
+<td class="org-left">log other 查看其他分支的日志</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+<img src="/assets/blog/000100-emacs-magit.html/magit-log-popup.png" alt="magit-log-popup.png" /><br />
+<img src="/assets/blog/000100-emacs-magit.html/magit-log.png" alt="magit-log.png" /><br />
+在具体的commit 上回车则能查看此次commit的提交内容<br />
+<img src="/assets/blog/000100-emacs-magit.html/magit-log-diff.png" alt="magit-log-diff.png" /><br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org71dabae" class="outline-2">
+<h2 id="org71dabae">cherry picking(a A)</h2>
+<div class="outline-text-2" id="text-org71dabae">
+<p>
+ 具体的作用是把某一次commit在当前分支重新commit一次<br />
+ 比如你想把另一个分支上的某一次提交在当前分支也重做一次,但又不想整个merge那个分支，则可以用此功能<br />
+lo 展示别的分支的日志，找到相应的commit,然后按a或A 来cherry pick<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orged1da6b" class="outline-2">
+<h2 id="orged1da6b">Stashing(z)(git stash)</h2>
+<div class="outline-text-2" id="text-orged1da6b">
+<p>
+ 把临时未commit 的更改暂存起来<br />
+我常用的<br />
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">zz</td>
+<td class="org-left">git stash</td>
+<td class="org-left">暂存</td>
+</tr>
+
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">git stash pop</td>
+<td class="org-left">找回</td>
+</tr>
+</tbody>
+</table>
+
+<div id="org278d182" class="figure">
+<p><img src="/assets/blog/000100-emacs-magit.html/magit-stash.png" alt="magit-stash.png" /><br />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org208d327" class="outline-2">
+<h2 id="org208d327">Discard or Delete(k 如果用evil-magit则为x)</h2>
+<div class="outline-text-2" id="text-org208d327">
+<p>
+跟删除相关的操作都可以用这个按键<br />
+如删除一个文件，删除一个@@,删除一个stash等<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org160fc00" class="outline-2">
+<h2 id="org160fc00">Resetting (x or evil-magit:o)</h2>
+<div class="outline-text-2" id="text-org160fc00">
+<p>
+放弃最近的n次提交，这n次的提交内容变成staged状态，之后可以进行合并提交或者丢弃<br />
+只需要在日志日光标定位到想要丢弃的log,即可回滚到这一次的提交状态<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org0b50ccf" class="outline-2">
+<h2 id="org0b50ccf">Merge(m)</h2>
+<div class="outline-text-2" id="text-org0b50ccf">
+<p>
+在magit 中的操作绑定在m上<br />
+常用的操作为 mm之后会提示选择与哪个分支进行merge<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgbc4992b" class="outline-2">
+<h2 id="orgbc4992b">Rebase(r)</h2>
+<div class="outline-text-2" id="text-orgbc4992b">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">ru</td>
+<td class="org-left">rebase on upstream</td>
+</tr>
+
+<tr>
+<td class="org-left">rp</td>
+<td class="org-left">rebase on pushremote</td>
+</tr>
+
+<tr>
+<td class="org-left">re</td>
+<td class="org-left">会提示你以哪个分支为基点进行rebase</td>
+</tr>
+</tbody>
+</table>
+
+<div id="org77a1841" class="figure">
+<p><img src="/assets/blog/000100-emacs-magit.html/magit-rebase.png" alt="magit-rebase.png" /><br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf1a2d7e" class="outline-3">
+<h3 id="orgf1a2d7e">ri 交互式rebase (git rebase -i)</h3>
+<div class="outline-text-3" id="text-orgf1a2d7e">
+<p>
+可以实现调整commit 的顺序，合并commit,放弃某个commit等<br />
+下面这些按键绑定是使用evil-magit后的按键绑定，这些绑定不必担心记不住，用到的时候magit会以注释的形式展示给你<br />
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">p</td>
+<td class="org-left">pick = use commit</td>
+<td class="org-left">保留此commit</td>
+</tr>
+
+<tr>
+<td class="org-left">r</td>
+<td class="org-left">reword = use commit, but edit the commit message</td>
+<td class="org-left">只修改此次commit 的日志</td>
+</tr>
+
+<tr>
+<td class="org-left">e</td>
+<td class="org-left">edit = use commit, but stop for amending</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">s</td>
+<td class="org-left">squash = use commit, but meld into previous commit</td>
+<td class="org-left">把这条commit与上一条commit合并(会提示输入合并之后的日志)</td>
+</tr>
+
+<tr>
+<td class="org-left">f</td>
+<td class="org-left">fixup = like "squash", but discard this commit's log message</td>
+<td class="org-left">同squash,只是合并后的那条commit直接使用上条commit的日志</td>
+</tr>
+
+<tr>
+<td class="org-left">x</td>
+<td class="org-left">exec = run command (the rest of the line) using shell</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">d</td>
+<td class="org-left">drop = remove commit</td>
+<td class="org-left">丢弃此条commit</td>
+</tr>
+
+<tr>
+<td class="org-left">u</td>
+<td class="org-left">undo last change</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">C-c C-c</td>
+<td class="org-left">tell Git to make it happen</td>
+<td class="org-left">执行更改</td>
+</tr>
+
+<tr>
+<td class="org-left">C-c C-k</td>
+<td class="org-left">tell Git that you changed your mind, i.e. abort</td>
+<td class="org-left">放弃更改</td>
+</tr>
+
+<tr>
+<td class="org-left">k</td>
+<td class="org-left">move point to previous line</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">j</td>
+<td class="org-left">move point to next line</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">M-k</td>
+<td class="org-left">move the commit at point up</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">M-j</td>
+<td class="org-left">move the commit at point down</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">RET</td>
+<td class="org-left">show the commit at point in another buffer</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+demo中演示了将commit 1 与update 进行合并，修改commit2 的日志为commit22222,同时调整commit 3 与commit 4 的顺序，<br />
+最后C-c C-c 执行上述变更<br />
+<img src="/assets/blog/000100-emacs-magit.html/magit-rebase-i.gif" alt="magit-rebase-i.gif" /><br />
+</p>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2017-02-05</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/emacs/">Emacs</a>, <a href="/tags/magit/">Magit</a>, <a href="/tags/git/">Git</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/000100-emacs-magit.html";
+          var disqus_url = "http://jixiuf.github.io/blog/000100-emacs-magit.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; qq &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

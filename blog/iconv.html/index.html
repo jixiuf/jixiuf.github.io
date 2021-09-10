@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>linux 下gbk utf8 转换 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="linux 下gbk utf8 转换" />
+    <meta name="keywords" content=":Linux:" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>linux 下gbk utf8 转换</h1>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #7fffd4;">#include</span> <span style="color: #ffa07a;">&lt;stdio.h&gt;</span>
+<span style="color: #7fffd4;">#include</span> <span style="color: #ffa07a;">&lt;stdlib.h&gt;</span>
+<span style="color: #7fffd4;">#include</span> <span style="color: #ffa07a;">&lt;string.h&gt;</span>
+<span style="color: #7fffd4;">#include</span> <span style="color: #ffa07a;">&lt;iconv.h&gt;</span>
+<span style="color: #7fffd4;">#define</span> <span style="color: #40E0D0;">OUTLEN</span> 255
+<span style="color: #AEAEAE;">/* </span><span style="color: #AEAEAE;">&#29992; file a.out &#26469;&#30475;&#36755;&#20986;&#25991;&#20214;&#30340;&#32534;&#30721;</span><span style="color: #AEAEAE;">*/</span>
+<span style="color: #8DA6CE;">int</span> <span style="color: #FF6400;">main</span>()
+{
+  <span style="color: #8DA6CE;">char</span>  <span style="color: #40E0D0;">buf</span>[255];
+  <span style="color: #8DA6CE;">char</span> <span style="color: #40E0D0;">out</span>[OUTLEN];
+  <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">rec</span>;
+
+  <span style="color: #8DA6CE;">FILE</span> *<span style="color: #40E0D0;">fin</span> = fopen(<span style="color: #ffa07a;">"/tmp/a.in"</span>, <span style="color: #ffa07a;">"r"</span>);
+  <span style="color: #8DA6CE;">FILE</span> *<span style="color: #40E0D0;">fout</span> = fopen(<span style="color: #ffa07a;">"a.out"</span>, <span style="color: #ffa07a;">"w"</span>);
+  fscanf(fin,<span style="color: #ffa07a;">"%s\n"</span>,buf);
+  rec = g2u(buf,strlen(buf),out,OUTLEN);
+  fprintf (fout,<span style="color: #ffa07a;">"%s\n"</span>,out);
+  <span style="color: #AEAEAE;">/* </span><span style="color: #AEAEAE;">fprintf (fout,"%s\n",buf);</span><span style="color: #AEAEAE;"> */</span>
+
+  fclose(fout);
+  fclose(fin);
+  <span style="color: #FBDE2D;">return</span> 0;
+}
+<span style="color: #AEAEAE;">//</span><span style="color: #AEAEAE;">&#20195;&#30721;&#36716;&#25442;:&#20174;&#19968;&#31181;&#32534;&#30721;&#36716;&#20026;&#21478;&#19968;&#31181;&#32534;&#30721;</span>
+<span style="color: #8DA6CE;">int</span> <span style="color: #FF6400;">code_convert</span>(<span style="color: #8DA6CE;">char</span> *<span style="color: #40E0D0;">from_charset</span>, <span style="color: #8DA6CE;">char</span> *<span style="color: #40E0D0;">to_charset</span>, <span style="color: #8DA6CE;">char</span> *<span style="color: #40E0D0;">inbuf</span>, <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">inlen</span>,
+                 <span style="color: #8DA6CE;">char</span> *<span style="color: #40E0D0;">outbuf</span>, <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">outlen</span>) {
+  <span style="color: #8DA6CE;">iconv_t</span> <span style="color: #40E0D0;">cd</span>;
+  <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">rc</span>;
+  <span style="color: #8DA6CE;">char</span> **<span style="color: #40E0D0;">pin</span> = &amp;inbuf;
+  <span style="color: #8DA6CE;">char</span> **<span style="color: #40E0D0;">pout</span> = &amp;outbuf;
+
+  cd = iconv_open(to_charset, from_charset);
+  <span style="color: #FBDE2D;">if</span> (cd == 0)
+    <span style="color: #FBDE2D;">return</span> -1;
+  memset(outbuf, 0, outlen);
+  <span style="color: #FBDE2D;">if</span> (iconv(cd, pin, &amp;inlen, pout, &amp;outlen) == -1)
+    <span style="color: #FBDE2D;">return</span> -1;
+  iconv_close(cd);
+  <span style="color: #FBDE2D;">return</span> 0;
+}
+<span style="color: #AEAEAE;">//</span><span style="color: #AEAEAE;">UNICODE&#30721;&#36716;&#20026;GB2312&#30721;</span>
+<span style="color: #8DA6CE;">int</span> <span style="color: #FF6400;">u2g</span>(<span style="color: #8DA6CE;">char</span> *<span style="color: #40E0D0;">inbuf</span>, <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">inlen</span>, <span style="color: #8DA6CE;">char</span> *<span style="color: #40E0D0;">outbuf</span>, <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">outlen</span>) {
+  <span style="color: #FBDE2D;">return</span> code_convert(<span style="color: #ffa07a;">"utf-8"</span>, <span style="color: #ffa07a;">"gb2312"</span>, inbuf, inlen, outbuf, outlen);
+}
+<span style="color: #AEAEAE;">//</span><span style="color: #AEAEAE;">GB2312&#30721;&#36716;&#20026;UNICODE&#30721;</span>
+<span style="color: #8DA6CE;">int</span> <span style="color: #FF6400;">g2u</span>(<span style="color: #8DA6CE;">char</span> *<span style="color: #40E0D0;">inbuf</span>, <span style="color: #8DA6CE;">size_t</span> <span style="color: #40E0D0;">inlen</span>, <span style="color: #8DA6CE;">char</span> *<span style="color: #40E0D0;">outbuf</span>, <span style="color: #8DA6CE;">size_t</span> <span style="color: #40E0D0;">outlen</span>) {
+  <span style="color: #FBDE2D;">return</span> code_convert(<span style="color: #ffa07a;">"gb2312"</span>, <span style="color: #ffa07a;">"utf-8"</span>, inbuf, inlen, outbuf, outlen);
+}
+</pre>
+</div>
+<p>
+测试 的时候从windows下创建a.in文件(gbk编码)，<br />
+</p>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2013-02-23</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/linux/">Linux</a>, <a href="/tags/c/">C</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/iconv.html";
+          var disqus_url = "http://jixiuf.github.io/blog/iconv.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

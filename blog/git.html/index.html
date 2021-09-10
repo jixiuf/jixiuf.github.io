@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>git拾遗 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="git拾遗" />
+    <meta name="keywords" content="git scm" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>git拾遗</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org32d3e83">git rm</a></li>
+<li><a href="#org247c396">在一个旧库中 建一个新分支（新分支上无任何内容）</a></li>
+<li><a href="#orgeee62db">git submodule 子模块的删除</a></li>
+<li><a href="#org1429389">要查看某个文件的以前的版本,使用 git show 命令</a></li>
+<li><a href="#orgbb122d9">可以checkout 某个文件的以前的版本</a></li>
+<li><a href="#orga1c23a4">git ls-tree 与git show</a></li>
+<li><a href="#org5839afb">git svn</a>
+<ul>
+<li><a href="#org1fb9a5d">svn 的远程分支叫 remotes/git-svn</a></li>
+<li><a href="#orgf424e49">git reset version</a></li>
+</ul>
+</li>
+<li><a href="#orgea23bcd">找回丢失的提交</a></li>
+<li><a href="#org68b73a6">找回库中删除的文件</a>
+<ul>
+<li><a href="#org731d9e1">grep 历史提交中的内容</a></li>
+</ul>
+</li>
+<li><a href="#orgf65e4ab">关于换行符 空格</a>
+<ul>
+<li><a href="#org7c0f751">git config &#x2013;global core.whitespace cr-at-eol</a></li>
+<li><a href="#org44411b8">如果很多文件包含 ^M 这个字符想把它去掉 (未测试 )</a></li>
+</ul>
+</li>
+<li><a href="#orga591bc8">总有一些修改的文件你不想提交,比如 连接db的配置文件,你只是想在本机做测试而做的小修改</a></li>
+<li><a href="#org4bdbb2b">关于修改已经提交的信息 git filter-branch</a>
+<ul>
+<li><a href="#orgb990b4b">查找中文件中包含"密码"二字的文件列出来</a></li>
+<li><a href="#org0cad3d5">修改历史提交信息</a></li>
+<li><a href="#org3c9172f">删除敏感文件</a></li>
+<li><a href="#org8706c1f">修改 commiter 的 name 和 email，</a></li>
+<li><a href="#org42bce6c">把项目中的某个目录当作git 的新的根目录 ,除此目录中的文件都删掉</a></li>
+<li><a href="#orgfb9fc70">删除两次提交之间的提交log,但是提交的内容还在库里并没有丢失</a></li>
+</ul>
+</li>
+<li><a href="#org84ea72c">Links</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org32d3e83" class="outline-2">
+<h2 id="org32d3e83">git rm</h2>
+<div class="outline-text-2" id="text-org32d3e83">
+<div class="org-src-container">
+<pre class="src src-sh">git rm --cache filename
+</pre>
+</div>
+<p>
+从库中删除filename ,即不再对它进行管理， 但本地会留一份.<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org247c396" class="outline-2">
+<h2 id="org247c396">在一个旧库中 建一个新分支（新分支上无任何内容）</h2>
+<div class="outline-text-2" id="text-org247c396">
+<p>
+git checkout &#x2013;orphan gh-pages<br />
+git rm -rf .<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgeee62db" class="outline-2">
+<h2 id="orgeee62db">git submodule 子模块的删除</h2>
+<div class="outline-text-2" id="text-orgeee62db">
+<p>
+需要3步<br />
+</p>
+<ul class="org-ul">
+<li><p>
+修改 .gitmodules 文件，删除相应的条目<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">[submodule <span style="color: #ffa07a;">"site-lisp/anything-config"</span>]
+    path = site-lisp/anything-config
+    url = http://repo.or.cz/r/anything-config.git
+</pre>
+</div></li>
+<li><p>
+修改.git/config 文件，删除相应的条目<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">[submodule <span style="color: #ffa07a;">"site-lisp/anything-config"</span>]
+        url = http://repo.or.cz/r/anything-config.git
+</pre>
+</div></li>
+<li><p>
+运行git rm &#x2013;cache 子模块所在路径,如:<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">git rm --cache site-lisp/anything-config
+</pre>
+</div>
+<p>
+不能写成<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">git rm --cache site-lisp/anything-config/
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org1429389" class="outline-2">
+<h2 id="org1429389">要查看某个文件的以前的版本,使用 git show 命令</h2>
+<div class="outline-text-2" id="text-org1429389">
+<div class="org-src-container">
+<pre class="src src-sh">git show 0b26bbe907c929ed88f6ba3dfeaaa9a2953b1c56:a.txt
+
+git cat-file blob 0b26bbe907c929ed88f6ba3dfeaaa9a2953b1c56:a.txt
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbb122d9" class="outline-2">
+<h2 id="orgbb122d9">可以checkout 某个文件的以前的版本</h2>
+<div class="outline-text-2" id="text-orgbb122d9">
+<div class="org-src-container">
+<pre class="src src-sh">git checkout 0b26bbe907c929ed88f6ba3dfeaaa9a2953b1c56 a.txt
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga1c23a4" class="outline-2">
+<h2 id="orga1c23a4">git ls-tree 与git show</h2>
+<div class="outline-text-2" id="text-orga1c23a4">
+<p>
+ 不仅仅一次提交后会产生一个sha1 的字符串,其实每一个提交对应的文件也后有一个状态,比后我想杳看<br />
+0b26bbe907c929ed88f6ba3dfeaaa9a2953b1c56这次提交后对应的文件所对应的sha1值<br />
+可以使用git ls-tree命令<br />
+比如<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">root <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">git ls-tree f7619cab6a71505b23e172f3146adfa750bab71e</span>
+100644 blob 83c4ba189edcc364ca18b0b7d2cd81655d97adc5    a
+100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391    d
+</pre>
+</div>
+<p>
+比如此次提交后文件a与d 分别对应的sha1 值列了出来,然后就可以直接用这个值去查看相应的文件<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">git show 83c4ba189edcc364ca18b0b7d2cd81655d97adc5 &#21518;&#26597;&#30475;&#25991;&#20214;a&#30340;&#20869;&#23481;
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">&#36825;&#19982;
+git show f7619cab6a71505b23e172f3146adfa750bab71e:a     &#30340;&#25928;&#26524;&#30456;&#21516;
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5839afb" class="outline-2">
+<h2 id="org5839afb">git svn</h2>
+<div class="outline-text-2" id="text-org5839afb">
+<p>
+git svn clone svn-url <code>= git clone git-url
+  git svn  fetch =</code> git pull<br />
+git svn  rebase <code>= git rebase
+  git svn dcommit =</code> git push<br />
+在运行git svn dcommit 时，必须保证本地没有已修改但未commit 的文件，<br />
+解决方法是<br />
+git stash<br />
+git svn dcommit<br />
+git stash pop<br />
+一般做法是<br />
+git stash<br />
+git svn fetch<br />
+git svn rebase<br />
+git svn dcommit<br />
+git stash pop<br />
+</p>
+</div>
+<div id="outline-container-org1fb9a5d" class="outline-3">
+<h3 id="org1fb9a5d">svn 的远程分支叫 remotes/git-svn</h3>
+<div class="outline-text-3" id="text-org1fb9a5d">
+<p>
+如果在当前分支已经有数次提交 ，但是发现有一个bug需要修复，修复后马上提交 ，而<br />
+  当前分支里的commit 并不想push到远程svn上，做法是<br />
+  git co remotes/git-svn -b tmp<br />
+  然后修复bug 提交 即可，当然其中可以使用stash 来暂时保存未commit 的修改<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgf424e49" class="outline-3">
+<h3 id="orgf424e49">git reset version</h3>
+<div class="outline-text-3" id="text-orgf424e49">
+<p>
+合并commit 。想将最后几次commit 合并成一个commit<br />
+可以用 git reset version<br />
+git reset 回退到某一版本后，<br />
+工作区的文件依然保存着未回退前的状态 ，所以只需再提交一次<br />
+即将最后几次的commit 合并到一次提交<br />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgea23bcd" class="outline-2">
+<h2 id="orgea23bcd">找回丢失的提交</h2>
+<div class="outline-text-2" id="text-orgea23bcd">
+<p>
+在使用Git的过程中，有时可能会有一些误操作<br />
+比如：执行checkout -f 或 reset -hard 或 branch -d删除一个分支<br />
+结果造成本地（远程）的分支或某些commit丢失<br />
+这时，我们可以通过reflog来进行恢复，前提是丢失的分支或commit信息没有被<br />
+git gc清除<br />
+一般情况下，gc对那些无用的object会保留很长时间后才清除的<br />
+reflog是git提供的一个内部工具，用于记录对git仓库进行的各种操作<br />
+可以使用git reflog show或git log -g命令来看到所有的操作日志<br />
+恢复的过程很简单：<br />
+</p>
+<ol class="org-ol">
+<li>通过git log -g命令来找到我们需要恢复的信息对应的commitid，可以通过提<br />
+交的时间和日期来辨别<br /></li>
+<li>通过git branch recover<sub>branch</sub> commitid 来建立一个新的分支<br />
+这样，我们就把丢失的东西给恢复到了recover<sub>branch分支上了</sub><br /></li>
+<li>在magit 中`lh'即要吧列出所有的commit<br /></li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org68b73a6" class="outline-2">
+<h2 id="org68b73a6">找回库中删除的文件</h2>
+<div class="outline-text-2" id="text-org68b73a6">
+<ol class="org-ol">
+<li>找回库中不再管理的已删除文件(之前git rm 过且git commit 后的文件)<br />
+git log &#x2013;all &#x2013;pretty=format: &#x2013;name-only &#x2013;diff-filter=D |grep -v "^$"<br />
+grep -v 过滤不包含空的行<br /></li>
+<li>列出  rm 过， 但未git rm 过的文件<br />
+git ls-files &#x2013;deleted<br /></li>
+<li>列出git rm过，但未git commit 的<br />
+用git status即可<br /></li>
+</ol>
+</div>
+<div id="outline-container-org731d9e1" class="outline-3">
+<h3 id="org731d9e1">grep 历史提交中的内容</h3>
+<div class="outline-text-3" id="text-org731d9e1">
+<p>
+git grep hello<br />
+但是如果某文件被删了， 不会grep之<br />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf65e4ab" class="outline-2">
+<h2 id="orgf65e4ab">关于换行符 空格</h2>
+<div class="outline-text-2" id="text-orgf65e4ab">
+<p>
+Github suggests that you should make sure to only use \n as a newline<br />
+character in git-handled repos. There's an option to auto-convert:<br />
+$ git config &#x2013;global core.autocrlf true<br />
+Of course, this is said to convert crlf to lf.<br />
+</p>
+</div>
+
+<div id="outline-container-org7c0f751" class="outline-3">
+<h3 id="org7c0f751">git config &#x2013;global core.whitespace cr-at-eol</h3>
+<div class="outline-text-3" id="text-org7c0f751">
+<p>
+This basically tells Git that an end-of-line CR is not an error. As a<br />
+result, those annoying ^M characters no longer appear at the end of lines<br />
+in git diff, git show, etc.<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org44411b8" class="outline-3">
+<h3 id="org44411b8">如果很多文件包含 ^M 这个字符想把它去掉 (未测试 )</h3>
+<div class="outline-text-3" id="text-org44411b8">
+<div class="org-src-container">
+<pre class="src src-sh">  <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">Remove everything from the index</span>
+$ git rm --cached -r .
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">Re-add all the deleted files to the index</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">You should get lots of messages like: "warning: CRLF will be replaced by LF in &lt;file&gt;."</span>
+$ git diff --cached --name-only -z | xargs -0 git add
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">Commit</span>
+$ git commit -m <span style="color: #ffa07a;">"Fix CRLF"</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orga591bc8" class="outline-2">
+<h2 id="orga591bc8">总有一些修改的文件你不想提交,比如 连接db的配置文件,你只是想在本机做测试而做的小修改</h2>
+<div class="outline-text-2" id="text-orga591bc8">
+<p>
+GIT: ignoring changes in tracked files<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">git update-index --assume-unchanged &lt;file&gt;
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">&#24674;&#22797;&#21017;&#20026;
+git update-index --no-assume-unchanged &lt;file&gt;
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">&#26597;&#30475;&#26377;&#21738;&#20123;&#36825;&#26679;&#30340;&#25991;&#20214;
+  git ls-files -v|grep <span style="color: #ffa07a;">'^h'</span>
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">&#22312;~/.gitconfig &#20197;&#26041;&#20415;&#20351;&#29992;
+[alias]
+      ignore = !git update-index --assume-unchanged
+      unignore = !git update-index --no-assume-unchanged
+      ignored = !git ls-files -v | grep ^[a-z]
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4bdbb2b" class="outline-2">
+<h2 id="org4bdbb2b">关于修改已经提交的信息 git filter-branch</h2>
+<div class="outline-text-2" id="text-org4bdbb2b">
+</div>
+<div id="outline-container-orgb990b4b" class="outline-3">
+<h3 id="orgb990b4b">查找中文件中包含"密码"二字的文件列出来</h3>
+<div class="outline-text-3" id="text-orgb990b4b">
+<p>
+&#x2013;stat告诉 git 我希望看到文件列表，以确定敏感数据在哪个文件里<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">git log --stat -S&#23494;&#30721;
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org0cad3d5" class="outline-3">
+<h3 id="org0cad3d5">修改历史提交信息</h3>
+<div class="outline-text-3" id="text-org0cad3d5">
+<div class="org-src-container">
+<pre class="src src-sh">&#23558;&#25552;&#20132;&#20449;&#24687;&#20013;&#25152;&#26377;oldpass&#26367;&#25442;&#20026;newpasswd
+git filter-branch --msg-filter  <span style="color: #ffa07a;">'sed s/oldpass/newpasswd/'</span> -f HEAD --all
+&#21024;&#38500;log&#20013;&#25152;&#26377;<span style="color: #ffa07a;">"git-svn-id:"</span>
+git filter-branch --msg-filter <span style="color: #ffa07a;">'sed -e "/^git-svn-id:/d"'</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3c9172f" class="outline-3">
+<h3 id="org3c9172f">删除敏感文件</h3>
+<div class="outline-text-3" id="text-org3c9172f">
+<div class="org-src-container">
+<pre class="src src-sh">git filter-branch --tree-filter <span style="color: #ffa07a;">'rm -rf files_to_remove'</span> --prune-empty -f HEAD --all
+<span style="color: #FF6400;">&#25110;&#32773;</span>(&#36739;&#24555;)
+git filter-branch -f --index-filter <span style="color: #ffa07a;">'git rm --cached --ignore-unmatch  filename'</span> --prune-empty HEAD
+</pre>
+</div>
+<p>
+&#x2013;tree-filter表示修改文件列表。<br />
+&#x2013;msg-filter表示修改提交信息，原提交信息从标准输入读入，新提交信息输出到标准输出。<br />
+&#x2013;prune-empty表示如果修改后的提交为空则扔掉不要。在一次试运行中我发现虽然文件被删除了，但是还剩下个空的提交，就查了下 man 文档，找到了这个选项。<br />
+-f是忽略备份。不加这个选项第二次运行这个命令时会出错，意思是 git 上次做了备份，现在再要运行的话得处理掉上次的备份。<br />
+&#x2013;all是针对所有的分支。<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8706c1f" class="outline-3">
+<h3 id="org8706c1f">修改 commiter 的 name 和 email，</h3>
+<div class="outline-text-3" id="text-org8706c1f">
+<div class="org-src-container">
+<pre class="src src-sh">git filter-branch -f --env-filter <span style="color: #ffa07a;">"GIT_AUTHOR_NAME='Newname'; GIT_AUTHOR_EMAIL='newemail'; GIT_COMMITTER_NAME='Newname'; GIT_COMMITTER_EMAIL='newemail';"</span> HEAD
+</pre>
+</div>
+<p>
+需要注意的是git filter-branch 会修改大量的sha1值,git push 时,可能会冲突,要想好<br />
+怎样处理好这个问题.<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org42bce6c" class="outline-3">
+<h3 id="org42bce6c">把项目中的某个目录当作git 的新的根目录 ,除此目录中的文件都删掉</h3>
+<div class="outline-text-3" id="text-org42bce6c">
+<p>
+相当于用某个子目录建一个新的git的仓库,不过,要注意,其他的文件都会被删了,<br />
+注意备份仓库<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">git filter-branch --subdirectory-filter w32 -- --all
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgfb9fc70" class="outline-3">
+<h3 id="orgfb9fc70">删除两次提交之间的提交log,但是提交的内容还在库里并没有丢失</h3>
+<div class="outline-text-3" id="text-orgfb9fc70">
+<p>
+作用仅仅相当于合并了n次提交成为一次提交<br />
+之前<br />
+</p>
+<blockquote>
+<ul class="org-ul">
+<li>(HEAD, master)f5b0f0b..: jixiuf 2013-01-11 4<br /></li>
+<li>22715cb..: jixiuf 2013-01-11 3<br /></li>
+<li>169849d..: jixiuf 2013-01-11 2<br /></li>
+</ul>
+</blockquote>
+<div class="org-src-container">
+<pre class="src src-sh">&#21024;&#38500;169849d&#19982;f5b0f0b&#20043;&#38388;&#30340;commit
+<span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"f5b0f0bab898d4021dad6c87bfad0140dfb5bb23 169849d727285e6d3b1ff7536a2d22033d2b8b10"</span> &gt;&gt; .git/info/grafts
+git filter-branch 169849d727285e6d3b1ff7536a2d22033d2b8b10..HEAD
+</pre>
+</div>
+<p>
+之后<br />
+</p>
+<blockquote>
+<ul class="org-ul">
+<li>(HEAD, master)60b2c23..: jixiuf 2013-01-11 4<br /></li>
+<li>169849d..: jixiuf 2013-01-11 2<br /></li>
+</ul>
+</blockquote>
+</div>
+</div>
+</div>
+<div id="outline-container-org84ea72c" class="outline-2">
+<h2 id="org84ea72c">Links</h2>
+<div class="outline-text-2" id="text-org84ea72c">
+<p>
+很多git的小技巧<br />
+<a href="http://gitready.com/">http://gitready.com/</a><br />
+</p>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-08-09</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/git/">Git</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/git.html";
+          var disqus_url = "http://jixiuf.github.io/blog/git.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

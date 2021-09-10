@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>mysql 双主 高可用实现方案 keepalived 自动自动切换 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="mysql 双主 高可用实现方案 keepalived 自动自动切换" />
+    <meta name="keywords" content="Mysql:keepalived" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>mysql 双主 高可用实现方案 keepalived 自动自动切换</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org1f6d1ec">参考</a></li>
+<li><a href="#org20655be">目标 实现mysql 高可用性，避免mysql单点故障</a></li>
+<li><a href="#orgfc3c2bb">mysql 双机热备</a></li>
+<li><a href="#org405a316">配置 keepalived</a>
+<ul>
+<li><a href="#org339fdbb">MySQL-master1</a></li>
+<li><a href="#org8e62429">MySQL-master2</a></li>
+<li><a href="#orgf69da19">/etc/keepalived/check_mysql.sh</a></li>
+</ul>
+</li>
+<li><a href="#orgc9861d4">启动keepalived</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org1f6d1ec" class="outline-2">
+<h2 id="org1f6d1ec">参考</h2>
+<div class="outline-text-2" id="text-org1f6d1ec">
+<p>
+<a href="https://github.com/chenzhiwei/linux/tree/master/keepalived">https://github.com/chenzhiwei/linux/tree/master/keepalived</a><br />
+<a href="http://allenlyu.com/2016/05/23/mysql-keepalived-hot-standby/">http://allenlyu.com/2016/05/23/mysql-keepalived-hot-standby/</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org20655be" class="outline-2">
+<h2 id="org20655be">目标 实现mysql 高可用性，避免mysql单点故障</h2>
+<div class="outline-text-2" id="text-org20655be">
+<p>
+Keepalived是一个基于VRRP协议来实现的WEB服务高可用方案，可以利用其来<br />
+避免单点故障。一个WEB服务至少会有2台服务器运行 Keepalived，一台为主服<br />
+务器（MASTER），一台为备份服务器（BACKUP），但是对外表现为一个虚拟IP，<br />
+主服务器会发送特定的消息给备份服务器，当备份服务器收不到这个消息的时<br />
+候，即主服务器宕机的时候，备份服务器就会接管虚拟IP，继续提供服务，从<br />
+而保证了高可用性<br />
+</p>
+
+<p>
+Keepalived的工作原理是VRRP（Virtual Router Redundancy Protocol）虚拟<br />
+路由冗余协议。在VRRP中有两组重要的概念：VRRP路由器和虚拟路由器，主控<br />
+路由器和备份路由器。<br />
+</p>
+
+<p>
+VRRP路由器是指运行VRRP的路由器，是物理实体，虚拟路由器是指VRRP协议创建<br />
+的，是逻辑概念。一组VRRP路由器协同工作，共同构成一台虚拟路由器。 Vrrp<br />
+中存在着一种选举机制，用以选出提供服务的路由即主控路由，其他的则成了备<br />
+份路由。当主控路由失效后，备份路由中会重新选举出一个主控路由，来继续工<br />
+作，来保障不间断服务<br />
+</p>
+
+<p>
+<a href="/blog/lvs.html">LVS负载均衡</a><br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfc3c2bb" class="outline-2">
+<h2 id="orgfc3c2bb">mysql 双机热备</h2>
+<div class="outline-text-2" id="text-orgfc3c2bb">
+<p>
+主从配置见 <a href="/blog/mysql-slave.html">mysql-slave配置</a><br />
+mysql 的双机热备 基本可以认为是 将主从模式 变成互为主从<br />
+虽然互为主从，但仍然采用单点写入，而非同时向两个库写入<br />
+</p>
+
+<p>
+惟一需要注意的一点是处理主键自增的时候，需要避免冲突<br />
+</p>
+<blockquote>
+<p>
+auto-increment-increment = 2<br />
+auto-increment-offset = 1<br />
+</p>
+</blockquote>
+<blockquote>
+<p>
+auto-increment-increment = 2<br />
+auto-increment-offset = 2<br />
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-org405a316" class="outline-2">
+<h2 id="org405a316">配置 keepalived</h2>
+<div class="outline-text-2" id="text-org405a316">
+</div>
+<div id="outline-container-org339fdbb" class="outline-3">
+<h3 id="org339fdbb">MySQL-master1</h3>
+<div class="outline-text-3" id="text-org339fdbb">
+<p>
+vi /etc/keepalived/keepalived.conf<br />
+! 开头的为注释<br />
+</p>
+
+<blockquote>
+<p>
+! Configuration File for keepalived<br />
+global_defs {<br />
+    notification_email {<br />
+    xxx@mail.com<br />
+    }<br />
+    notification_email_from xxx@mail.com<br />
+    smtp_server 127.0.0.1<br />
+    smtp_connect_timeout 30<br />
+    router_id MySQL-ha<br />
+    }<br />
+</p>
+
+<p>
+vrrp_instance VI_1 {<br />
+    state MASTER   #标记状态MASTER<br />
+    interface eth0<br />
+    virtual_router_id 51<br />
+    priority 100   #MASTER权重要高于BACKUP<br />
+    advert_int 1<br />
+    nopreempt   #不抢占，只在优先级高的机器上设置即可<br />
+    authentication {<br />
+    auth_type PASS<br />
+    auth_pass 1111<br />
+    }<br />
+    virtual_ipaddress {<br />
+    192.168.1.200   #VIP虚拟 IP#虚拟IP地址，mysql客户端访问的地址<br />
+    }<br />
+    }<br />
+</p>
+
+<p>
+virtual_server 192.168.1.200 3306 {   #VIP虚拟 IP<br />
+    delay_loop 2<br />
+    lb_algo wrr<br />
+    lb_kind DR<br />
+    persistence_timeout 60<br />
+    protocol TCP<br />
+    real_server 192.168.1.201 3306 { #本机IP地址<br />
+    weight 3<br />
+    notify_down /etc/keepalived/check_mysql.sh   #检测到服务down后执行的脚本<br />
+    TCP_CHECK {<br />
+    connect_timeout 10 #连接超时<br />
+    nb_get_retry 3 #重试次数<br />
+    delay_before_retry 3 #重试间隔时间<br />
+    connect_port 3306 #mysql端口号<br />
+    }<br />
+    }<br />
+</p>
+</blockquote>
+</div>
+</div>
+
+
+<div id="outline-container-org8e62429" class="outline-3">
+<h3 id="org8e62429">MySQL-master2</h3>
+<div class="outline-text-3" id="text-org8e62429">
+<blockquote>
+<p>
+<br />
+</p>
+
+<p>
+! Configuration File for keepalived<br />
+global_defs {<br />
+     notification_email {<br />
+     xxx@mail.com<br />
+     }<br />
+     notification_email_from xxx@mail.com<br />
+     smtp_server 127.0.0.1<br />
+     smtp_connect_timeout 30<br />
+     router_id MySQL-ha<br />
+     }<br />
+</p>
+
+<p>
+vrrp_instance VI_1 {<br />
+     state BACKUP<br />
+     interface eth0<br />
+     virtual_router_id 51<br />
+     priority 90<br />
+     advert_int 1<br />
+     nopreempt<br />
+     authentication {<br />
+     auth_type PASS<br />
+     auth_pass 1111<br />
+     }<br />
+     virtual_ipaddress {<br />
+     192.168.1.200<br />
+     }<br />
+     }<br />
+</p>
+
+<p>
+virtual_server 192.168.1.200 3306 {<br />
+     delay_loop 2<br />
+     lb_algo wrr<br />
+     lb_kind DR<br />
+     persistence_timeout 60<br />
+     protocol TCP<br />
+     real_server 192.168.1.202 3306 {<br />
+     weight 3<br />
+     notify_down /etc/keepalived/check_mysql.sh<br />
+     TCP_CHECK {<br />
+     connect_timeout 10<br />
+     nb_get_retry 3<br />
+     delay_before_retry 3<br />
+     connect_port 3306<br />
+     }<br />
+     }<br />
+</p>
+</blockquote>
+</div>
+</div>
+<div id="outline-container-orgf69da19" class="outline-3">
+<h3 id="orgf69da19">/etc/keepalived/check_mysql.sh</h3>
+<div class="outline-text-3" id="text-orgf69da19">
+<div class="org-src-container">
+<pre class="src src-sh">!/bin/sh
+pkill keepalived
+</pre>
+</div>
+<p>
+该脚本能在mysql服务不可用时，停止keepalived，从而不独占虚拟IP地址，保障虚拟地址被其他机器的keepalived抢占<br />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc9861d4" class="outline-2">
+<h2 id="orgc9861d4">启动keepalived</h2>
+<div class="outline-text-2" id="text-orgc9861d4">
+<div class="org-src-container">
+<pre class="src src-sh">/etc/init.d/keepalived start | restart | stop
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2017-07-29</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/mysql/">Mysql</a>, <a href="/tags/keepalived/">keepalived</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/mysql_keepalived.html";
+          var disqus_url = "http://jixiuf.github.io/blog/mysql_keepalived.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; qq &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

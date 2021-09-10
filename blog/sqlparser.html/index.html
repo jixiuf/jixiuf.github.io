@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>为mysql、sqlserver、oracle编写sql脚本时补全表名、列名 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="为mysql及oracle编写sql脚本时补全表名、列名" />
+    <meta name="keywords" content="emacs sql mysql oracle complete anything" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>为mysql、sqlserver、oracle编写sql脚本时补全表名、列名</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orga6666c0">链接</a></li>
+<li><a href="#org1a31d23">简介</a></li>
+<li><a href="#orgfb0965b">如何使用进行mysql 的表名列名补全：</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orga6666c0" class="outline-2">
+<h2 id="orga6666c0">链接</h2>
+<div class="outline-text-2" id="text-orga6666c0">
+<p>
+演示视频screencast <a href="http://screencast-repos.googlecode.com/files/emacs-sqlparse-mysql-complete.mkv.bz2">screencast</a> mkv格式 ，用bzip 进行压缩<br />
+文件上传到了 <a href="http://emacswiki.org/Joseph">http://emacswiki.org/Joseph</a>,<br />
+同时源代码用git 进行管理，地址在这里<a href="https://github.com/jixiuf/sqlparser">github.com/sqlparser</a>.<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org1a31d23" class="outline-2">
+<h2 id="org1a31d23">简介</h2>
+<div class="outline-text-2" id="text-org1a31d23">
+<p>
+最近新写了一个以mysql 为后端，当编写sql 脚本时，能适时地从mysql 数据库中查询<br />
+适时插入到当前光标下的表名列名等内容的扩展. 即进行表名列名的补全。(现在也相应<br />
+的提供了 oracle sqlserver 版本的)<br />
+emacswiki上有<a href="http://www.emacswiki.org/emacs/SqlComplete">SqlComplete</a> 的介绍，用了一下，发现并不好用。不够智能，比如它不<br />
+清楚什么时候该插入表名，什么时候该插入列名。所以只好自已动手。<br />
+</p>
+
+<p>
+相初用这个sqlparser名字是因为 在emacs 中对sql 语句进行编写时，想写一些解析当前sql<br />
+语句的相关函数，所以用了sqlparser这个名，后来陆续添加了一些与sql相关的功能<br />
+用这个名字，似乎不太合适，但也懒得改了。<br />
+</p>
+<ul class="org-ul">
+<li>oracle-query.el<br /></li>
+<li>sqlserver-query.el<br /></li>
+<li>mysql-query.el<br />
+这三个提供最基本的连接数据库的功能<br /></li>
+
+<li>sqlparser-mysql-complete.el<br /></li>
+<li>sqlparser-oracle-complete.el<br /></li>
+<li>sqlparser-sqlserver-complete.el<br />
+这三个文件 分别提供编写 sql脚本时补全 表名、列名的功能。<br />
+比如在from 之后，补全表名，在select ,where 之后补全列名等.<br /></li>
+
+<li>sqlserver-table2entity-4csharp.el<br /></li>
+<li>sqlserver-table2entity-4java.el<br /></li>
+<li>oracle-table2entity-4csharp.el<br /></li>
+<li>oracle-table2entity-4java.el<br /></li>
+<li>mysql-table2entity-4csharp.el<br /></li>
+<li>mysql-table2entity-4java.el<br /></li>
+<li><p>
+mysql-table2record-erlang.el<br />
+这几个文件分别提供了将sqlserver mysql oracle的某个schema中所有的表导出成java<br />
+csharp 实体类的功能。<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">M-x: sqlserver-table2entity-4csharp-interactively
+M-x: sqlserver-table2entity-4java-interactively
+M-x: oracle-table2entity-4java-interactively
+M-x: oracle-table2entity-4csharp-interactively
+M-x: mysql-table2entity-4csharp-interactively
+M-x: mysql-table2entity-4java-interactively
+M-x: erlang-mysql-generate-records
+</pre>
+</div>
+<p>
+分别提供这样几个函数<br />
+</p>
+<ul class="org-ul">
+<li><p>
+mysql-query.el<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">the normal way to use mysql-query.el is :</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">1:</span>
+(<span style="color: #FBDE2D;">defvar</span> <span style="color: #40E0D0;">mysql-connection</span> (mysql-query-create-connection connection-info))
+or
+(<span style="color: #FBDE2D;">defvar</span> <span style="color: #40E0D0;">mysql-connection</span> nil)
+(<span style="color: #FBDE2D;">unless</span> (mysql-query-connection-alive-p  mysql-connection)
+  (<span style="color: #FBDE2D;">setq</span> mysql-connection (call-interactively 'mysql-query-create-connection)))
+
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">2:</span>
+  (mysql-query              <span style="color: #ffa07a;">"select user from mysql.user"</span> mysql-connection)
+  (mysql-query-with-heading <span style="color: #ffa07a;">"select user from mysql.user"</span> mysql-connection)
+</pre>
+</div></li>
+<li><p>
+oracle-query.el<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">execute sql using sqlplus and return as list .</span>
+(oracle-query <span style="color: #ffa07a;">"select empno,ename from emp where empno&lt;=7499"</span>)
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">got :     (("7369" "SMITH") ("7499" "ALLEN"))</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">or</span>
+(oracle-query-with-heading <span style="color: #ffa07a;">"select empno,ename from emp where empno&lt;=7499"</span>)
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">got :     (("EMPNO" "ENAME") ("7369" "SMITH") ("7499" "ALLEN"))</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">using default connection ,not recommended.</span>
+(<span style="color: #FBDE2D;">defvar</span> <span style="color: #40E0D0;">connection</span> (oracle-query-create-connection <span style="color: #ffa07a;">"scott/tiger"</span>))
+(oracle-query <span style="color: #ffa07a;">"select empno from emp"</span> connection)
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">recommended</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">the normal way to use oracle-query.el is :</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">1:</span>
+(<span style="color: #FBDE2D;">defvar</span> <span style="color: #40E0D0;">sqlplus-connection</span> nil)
+(<span style="color: #FBDE2D;">unless</span> (oracle-query-connection-alive-p c)
+  (<span style="color: #FBDE2D;">setq</span> sqlplus-connection (call-interactively 'oracle-query-create-connection)))
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">2:</span>
+(oracle-query <span style="color: #ffa07a;">"select empno from emp"</span> sqlplus-connection)
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">3:</span>
+(oracle-query-close-connection sqlplus-connection)
+</pre>
+</div></li>
+<li><p>
+sqlserver-query.el<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">the normal way to use sqlserver-query.el is :</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">1:</span>
+(<span style="color: #FBDE2D;">defvar</span> <span style="color: #40E0D0;">c</span> nil)
+(<span style="color: #FBDE2D;">unless</span> (sqlserver-query-connection-alive-p c)
+  (<span style="color: #FBDE2D;">setq</span> c (call-interactively 'sqlserver-query-create-connection)))
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">2:</span>
+  (sqlserver-query <span style="color: #ffa07a;">"select empno from emp"</span> c)
+  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">or</span>
+  (sqlserver-query-with-heading <span style="color: #ffa07a;">"select empno from emp"</span> c)
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">3:</span>
+  (sqlserver-query-close-connection c)
+</pre>
+</div></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgfb0965b" class="outline-2">
+<h2 id="orgfb0965b">如何使用进行mysql 的表名列名补全：</h2>
+<div class="outline-text-2" id="text-orgfb0965b">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">require</span> '<span style="color: #D8FA3C;">sqlparser-mysql-complete</span>)
+(define-key sql-mode-map (<span style="color: #FBDE2D;">quote</span> [M-return]) 'sqlparser-mysql-complete)
+(define-key sql-interactive-mode-map  (<span style="color: #FBDE2D;">quote</span> [M-return]) 'sqlparser-mysql-complete)
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">or</span>
+(<span style="color: #FBDE2D;">defadvice</span> <span style="color: #FF6400;">sql-mysql</span> (around start-mysql-complete-minor-mode activate)
+  <span style="color: #ffa07a;">"enable `</span><span style="color: #D8FA3C;">mysql-complete-minor-mode</span><span style="color: #ffa07a;">' minor mode."</span>
+  ad-do-it
+  (mysql-complete-minor-mode))
+(<span style="color: #FBDE2D;">define-derived-mode</span> <span style="color: #FF6400;">mysql-mode</span> sql-mode <span style="color: #ffa07a;">"mysql"</span>
+  <span style="color: #ffa07a;">"mysql mode"</span>
+  (mysql-complete-minor-mode))
+
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">`</span><span style="color: #D8FA3C;">sqlparser-mysql-complete</span><span style="color: #AEAEAE;">' default  bind on `</span><span style="color: #D8FA3C;">TAB</span><span style="color: #AEAEAE;">' in</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">with `</span><span style="color: #D8FA3C;">C-u</span><span style="color: #AEAEAE;">' you can change the dbname</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">with `</span><span style="color: #D8FA3C;">C-uC-u</span><span style="color: #AEAEAE;">' you can use another new mysql connection</span>
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">require</span> '<span style="color: #D8FA3C;">sqlparser-oracle-complete</span>)
+(add-hook 'sql-mode-hook 'oracle-complete-minor-mode)
+(add-hook 'sqlplus-mode-hook 'oracle-complete-minor-mode)
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">or you can call M-x: oracle-complete-minor-mode</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">and complete command is binded on `</span><span style="color: #D8FA3C;">TAB</span><span style="color: #AEAEAE;">' .</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">with `</span><span style="color: #D8FA3C;">C-u</span><span style="color: #AEAEAE;">' you can complete with new connection string.</span>
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"> <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">there is a minor mode defined here</span>
+      (sqlserver-complete-minor-mode)
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">you can add it to sql-mode-hook</span>
+(add-hook  'sql-mode-hook 'sqlserver-complete-minor-mode)
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">or call M-x sqlserver-complete-minor-mode</span>
+
+ <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">and complete command is binded on `</span><span style="color: #D8FA3C;">TAB</span><span style="color: #AEAEAE;">' .</span>
+
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">1. you should custom these variable</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">`</span><span style="color: #D8FA3C;">sqlserver-connection-info</span><span style="color: #AEAEAE;">'</span>
+ <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">`</span><span style="color: #D8FA3C;">sqlserver-cmd</span><span style="color: #AEAEAE;">' ;sqlcmd or osql</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">for example</span>
+(<span style="color: #FBDE2D;">setq</span> sqlserver-connection-info
+      '((username . <span style="color: #ffa07a;">"sa"</span>)
+        (password . <span style="color: #ffa07a;">"sa"</span>)
+        (server-instance . <span style="color: #ffa07a;">"localhost\\SQLEXPRESS"</span>)
+        (dbname . <span style="color: #ffa07a;">"master"</span>))
+      )
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">or sometimes</span>
+(<span style="color: #FBDE2D;">setq</span> sqlserver-connection-info
+      '((username . <span style="color: #ffa07a;">"sa"</span>)
+        (password . <span style="color: #ffa07a;">"sa"</span>)
+        (server-instance . <span style="color: #ffa07a;">"localhost"</span>)
+        (dbname . <span style="color: #ffa07a;">"master"</span>)))
+
+(<span style="color: #FBDE2D;">setq</span> sqlserver-cmd' 'sqlcmd) or (<span style="color: #FBDE2D;">setq</span> sqlserver-cmd' 'osql)
+
+
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">my config file about sqlserver-complete-minor-mode looks like this .</span>
+(<span style="color: #FBDE2D;">require</span> '<span style="color: #D8FA3C;">sql</span>)
+(<span style="color: #FBDE2D;">require</span> '<span style="color: #D8FA3C;">sqlparser-sqlserver-complete</span>)
+(add-hook  'sql-mode-hook 'sqlserver-complete-minor-mode)
+(add-hook  'sqlserver-complete-minor-mode-hook 'sqlserver-complete-minor-mode-setup)
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">sqlserver-complete-minor-mode-setup</span>()
+  (<span style="color: #FBDE2D;">setq</span> sqlserver-connection-info
+    '((username . <span style="color: #ffa07a;">"sa"</span>)
+      (password . <span style="color: #ffa07a;">"sa"</span>)
+      (server-instance . <span style="color: #ffa07a;">"localhost"</span>)
+      (dbname . <span style="color: #ffa07a;">"HAIHUA"</span>))
+    )
+  (<span style="color: #FBDE2D;">setq</span> sqlserver-cmd 'sqlcmd)
+  )
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-07-21</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/emacs/">Emacs</a>, <a href="/tags/sql/">SQL</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/sqlparser.html";
+          var disqus_url = "http://jixiuf.github.io/blog/sqlparser.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>record_info.org - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="record_info.org" />
+    <meta name="keywords" content="erlang record" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>record_info.org</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgeea0414">record_info(fields,yourrecordname), record_info(size,yourrecordname),</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgeea0414" class="outline-2">
+<h2 id="orgeea0414">record_info(fields,yourrecordname), record_info(size,yourrecordname),</h2>
+<div class="outline-text-2" id="text-orgeea0414">
+<p>
+这两个宏不像宏，函数不像函数的东西，可以在编译期进行展开，但是我如果想写一个<br />
+record到json 格式的转换函数的话，是没法实现的，因为它只在编译期有限，在运行<br />
+其一个 record 实际就是一个tuple,其中是取不到record 的field的名字的。<br />
+所以参照网上的资料写了下面一个工具，<br />
+作用是根据某个erlang头文件，提取出其中的record ,然后为其生成一个module<br />
+提供get_key get_value get_index ,fields_info等函数 ，可以得到record的相应信<br />
+息<br />
+<a href="https://github.com/jixiuf/helloerlang/blob/master/record_field/src/record_util.erl">https://github.com/jixiuf/helloerlang/blob/master/record_field/src/record_util.erl</a><br />
+比如有这样一个头文件myhead.hrl<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-erlang">-record(user,{id,name,age}).
+-record(classes,{name,id,nums}).
+</pre>
+</div>
+<p>
+我修改record_util.hrl中头部的几个宏，记其生成关于myhead.hrl的一个工具模块myhead_util.erl<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-erlang">-define(HEAD_FILE_PATH,"../include/myhead.hrl").%relative to ebin/
+%% save ?MODULENAME.erl in this dir
+-define(DEST_DIR,"../src"). %relative to ebin/
+-define(MODULENAME,"myhead_util").
+-define(INCLUDE_CMD_IN_DEST_MODULE,"-include(\"myhead.hrl\").").
+</pre>
+</div>
+<p>
+自动生成的模块如下<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-erlang">%% This module automatically generated - do not edit
+
+%%% This module provides utilities for getting info about records
+%% suppose there is a record in myhead.erl
+
+%% -record(user,[id,name,age]).
+%% U=#user{id=100,name=joseph,age=11}.
+
+%% get_index(user,id)==1
+%% get_index(U,id)==1
+
+%% get_value(U,id)==100
+%% get_value(U,1)==100
+
+%% get_key(U,1)==key
+%% get_key(user,1)==key
+
+%% fields_info(user)==[id,name,age]
+%% fields_info(U)==[id,name,age]
+
+%% length(user)==3
+%% length(U)==3
+
+-module(myhead_util).
+
+-include("myhead.hrl").
+-export([get_index/2,get_key/2,get_value/2,length/1,fields_info/1]).
+
+%% get the filed index (1 based ) of a record
+get_index(user,id)-&gt; #user.id-1 ;
+get_index(Record,id) when is_record(Record,user)-&gt; #user.id-1 ;
+get_index(user,name)-&gt; #user.name-1 ;
+get_index(Record,name) when is_record(Record,user)-&gt; #user.name-1 ;
+get_index(user,age)-&gt; #user.age-1 ;
+get_index(Record,age) when is_record(Record,user)-&gt; #user.age-1 ;
+get_index(user,F) -&gt; exit({error,"Record: user has no field called "++atom_to_list(F)});
+get_index(classes,name)-&gt; #classes.name-1 ;
+get_index(Record,name) when is_record(Record,classes)-&gt; #classes.name-1 ;
+get_index(classes,id)-&gt; #classes.id-1 ;
+get_index(Record,id) when is_record(Record,classes)-&gt; #classes.id-1 ;
+get_index(classes,nums)-&gt; #classes.nums-1 ;
+get_index(Record,nums) when is_record(Record,classes)-&gt; #classes.nums-1 ;
+get_index(classes,F) -&gt; exit({error,"Record: classes has no field called "++atom_to_list(F)});
+get_index(Record,_Field) -&gt; exit({error,"Invalid Record Name: "++Record}).
+
+%% get field value of a record by index(1 based) or field name
+get_value(Record,id) when  is_record(Record,user)-&gt;Record#user.id;
+get_value(Record,1) when  is_record(Record,user)-&gt;Record#user.id;
+get_value(Record,name) when  is_record(Record,user)-&gt;Record#user.name;
+get_value(Record,2) when  is_record(Record,user)-&gt;Record#user.name;
+get_value(Record,age) when  is_record(Record,user)-&gt;Record#user.age;
+get_value(Record,3) when  is_record(Record,user)-&gt;Record#user.age;
+get_value(user,Index) -&gt; exit({error,"Record: user has no field index "++integer_to_list(Index)});
+get_value(Record,name) when  is_record(Record,classes)-&gt;Record#classes.name;
+get_value(Record,1) when  is_record(Record,classes)-&gt;Record#classes.name;
+get_value(Record,id) when  is_record(Record,classes)-&gt;Record#classes.id;
+get_value(Record,2) when  is_record(Record,classes)-&gt;Record#classes.id;
+get_value(Record,nums) when  is_record(Record,classes)-&gt;Record#classes.nums;
+get_value(Record,3) when  is_record(Record,classes)-&gt;Record#classes.nums;
+get_value(classes,Index) -&gt; exit({error,"Record: classes has no field index "++integer_to_list(Index)});
+get_value(Record,_KeyIndex) -&gt; exit({error,"Invalid Record Name: "++Record}).
+
+%% get field name by index
+get_key(user,1)-&gt; id;
+get_key(Record,1) when is_record(Record,user) -&gt;id;
+get_key(user,2)-&gt; name;
+get_key(Record,2) when is_record(Record,user) -&gt;name;
+get_key(user,3)-&gt; age;
+get_key(Record,3) when is_record(Record,user) -&gt;age;
+get_key(user,Index) -&gt; exit({error,"Record: user has no field index "++integer_to_list(Index)});
+get_key(classes,1)-&gt; name;
+get_key(Record,1) when is_record(Record,classes) -&gt;name;
+get_key(classes,2)-&gt; id;
+get_key(Record,2) when is_record(Record,classes) -&gt;id;
+get_key(classes,3)-&gt; nums;
+get_key(Record,3) when is_record(Record,classes) -&gt;nums;
+get_key(classes,Index) -&gt; exit({error,"Record: classes has no field index "++integer_to_list(Index)});
+get_key(Record,_Index) -&gt; exit({error,"Invalid  Record Name or Index out of bound : "++lists:flatten(io_lib:format("~p",[Record]))}).
+
+%% get all field name of a record
+fields_info(classes) -&gt; [name,id,nums];
+fields_info(Record ) when is_record(Record,classes)-&gt;[name,id,nums];
+fields_info(user) -&gt; [id,name,age];
+fields_info(Record ) when is_record(Record,user)-&gt;[id,name,age];
+fields_info(Other) -&gt; exit({error,"Invalid Record Name: "++Other}).
+
+%% get count of fields of a record
+length(classes) -&gt; 3;
+length(Record ) when is_record(Record,classes)-&gt;3;
+length(user) -&gt; 3;
+length(Record ) when is_record(Record,user)-&gt;3;
+length(Other) -&gt; exit({error,"Invalid Record Name: "++Other}).
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-05-30</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/erlang/">Erlang</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/record_info.html";
+          var disqus_url = "http://jixiuf.github.io/blog/record_info.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

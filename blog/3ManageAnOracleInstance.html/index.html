@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>3.ManageAnOracleInstance.org - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="3ManageAnOracleInstance.org" />
+    <meta name="keywords" content="oracle linux " />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>3.ManageAnOracleInstance.org</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgbec7f67">1. 学习目标</a></li>
+<li><a href="#org0f16c48">2. $ORACLE<sub>BASE</sub>  $ORACLE<sub>HOME</sub> $ORACLE<sub>SID</sub></a></li>
+<li><a href="#org08e1ce1">3. Initialization  Parameter Files 参数文件</a>
+<ul>
+<li><a href="#org8f14879">3.1. Static parameter file :PFILE ,纯文本。</a></li>
+<li><a href="#orgafa019d">3.2. Persistent server parameter file : SPFILE</a>
+<ul>
+<li><a href="#orgc557922">3.2.1. 创建SPFILE</a></li>
+<li><a href="#org042a081">3.2.2. 修改 SPFILE的内容。</a></li>
+<li><a href="#org8f459e1">3.2.3. 根据 SPFILE创建 PFILE</a></li>
+<li><a href="#org1fc0cb8">3.2.4. SPFILE 比 PFILE好</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org284bc52">4. oracle的启动过程</a></li>
+<li><a href="#org954336a">5. 谁能开关oracle</a></li>
+<li><a href="#org32e4db3">6. oracle database 的状态</a>
+<ul>
+<li><a href="#orgee64332">6.1. shutdown-&#x2014;&gt;nomount启动一个instance</a></li>
+<li><a href="#org9746c45">6.2. nomount-&#x2014;&gt;mount 将这个启动的instance与database进行关联</a></li>
+<li><a href="#org9b0ad68">6.3. mount&#x2013;&#x2014;&gt;open</a></li>
+<li><a href="#orgd24e3ef">6.4. oracle状态的切换</a></li>
+<li><a href="#org9ddcfc8">6.5. Restricted mode 受限模式，</a>
+<ul>
+<li><a href="#org4666128">6.5.1. 查或kill掉一个会话 v$session 可知目前连接的会话,</a></li>
+</ul>
+</li>
+<li><a href="#org8c22edb">6.6. Read Mode</a></li>
+<li><a href="#orgb834cf6">6.7. oracle database的关闭</a>
+<ul>
+<li><a href="#orgd86ff29">6.7.1. Close a Database</a></li>
+<li><a href="#org0fb28d1">6.7.2. Unmount a Database</a></li>
+<li><a href="#org7e3379c">6.7.3. Shutdown an instance</a></li>
+<li><a href="#org09d60dc">6.7.4. shutdown 命令</a></li>
+<li><a href="#org00df426">6.7.5. v$transcation 可以查是否有活动的事务，即未提交的事务。</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org995457f">7. Diagnostic Files (诊断文件)</a>
+<ul>
+<li><a href="#org2198f90">7.1. alert<sub>SID.log</sub></a></li>
+<li><a href="#orgd4b694a">7.2. Background  trace files</a></li>
+<li><a href="#orga068b6a">7.3. user trace files</a></li>
+</ul>
+</li>
+<li><a href="#org18e1ae1">8. sqlplus 小技巧，调整某列的显示宽度</a></li>
+<li><a href="#org025d6cd">9. oracle instance 启动后，查看parameter的值。</a>
+<ul>
+<li><a href="#org9d849a7">9.1. 查动态视图 v$parameter</a></li>
+<li><a href="#org37e0f15">9.2. 通过show parameter命令，</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgbec7f67" class="outline-2">
+<h2 id="orgbec7f67"><span class="section-number-2">1</span> 学习目标</h2>
+<div class="outline-text-2" id="text-1">
+<ul class="org-ul">
+<li>create and manager  initialization parameter files 管理参数文件</li>
+<li>start up and shutdown oracle instance.启动关闭oracle instance</li>
+<li>monitor and use diagnostic files</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org0f16c48" class="outline-2">
+<h2 id="org0f16c48"><span class="section-number-2">2</span> $ORACLE<sub>BASE</sub>  $ORACLE<sub>HOME</sub> $ORACLE<sub>SID</sub></h2>
+<div class="outline-text-2" id="text-2">
+<p>
+oracle 公司不只oracle数据库一个软件，他们希望把他们的所有软件安装在同一个
+目录下，即$ORACLE<sub>BASE目录</sub>。而$ORACLE<sub>HOME的值则是oracle数据库的安装目录</sub>.
+它是 $ORACLE<sub>BASE下的一个目录</sub>。而 $ORACLE<sub>SID则是一个数据库instance的名称</sub>。
+一个oracle database可以有多个oracle instance.而不同的instance 通过
+$ORACLE<sub>SID</sub> 来区分。另外 在linux上。一个oracle instance 会启用多个进程，它
+们共享一块内存，而这块内存的位置是通过 $ORACLE<sub>HOME与</sub>$ORACLE<sub>SID两个变量的</sub>
+值通过hash 计算后得到的。（可以这样理解，可能并不完全正确）.Windows 上，一
+个oracle instance 只有一个进程，进程中再分出多个线程。所以不需要进程间共享
+内存。
+比如我系统上对应的值是：
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">$ORACLE<sub>BASE</sub></td>
+<td class="org-left"><i>home/oracle</i></td>
+</tr>
+
+<tr>
+<td class="org-left">$ORACLE<sub>HOME</sub></td>
+<td class="org-left">/home/oracle/app/oracle/product/11.2.0/dbhome<sub>1</sub></td>
+</tr>
+
+<tr>
+<td class="org-left">$ORACLE<sub>SID</sub></td>
+<td class="org-left">orcl</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-org08e1ce1" class="outline-2">
+<h2 id="org08e1ce1"><span class="section-number-2">3</span> Initialization  Parameter Files 参数文件</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+参数文件分两种,参数文件在linux上位于 $ORACLE<sub>HOME</sub>/dbs/目录下。windows 上，
+好像是 $ORACLE<sub>HOME</sub>/database/. 参数分explicit和inplicit ，显式或隐式。未声
+明的则使用oracle默认的设置，即inplicit
+</p>
+</div>
+<div id="outline-container-org8f14879" class="outline-3">
+<h3 id="org8f14879"><span class="section-number-3">3.1</span> Static parameter file :PFILE ,纯文本。</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+$ORACLE<sub>HOME</sub>/dbs/initSID.ora (注：SID为 $ORACLE<sub>SID的值</sub>)如initorcl.ora
+其中的值会在oracle instance 启动时读入。目录下有个init.ora的示例文件，
+可以参照之。不过好像oracle9上的init.ora文件太老了，最后修改时间1989年针
+对oracle8的，可能不能用。好像不推荐使用。 在linux 上，没实验成功.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgafa019d" class="outline-3">
+<h3 id="orgafa019d"><span class="section-number-3">3.2</span> Persistent server parameter file : SPFILE</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+也位于 $ORACLE<sub>HOME</sub>/dbs/目录下。名称以spfie打头。
+</p>
+<ul class="org-ul">
+<li>二进制文件。</li>
+<li>由oracle server来维护，即，通过sqlplus用命令修改。</li>
+<li>Always resides on the server side 存在于oracle 服务器上，不在客户端。
+(防止多个版本的存在，导致你不知该用哪个pfile)</li>
+<li>ability to make changes persistent across  shutdown and startup
+修改后，即使重启，关闭，它会一直有效。</li>
+<li>can have Recovery Manager(RMan ,oracle的备份工具)support backing up
+to initialization file .即，RM备份时他会备份 initialization file .</li>
+</ul>
+</div>
+<div id="outline-container-orgc557922" class="outline-4">
+<h4 id="orgc557922"><span class="section-number-4">3.2.1</span> 创建SPFILE</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<ul class="org-ul">
+<li>根据PFILE 创建SPFILE
+   进入sqlplus后使用以下命令 
+create spfile= '/tmp/spfile<sub>example1</sub>'  FROM pfile= '/tmp/init.ora';
+或者简写为，
+ create spfile from pfile; 则使用默认的pfile 创建spfle
+ 前提是默认的pfile 存在。
+ 使用linux 下的命令strings 查看生成的spfile 中的字符串
+ strings /tmp/spfile<sub>example1</sub></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org042a081" class="outline-4">
+<h4 id="org042a081"><span class="section-number-4">3.2.2</span> 修改 SPFILE的内容。</h4>
+<div class="outline-text-4" id="text-3-2-2">
+<div class="org-src-container">
+<pre class="src src-sql">alert <span style="color: #FBDE2D;">system</span> <span style="color: #FBDE2D;">set</span> <span style="color: #FBDE2D;">parameter</span> = <span style="color: #FBDE2D;">value</span>  &lt;comment= <span style="color: #ffa07a;">'text'</span>&gt;  &lt;<span style="color: #FBDE2D;">deferred</span>&gt;
+&lt;<span style="color: #8DA6CE;">scope</span>=  memory|spfile|<span style="color: #FBDE2D;">both</span>&gt; &lt;sid=<span style="color: #ffa07a;">'sid|*'</span>&gt;
+</pre>
+</div>
+<p>
+括号中的内容为可选
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">comment</td>
+<td class="org-left">注释</td>
+</tr>
+
+<tr>
+<td class="org-left">deferred</td>
+<td class="org-left">下一次登录的时候有效</td>
+</tr>
+
+<tr>
+<td class="org-left">scope</td>
+<td class="org-left">影响的范围，只修改内存中的参数，修改spfile,两者都修改 （默认both）</td>
+</tr>
+
+<tr>
+<td class="org-left">sid</td>
+<td class="org-left">可以指定只对某一特定的instance的参数进行修改</td>
+</tr>
+
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+<p>
+alter system set undo<sub>tablespace</sub>=undo2;
+alert system reset undo<sub>tablespace</sub>;
+详见联机文档
+</p>
+</div>
+</div>
+<div id="outline-container-org8f459e1" class="outline-4">
+<h4 id="org8f459e1"><span class="section-number-4">3.2.3</span> 根据 SPFILE创建 PFILE</h4>
+<div class="outline-text-4" id="text-3-2-3">
+<p>
+create pfile <code>'/tmp/pfile' from spfile
+    create pfile ='/tmp/pfile' from spfile</code>'/tmp/spfile.ora'
+</p>
+</div>
+</div>
+<div id="outline-container-org1fc0cb8" class="outline-4">
+<h4 id="org1fc0cb8"><span class="section-number-4">3.2.4</span> SPFILE 比 PFILE好</h4>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org284bc52" class="outline-2">
+<h2 id="org284bc52"><span class="section-number-2">4</span> oracle的启动过程</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+oracle寻找 parameter file的顺序
+</p>
+<ul class="org-ul">
+<li>spfileSID.ora</li>
+<li>Default spfile : spfile.ora</li>
+<li>initSID.ora</li>
+<li><p>
+Default PFILE :(可能是init.ora,未验证)
+(这几个文件都在 $ORACLE<sub>HOME</sub>/dbs/目录下)
+或者手动指定使用哪个 pfile
+startup  pfile='/path/to/pfile.ora'
+但是没有spfile='' 的参数
+不过可以有可选的解决方案，在一个pfile 中加入一句
+</p>
+<div class="org-src-container">
+<pre class="src src-sql">SPFILE=/<span style="color: #FBDE2D;">path</span>/<span style="color: #FBDE2D;">to</span>/spfile
+</pre>
+</div>
+<p>
+然后使用
+</p>
+<div class="org-src-container">
+<pre class="src src-sql">startup pfile=<span style="color: #ffa07a;">'/path/to/pfile'</span>
+</pre>
+</div>
+<p>
+间接指定spfile
+</p></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org954336a" class="outline-2">
+<h2 id="org954336a"><span class="section-number-2">5</span> 谁能开关oracle</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+1). 操作系统的管理员
+2). 被赋予 sysdba system权限的用户
+</p>
+</div>
+</div>
+<div id="outline-container-org32e4db3" class="outline-2">
+<h2 id="org32e4db3"><span class="section-number-2">6</span> oracle database 的状态</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+---------&#x2013;&#x2014;startup--------------------&#x2013;&#x2014;&gt;
+</p>
+
+<p>
+shutdown -&#x2014;&gt; nomount-&#x2013;&#x2014;&gt;mount-&#x2013;&#x2014;&gt;open
+</p>
+
+<p>
+&lt;---------&#x2013;&#x2014;shutdown-------------------&#x2013;&#x2014;
+</p>
+</div>
+
+<div id="outline-container-orgee64332" class="outline-3">
+<h3 id="orgee64332"><span class="section-number-3">6.1</span> shutdown-&#x2014;&gt;nomount启动一个instance</h3>
+<div class="outline-text-3" id="text-6-1">
+<ul class="org-ul">
+<li>首先读取参数文件(spfile or pfile)</li>
+<li>分配 SGA内存，启动后台进程,此时还没在oracle database与这段内在及进程关
+联.</li>
+<li><p>
+当instance 启动时，database 会将一些 explicit的parameter写到alert log 中。
+你可以依次运行
+</p>
+<div class="org-src-container">
+<pre class="src src-sql">sqlplus /nolog
+conn / <span style="color: #FBDE2D;">as</span> sysdba 
+startup nomount
+alert database mount
+
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org9746c45" class="outline-3">
+<h3 id="org9746c45"><span class="section-number-3">6.2</span> nomount-&#x2014;&gt;mount 将这个启动的instance与database进行关联</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+instance 寻找control file 并open 之.control file 是以
+CONTROL<sub>FILES</sub>='/PATH/TO/CTL<sub>FILE.ctl</sub>'.形式存在于parameter文件中的
+</p>
+</div>
+</div>
+<div id="outline-container-org9b0ad68" class="outline-3">
+<h3 id="org9b0ad68"><span class="section-number-3">6.3</span> mount&#x2013;&#x2014;&gt;open</h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+mount之后，普通用户是无关连接database的.
+这个过程会根据control file 中的描述，寻找其他一些必须的文件
+(online datafiles ,redo log files).如果一个tablespace在上一次shutdown
+时处于offline状态，此时它依然如故(offline)，如果，没找到online
+datafiles ,or redo log files ,会报错.一般此时需要进行恢复。
+所以可以在不同的状态进行一定的维护工作。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd24e3ef" class="outline-3">
+<h3 id="orgd24e3ef"><span class="section-number-3">6.4</span> oracle状态的切换</h3>
+<div class="outline-text-3" id="text-6-4">
+<ul class="org-ul">
+<li>alter database nomount</li>
+<li>alert database mount</li>
+<li>alert database open
+状态只能从shutdown 到nomount ,由nomount变成mount 
+由mount 变open 而不能反过来。</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org9ddcfc8" class="outline-3">
+<h3 id="org9ddcfc8"><span class="section-number-3">6.5</span> Restricted mode 受限模式，</h3>
+<div class="outline-text-3" id="text-6-5">
+<p>
+只有具有restricted 权限的用户才能连上来，它跟open状态相同，只是不允许普通
+的用户连接上来，有些命令在mount状态下没法使用，而又不想启动到open状态。只
+能具有和restricted session系统权限的用户才可以访问数据库，
+而通常只有数据库管理员具有这种系统权限
+，实例只能为管理用户服务，当采用这种模式启动时，主要是为了完成以下任务：
+1). 执行export或import数据
+2). 执行data load
+3). 临时防止用户使用数据
+4). 执行某些移植或升级操作
+</p>
+<div class="org-src-container">
+<pre class="src src-sql">startup <span style="color: #FBDE2D;">restrict</span>
+</pre>
+</div>
+<p>
+如果已经处于open状态，可以使用
+</p>
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #FBDE2D;">alter</span> <span style="color: #FBDE2D;">system</span> enable restricted <span style="color: #FBDE2D;">session</span>
+<span style="color: #FBDE2D;">alter</span> <span style="color: #FBDE2D;">system</span> diable restricted <span style="color: #FBDE2D;">session</span> (&#22238;&#21040;&#27491;&#24120;<span style="color: #FBDE2D;">open</span>&#29366;&#24577;)
+</pre>
+</div>
+<p>
+处于这种状态,一般是管理员想进行一定的维护工作。
+赋予某用户权限可以在restircted mode下工作. 
+</p>
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #FBDE2D;">grant</span> restricted <span style="color: #FBDE2D;">session</span> <span style="color: #FBDE2D;">to</span> scott;
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org4666128" class="outline-4">
+<h4 id="org4666128"><span class="section-number-4">6.5.1</span> 查或kill掉一个会话 v$session 可知目前连接的会话,</h4>
+<div class="outline-text-4" id="text-6-5-1">
+<p>
+对于已经连接的session,可以把它踢出去
+</p>
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #FBDE2D;">select</span>  SADDR ,SID,  SERIAL#,  AUDSID ,username <span style="color: #FBDE2D;">from</span> v$<span style="color: #FBDE2D;">session</span>;
+</pre>
+</div>
+<p>
+这是表中的前几列， 主要看sid ,username ,可能会有很多username是空，表示
+这是一个后台进程，找到某一用户的sid后
+</p>
+<div class="org-src-container">
+<pre class="src src-sql"> <span style="color: #FBDE2D;">alter</span> <span style="color: #FBDE2D;">system</span> kill <span style="color: #FBDE2D;">session</span> <span style="color: #ffa07a;">'sid,serial#'</span>
+<span style="color: #FBDE2D;">alter</span> <span style="color: #FBDE2D;">system</span> kill <span style="color: #FBDE2D;">session</span> <span style="color: #ffa07a;">'15,6'</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8c22edb" class="outline-3">
+<h3 id="org8c22edb"><span class="section-number-3">6.6</span> Read Mode</h3>
+<div class="outline-text-3" id="text-6-6">
+<div class="org-src-container">
+<pre class="src src-sql">startup mount
+<span style="color: #FBDE2D;">alter</span> database <span style="color: #FBDE2D;">open</span> <span style="color: #FBDE2D;">read</span> <span style="color: #FBDE2D;">only</span>
+</pre>
+</div>
+<p>
+可以：
+</p>
+<ul class="org-ul">
+<li>execute queries</li>
+<li>execute disks sorts using  Logically Managered TableSpace</li>
+<li>take data files  offline or online ,but not tablespace(可以把
+tablespace的某个data file 设成离线，在线，但不能整个tablespace)</li>
+<li>perform recovery  of offline data files  and tablespace，可以对离线的
+data file 或 tablespace进行恢复操作.</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgb834cf6" class="outline-3">
+<h3 id="orgb834cf6"><span class="section-number-3">6.7</span> oracle database的关闭</h3>
+<div class="outline-text-3" id="text-6-7">
+</div>
+<div id="outline-container-orgd86ff29" class="outline-4">
+<h4 id="orgd86ff29"><span class="section-number-4">6.7.1</span> Close a Database</h4>
+<div class="outline-text-4" id="text-6-7-1">
+<p>
+将SGA中的database data 、recovery data 写入data file 、redo log file
+the database is closed ,but still mounted 
+</p>
+</div>
+</div>
+<div id="outline-container-org0fb28d1" class="outline-4">
+<h4 id="org0fb28d1"><span class="section-number-4">6.7.2</span> Unmount a Database</h4>
+<div class="outline-text-4" id="text-6-7-2">
+<p>
+disassociate a database from the instance.
+the database is unmounted .
+the control files is closed .
+</p>
+</div>
+</div>
+<div id="outline-container-org7e3379c" class="outline-4">
+<h4 id="org7e3379c"><span class="section-number-4">6.7.3</span> Shutdown an instance</h4>
+<div class="outline-text-4" id="text-6-7-3">
+<p>
+SGA 内存释放，杀掉后台进程
+</p>
+</div>
+</div>
+
+<div id="outline-container-org09d60dc" class="outline-4">
+<h4 id="org09d60dc"><span class="section-number-4">6.7.4</span> shutdown 命令</h4>
+<div class="outline-text-4" id="text-6-7-4">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">shutdown mode</td>
+<td class="org-left">abort</td>
+<td class="org-left">immediate</td>
+<td class="org-left">transactional</td>
+<td class="org-left">normal</td>
+</tr>
+
+<tr>
+<td class="org-left">all new connection</td>
+<td class="org-left">No</td>
+<td class="org-left">No</td>
+<td class="org-left">No</td>
+<td class="org-left">No</td>
+</tr>
+
+<tr>
+<td class="org-left">wait until current session end</td>
+<td class="org-left">no</td>
+<td class="org-left">no</td>
+<td class="org-left">no</td>
+<td class="org-left">yes</td>
+</tr>
+
+<tr>
+<td class="org-left">wait util current transaction end</td>
+<td class="org-left">no</td>
+<td class="org-left">no</td>
+<td class="org-left">yes</td>
+<td class="org-left">yes</td>
+</tr>
+
+<tr>
+<td class="org-left">force a checkpoint and close files</td>
+<td class="org-left">no</td>
+<td class="org-left">yes</td>
+<td class="org-left">yes</td>
+<td class="org-left">yes</td>
+</tr>
+</tbody>
+</table>
+<div class="org-src-container">
+<pre class="src src-sql">shutdown <span style="color: #FBDE2D;">immediate</span> ,&#26368;&#24120;&#29992;&#65292;&#23427;&#19981;&#31561;&#20107;&#21153;&#23436;&#25104;&#65292;&#32780;&#26159;&#22238;&#28378;&#65292;&#20445;&#35777;&#25968;&#25454;&#30340;&#23436;&#25972;&#65292;&#21516;&#26102;
+&#24555;&#36895;&#30340;&#20851;&#38381;
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org00df426" class="outline-4">
+<h4 id="org00df426"><span class="section-number-4">6.7.5</span> v$transcation 可以查是否有活动的事务，即未提交的事务。</h4>
+<div class="outline-text-4" id="text-6-7-5">
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #FBDE2D;">select</span> addr ,status <span style="color: #FBDE2D;">from</span> v$transcation
+</pre>
+</div>
+<p>
+shutdown transaction 命令会一直等到所有事务均提交后。
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org995457f" class="outline-2">
+<h2 id="org995457f"><span class="section-number-2">7</span> Diagnostic Files (诊断文件)</h2>
+<div class="outline-text-2" id="text-7">
+<ul class="org-ul">
+<li>记录一些大事件，如启动关闭等</li>
+<li>used to resolve problems</li>
+<li>used to better manage the database on a day-to-day  bsis</li>
+</ul>
+<p>
+主要包括以下几种类型的files
+</p>
+</div>
+<div id="outline-container-org2198f90" class="outline-3">
+<h3 id="org2198f90"><span class="section-number-3">7.1</span> alert<sub>SID.log</sub></h3>
+<div class="outline-text-3" id="text-7-1">
+<ul class="org-ul">
+<li>record you command</li>
+<li>record results of major event</li>
+<li>used for day-to-day operational  info.</li>
+<li>used to diagnosing  database error</li>
+</ul>
+<p>
+它位于 background<sub>dump</sub><sub>dest</sub> 参数对应的文件夹下。
+show parameter dump 
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd4b694a" class="outline-3">
+<h3 id="orgd4b694a"><span class="section-number-3">7.2</span> Background  trace files</h3>
+<div class="outline-text-3" id="text-7-2">
+<p>
+记录后台进程的信息，后台进程出错时记录
+文件名：    SID<sub>precessName</sub><sub>pid.trc</sub>
+</p>
+</div>
+</div>
+<div id="outline-container-orga068b6a" class="outline-3">
+<h3 id="orga068b6a"><span class="section-number-3">7.3</span> user trace files</h3>
+<div class="outline-text-3" id="text-7-3">
+<p>
+文件名：    SID<sub>ora</sub><sub>pid.trc</sub>
+位置在user<sub>dump</sub><sub>dest</sub>   
+</p>
+<ul class="org-ul">
+<li>procuded by user process</li>
+<li>can  be generated by a server process</li>
+<li>contain statistics  for traced sql statement .</li>
+<li>contain usr messages
+默认只在user precess 出错时才记录。也可以随时都做</li>
+<li>alter session set sql<sub>trace</sub>=true
+或者设参数sql<sub>trace</sub>=true</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org18e1ae1" class="outline-2">
+<h2 id="org18e1ae1"><span class="section-number-2">8</span> sqlplus 小技巧，调整某列的显示宽度</h2>
+<div class="outline-text-2" id="text-8">
+<ul class="org-ul">
+<li>set pagesize 300</li>
+<li>set linesize 200</li>
+<li>col col<sub>name</sub> format a30</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org025d6cd" class="outline-2">
+<h2 id="org025d6cd"><span class="section-number-2">9</span> oracle instance 启动后，查看parameter的值。</h2>
+<div class="outline-text-2" id="text-9">
+</div>
+<div id="outline-container-org9d849a7" class="outline-3">
+<h3 id="org9d849a7"><span class="section-number-3">9.1</span> 查动态视图 v$parameter</h3>
+<div class="outline-text-3" id="text-9-1">
+<p>
+select name ,value ,type from v$parameter where name='';
+</p>
+</div>
+</div>
+<div id="outline-container-org37e0f15" class="outline-3">
+<h3 id="org37e0f15"><span class="section-number-3">9.2</span> 通过show parameter命令，</h3>
+<div class="outline-text-3" id="text-9-2">
+<p>
+如： show parameter sga ，注参数名不需要输入完整的名称，如这个命令，会
+显示所有参数名称包含sga 的参数。
+</p>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-07-09</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/oracle/">Oracle</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/3ManageAnOracleInstance.html";
+          var disqus_url = "http://jixiuf.github.io/blog/3ManageAnOracleInstance.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

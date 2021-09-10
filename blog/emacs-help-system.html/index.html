@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>emacs 的帮助系统 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="emacs 的帮助系统" />
+    <meta name="keywords" content="emacs help system" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>emacs 的帮助系统</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org511ab0e">1. 首先是关于帮助系统的帮助系统</a></li>
+<li><a href="#org2966f7a">2. 查看变量的值和文档</a></li>
+<li><a href="#org97ffaec">3. 查看函数的文档</a></li>
+<li><a href="#org50a9b64">4. M-x describe-face</a></li>
+<li><a href="#org223aa69">5. C-h m (describe-mode)</a></li>
+<li><a href="#org0ab9b42">6. C-h k (describe-key)</a></li>
+<li><a href="#orgb573df2">7. C-h w (where-is)</a></li>
+<li><a href="#org3b16281">8. C-h b (describe-bindings)</a></li>
+<li><a href="#org115ac9b">9. find-function</a></li>
+<li><a href="#org40a429f">10. find-variable</a></li>
+<li><a href="#org5beb701">11. find-face-definition</a></li>
+<li><a href="#org004c851">12. M-x apropos</a></li>
+<li><a href="#org6342154">13. 会些简单的配置</a></li>
+<li><a href="#orgeddfd38">14. 快捷键定制</a></li>
+<li><a href="#orgd185321">15. 参考文献</a></li>
+</ul>
+</div>
+</div>
+<p>
+Emacs的帮助系统的按键前缀是C-h, 和F1
+</p>
+<div id="outline-container-org511ab0e" class="outline-2">
+<h2 id="org511ab0e"><span class="section-number-2">1</span> 首先是关于帮助系统的帮助系统</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+C-h ?  实际是C-h S-/,它会列出C-h 前缀下可用的命令，如b ,列出当前可用的键绑定，完整的按键
+是C-h b
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org2966f7a" class="outline-2">
+<h2 id="org2966f7a"><span class="section-number-2">2</span> 查看变量的值和文档</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+C-h v (describe-variable) 
+</p>
+</div>
+</div>
+<div id="outline-container-org97ffaec" class="outline-2">
+<h2 id="org97ffaec"><span class="section-number-2">3</span> 查看函数的文档</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+C-h f (describe-function)
+查看face的文档
+</p>
+</div>
+</div>
+<div id="outline-container-org50a9b64" class="outline-2">
+<h2 id="org50a9b64"><span class="section-number-2">4</span> M-x describe-face</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+查看某个mode的文档
+</p>
+</div>
+</div>
+<div id="outline-container-org223aa69" class="outline-2">
+<h2 id="org223aa69"><span class="section-number-2">5</span> C-h m (describe-mode)</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+刚开始学习某个mode的时候, 可以用C-h m看看当前buffer对应的主mode和副mode的文档, 这个文档一般都会包括mode中的命令和快捷键列表.
+查看某个快捷键对应的命令
+</p>
+</div>
+</div>
+<div id="outline-container-org0ab9b42" class="outline-2">
+<h2 id="org0ab9b42"><span class="section-number-2">6</span> C-h k (describe-key)</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+查看某个命令对应的快捷键
+</p>
+</div>
+</div>
+<div id="outline-container-orgb573df2" class="outline-2">
+<h2 id="orgb573df2"><span class="section-number-2">7</span> C-h w (where-is)</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+查看当前buffer所有的快捷键列表
+</p>
+</div>
+</div>
+<div id="outline-container-org3b16281" class="outline-2">
+<h2 id="org3b16281"><span class="section-number-2">8</span> C-h b (describe-bindings)</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+查看当前buffer中以某个快捷键序列开头的快捷键列表
+&lt;待查看的快捷键序列&gt; C-h，比如你想查看当前buffer中所有以C-c开头的快捷键列表，按C-c C-h就可以了。
+查看函数的代码
+</p>
+</div>
+</div>
+<div id="outline-container-org115ac9b" class="outline-2">
+<h2 id="org115ac9b"><span class="section-number-2">9</span> find-function</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+查看变量的代码
+</p>
+</div>
+</div>
+<div id="outline-container-org40a429f" class="outline-2">
+<h2 id="org40a429f"><span class="section-number-2">10</span> find-variable</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+查看face的代码
+</p>
+</div>
+</div>
+<div id="outline-container-org5beb701" class="outline-2">
+<h2 id="org5beb701"><span class="section-number-2">11</span> find-face-definition</h2>
+</div>
+<div id="outline-container-org004c851" class="outline-2">
+<h2 id="org004c851"><span class="section-number-2">12</span> M-x apropos</h2>
+<div class="outline-text-2" id="text-12">
+<p>
+查看包含某个关键词的函数,变量,face
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6342154" class="outline-2">
+<h2 id="org6342154"><span class="section-number-2">13</span> 会些简单的配置</h2>
+<div class="outline-text-2" id="text-13">
+<p>
+执行Elisp代码
+    在某条语句后面按C-x C-e (eval-last-sexp)可以执行那条语句
+    M-x eval-buffer 可以执行当前buffer内的Elisp代码
+    选中一个region后, M-x eval-region可以执行这个region内的代码
+Emacs的插件一般都是一个以el为后缀名的文件, 把这个文件下载下来后放到一个目录, 比如~/emacs/lisps, 然后执行下面这两条语句:
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(add-to-list 'load-path <span style="color: #ffa07a;">"~/emacs/lisps"</span>)
+(<span style="color: #FBDE2D;">require</span> '<span style="color: #D8FA3C;">pluginname</span>)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgeddfd38" class="outline-2">
+<h2 id="orgeddfd38"><span class="section-number-2">14</span> 快捷键定制</h2>
+<div class="outline-text-2" id="text-14">
+<p>
+建议看<a href="http://docs.huihoo.com/homepage/shredderyin/wiki/KeyBinding.html">王垠的键盘绑定技巧</a>
+</p>
+</div>
+</div>
+<div id="outline-container-orgd185321" class="outline-2">
+<h2 id="orgd185321"><span class="section-number-2">15</span> 参考文献</h2>
+<div class="outline-text-2" id="text-15">
+<p>
+<a href="http://emacser.com/emacs-beginner-must-know.htm">emacser中文网ahei Emacs初学者必会</a>
+</p>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-06-09</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/emacs/">Emacs</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/emacs-help-system.html";
+          var disqus_url = "http://jixiuf.github.io/blog/emacs-help-system.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

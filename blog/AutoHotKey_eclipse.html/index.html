@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>AutoHotKey对Eclipse 进行增强 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="对Eclipse 进行增强" />
+    <meta name="keywords" content="eclipse autohotkey " />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>AutoHotKey对Eclipse 进行增强</h1>
+<p>
+正常情况下，Eclipse下可以对按键进行绑定，但是有些时候，也会出现eclipse无能为<br />
+力的时候，比如，在eclipse中，对所有打开的文件进行“上一个”、“下一个”这种<br />
+操作进行键绑定。并不是eclipse未提供这两个功能，而是他们将它进行了硬编码，这<br />
+两个功能默认绑定在Ctrl+pageUp ,Ctrl+PageDown 上。而按照Emacs使用键盘进行高<br />
+效快捷操作的理念：“双手始终不离键盘，且不使用距离键盘中心区域过远的按键”，这<br />
+个PageUp ,PageDown 实在不应该使用。所以重新对它做映射。映射为Ctrl+Alt+n,<br />
+与Ctrl+Alt+p ,这两个键。<br />
+另外一个功能就是Alt+n ,Alt+p ,光标分别向下、向上移动4行，这样可以实现光标的<br />
+中小范围的跳跃。我在Eclipse中使用了一个插件EmacsPlus,，虽然Eclipse 也默认提<br />
+供了Emacs的按键绑定，但毕竟功能有限，而EmacsPlus 插件可以将Eclipse模拟的更<br />
+像Emacs. 下面是以上功能的代码。<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c">SetKeyDelay 0
+;;<span style="color: #8DA6CE;">Eclipse</span> <span style="color: #40E0D0;">&#20013;Ctrl</span>+PageUP Ctrl+pagedown&#22312;&#25171;&#24320;&#30340;&#32534;&#36753;&#22120;&#20013;&#20999;&#25442;
+;;&#20294;&#26159;&#23427;&#30828;&#32534;&#36753;&#21040;&#20195;&#30721;&#20013;&#20102;,&#27809;&#27861;&#36827;&#34892;&#37197;&#32622;,&#36825;&#37324;&#23558;Ctrl+alt+n &#25353;&#19979;&#26102;&#31561;&#25928;&#20110;Ctrl+pageDown
+<span style="color: #7fffd4;">#IfWinActive</span> ahk_class SWT_Window0
+^!n::Send ^{PgDn}
+^!p::Send ^{PgUp}
+;;&#32780;&#27492;&#22788;Alt+n &#30456;&#24403;&#20110;&#25353;&#19979;5&#27425;{Down
+;;     Alt+p &#30456;&#24403;&#20110;&#25353;&#19979;5&#27425;Up
+!n::Send {Down 4} 
+!p::Send {Up 4}
+<span style="color: #7fffd4;">#IfWinActive</span> 
+</pre>
+</div>
+<p>
+另外一个功能增强是，Eclipse默认的绑定为Ctrl+Shift+r的Open Resource,它会打开<br />
+一个窗口，然后你可以输入正则表达式去匹配项目中的文件，然后打开相应的文件，这<br />
+种方式比你一层层地打开目录找到相应的文件要快许多，尤其在项目比较大的时候。<br />
+这个功能虽然已经很强大了，但与Emacs中的Anything插件寻找文件的功能还是差了两<br />
+点：<br />
+</p>
+<ul class="org-ul">
+<li>输入正则表达式中的星号*的过程有点麻烦，为什么不像Google一样用空格来分开<br />
+关键字呢。<br /></li>
+<li>另外大部分人使用这个功能，我相信他最后是用鼠标点选最后过滤出来的文件，或者<br />
+用上下键来选中相应的文件然后回车。无论是用哪种方式都与Emacs使用键盘进行快<br />
+捷操作的理念相违背。sorry ,我已经深深地被Emacs毒害了。(用鼠标，这无疑是个<br />
+高速缓冲错误，而上下键，它们离键盘中心区域太远(Emacs中始终用Ctrl+n<br />
+,Ctrl+p来代替上下键的操作))。还有一个不便之处是，当用户用上下键选中某个候<br />
+选项时，突然发现这些候选项还是有点多，想再次输入一个关键字过滤一下后再进行<br />
+选择。这又牵扯到焦点的问题了，现在焦点在文件列表中而不是文本框中,想继续输<br />
+入关键字的话首先你得将光标定位到文本框。大多数人是用鼠标来完成的吧。我就不<br />
+提醒你又用了一次鼠标了。<br /></li>
+</ul>
+<p>
+那如何用AutoHotkey 来解决以上问题呢。<br />
+</p>
+<ol class="org-ol">
+<li><p>
+最根本的办法当然是修改Eclipse的源代码了，但是我找了半天也没定位出这块功能<br />
+的源代码在什么文件里，后来就懒得找了，用Autohotkey简单的做一下处理，虽然<br />
+还是有点小缺陷，但已经好许多了。我做的处理就是，当按下空格的时候它会输入<br />
+星号。使用体验和用空格分隔关键字是相同的，缺点就是关键字的顺序必须按照文<br />
+件名中出现的顺序来。代码是:<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c">space::Send *
+</pre>
+</div></li>
+<li><p>
+第2个问题的解决方法是：<br />
+首先对Ctrl+n Ctrl+p 分别映射为Down, Up 键。<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c">^p::send {Up}
+^n::send {Down}
+</pre>
+</div>
+<p>
+当我按下字母数字的时候，首先把焦点定位到文本框，然后才输入相应的字母，因<br />
+为需要对每个字母进行映射，所以代码会很长，但是逻辑很简单，比如以对字母<br />
+a的映射为例：<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c">a::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">a</span>
+<span style="color: #FBDE2D;">return</span>
+</pre>
+</div>
+<p>
+代码很简单就是当你按下字母a的时候，首先将焦点定位到Edit1即文本框，然后才<br />
+输入字母a ,然后就return结束了。<br />
+将上面所有的代码放到<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #7fffd4;">#IfWinActive</span> Open Resource
+ &#36825;&#37324;&#25918;&#20197;&#19978;&#20195;&#30721;
+<span style="color: #7fffd4;">#IfWinActive</span> 
+</pre>
+</div>
+<p>
+表示以上的代码只是窗口标题为Open Resource的窗口中有效。下面附上上面提到的<br />
+ 所有代码<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c">; #NoTrayIcon
+; #SingleInstance force   
+SetKeyDelay 0
+;;<span style="color: #8DA6CE;">Eclipse</span> <span style="color: #40E0D0;">&#20013;Ctrl</span>+PageUP Ctrl+pagedown&#22312;&#25171;&#24320;&#30340;&#32534;&#36753;&#22120;&#20013;&#20999;&#25442;
+;;&#20294;&#26159;&#23427;&#30828;&#32534;&#36753;&#21040;&#20195;&#30721;&#20013;&#20102;,&#27809;&#27861;&#36827;&#34892;&#37197;&#32622;,&#36825;&#37324;&#23558;Ctrl+alt+n &#25353;&#19979;&#26102;&#31561;&#25928;&#20110;Ctrl+pageDown
+<span style="color: #7fffd4;">#IfWinActive</span> ahk_class SWT_Window0
+^!n::Send ^{PgDn}
+^!p::Send ^{PgUp}
+;;&#32780;&#27492;&#22788;Alt+n &#30456;&#24403;&#20110;&#25353;&#19979;5&#27425;{Down
+;;     Alt+p &#30456;&#24403;&#20110;&#25353;&#19979;5&#27425;Up
+!n::SendInput {Down 4} 
+!p::SendInput {Up 4}
+<span style="color: #7fffd4;">#IfWinActive</span> 
+
+;;&#23545;&#20110;Ctrl+Shift+r ,<span style="color: #8DA6CE;">open</span> <span style="color: #40E0D0;">resource</span>
+;;&#25353;&#19979;&#31354;&#26684;&#30456;&#24403;&#20110;&#25353;&#19979;*
+;;&#32780;&#36755;&#20837;a-z&#20219;&#20309;&#19968;&#20010;&#23383;&#31526;&#65292;&#20808;&#23558;&#28966;&#28857;&#31227;&#21040;Edit&#19978;&#65292;&#28982;&#21518;&#20877;&#36755;&#20837;&#30456;&#24212;&#30340;&#23383;&#31526;
+<span style="color: #7fffd4;">#IfWinActive</span> Open Resource
+^p::send {Up}
+^n::send {Down}
+space::SendInput *
+a::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">a</span>
+<span style="color: #FBDE2D;">return</span>
+b::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">b</span>
+<span style="color: #FBDE2D;">return</span>
+c::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">c</span>
+<span style="color: #FBDE2D;">return</span>
+d::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">d</span>
+<span style="color: #FBDE2D;">return</span>
+e::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">e</span>
+<span style="color: #FBDE2D;">return</span>
+f::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">f</span>
+<span style="color: #FBDE2D;">return</span>
+g::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">g</span>
+<span style="color: #FBDE2D;">return</span>
+h::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">h</span>
+<span style="color: #FBDE2D;">return</span>
+i::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">i</span>
+<span style="color: #FBDE2D;">return</span>
+j::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">j</span>
+<span style="color: #FBDE2D;">return</span>
+k::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">k</span>
+<span style="color: #FBDE2D;">return</span>
+l::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">l</span>
+<span style="color: #FBDE2D;">return</span>
+m::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">m</span>
+<span style="color: #FBDE2D;">return</span>
+n::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">n</span>
+<span style="color: #FBDE2D;">return</span>
+o::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">o</span>
+<span style="color: #FBDE2D;">return</span>
+p::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">p</span>
+<span style="color: #FBDE2D;">return</span>
+q::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">q</span>
+<span style="color: #FBDE2D;">return</span>
+r::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">r</span>
+<span style="color: #FBDE2D;">return</span>
+s::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">s</span>
+<span style="color: #FBDE2D;">return</span>
+t::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">t</span>
+<span style="color: #FBDE2D;">return</span>
+u::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">u</span>
+<span style="color: #FBDE2D;">return</span>
+v::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">v</span>
+<span style="color: #FBDE2D;">return</span>
+w::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">w</span>
+<span style="color: #FBDE2D;">return</span>
+x::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">x</span>
+<span style="color: #FBDE2D;">return</span>
+y::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">y</span>
+<span style="color: #FBDE2D;">return</span>
+z::
+ControlFocus ,Edit1
+<span style="color: #8DA6CE;">SendInput</span> <span style="color: #40E0D0;">z</span>
+<span style="color: #FBDE2D;">return</span>
+1::
+ControlFocus ,<span style="color: #8DA6CE;">Edit1</span>
+<span style="color: #40E0D0;">SendInput</span> 1
+<span style="color: #FBDE2D;">return</span>
+2::
+ControlFocus ,<span style="color: #8DA6CE;">Edit1</span>
+<span style="color: #40E0D0;">SendInput</span> 2
+<span style="color: #FBDE2D;">return</span>
+3::
+ControlFocus ,<span style="color: #8DA6CE;">Edit1</span>
+<span style="color: #40E0D0;">SendInput</span> 3
+<span style="color: #FBDE2D;">return</span>
+4::
+ControlFocus ,<span style="color: #8DA6CE;">Edit1</span>
+<span style="color: #40E0D0;">SendInput</span> 4
+<span style="color: #FBDE2D;">return</span>
+5::
+ControlFocus ,<span style="color: #8DA6CE;">Edit1</span>
+<span style="color: #40E0D0;">SendInput</span> 5
+<span style="color: #FBDE2D;">return</span>
+6::
+ControlFocus ,<span style="color: #8DA6CE;">Edit1</span>
+<span style="color: #40E0D0;">SendInput</span> 6
+<span style="color: #FBDE2D;">return</span>
+7::
+ControlFocus ,<span style="color: #8DA6CE;">Edit1</span>
+<span style="color: #40E0D0;">SendInput</span> 7
+<span style="color: #FBDE2D;">return</span>
+8::
+ControlFocus ,<span style="color: #8DA6CE;">Edit1</span>
+<span style="color: #40E0D0;">SendInput</span> 8
+<span style="color: #FBDE2D;">return</span>
+9::
+ControlFocus ,<span style="color: #8DA6CE;">Edit1</span>
+<span style="color: #40E0D0;">SendInput</span> 9
+<span style="color: #FBDE2D;">return</span>
+.::
+ControlFocus ,<span style="color: #8DA6CE;">Edit1</span>
+<span style="color: #40E0D0;">SendInput</span> .
+<span style="color: #FBDE2D;">return</span>
+<span style="color: #7fffd4;">#IfWinActive</span> 
+</pre>
+</div></li>
+</ol>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-06-26</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/eclipse/">Eclipse</a>, <a href="/tags/autohotkey/">AutoHotKey</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/AutoHotKey_eclipse.html";
+          var disqus_url = "http://jixiuf.github.io/blog/AutoHotKey_eclipse.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

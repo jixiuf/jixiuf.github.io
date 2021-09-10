@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>让helm表现的更像ido - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="让helm表现的更像ido" />
+    <meta name="keywords" content="Emacs" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>让helm表现的更像ido</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org8fbf44d">helm 像 ido 一样 在目录上return 则进入目录而不是打开dired,并且忽略开头的"." 和 ".."</a></li>
+<li><a href="#orgb598257">helm 像 ido 一样C-d打开dired</a></li>
+<li><a href="#org5b992a2">helm 像 ido 一样C-j直接用输入的内容创建文件或buffer,而不是用选中的那个</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org8fbf44d" class="outline-2">
+<h2 id="org8fbf44d">helm 像 ido 一样 在目录上return 则进入目录而不是打开dired,并且忽略开头的"." 和 ".."</h2>
+<div class="outline-text-2" id="text-org8fbf44d">
+<p>
+可以解决这个问题<br />
+<a href="http://stackoverflow.com/questions/27652371/how-can-i-change-emacs-helm-find-file-default-action-on-directory-to-be-go-insid">http://stackoverflow.com/questions/27652371/how-can-i-change-emacs-helm-find-file-default-action-on-directory-to-be-go-insid</a><br />
+</p>
+
+<p>
+In Ido, I could hit ret to go down the selected directory, but I have<br />
+to hit right or c-j in helm. Also, helm-find-files would list . and<br />
+.. at the very top for every directory. This means in ido, I can<br />
+just hit ret ret ret until I get to the final destination if there<br />
+aren't many directories along the path.<br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;;;</span><span style="color: #AEAEAE;">###</span><span style="color: #ffc0cb;">autoload</span>
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">vmacs-helm-ido-exit-minibuffer</span>()
+  (<span style="color: #FBDE2D;">interactive</span>)
+  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">&#22914;&#26524;&#36873;&#20013;&#30340;&#26159;..&#25110;.&#21017;&#35748;&#20026;&#36873;&#20013;&#30340;&#26159;&#31532;&#19968;&#20010;&#38750;. &#25110;..&#39033;&#30446;, &#21363;&#36339;&#36807;.. &#19982;.</span>
+  (<span style="color: #FBDE2D;">let</span> ((selection (helm-get-selection)))
+    (<span style="color: #FBDE2D;">when</span> (string-match-p <span style="color: #ffa07a;">"/\\.$"</span> selection)
+      (helm-move-selection-common <span style="color: #F8F8F8;">:where</span> 'line <span style="color: #F8F8F8;">:direction</span> 'next)
+      (helm-move-selection-common <span style="color: #F8F8F8;">:where</span> 'line <span style="color: #F8F8F8;">:direction</span> 'next))
+    (<span style="color: #FBDE2D;">when</span> (string-match-p <span style="color: #ffa07a;">"/\\.\\.$"</span> selection)
+      (helm-move-selection-common <span style="color: #F8F8F8;">:where</span> 'line <span style="color: #F8F8F8;">:direction</span> 'next))
+    (<span style="color: #FBDE2D;">when</span> (string-match-p <span style="color: #ffa07a;">"\\.DS_Store"</span> (helm-get-selection))
+      (helm-move-selection-common <span style="color: #F8F8F8;">:where</span> 'line <span style="color: #F8F8F8;">:direction</span> 'next))
+
+    (<span style="color: #FBDE2D;">if</span> (file-directory-p (helm-get-selection))
+        (call-interactively 'helm-execute-persistent-action)
+      (call-interactively 'helm-maybe-exit-minibuffer ))))
+  (define-key helm-find-files-map (kbd <span style="color: #ffa07a;">"&lt;return&gt;"</span>) 'vmacs-helm-ido-exit-minibuffer)
+  (define-key helm-find-files-map (kbd <span style="color: #ffa07a;">"&lt;RET&gt;"</span>)      'vmacs-helm-ido-exit-minibuffer)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb598257" class="outline-2">
+<h2 id="orgb598257">helm 像 ido 一样C-d打开dired</h2>
+<div class="outline-text-2" id="text-orgb598257">
+<p>
+C-d 可以删除光标后的内容,当光标后无内容时则用dired打开当前项<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;;;</span><span style="color: #AEAEAE;">###</span><span style="color: #ffc0cb;">autoload</span>
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">vmacs-helm-magic-delete-char</span>( arg)
+  <span style="color: #ffa07a;">"ido like `</span><span style="color: #D8FA3C;">C-d</span><span style="color: #ffa07a;">' for helm."</span>
+  (<span style="color: #FBDE2D;">interactive</span> <span style="color: #ffa07a;">"P"</span>)
+  (<span style="color: #FBDE2D;">if</span> (eobp)
+      (helm-select-nth-action 0)
+    (delete-char (min (prefix-numeric-value arg)
+                      (- (point-max) (point))))))
+
+(define-key helm-generic-files-map (kbd <span style="color: #ffa07a;">"C-d"</span>) 'vmacs-helm-magic-delete-char) <span style="color: #AEAEAE;">;;</span>
+(define-key helm-find-files-map (kbd <span style="color: #ffa07a;">"C-d"</span>) 'vmacs-helm-magic-delete-char) <span style="color: #AEAEAE;">;;</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5b992a2" class="outline-2">
+<h2 id="org5b992a2">helm 像 ido 一样C-j直接用输入的内容创建文件或buffer,而不是用选中的那个</h2>
+<div class="outline-text-2" id="text-org5b992a2">
+<p>
+helm-multi-files helm-find-file 都可以用这个功能<br />
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;;;</span><span style="color: #AEAEAE;">###</span><span style="color: #ffc0cb;">autoload</span>
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">vmacs-helm-find-file-select-text</span>()
+  <span style="color: #ffa07a;">"like `</span><span style="color: #D8FA3C;">C-j</span><span style="color: #ffa07a;">' in ido."</span>
+  (<span style="color: #FBDE2D;">interactive</span>)
+  (<span style="color: #FBDE2D;">let</span> ((file (find-file-noselect helm-pattern)))
+    (helm-run-after-exit 'switch-to-buffer file)
+    (helm-exit-minibuffer)))
+
+  (define-key helm-find-files-map (kbd <span style="color: #ffa07a;">"C-j"</span>) 'vmacs-helm-find-file-select-text) <span style="color: #AEAEAE;">;;</span>
+  (define-key helm-generic-files-map (kbd <span style="color: #ffa07a;">"C-j"</span>) 'vmacs-helm-find-file-select-text) <span style="color: #AEAEAE;">;;</span>
+  (define-key helm-buffer-map (kbd <span style="color: #ffa07a;">"C-j"</span>)       'vmacs-helm-find-file-select-text) <span style="color: #AEAEAE;">;</span><span style="color: #AEAEAE;">make it like C-j in ido</span>
+  (define-key helm-buffers-ido-virtual-map (kbd <span style="color: #ffa07a;">"C-j"</span>) 'vmacs-helm-find-file-select-text)
+</pre>
+</div>
+
+<p>
+这样会导致C-j无法执行 helm-execute-persistent-action,当然也可用用C-z,但C-z不太好按<br />
+决定把它绑定到C-e上,实现在光标到行末时执行helm-execute-persistent-action,否则C-e执行end-of-line<br />
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;;;</span><span style="color: #AEAEAE;">###</span><span style="color: #ffc0cb;">autoload</span>
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">vmacs-helm-magic-eol</span>( arg)
+  <span style="color: #ffa07a;">"C-e move to end of line or execute helm-execute-persistent-action"</span>
+  (<span style="color: #FBDE2D;">interactive</span> <span style="color: #ffa07a;">"P"</span>)
+  (<span style="color: #FBDE2D;">if</span> (eobp)
+      (call-interactively 'helm-execute-persistent-action)
+    (call-interactively 'end-of-line)))
+
+(define-key helm-map (kbd <span style="color: #ffa07a;">"C-e"</span>)        'vmacs-helm-magic-eol)
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2017-03-13</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/emacs/">Emacs</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/00011-emacs-make-helm-like-ido.html";
+          var disqus_url = "http://jixiuf.github.io/blog/00011-emacs-make-helm-like-ido.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; qq &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

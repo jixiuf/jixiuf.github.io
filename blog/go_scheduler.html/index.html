@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>goroutine调度 拾遗 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="jixiuf" />
+    <meta name="description" content="goroutine调度" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>goroutine调度 拾遗</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org93aa086">参考链接</a></li>
+<li><a href="#org16c24f3">拾遗</a></li>
+<li><a href="#org8a933ab">系统调用阻塞时(同步系统调用)</a></li>
+<li><a href="#org244a032">net poller</a></li>
+<li><a href="#orgda05f1d">用户态阻塞/唤醒</a>
+<ul>
+<li><a href="#orgadd0e9f">channel操作</a></li>
+<li><a href="#orgd0fec21">network I/O</a></li>
+</ul>
+</li>
+<li><a href="#org0783bd8">调度器跟踪调试</a></li>
+<li><a href="#orga5b99e6">goroutine的创建</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org93aa086" class="outline-2">
+<h2 id="org93aa086">参考链接</h2>
+<div class="outline-text-2" id="text-org93aa086">
+<p>
+<a href="https://segmentfault.com/a/1190000015464889">https://segmentfault.com/a/1190000015464889</a><br />
+</p>
+
+<p>
+<a href="https://segmentfault.com/a/1190000016611742">https://segmentfault.com/a/1190000016611742</a><br />
+<a href="https://zhuanlan.zhihu.com/p/30353139">https://zhuanlan.zhihu.com/p/30353139</a><br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org16c24f3" class="outline-2">
+<h2 id="org16c24f3">拾遗</h2>
+<div class="outline-text-2" id="text-org16c24f3">
+<p>
+  go的调度本质上是一个协作式调度器,后来加入了些抢占机制，但并不能<br />
+保障一定能抢占的到sysmon 线程会定期扫goroutine ,如果running&gt;10ms则将其<br />
+标记为可被抢占注意只是标记为，需要在这个goroutine调用非内联函数时才能<br />
+真正的触发把执行权交出去，即如果此goroutine没有调用任何函数，纯粹是<br />
+cpu密集型计算，则并不会把执行权让出去。<br />
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org8a933ab" class="outline-2">
+<h2 id="org8a933ab">系统调用阻塞时(同步系统调用)</h2>
+<div class="outline-text-2" id="text-org8a933ab">
+<p>
+    当G被阻塞在某个系统调用上时(并不是所有的系统调用都是阻塞的)，此时G<br />
+会阻塞在_Gsyscall状态，M也处于 block on syscall 状态，此时的M可被操作<br />
+系统抢占调度(即让出cpu),执行该G的M会与P解绑(注意此时G仍然与M绑在一起，<br />
+等着系统调用的返回)，而P则尝试与其它idle的M绑定，继续执行其它G。如果没<br />
+有其它idle的M，但P的Local队列中仍然有G需要执行，则创建一个新的M(即P总<br />
+会给它分配一个M，不会让它闲着)；<br />
+</p>
+
+<p>
+    当系统调用完成后，G会重新尝试获取一个idle的P加入它的Local队列，恢复<br />
+执行，如果没有idle的P，G会被标记为runnable加入到Global队列<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org244a032" class="outline-2">
+<h2 id="org244a032">net poller</h2>
+<div class="outline-text-2" id="text-org244a032">
+<p>
+    除了G P M 角色golang 专门有个net poller 用来处理网络IO，即如果某<br />
+G1想要进行网络系统调用，则它会从P的队列中移除，并被移动到网络轮询器的队列中<br />
+处理异步网络系统调用。然后，M可以从其关联P的 local 队列中选择另一个G执行执行其中的代码。<br />
+</p>
+
+<p>
+异步网络系统调用由网络轮询器完成后，G1被移回到P的 local 队列 中<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgda05f1d" class="outline-2">
+<h2 id="orgda05f1d">用户态阻塞/唤醒</h2>
+<div class="outline-text-2" id="text-orgda05f1d">
+</div>
+<div id="outline-container-orgadd0e9f" class="outline-3">
+<h3 id="orgadd0e9f">channel操作</h3>
+</div>
+<div id="outline-container-orgd0fec21" class="outline-3">
+<h3 id="orgd0fec21">network I/O</h3>
+<div class="outline-text-3" id="text-orgd0fec21">
+<p>
+golang已经用netpoller实现了goroutine网络I/O阻塞不会导致M被阻塞，仅阻塞G，<br />
+对应的G会被放置到某个wait队列(如channel的waitq)<br />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0783bd8" class="outline-2">
+<h2 id="org0783bd8">调度器跟踪调试</h2>
+<div class="outline-text-2" id="text-org0783bd8">
+<p>
+G ODEBUG=scheddetail=1,schedtrace=1000 ./program<br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-go">SCHED 0ms: gomaxprocs=8 idleprocs=7 threads=2 spinningthreads=0 idlethreads=0 runqueue=0 gcwaiting=0 nmidlelocked=0 stopwait=0 sysmonwait=0
+P0: status=1 schedtick=0 syscalltick=0 m=0 runqsize=0 gfreecnt=0
+P1: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+P2: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+P3: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+P4: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+P5: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+P6: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+P7: status=0 schedtick=0 syscalltick=0 m=-1 runqsize=0 gfreecnt=0
+M1: p=-1 curg=-1 mallocing=0 throwing=0 preemptoff= locks=1 dying=0 helpgc=0 spinning=false blocked=false lockedg=-1
+M0: p=0 curg=1 mallocing=0 throwing=0 preemptoff= locks=1 dying=0 helpgc=0 spinning=false blocked=false lockedg=1
+G1: status=8() m=0 lockedm=0
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga5b99e6" class="outline-2">
+<h2 id="orga5b99e6">goroutine的创建</h2>
+<div class="outline-text-2" id="text-orga5b99e6">
+<p>
+proc.go newproc<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-go">  func newproc(siz int32, fn *funcval) {
+
+  func newproc1(fn *funcval, argp *uint8, narg int32, callergp *g, callerpc uintptr) {
+	runqput(_p_, newg, true)
+
+    // runqput tries to put g on the local runnable queue.
+    // If next is false, runqput adds g to the tail of the runnable queue.
+    // If next is true, runqput puts g in the _p_.runnext slot.
+    // If the run queue is full, runnext puts g on the global queue.
+    // Executed only by the owner P.
+func runqput(_p_ *p, gp *g, next bool) {
+	if randomizeScheduler &amp;&amp; next &amp;&amp; fastrand()%2 == 0 {
+		next = false
+	}
+
+	if next {
+	retryNext:
+		oldnext := _p_.runnext
+	//这里会把新创建的g放到_p_.runnext上,以更高优先级被执行(高于_p_.runq队列里的)
+		if !_p_.runnext.cas(oldnext, guintptr(unsafe.Pointer(gp))) {
+			goto retryNext
+		}
+		if oldnext == 0 {
+			return
+		}
+		// Kick the old runnext out to the regular run queue.
+		gp = oldnext.ptr()
+	}
+
+
+</pre>
+</div>
+<p>
+这就能解释下面这段程序的打印顺序问题了<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-go">package main
+
+import (
+	"fmt"
+	"runtime"
+)
+
+func main() {
+	runtime.GOMAXPROCS(1)
+	var c chan int = make(chan int, 100)
+
+    g
+o func() { c &lt;- 1 }()
+	go func() { c &lt;- 2 }()
+	go func() { c &lt;- 3 }()
+	go func() { c &lt;- 4 }()
+	go func() { c &lt;- 5 }()
+	go func() { c &lt;- 6 }()
+	go func() {
+		for {
+		}
+	}()
+	go func() { c &lt;- 8 }()
+	go func() { c &lt;- 9 }()
+	go func() { c &lt;- 10 }()
+
+	for {
+		select {
+		case v := &lt;-c:
+			fmt.Println("sssssssssssssssssssss", v)
+
+		}
+
+	}
+
+}
+</pre>
+</div>
+<blockquote>
+<p>
+go run a.go<br />
+sssssssssssssssssssss 10 p.runnext先被执行<br />
+sssssssssssssssssssss 1<br />
+sssssssssssssssssssss 2<br />
+sssssssssssssssssssss 3<br />
+sssssssssssssssssssss 4<br />
+sssssssssssssssssssss 5<br />
+sssssssssssssssssssss 6<br />
+</p>
+</blockquote>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2019-01-23</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info">N/A</span>
+        <span title="author" class="post-info">jixiuf</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/go_scheduler.html";
+          var disqus_url = "http://jixiuf.github.io/blog/go_scheduler.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; qq &lt;dot&gt; com">jixiuf</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>release_handler rebar hot code swap - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="readme.org" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>release_handler rebar hot code swap</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgc921617">测试代码位置</a></li>
+<li><a href="#orge6950f8">appup文件的格式</a></li>
+<li><a href="#orga70709e">操作步骤</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgc921617" class="outline-2">
+<h2 id="orgc921617">测试代码位置</h2>
+<div class="outline-text-2" id="text-orgc921617">
+<p>
+<a href="https://github.com/jixiuf/helloerlang/tree/master/release_handle">https://github.com/jixiuf/helloerlang/tree/master/release_handle</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-orge6950f8" class="outline-2">
+<h2 id="orge6950f8">appup文件的格式</h2>
+<div class="outline-text-2" id="text-orge6950f8">
+<blockquote>
+<p>
+{Vsn,                         % Vsn 为当前version的appliction版本号<br />
+[{UpFromVsn1, InstructionsU1}, %UpFromVsn1 是前一版的版本号 ,InstructionsU1  是一个 指令 list<br />
+&#x2026;,<br />
+{UpFromVsnK, InstructionsUK}],<br />
+[{DownToVsn1, InstructionsD1},<br />
+&#x2026;,<br />
+{DownToVsnK, InstructionsDK}]}.<br />
+</p>
+</blockquote>
+<p>
+参考：<br />
+</p>
+<ul class="org-ul">
+<li><a href="https://bitbucket.org/basho/rebar/wiki/ReleaseHandling">https://bitbucket.org/basho/rebar/wiki/ReleaseHandling</a><br /></li>
+<li><a href="https://github.com/basho/rebar/wiki/Upgrades">https://github.com/basho/rebar/wiki/Upgrades</a><br /></li>
+<li><a href="http://www.metabrew.com/article/erlangotp-releases-rebar-release_handler-appup-etc">http://www.metabrew.com/article/erlangotp-releases-rebar-release_handler-appup-etc</a><br /></li>
+<li><a href="http://www.metabrew.com/article/erlang-rebar-tutorial-generating-releases-upgrades">http://www.metabrew.com/article/erlang-rebar-tutorial-generating-releases-upgrades</a><br /></li>
+<li><a href="http://www.erlang.org/doc/design_principles/appup_cookbook.html#sup">http://www.erlang.org/doc/design_principles/appup_cookbook.html#sup</a><br /></li>
+<li><a href="http://www.erlang.org/doc/design_principles/release_handling.html">http://www.erlang.org/doc/design_principles/release_handling.html</a><br /></li>
+<li><a href="http://www.erlang.org/doc/system_principles/create_target.html">http://www.erlang.org/doc/system_principles/create_target.html</a><br /></li>
+<li><a href="http://www.erlang.org/doc/man/reltool.html">http://www.erlang.org/doc/man/reltool.html</a><br /></li>
+<li><a href="http://stackoverflow.com/questions/7324556/cannot-start-sample-erlang-release-generated-with-rebar">http://stackoverflow.com/questions/7324556/cannot-start-sample-erlang-release-generated-with-rebar</a><br /></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orga70709e" class="outline-2">
+<h2 id="orga70709e">操作步骤</h2>
+<div class="outline-text-2" id="text-orga70709e">
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #F8F8F8;">cd</span> release_handle/release_h/
+make clean
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-sh">cp src-0.1 src
+make
+</pre>
+</div>
+<p>
+先使用0.1版的src进行编译<br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">make createnode
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#36825;&#20010;make &#25351;&#20196;&#20854;&#23454;&#25191;&#34892;&#22914;&#19979;&#21629;&#20196;</span>
+mkdir rel;<span style="color: #F8F8F8;">cd</span> rel;../rebar create-node <span style="color: #40E0D0;">nodeid</span>=release_h
+</pre>
+</div>
+
+<p>
+生成 ./rel目录,<br />
+不太明白为什么rebar起名字叫create-node<br />
+但是要想运行 rebar generate<br />
+./rel/目录下必须有rebar create-node nodeid=$(PROJECT) 命令生成的<br />
+一系列文件才行，比如 reltool.config<br />
+生成的reltool.config形如：<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-erlang">{sys, [
+       {lib_dirs, []},
+       {erts, [{mod_cond, derived}, {app_file, strip}]},
+       {app_file, strip},
+       {rel, "release_h", "1",
+	[
+	 kernel,
+	 stdlib,
+	 sasl,
+	 release_h
+	]},
+       {rel, "start_clean", "",
+	[
+	 kernel,
+	 stdlib
+	]},
+       {boot_rel, "release_h"},
+       {profile, embedded},
+       {incl_cond, exclude},
+       {excl_archive_filters, [".*"]}, %% Do not archive built libs
+       {excl_sys_filters, ["^bin/.*", "^erts.*/bin/(dialyzer|typer)",
+			   "^erts.*/(doc|info|include|lib|man|src)"]},
+       {excl_app_filters, ["\.gitignore"]},
+       {app, sasl,   [{incl_cond, include}]},
+       {app, stdlib, [{incl_cond, include}]},
+       {app, kernel, [{incl_cond, include}]},
+       {app, release_h, [{incl_cond, include}]}
+      ]}.
+
+{target_dir, "release_h"}.
+
+{overlay, [
+	   {mkdir, "log/sasl"},
+	   {copy, "files/erl", "\{\{erts_vsn\}\}/bin/erl"},
+	   {copy, "files/nodetool", "\{\{erts_vsn\}\}/bin/nodetool"},
+	   {copy, "files/release_h", "bin/release_h"},
+	   {copy, "files/release_h.cmd", "bin/release_h.cmd"},
+	   {copy, "files/start_erl.cmd", "bin/start_erl.cmd"},
+	   {copy, "files/install_upgrade.escript", "bin/install_upgrade.escript"},
+	   {copy, "files/sys.config", "releases/\{\{rel_vsn\}\}/sys.config"},
+	   {copy, "files/vm.args", "releases/\{\{rel_vsn\}\}/vm.args"}
+	  ]}.
+</pre>
+</div>
+<p>
+这个生成的reltool.config有几处需要修改<br />
+</p>
+<ul class="org-ul">
+<li>注释掉这一行，{app_file, strip},<br />
+可能是rebar bug的原因，<br />
+我在 rebar generate-upgrade。。。 时，会报错，注释掉这句就可以了<br /></li>
+<li>{lib_dirs, ["../.."]},<br />
+       将本项目源码所在目录加到reltool.config的 lib_dirs中，这里使用了相对<br />
+目径，这样 reltool才能找到 本源目<br /></li>
+<li>修改版本号为0.1    {rel, "release_h", "0.1",&#x2026;}<br /></li>
+</ul>
+
+<p>
+修改后的文件为<br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-erlang">{sys, [
+       {lib_dirs, ["../.."]},
+       {erts, [{mod_cond, derived}, {app_file, strip}]},
+       %% {app_file, strip},
+       {rel, "release_h", "0.1",
+	[
+	 kernel,
+	 stdlib,
+	 sasl,
+	 release_h
+	]},
+       {rel, "start_clean", "",
+	[
+	 kernel,
+	 stdlib
+	]},
+       {boot_rel, "release_h"},
+       {profile, embedded},
+       {incl_cond, exclude},
+       {excl_archive_filters, [".*"]}, %% Do not archive built libs
+       {excl_sys_filters, ["^bin/.*", "^erts.*/bin/(dialyzer|typer)",
+			   "^erts.*/(doc|info|include|lib|man|src)"]},
+       {excl_app_filters, ["\.gitignore"]},
+       {app, sasl,   [{incl_cond, include}]},
+       {app, stdlib, [{incl_cond, include}]},
+       {app, kernel, [{incl_cond, include}]},
+       {app, release_h, [{incl_cond, include}]}
+      ]}.
+
+{target_dir, "release_h"}.
+
+{overlay, [
+	   {mkdir, "log/sasl"},
+	   {copy, "files/erl", "\{\{erts_vsn\}\}/bin/erl"},
+	   {copy, "files/nodetool", "\{\{erts_vsn\}\}/bin/nodetool"},
+	   {copy, "files/release_h", "bin/release_h"},
+	   {copy, "files/release_h.cmd", "bin/release_h.cmd"},
+	   {copy, "files/start_erl.cmd", "bin/start_erl.cmd"},
+	   {copy, "files/install_upgrade.escript", "bin/install_upgrade.escript"},
+	   {copy, "files/sys.config", "releases/\{\{rel_vsn\}\}/sys.config"},
+	   {copy, "files/vm.args", "releases/\{\{rel_vsn\}\}/vm.args"}
+	  ]}.
+
+</pre>
+</div>
+<p>
+生成 ./rel/release_h<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">make generate
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#23454;&#38469;&#36816;&#34892;&#30340;&#26159; ./rebar generate</span>
+
+&#21487;&#20197;&#26597;&#30475;&#19979;&#30830;&#20445;release_h-0.1&#34987; &#25171;&#21253;&#21040;&#30456;&#24212;&#29256;&#26412;&#20013;
+ ls ./rel/release_h/lib/|grep release_h
+mv ./rel/release_h/ ./rel/release_h-0.1/
+</pre>
+</div>
+<p>
+0.1版的release_h已经生成好了,适运行一下<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #F8F8F8;">cd</span> ./rel/release_h/bin
+./release_h console
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">Eshell V5.9.1  (abort with ^G)
+(release_h@jixiufeng-Joseph)1&gt; hello_gen:hello().
+1
+(release_h@jixiufeng-Joseph)2&gt; hello_gen:module_info(attributes).
+[{vsn,<span style="color: #ffa07a;">"0.1"</span>}]
+(release_h@jixiufeng-Joseph)3&gt;
+(release_h@jixiufeng-Joseph)3&gt; release_handler:which_releases().
+[{<span style="color: #ffa07a;">"release_h"</span>,<span style="color: #ffa07a;">"0.1"</span>,
+  [<span style="color: #ffa07a;">"kernel-2.15.1"</span>,<span style="color: #ffa07a;">"stdlib-1.18.1"</span>,<span style="color: #ffa07a;">"sasl-2.2.1"</span>,
+   <span style="color: #ffa07a;">"release_h-0.1"</span>],
+  permanent}]
+(release_h@jixiufeng-Joseph)4&gt; tool:sayhello().
+this is just a common module withou process running on ,so
+update this module is easy
+ok
+(release_h@jixiufeng-Joseph)5&gt;
+</pre>
+</div>
+
+<p>
+修改./rel/reltool.config<br />
+将版本号由0.1改成0.2<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">rm src
+cp src-0.2 src
+make clean
+make
+make generate
+ls rel/release_h/lib/|grep release_h
+make up
+ls rel/release_h/lib/release_h*/ebin |grep appup
+ls rel/|grep tar
+cp rel/release_h_0.2.tar.gz ./rel/release_h-0.1/releases/
+</pre>
+</div>
+
+<p>
+用0.2版的代码生成新的 ./rel/release_h/<br />
+注意在0.2版的代码中 src/有 release_h.appup.src<br />
+编译过程中，会放到 ebin/release_h.appup<br />
+make up 命令执行两个命令<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">./rebar generate-appups <span style="color: #40E0D0;">previous_release</span>=release_h-0.1
+./rebar generate-upgrade <span style="color: #40E0D0;">previous_release</span>=release_h-0.1
+</pre>
+</div>
+<p>
+关于参数previous_release后面跟 相对于./rel/目录的路径，比如，我将0.1版的<br />
+release_h目录命名为 release_h-0.1<br />
+generate-appups会在 ./rel/release_h/lib/release_h-0.2/ebin目录下生成<br />
+release_h.appup文件<br />
+如果 你的ebin/目录下没有appup文件的话， rebar 会为你生成一个，然后这它放到<br />
+ ./rel/release_h/lib/release_h-0.2/ebin目录中<br />
+generate-upgrade命令会在./rebar 生成一个tar.gz包<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">&#25226;release_h_0.2.tar.gz&#21319;&#32423;&#21253;  copy&#21040; 0.1&#29256; &#30340;releases&#30446;&#24405;&#19979;
+cp ./rel/release_h_0.2.tar.gz ./rel/release-0.1/releases/
+</pre>
+</div>
+<p>
+在刚才测试0.1版的erlang shell中执行<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-erlang">erl&gt; release_handler:unpack_release("release_h_0.2"). %解包
+erl&gt; release_handler:install_release("0.2"). % install
+erl&gt; release_handler:make_permanent("0.2"). % 使0.2版成为默认版本
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-erlang">(release_h@jixiufeng-Joseph)2&gt; release_handler:unpack_release("release_h_0.2").
+{ok,"0.2"}
+(release_h@jixiufeng-Joseph)3&gt;  release_handler:install_release("0.2").
+if you see this line ,that means hello_gen.erl is updated
+hello_gen update from version 0.1 and current version is 0.2
+and the third param Extra is "Extra info for code_change/3"
+
+if you see this line that means world_gen is started
+{ok,"0.1",[]}
+(release_h@jixiufeng-Joseph)4&gt;  release_handler:make_permanent("0.2").
+ok
+(release_h@jixiufeng-Joseph)5&gt;
+</pre>
+</div>
+
+<p>
+查看一下确认已经升级到0.2<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-erlang">(release_h@jixiufeng-Joseph)5&gt; release_handler:which_releases().
+[{"release_h","0.2",
+  ["kernel-2.15.1","stdlib-1.18.1","sasl-2.2.1",
+   "release_h-0.2"],
+  current},
+ {"release_h","0.1",
+  ["kernel-2.15.1","stdlib-1.18.1","sasl-2.2.1",
+   "release_h-0.1"],
+  permanent}]
+(release_h@jixiufeng-Joseph)7&gt; whereis(world_gen).
+&lt;0.60.0&gt;
+(release_h@jixiufeng-Joseph)10&gt; supervisor:which_children(hello_sup).
+[{world_gen,&lt;0.60.0&gt;,worker,[world_gen]},
+ {hello_gen,&lt;0.49.0&gt;,worker,[hello_gen]}]
+(release_h@jixiufeng-Joseph)11&gt;
+(release_h@jixiufeng-Joseph)11&gt; tool:sayworld().
+this is just a common module withou process running on ,so
+update this module is easy
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-05-18</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/erlang/">Erlang</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/release_handle_rebar_hot_code_swap.html";
+          var disqus_url = "http://jixiuf.github.io/blog/release_handle_rebar_hot_code_swap.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

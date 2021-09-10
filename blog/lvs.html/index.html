@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>LVS负载均衡 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="LVS负载均衡" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>LVS负载均衡</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org7e8be6e">前言</a></li>
+<li><a href="#orgf1b3bb0">LVS (linux virtual server) 什么是LVS？</a></li>
+<li><a href="#orgafe1cbf">安装</a></li>
+<li><a href="#org0fa1d5c">LVS的组成</a></li>
+<li><a href="#org276a3c0">LVS负载均衡方式</a>
+<ul>
+<li><a href="#orgacb35d3">Virtual Server via Network Address Translation NAT（VS/NAT）</a></li>
+<li><a href="#org621a056">Virtual Server via IP Tunneling(VS/TUN)</a></li>
+<li><a href="#org4eb71b1">Virtual Server via Direct Routing(VS/DR) 推荐使用的</a></li>
+</ul>
+</li>
+<li><a href="#org65df543">8种调度算法</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org7e8be6e" class="outline-2">
+<h2 id="org7e8be6e">前言</h2>
+<div class="outline-text-2" id="text-org7e8be6e">
+<p>
+参考<br />
+<a href="https://my.oschina.net/leeypp1/blog/294807">https://my.oschina.net/leeypp1/blog/294807</a><br />
+<a href="http://lansgg.blog.51cto.com/5675165/1229421">http://lansgg.blog.51cto.com/5675165/1229421</a><br />
+基本属于转载自leeypp@gmail.com<br />
+记录下以备忘。渐渐的有种感觉，东西不记下来慢慢就会遗忘。<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgf1b3bb0" class="outline-2">
+<h2 id="orgf1b3bb0">LVS (linux virtual server) 什么是LVS？</h2>
+<div class="outline-text-2" id="text-orgf1b3bb0">
+<p>
+  首先简单介绍一下LVS (Linux Virtual Server)到底是什么东西，其实它是一<br />
+种集群(Cluster)技术，基于IP的负载均衡技术。<br />
+</p>
+
+<p>
+调度器具有很好的吞吐率，将请求均衡地转移到不同的服务器上执行，且调度器<br />
+自动屏蔽掉服务器的故障，从而将一组服务器构成一个高性能的、高可用的虚拟<br />
+服务器。整个服务器集群的结构对客户是透明的，而且无需修改客户端和服务器<br />
+端的程序。为此，在设计时需要考虑系统的透明性、可伸缩性、高可用性和易管<br />
+理性。<br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgafe1cbf" class="outline-2">
+<h2 id="orgafe1cbf">安装</h2>
+<div class="outline-text-2" id="text-orgafe1cbf">
+<pre class="example">
+yum install ipvsadm
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org0fa1d5c" class="outline-2">
+<h2 id="org0fa1d5c">LVS的组成</h2>
+<div class="outline-text-2" id="text-org0fa1d5c">
+<ol class="org-ol">
+<li><p>
+负载调度器（load balancer/ Director）<br />
+</p>
+
+<p>
+它是整个集群对外面的前端机，负责将客户的请求发送到一组服务器上执行，<br />
+而客户认为服务是来自一个IP地址（我们可称之为虚拟IP地址或VIP(Virtal<br />
+IP)）上的。<br />
+</p></li>
+
+<li>服务器池(RealServer)<br />
+一组真正执行客户请求的服务器，执行的服务一般有WEB、MAIL、FTP和DNS等<br /></li>
+</ol>
+<p>
+Load balancer 将客户真实的请求通过一定的负载均衡策略从 RealServer池中选出一个<br />
+将客户请求转发到RealServer进行处理<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org276a3c0" class="outline-2">
+<h2 id="org276a3c0">LVS负载均衡方式</h2>
+<div class="outline-text-2" id="text-org276a3c0">
+</div>
+<div id="outline-container-orgacb35d3" class="outline-3">
+<h3 id="orgacb35d3">Virtual Server via Network Address Translation NAT（VS/NAT）</h3>
+<div class="outline-text-3" id="text-orgacb35d3">
+<p>
+VS/NAT是一种最简单的方式，所有的RealServer只需要将自己的网关指向<br />
+Director即可。客户端可以是任意操作系统，但此方式下，一个Director<br />
+能够带动的RealServer比较有限。在VS/NAT的方式下，Director也可以兼<br />
+为一台RealServer。<br />
+</p>
+
+<p>
+NAT模型:地址转换类型，主要是做地址转换，类似于iptables的DNAT类型，<br />
+它通过多目标地址转换，来实现负载均衡；<br />
+</p>
+<ol class="org-ol">
+<li>LVS（Director）上面需要双网卡：DIP(内网)和VIP（外网）<br /></li>
+
+<li><p>
+内网的Real Server主机的IP必须和DIP在同一个网络中，并且要求其网关都需要指向DIP的地址<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">centos &#19978;&#37197;&#32622;gateway &#32593;&#20851;&#30340;&#26041;&#24335;</span>
+cat /etc/sysconfig/network
+</pre>
+</div>
+<blockquote>
+<p>
+PEERNTP=no<br />
+NETWORKING_IPV6=no<br />
+GATEWAY=101.200.147.247<br />
+</p>
+</blockquote>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">centos &#19978;&#37197;&#32622;gateway &#32593;&#20851;&#30340;&#26041;&#24335;</span>
+&#25110;&#36825;&#26679;&#25351;&#23450;&#20855;&#20307;&#26576;&#20010;&#32593;&#21345; cat /etc/sysconfig/network-scripts/ifcfg-eth0
+</pre>
+</div>
+<blockquote>
+<p>
+DEVICE=eth0<br />
+ONBOOT=yes<br />
+BOOTPROTO=static<br />
+IPADDR=10.44.37.249<br />
+NETMASK=255.255.248.0<br />
+GATEWAY=10.44.37.247 # add this line 指向Director的内网ip<br />
+</p>
+</blockquote>
+<p>
+举例 192.168.244.132为VIP (挡在前面)<br />
+192.168.27.131 192.168.27.130( RIP ) 为两台提供真实服务的内网机<br />
+以下对VIP<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #F8F8F8;">echo</span> 1 &gt; /proc/sys/net/ipv4/ip_forward <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#25110;&#32773;&#20462;&#25913; /etc/sysctl.conf</span>
+ipvsadm -A -t 192.168.244.132:80 -s rr  <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-s rr &#34920;&#31034;&#20351;&#29992;&#36718;&#35810;&#31639;&#27861; &#35265;&#19979;&#25991;8&#31181;&#35843;&#24230;&#31639;&#27861;</span>
+ipvsadm -a -t 192.168.244.132:80 -r 192.168.27.131 -m
+ipvsadm -a -t 192.168.244.132:80 -r 192.168.27.130 -m
+</pre>
+</div>
+<p>
+或者 使用加权轮询调度<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">ipvsadm -E -t 192.168.244.132:80 -s wrr
+ipvsadm -e -t 192.168.244.132:80 -r 192.168.27.130 -m -w 2
+ipvsadm -e -t 192.168.244.132:80 -r 192.168.27.131 -m -w 1
+</pre>
+</div></li>
+</ol>
+
+
+<ol class="org-ol">
+<li>RIP 都是私有IP地址，仅用于各个节点之间的通信(不需要外网ip)<br /></li>
+
+<li>Director位于client和Real Server之间，负载处理所有的进站、出站的通信<br /></li>
+
+<li>支持端口映射<br /></li>
+
+<li>通常应用在较大规模的应用场景中，但Director易成为整个架构的瓶颈！(是3种模式中最差的)<br /></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org621a056" class="outline-3">
+<h3 id="org621a056">Virtual Server via IP Tunneling(VS/TUN)</h3>
+<div class="outline-text-3" id="text-org621a056">
+<p>
+IP隧道（IP tunneling）是将一个IP报文封装在另一个IP报文的技术，这可以<br />
+使得目标为一个IP地址的数据报文能被封装和转发到另一个IP地址。IP隧道技术<br />
+亦称为IP封装技术（IP encapsulation）。IP隧道主要用于移动主机和虚拟私有<br />
+网络（Virtual Private Network），在其中隧道都是静态建立的，隧道一端有<br />
+一个IP地址，另一端也有唯一的IP地址。它的连接调度和管理与VS/NAT中的一样，<br />
+只是它的报文转发方法不同。调度器根据各个服务器的负载情况，动态地选择一<br />
+台服务器，将请求报文封装在另一个IP报文中，再将封装后的IP报文转发给选出<br />
+的服务器；服务器收到报文后，先将报文解封获得原来目标地址为 VIP 的报文，<br />
+服务器发现VIP地址被配置在本地的IP隧道设备上，所以就处理这个请求，然后<br />
+根据路由表将响应报文直接返回给客户。<br />
+</p>
+
+<p>
+其实数据转发原理和DR模式是一样的，不过这个我个人认为主要是位于不同位置<br />
+（不同机房）；LB是通过隧道进行了信息传输，虽然增加了负载，可是因为地理<br />
+位置不同的优势，还是可以参考的一种方案<br />
+</p>
+
+<p>
+优点：负载均衡器只负责将请求包分发给物理服务器，而物理服务器将应答包直<br />
+接发给用户。所以，负载均衡器能处理很巨大的请求量，这种方式，一台负载均<br />
+衡能为超过100台的物理服务器服务，负载均衡器不再是系统的瓶颈。使用<br />
+VS-TUN方式，如果你的负载均衡器拥有100M的全双工网卡的话，就能使得整个<br />
+Virtual Server能达到1G的吞吐量。<br />
+而且跑在公网上就能进行不同地域的分发。<br />
+</p>
+
+<p>
+不足：这种方式需要所有的服务器内核支持"IP Tunneling"(IP Encapsulation)协议；<br />
+      服务器可能只局限在部分Linux系统上。<br />
+</p>
+
+
+<p>
+举例<br />
+</p>
+<blockquote>
+<p>
+LB1: eth0: 192.168.182.132<br />
+     vip(tunl0）: 192.168.182.200<br />
+RS1: eth0:192.168.27.130<br />
+      tunl0(vip)  :192.168.182.200<br />
+RS2: eth0:192.168.138.131<br />
+     tunl0(vip) :192.168.182.200<br />
+</p>
+</blockquote>
+
+<p>
+LB1操作<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">yum install ipvsadm -y
+ifconfig tunl0 192.168.182.200 broadcast 192.168.182.200 netmask 255.255.255.0 up
+route add -host $<span style="color: #40E0D0;">VIP</span> dev tunl0 <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">VIP &#36825;&#37324;&#21487;&#33021;&#24212;&#35813;&#26159;192.168.182.200</span>
+ipvsadm -A -t 192.168.182.200:80 -s rr
+ipvsadm -a -t 192.168.182.200:80 -r 192.168.27.130 -i
+ipvsadm -a -t 192.168.182.200:80 -r 192.168.138.131 -i
+
+</pre>
+</div>
+
+
+<p>
+RS1操作：(RS2的操作类似)<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">ifconfig tunl0 192.168.182.200 netmask 255.255.255.0 broadcast 192.168.182.200 up
+route add -host 192.168.182.200 dev tunl0
+ <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#20851;&#20110;&#36825;&#20960;&#20010;&#21442;&#25968;&#30340;&#21547;&#20041;&#65292;&#35265;&#19979;&#25991;&#31295; DR&#27169;&#24335;&#35762;&#35299;</span>
+<span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"1"</span> &gt;/proc/sys/net/ipv4/conf/tunl0/arp_ignore
+<span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"2"</span> &gt;/proc/sys/net/ipv4/conf/tunl0/arp_announce
+<span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"1"</span> &gt;/proc/sys/net/ipv4/conf/all/arp_ignore
+<span style="color: #F8F8F8;">echo</span> <span style="color: #ffa07a;">"2"</span> &gt;/proc/sys/net/ipv4/conf/all/arp_announce
+
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org4eb71b1" class="outline-3">
+<h3 id="org4eb71b1">Virtual Server via Direct Routing(VS/DR) 推荐使用的</h3>
+<div class="outline-text-3" id="text-org4eb71b1">
+<p>
+VS/DR方式是通过改写请求报文中的MAC地址部分来实现的。Director和<br />
+RealServer必需在物理上有一个网卡通过不间断的局域网相连。<br />
+</p>
+
+<p>
+ DR模型：直接路由模型，每个Real Server上都有两个IP：VIP和RIP，但<br />
+是VIP是隐藏的，就是不能提供解析等功能，只是用来做请求回复的源IP的，<br />
+Director上只需要一个网卡，然后利用别名来配置两个IP：VIP和DIP<br />
+Director在接受到外部主机的请求的时候转发给Real Server的时候并不更<br />
+改目标地址，只是通过arp解析的MAC地址进行封装然后转给Real Server，<br />
+Real Server在接受到信息以后拆除MAC帧封装，然后直接回复给CIP<br />
+</p>
+
+<p>
+负载均衡器和RS都使用同一个IP对外服务｡但只有DR对ARP请求进行响应,所有RS<br />
+对本身这个IP的ARP请求保持静默｡也就是说,网关会把对这个服务IP的请求全部<br />
+定向给DR,而DR收到数据包后根据调度算法,找出对应的RS,把目的MAC地址改为RS<br />
+的MAC（因为IP一致）并将请求分发给这台RS｡这时RS收到这个数据包,处理完成<br />
+之后，由于IP一致，可以直接将数据返给客户，则等于直接从客户端收到这个数<br />
+据包无异,处理后直接返回给客户端｡由于负载均衡器要对二层包头进行改换,所<br />
+以负载均衡器和RS之间必须在一个广播域,也可以简单的理解为在同一台交换机<br />
+上｡<br />
+</p>
+
+<p>
+优点：和TUN（隧道模式）一样，负载均衡器也只是分发请求，应答包通过单独<br />
+的路由方法返回给客户端。与VS-TUN相比，VS-DR这种实现方式不需要隧道结构，<br />
+因此可以使用大多数操作系统做为物理服务器。<br />
+不足: 要求负载均衡器的网卡必须与物理网卡在一个物理段上。<br />
+</p>
+
+<ol class="org-ol">
+<li>各个集群节点必须和Director在同一个物理网络中<br /></li>
+
+<li>RIP 地址不能为私有地址，可以实现便捷的远程管理和监控(后面真实提供服务的机器要有外网ip,如果服务是对外的话)<br /></li>
+
+<li>Director仅仅负责处理入站请求，响应报文则由Real Server直接发往客户端<br />
+(所以 RealServer 于Load banlance 需要都有外网ip,如果内外网提供服务的话，假如只是局域网内提供服务，可以都不用外网ip)<br /></li>
+
+<li>集群节点Real Server 的网关一定不能指向DIP，而是指向外部路由(原因见上条,需要直接发回客户端)<br /></li>
+
+<li>Director不支持端口映射<br /></li>
+
+<li>Director能够支持比NAT多很多的Real Server (请求来的时候经过Director,去的时候不用经过,更高效)<br /></li>
+</ol>
+
+<p>
+举例<br />
+</p>
+<blockquote>
+<p>
+LB1: eth0: 192.168.182.133<br />
+    vip（eth0:0）: 192.168.182.200<br />
+RS1: eth0:192.168.182.130<br />
+    lo:0(vip)  :192.168.182.200<br />
+RS2: eth0:192.168.182.129<br />
+    lo:0(vip)  192.168.182.200<br />
+</p>
+</blockquote>
+<p>
+你会发现3台机器都有一个 192.168.182.200的身份<br />
+</p>
+
+<p>
+通信原理：<br />
+</p>
+
+<p>
+每个Real Server上都有两个IP：VIP和RIP，但是VIP是隐藏的，就是不<br />
+能提供解析等功能，只是用来做请求回复的源IP的，Director上只需要<br />
+一个网卡，然后利用别名来配置两个IP：VIP和DIP<br />
+</p>
+
+<p>
+ Director在接受到外部主机的请求的时候转发给Real Server的时候并<br />
+不更改目标地址，只是通过arp解析的MAC地址进行封装然后转给Real<br />
+Server，Real Server在接受到信息以后拆除MAC帧封装，然后直接回复<br />
+给CIP。<br />
+</p>
+
+<p>
+而此时需要关闭RS上的基于VIP的arp解析，在linux内核2.4以后，内核<br />
+中都内置了这种功能，通过一些设置可以关闭其arp的功能：<br />
+</p>
+
+<p>
+arp_ignore:定义接收到ARP请求时的响应级别<br />
+	0：默认，只用本地配置的有响应地址都给予响应<br />
+	1：仅仅在目标IP是本地地址，并且是配置在请求进来的接口上的时候才给予响应(仅在请求的目标地址配置请求到达的接口上的时候，才给予响应)<br />
+    arp_announce：定义将自己的地址向外通告时的级别<br />
+	0：默认，表示使用配置在任何接口的任何地址向外通告<br />
+	1：试图仅向目标网络通告与其网络匹配的地址<br />
+	2：仅向与本地接口上地址匹配的网络进行通告<br />
+    Ps：要想让其功能生效，必须先设置相关设置，然后在配置IP地址等信息<br />
+</p>
+
+<ol class="org-ol">
+<li><p>
+开始在RS1操作：<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #F8F8F8;">echo</span> 2 &gt; /proc/sys/net/ipv4/conf/all/arp_announce
+<span style="color: #F8F8F8;">echo</span> 2 &gt; /proc/sys/net/ipv4/conf/eth0/arp_announce
+<span style="color: #F8F8F8;">echo</span> 1 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore
+<span style="color: #F8F8F8;">echo</span> 1 &gt; /proc/sys/net/ipv4/conf/eth0/arp_ignore
+service network restart
+ifconfig lo:0 192.168.182.200 netmask 255.255.255.255 broadcast 182.168.182.200
+route add -host 192.168.182.200 dev lo:0
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#19978;&#38754;&#30340;&#23601;&#26159;&#23450;&#20041;&#20102;arp&#21709;&#24212;&#30340;&#32423;&#21035;&#65307;&#36824;&#26377;&#23601;&#26159;VIP&#30340;&#35831;&#27714;&#25968;&#25454;&#65292;&#20174;rs1&#30340;&#26412;&#22320;ip&#36827;&#34892;&#20102;&#22238;&#22797;</span>
+</pre>
+</div></li>
+<li>在RS2上执行上面同样的操作<br /></li>
+<li><p>
+在LB上操作:<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">ifconfig eth0:0 192.168.182.200/24  <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#22312;eth0:0&#37197;&#32622;vip</span>
+</pre>
+</div></li>
+<li><p>
+确保 RS1 RS2 上的80端口能正常提供服务后（以80端口为例）<br />
+在LB<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">yum install ipvsadm -y
+ipvsadm -A -t 192.168.182.200:80 -s rr
+ipvsadm -a -t 192.168.182.200:80 -r 192.168.182.130 -g
+ipvsadm -a -t 192.168.182.200:80 -r 192.168.182.129 -g
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">ipvsadm -L -n &#21487;&#26597;&#30475;&#20855;&#20307;&#30340;&#35268;&#21017;&#65292;&#24863;&#35273;&#31867;&#20284;iptables
+</pre>
+</div>
+<p>
+此时 访问 <a href="http://192.168.182.200">http://192.168.182.200</a> 即可感觉到其实质内容是 RS1 RS2 轮流处理的结果<br />
+</p></li>
+</ol>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org65df543" class="outline-2">
+<h2 id="org65df543">8种调度算法</h2>
+<div class="outline-text-2" id="text-org65df543">
+<ol class="org-ol">
+<li>轮叫调度（Round Robin Scheduling）<br />
+算法就是以轮叫的方式依次将请求调度不同的服务器，即每次调度执行i=(i+1)mod n，并选出第i台服务器。算法的优点是其简洁性，它无需记录当前所有连接的状态，所以它是一种无状态调度。<br /></li>
+<li>加权轮叫调度（Weighted Round Robin Scheduling   ）<br />
+解决服务器间性能不一的情况，它用相应的权值表示服务器的处理性能，服务器的缺省权值为1<br /></li>
+<li>最小连接调度（Least Connection Schedul ing   ）<br />
+把新的连接请求分配到当前连接数最小的服务器,调度器需要记录各个服务器已建立连接的数目<br /></li>
+<li>加权最小连接调度（Weighted Least Connection Scheduling）<br /></li>
+<li><p>
+基于局部性的最少链接（Locality Based Least Connections Scheduling ）简称为LBLC<br />
+</p>
+
+<p>
+目前主要用于Cache集群系统，因为在Cache集群中客户请求报文的目标IP<br />
+地址是变化的。这里假设任何后端服务器都可以处理任一请求，算法的设<br />
+计目标是在服务器的负载基本平衡情况下，将相同目标IP地址的请求调度<br />
+到同一台服务器，来提供各台服务器的访问局部性和主存Cache命中率<br />
+</p>
+
+<p>
+LBLC调度算法先根据请求的目标IP 地址 找出该目标IP地址最近使用的服务器，<br />
+若该服务器是可用的且没有超载，将请求发送到该服务器；若服务器不存在，或<br />
+者该服务器超载且有服务器处于其一半的工 作负载，则用“最少链接”的原则<br />
+选出一个可用的服务器，将请求发送到该服务器。<br />
+</p></li>
+<li><p>
+带复制的基于局部性最少链接（Locality Based Least Connections with Replication Scheduling）<br />
+</p>
+
+<p>
+带复制的基于局部性最少链接调度（Locality Based Least Connectio<br />
+ns with Replication Scheduling，以下简称为LBLCR）算法也是针对目标IP<br />
+地址的负载均衡，目前主要用于Cache集群系统。它与LBLC算法的不同之处是<br />
+它要 维护从一个目标IP地址到一组服务器的映射，而LBLC算法维护从一个目<br />
+标IP地址到一台服务器的映射。对于一个“热门”站点的服务请求，一台<br />
+Cache 服务器可能会忙不过来处理这些请求。这时，LBLC调度算法会从所有的<br />
+Cache服务器中按“最小连接”原则选出一台Cache服务器，映射该“热门”站<br />
+点到这台Cache服务器，很快这台Cache服务器也会超载，就会重复上述过程选<br />
+出新的Cache服务器。这样，可能会导致该“热门”站点的映像会出现 在所有<br />
+的Cache服务器上，降低了Cache服务器的使用效率。LBLCR调度算法将“门站”点<br />
+映射到一组Cache服务器（服务器集合），当该“热门”站点的请求负载增加<br />
+时，会增加集合里的Cache服务器，来处理不断增长的负载；当该“热门”站<br />
+点的请求负载降低时，会减少集合里的Cache服务器 数目。这样，该热门站点<br />
+的映像不可能出现在所有的Cache服务器上，从而提供Cache集群系统的使用效<br />
+率。LBLCR算法先根据请求的目标IP 地址找出该目标IP地址对应的服务器组；<br />
+按“最小连接”原则从该服务器组中选出一台服务器，若服务器没有超载，将<br />
+请求发送到该服务器；若服务器超载；则按“最小连接”原则从整个集群中选<br />
+出一台服务器，将该服务器加入到服务器组中，将请求发送到该服务器。同时，<br />
+当该服务器组有一段时间没有被修改，将最忙的服 务器从服务器组中删除，<br />
+以降低复制的程度。<br />
+</p></li>
+<li><p>
+目标地址散列调度（Destination Hashing Scheduling   ）<br />
+</p>
+
+<p>
+目标地址散列调度 （Destination Hashing Scheduling）算法也是针对目标IP<br />
+地址的负载均衡，但它是一种静态映射算法，通过一个散列（Hash）函数将一个<br />
+目标IP地址映射到一台服务器。目标地址散列调度算法先根据请求的目标IP地址，<br />
+作为散列键（Hash Key）从静态分配的散列表找出对应的服务器，若该服务器是<br />
+可用的且未超载，将请求发送到该服务器，否则返回空。<br />
+</p></li>
+<li><p>
+源地址散列调度（Source Hashing Scheduling）<br />
+</p>
+
+<p>
+源地址散列调度（Source Hashing Scheduling）算法正好与目标地址散列调<br />
+度算法相反，它根据请求的源IP地址，作为散列键（Hash Key）从静态分配的<br />
+散列表找出对应的服务器，若该服务器是可用的且未超载，将请求发送到该服<br />
+务器，否则返回空。它采用的散列函数与目标地址散列调度算法 的相同。它<br />
+的算法流程与目标地址散列调度算法的基本相似，除了将请求的目标IP地址换<br />
+成请求的源IP 地址，所以这里不一一叙述。在实际应用中，源地址散列 调度<br />
+和目标地址散列调度可以结合使用在防火墙集群中，它们可以保证整个系统的<br />
+唯一出入口。<br />
+</p></li>
+</ol>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2017-07-29</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/linux/">Linux</a>, <a href="/tags/mysql/">Mysql</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/lvs.html";
+          var disqus_url = "http://jixiuf.github.io/blog/lvs.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; qq &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

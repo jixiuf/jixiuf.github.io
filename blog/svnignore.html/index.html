@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>svn:ignore global-ignores property 忽略某些文件 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="svn:ignore property 相关内容" />
+    <meta name="keywords" content="svn ignore " />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>svn:ignore global-ignores property 忽略某些文件</h1>
+<p>
+参考：<a href="http://qa.taobao.com/?p=2163">http://qa.taobao.com/?p=2163</a><br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">svn propedit svn:ignore . -editor-cmd notepad
+&#25110;
+EXPORT <span style="color: #40E0D0;">SVN_EDITOR</span>=emacsclientw.exe 
+svn propedit svn:ignore . 
+</pre>
+</div>
+<p>
+运行上面的命令，会使用你设置的编辑器编辑svn:ignore 属性的内容，<br />
+从网上找了几个例子<br />
+似乎 svn:ignore 属性不能递归目录<br />
+</p>
+
+<p>
+不过svn 还有一个属性global-ignores ,这个属性只在客户端有效，<br />
+在windows 上，<br />
+%appdata%/Subversion 目录下有一个config 文件<br />
+在文件中[miscellany] 子模块下，有一个注释掉的属性global-ignore<br />
+它的值是一系列被忽略的文件目录对应的匹配符，用空格格式<br />
+</p>
+<blockquote>
+<p>
+[miscellany]<br />
+global-ignores = <b>.usr *.hello *.o *.lo *.la *.al .libs *.so *.so.[0-9]</b> *.a *.pyc *.pyo<br />
+</p>
+</blockquote>
+
+<blockquote>
+<p>
+global-ignores = <b>.o *.lo *.la #*# .</b>.rej <b>.rej .*~ *~ .#</b> .DS<sub>Store</sub> thumbs.db Thumbs.db <b>.bak *.class *.exe *.dll *.mine *.obj *.ncb *.lib *.log *.idb *.pdb *.ilk *.msi</b> .res <b>.pch *.suo *.exp *.*~ *.~</b> ~*.* cvs CVS .CVS .cvs release Release debug Debug ignore Ignore bin Bin obj Obj <b>.csproj.user *.user  _ReSharper.</b> *.resharper.user<br />
+</p>
+</blockquote>
+
+<p>
+My ignore pattern for Visual Studio:<br />
+</p>
+<blockquote>
+<p>
+global-ignores= <b>/bin */obj */Release */Debug *.suo *.err *.log *.obj *.bin *.dll *.exe *.LOG *.user *.pdb [tT]emp [tT]empPE Ankh.Load thumbs.db *.resharper *.vspscc *.vsssccc *.scc */<sub>ReSharper</sub></b> <b>/<sub>ReSharper</sub>.</b> bin obj <b>.resharperoptions *.db *.bak *<sub>ReSharper</sub></b> *.snk logs output TestResults<br />
+</p>
+</blockquote>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-09-08</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/svn/">SVN</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/svnignore.html";
+          var disqus_url = "http://jixiuf.github.io/blog/svnignore.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

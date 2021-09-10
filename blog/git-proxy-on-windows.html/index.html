@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>在windows上通过代理访问github.com - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="在windows上通过代理访问github.com" />
+    <meta name="keywords" content="git windows proxy github" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>在windows上通过代理访问github.com</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org2d92a1d">git://</a></li>
+<li><a href="#org61a5a67">http(s) 协议</a></li>
+</ul>
+</div>
+</div>
+<p>
+公司上网用代理，但是git 与ssh似乎没开代理。导致无没访问github.com 来更新我<br />
+的配置文件。下面是解法。<br />
+github.com 的git 提供了三种方式： <a href="http://">http://</a> git:// 与ssh 方式<br />
+</p>
+<div id="outline-container-org2d92a1d" class="outline-2">
+<h2 id="org2d92a1d">git://</h2>
+<div class="outline-text-2" id="text-org2d92a1d">
+<p>
+需要用到socat这个软件，有windows 版的，它用cygwin 进行编译的，放心你不必<br />
+安装cygwin ,socat它自带了cygwin.dll可以单独运行<br />
+到这里下载<br />
+<a href="http://www.dest-unreach.org/socat/">http://www.dest-unreach.org/socat/</a><br />
+<a href="http://www.gentilkiwi.com/telechargements-s43-t-socat.htm#englishversion">http://www.gentilkiwi.com/telechargements-s43-t-socat.htm#englishversion</a><br />
+把socat 解压开后的目录加入到path路径下<br />
+然后需要写一个脚本<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">  <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">!/bin/bash</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#36825;&#37324;&#26159;&#20320;&#23545;&#24212;&#30340;&#20195;&#29702;ip &#21450;&#31471;&#21475;</span>
+<span style="color: #40E0D0;">_proxy</span>=172.20.65.51
+<span style="color: #40E0D0;">_proxyport</span>=12080
+<span style="color: #FBDE2D;">exec</span> socat STDIO PROXY:$<span style="color: #40E0D0;">_proxy</span>:$<span style="color: #40E0D0;">1</span>:$<span style="color: #40E0D0;">2</span>,<span style="color: #40E0D0;">proxyport</span>=$<span style="color: #40E0D0;">_proxyport</span>
+</pre>
+</div>
+<p>
+把这个脚本命名为git-proxy,加入到Path路径下<br />
+然后修改~/.gitconfig<br />
+在里面加入这样一条<br />
+</p>
+<blockquote>
+<p>
+[core]<br />
+	gitproxy = git-proxy<br />
+</p>
+</blockquote>
+<p>
+或者运行<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">git-proxy&#24050;&#32463;&#21152;&#20837;&#21040;path&#30446;&#24405;&#19979;</span>
+ git config --global core.gitproxy <span style="color: #ffa07a;">"git-proxy"</span>
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">git-proxy&#27809;&#26377;&#21152;&#20837;&#21040;path&#30446;&#24405;&#19979;</span>
+ git config --global core.gitproxy <span style="color: #ffa07a;">"/local/path/to/git-proxy"</span>
+</pre>
+</div>
+<p>
+此时对于git:/协议就支持了<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">&#20363;&#22914; git clone git://github.com/jixiuf/anything-etags-plus.git
+</pre>
+</div>
+<p>
+但是即使你费劲的配置好git://协议之后，却仍然没办法向github提交你的代码，因<br />
+为它需要ssh 的支持，<br />
+要想git push 命令可用，还需要继续做一些工作<br />
+参考了<a href="http://skim.la/2010/02/22/how-to-make-github-and-proxy-play-nicely-with-ssh/">http://skim.la/2010/02/22/how-to-make-github-and-proxy-play-nicely-with-ssh/</a><br />
+但是不要费劲去找文中提到的connect.c 编译后的connect.exe了，因为现在的<br />
+<a href="file:///github/home/documents/org/src/download/connect.c">connect.c</a> <a href="file:///github/home/documents/org/src/download/connect">connect_compile_on_linux</a> 本站保存<br />
+msysGit bin目录下已经提供了这个文件。<br />
+只需要在~/.ssh/config文件中加入以下代码即可以了<br />
+注意我用的密钥是dsa 的而不是rsa 另外文件中的和种路径 及代理ip端口，你需要改<br />
+成你自已的<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#27492;&#34892;&#35201;&#25913;&#36335;&#24452; &#20195;&#29702;ip &#21450;port</span>
+ProxyCommand d:/usr/Git/bin/connect.exe -H 172.20.65.51:12080 %h %p
+
+Host github.com
+User git
+Port 22
+Hostname github.com
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#27492;&#34892;&#35201;&#25913;&#36335;&#24452;&#21450;id_dsa &#25110;id_rsa</span>
+IdentityFile <span style="color: #ffa07a;">"d:\.ssh\id_dsa"</span>
+
+TCPKeepAlive yes
+IdentitiesOnly yes
+
+Host ssh.github.com
+User git
+Port 443
+Hostname ssh.github.com
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#27492;&#34892;&#35201;&#25913;&#36335;&#24452;&#21450;id_dsa &#25110;id_rsa</span>
+IdentityFile <span style="color: #ffa07a;">"d:\.ssh\id_dsa"</span>
+
+TCPKeepAlive yes
+IdentitiesOnly yes
+
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org61a5a67" class="outline-2">
+<h2 id="org61a5a67">http(s) 协议</h2>
+<div class="outline-text-2" id="text-org61a5a67">
+<p>
+这种解法最简单:在~/.bashrc中加入以下代码<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">http_proxy</span>=<span style="color: #ffa07a;">'http://myproxy.example.com:1080/'</span>
+<span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">https_proxy</span>=<span style="color: #ffa07a;">'https://myproxy.example.com:1080/'</span>
+<span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ftp_proxy</span>=<span style="color: #ffa07a;">'http://myproxy.example.com:1080/'</span>
+<span style="color: #F8F8F8;">export</span> no_proxy = <span style="color: #ffa07a;">'.example.com'</span>
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-11-24</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/git/">Git</a>, <a href="/tags/windows/">Windows</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/git-proxy-on-windows.html";
+          var disqus_url = "http://jixiuf.github.io/blog/git-proxy-on-windows.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

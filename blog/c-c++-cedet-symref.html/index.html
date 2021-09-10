@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>c-c++-cedet-symref.org - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="c-c++-cedet-.org" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>c-c++-cedet-symref.org</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orge124065">semantic-symref semantic-symref-symbol</a>
+<ul>
+<li><a href="#orgb733959">Search for places where function is called(寻找某函数、变量在哪个地方被调用了)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orge124065" class="outline-2">
+<h2 id="orge124065">semantic-symref semantic-symref-symbol</h2>
+<div class="outline-text-2" id="text-orge124065">
+</div>
+<div id="outline-container-orgb733959" class="outline-3">
+<h3 id="orgb733959">Search for places where function is called(寻找某函数、变量在哪个地方被调用了)</h3>
+<div class="outline-text-3" id="text-orgb733959">
+<p>
+semantic-symref命令 可以查找到光标下变量的在本项目中声明位置 semantic-symref-symbol 可以输入你想要找的具体变量名.<br />
+如果某些名称没有在相应的database(如gnu/global,)中找到,它会用 find-grep命令尝试搜索.可以在打开的新buffer中找到你要找的变量进行跳转.<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">alexott/c-mode-cedet-hook</span> ()
+  (local-set-key <span style="color: #ffa07a;">"\C-c\C-r"</span> 'semantic-symref)
+  (local-set-key <span style="color: #ffa07a;">"\C-cr"</span> 'semantic-symref-symbol)
+  )
+(add-hook 'c-mode-common-hook 'alexott/c-mode-cedet-hook)
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #7fffd4;">#include</span> <span style="color: #ffa07a;">&lt;iostream&gt;</span>
+
+<span style="color: #FBDE2D;">using</span> <span style="color: #FBDE2D;">namespace</span> <span style="color: #D8FA3C;">std</span>;
+<span style="color: #FBDE2D;">class</span> <span style="color: #8DA6CE;">Stu</span>
+{
+<span style="color: #FBDE2D;">private</span>:
+<span style="color: #FBDE2D;">public</span>:
+  <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">age</span>;
+  <span style="color: #8DA6CE;">String</span> <span style="color: #40E0D0;">name</span>;
+  <span style="color: #8DA6CE;">void</span> <span style="color: #FF6400;">test</span>();
+};
+
+<span style="color: #FBDE2D;">class</span> <span style="color: #8DA6CE;">P</span>:
+  <span style="color: #FBDE2D;">public</span> <span style="color: #8DA6CE;">Stu</span>
+{
+<span style="color: #FBDE2D;">public</span>:
+  <span style="color: #FF6400;">P</span>();
+  <span style="color: #FBDE2D;">virtual</span> ~<span style="color: #FF6400;">P</span>();
+};
+<span style="color: #8DA6CE;">int</span> <span style="color: #FF6400;">main</span>(<span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">argc</span>, <span style="color: #8DA6CE;">char</span> *<span style="color: #40E0D0;">argv</span>[]){
+  <span style="color: #8DA6CE;">P</span> <span style="color: #40E0D0;">p</span>;
+  cout&lt;&lt;p.name;
+  <span style="color: #FBDE2D;">return</span> 0;
+}
+</pre>
+</div>
+<p>
+比如在这个一个cpp文件中<br />
+我调用semantic-symref-symbol然后输入 "name" 四个字母<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-fundamental-mode">/tmp/a.cpp
+  [+] class Stu {}
+  [+] int main (int argc,char argv[])
+</pre>
+</div>
+<p>
+会产生一个 buffer 内容如上，<br />
+在这个buffer中可以用这些调用<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">Tab         forward-button &#21487;&#22810;&#25353;&#20960;&#27425;tab&#36827;&#34892;&#36339;&#36716;&#65292;
+(           semantic-symref-list-create-macro-on-open-hit &#36825;&#20010;&#19981;&#24120;&#29992; ,&#36319;&#23439;&#24405;&#21046;&#30456;&#20851;
++           semantic-symref-list-toggle-showing  toogle&#23637;&#24320;&#19982;&#21542;
+R           semantic-symref-list-rename-open-hits &#21487;&#20197;&#36827;&#34892;&#25209;&#37327;&#37325;&#21629;&#21517;
+C-c C-e     semantic-symref-list-expand-all &#23637;&#24320;&#25152;&#26377;&#65292;
+C-c C-r     semantic-symref-list-contract-all &#25240;&#21472;&#25152;&#26377;
+Enter       &#22238;&#36710;&#20013;&#36716;&#21040;&#30456;&#24212;&#20195;&#30721;&#22788;
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-fundamental-mode">/tmp/a.cpp
+  [-] class Stu {}
+    String name;
+  [-] int main (int argc,char argv[])
+    cout&lt;&lt;p.name;
+</pre>
+</div>
+<p>
+全部展开之后的样子<br />
+</p>
+<blockquote>
+<p>
+&#x2013; Variable: semantic-symref-tool<br />
+    The value of this variable is a symbol that determines the external<br />
+    symbol reference tool to use.  The default value, `detect', says<br />
+    to look for the best available tool.  Other possible values are<br />
+    `global', `idutils', `cscope', and `grep'.  Note that `grep' is<br />
+    much slower than the others.<br />
+</p>
+</blockquote>
+<p>
+semantic 会使 用     `global', `idutils', `cscope', and `grep'这几个工具来实现<br />
+以上功能， grep是最慢的<br />
+</p>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-08-27</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/cedet/">Cedet</a>, <a href="/tags/emacs/">Emacs</a>, <a href="/tags/c/">C</a>, <a href="/tags/c++/">C++</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/c-c++-cedet-symref.html";
+          var disqus_url = "http://jixiuf.github.io/blog/c-c++-cedet-symref.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>AutoHotKey 几个简单的小例子 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="AutoHotKey 几个简单的小例子" />
+    <meta name="keywords" content="autohotkey windows demo" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>AutoHotKey 几个简单的小例子</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgf4839ef">hotString 别名:</a></li>
+<li><a href="#org9a1e9cb">简单的键绑定</a>
+<ul>
+<li><a href="#org932e025">Ctrl+鼠标中键关闭窗口,</a></li>
+<li><a href="#org182ec15">Win+Esc 关闭当前窗口：</a></li>
+<li><a href="#org4137032">在资源管理器中，一键显隐隐藏文件</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgf4839ef" class="outline-2">
+<h2 id="orgf4839ef">hotString 别名:</h2>
+<div class="outline-text-2" id="text-orgf4839ef">
+<p>
+AutoHotKey 称之为<a href="http://www.autohotkey.com/docs/Hotstrings.htm">hotStrings</a> ,我叫它别名，叫缩写也可以<br />
+比如下面的几个例子<br />
+以第一个<br />
+::btw::by the way<br />
+为例 不论在什么地方，当你输入btw然后回车或空格或TAB之后，它会自动扩展为后<br />
+面的字符串by the way剩下的几个是公司几个同事的Ip地址，我访问他们的共享文件<br />
+时，只需要输入前面几个字母就可以了，而不用输入难记的IP.<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c">::btw::by the way 
+::liuxjs::\\172.20.68.32
+::lihts::\\172.20.68.55   
+::wanglins::\\172.20.68.51
+::wangls::\\172.20.68.51
+::kanban::http:<span style="color: #AEAEAE;">//</span><span style="color: #AEAEAE;">172.20.68.243:8080</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9a1e9cb" class="outline-2">
+<h2 id="org9a1e9cb">简单的键绑定</h2>
+<div class="outline-text-2" id="text-org9a1e9cb">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">"#"</td>
+<td class="org-left">表示Windows键</td>
+</tr>
+
+<tr>
+<td class="org-left">"^"</td>
+<td class="org-left">表示Cntrl键</td>
+</tr>
+
+<tr>
+<td class="org-left">"!"</td>
+<td class="org-left">表示Alt,</td>
+</tr>
+
+<tr>
+<td class="org-left">"+"</td>
+<td class="org-left">表示Shift键。</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+详细内容看官网<a href="http://www.autohotkey.com/docs/Hotkeys.htm">hotkey</a><br />
+</p>
+</div>
+
+<div id="outline-container-org932e025" class="outline-3">
+<h3 id="org932e025">Ctrl+鼠标中键关闭窗口,</h3>
+<div class="outline-text-3" id="text-org932e025">
+<div class="org-src-container">
+<pre class="src src-c">^MButton::
+    SendInput {<span style="color: #8DA6CE;">Alt</span> <span style="color: #40E0D0;">Down</span>}{F4}{<span style="color: #8DA6CE;">Alt</span> <span style="color: #40E0D0;">Up</span>}
+Return
+</pre>
+</div>
+<p>
+你不必把鼠标移动到窗口右上方的关闭按钮，按下鼠标后然后鼠标中键点选窗口，就会<br />
+关闭当前窗口。<br />
+原理很简单，就是简单的模拟你按下Alt+F4,的操作，其实不必像上面那么复杂<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c">^MButton::
+    SendInput !{F4}
+Return
+</pre>
+</div>
+<p>
+例如：我想让<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org182ec15" class="outline-3">
+<h3 id="org182ec15">Win+Esc 关闭当前窗口：</h3>
+<div class="outline-text-3" id="text-org182ec15">
+<div class="org-src-container">
+<pre class="src src-c">;;&#25105;&#20064;&#24815;&#20110;Win+Esc &#20851;&#38381;&#31383;&#21475;,&#32780;&#19981;&#26159;Alt+F4
+<span style="color: #7fffd4;">#Esc</span>::Send !{F4}
+</pre>
+</div>
+<p>
+<a href="http://www.autohotkey.com/docs/commands/Send.htm">Send</a> 和SendInput ,都是模拟用户按下键盘的函数<br />
+进行按键绑定 ,一般是“按键名称”后跟两个冒号，然后是你要进行的操作<br />
+如果只有一句，写在同一行，可以不写"return" ，否则得写return 表示到此结束。<br />
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org4137032" class="outline-3">
+<h3 id="org4137032">在资源管理器中，一键显隐隐藏文件</h3>
+<div class="outline-text-3" id="text-org4137032">
+<div class="org-src-container">
+<pre class="src src-c">;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;&#22312;&#36164;&#28304;&#31649;&#29702;&#22120;&#20013;&#65292;&#22312;&#38544;&#19982;&#19981;&#38544;&#38388;&#20999;&#25442;&#65288;&#38544;&#34255;&#25991;&#20214;&#65289;
+;;<span style="color: #FF6400;">&#20027;&#35201;&#36890;&#36807;&#20462;&#25913;&#27880;&#20876;&#34920;</span> 
+(&#36825;&#19968;&#20010;&#22312;Xp&#19979;&#26377;&#29992;&#65292;&#22312;&#20854;&#20182;&#29256;&#30340;&#21487;&#33021;&#26080;&#29992;,&#36825;&#20010;&#21151;&#33021;&#32593;&#19978;&#27969;&#20256;&#30340;&#24456;&#24191;&#27867;)
+&#36825;&#37324;&#21482;&#26159;&#23450;&#20041;&#19968;&#20010;&#20989;&#25968;&#65292;&#23558;&#23427;&#19982;&#25353;&#38190;&#32465;&#23450;&#21363;&#21487;&#12290;
+toggle_hide_file_in_explore(){
+
+;------------------------------------------------------------------------
+; Show hidden folders and files in <span style="color: #8DA6CE;">Windows</span> <span style="color: #40E0D0;">XP</span>
+;------------------------------------------------------------------------
+; <span style="color: #8DA6CE;">User</span> <span style="color: #40E0D0;">Key</span>: [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+; <span style="color: #8DA6CE;">Value</span> <span style="color: #40E0D0;">Name</span>: Hidden
+; <span style="color: #8DA6CE;">Data</span> <span style="color: #FF6400;">Type</span>: REG_DWORD (<span style="color: #8DA6CE;">DWORD</span> <span style="color: #40E0D0;">Value</span>)
+; <span style="color: #8DA6CE;">Value</span> <span style="color: #FF6400;">Data</span>: (1 = show hidden, 2 = <span style="color: #FBDE2D;">do</span> not show)
+RegRead, ShowHidden_Status, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, Hidden
+<span style="color: #FBDE2D;">if</span> ShowHidden_Status = 2
+  RegWrite, REG_DWORD, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, Hidden, 1
+Else
+  RegWrite, REG_DWORD, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced, Hidden, 2
+WinGetClass, <span style="color: #8DA6CE;">CabinetWClass</span>
+<span style="color: #40E0D0;">PostMessage</span>, 0x111, 28931,,, <span style="color: #8DA6CE;">A</span>
+<span style="color: #40E0D0;">Return</span>
+}
+</pre>
+</div>
+
+<p>
+比如把上面的函数绑定为 Ctrl+Alt+h<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c">^!h::toggle_hide_file_in_explore()
+</pre>
+</div>
+<p>
+但是，上面有一个问题，如果当前窗口不是资源管理器，它依然会调用这个函数，虽<br />
+然不会造成什么恶果，但是原本这个程序的Ctrl+alt+h 也绑定了一个功能的话，<br />
+这个功能就没法被调用到了，因为它被AutoHotKey 拦截到了。解决办法就是只在资源<br />
+管理器中启用这个键绑定。<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c">&#20195;&#30721;&#22914;&#19979;
+<span style="color: #8DA6CE;">SetTitleMatchMode</span> <span style="color: #40E0D0;">Regex</span> ;&#21487;&#20197;&#20351;&#29992;&#27491;&#21017;&#34920;&#36798;&#24335;&#23545;&#26631;&#39064;&#36827;&#34892;&#21305;&#37197;
+<span style="color: #7fffd4;">#IfWinActive</span> ahk_class ExploreWClass|CabinetWClass
+^!h::toggle_hide_file_in_explore()
+<span style="color: #7fffd4;">#IfWinActive</span>
+
+</pre>
+</div>
+<p>
+#IfWinActive ahk<sub>class</sub> ExploreWClass|CabinetWClass<br />
+表示如果当前激活的窗口是"我的电脑"或者"我的文档"的话，就进行下面的操作。如<br />
+果不是，就不进行。#IfWinActive是一个结束标志，跟<br />
+ #IfWinActive ahk<sub>class</sub> ExploreWClass|CabinetWClass 相对应。<br />
+<a href="http://www.autohotkey.com/docs/commands/_IfWinActive.htm">IfWinActive/IfWinExists</a> 内容在这。 它是判断“符合某些条件”的“窗口”是否存有的一个<br />
+函数。它可以通过窗口标题是否含有特定的字符串，来判断。<br />
+如果你用的是英文版的Windows 的话，<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #8DA6CE;">IfWinExist</span> <span style="color: #40E0D0;">Untitled</span> - Notepad
+^h::Send , <span style="color: #40E0D0;">hello</span> 
+<span style="color: #7fffd4;">#IfWinActive</span> 
+</pre>
+</div>
+<p>
+这段代码 当你在新打开的记事本（也就是标题正好是“Untitled - Notepad”的窗<br />
+口，不能多一个字也不能少一个字）按Ctrl+h ,的时候，会在其中插入"hello"这个单<br />
+词。依照正常人的思维，在中文系统里，相应的代码是<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #8DA6CE;">IfWinExist</span> <span style="color: #40E0D0;">&#26080;&#26631;&#39064;</span> - &#35760;&#20107;&#26412;
+^h::Send , <span style="color: #40E0D0;">hello</span> 
+<span style="color: #7fffd4;">#IfWinActive</span> 
+</pre>
+</div>
+<p>
+但是，AutoHotKey 对中文虽然支持，但支持的并不好。比如这个地方，中文就不好用。<br />
+刚才，进行窗口标题匹配的时候，要求整个标题必须完全匹配。，也可以做到只匹配<br />
+标题的一部分，<br />
+通过这个命令<a href="http://www.autohotkey.com/docs/commands/SetTitleMatchMode.htm">SetTitleMatchMode</a> 事先进行设置<br />
+比如:<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c">SetTitleMatchMode 2
+; <span style="color: #D8FA3C;">OR</span>:
+<span style="color: #8DA6CE;">SetTitleMatchMode</span> <span style="color: #40E0D0;">RegEx</span>
+</pre>
+</div>
+<p>
+可以有 1 2 3 Fast Slow ,RegEx ,六种值<br />
+</p>
+<ul class="org-ul">
+<li>1: 表示前端匹配，<br /></li>
+<li>2: 表示部分匹配<br /></li>
+<li>3: 表示完全匹配<br /></li>
+<li>RegEx:表示使用正则表达式进行匹配<br /></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-c">SetTitleMatchMode 2
+IfWinExist  Notepad
+^h::Send , hello 
+<span style="color: #7fffd4;">#IfWinActive</span> 
+</pre>
+</div>
+<p>
+这个只需要标题中含有Notepad这几个字就可以。<br />
+一个窗口，除了可以用标题进行匹配之外，还可以用窗口所具有的其他属性来匹配<br />
+比如window ID ,Window Class  ,进程ID. 最常用的一个就是Window Class<br />
+但是怎样知道一个窗口的window class 是什么呢? AutoHotkey 提供了一个工具<br />
+“Window Spy”,运行这个工具，然后用鼠标点选目标窗口，就会出现这个窗口的一些<br />
+可用信息。包括window class .<br />
+比如这张图是鼠标点选“我的电脑”中地址栏后 的探测结果<img src="/assets/blog/AutoHotKey_1.html/autohotkey_winspy.JPG" alt="autohotkey_winspy.JPG" /><br />
+红色的圈起来的是“我的电脑 ”的window class .<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #7fffd4;">#IfWinActive</span> ahk_class ExploreWClass
+&#21482;&#22312;<span style="color: #ffa07a;">"&#25105;&#30340;&#30005;&#33041;"</span>&#20013;&#36215;&#20316;&#29992;&#30340;&#20195;&#30721;&#20889;&#22312;&#36825;&#37324;
+<span style="color: #7fffd4;">#IfWinActive</span>
+
+SetTitleMatchMode Regex ;<span style="color: #8DA6CE;">&#21487;&#20197;&#20351;&#29992;&#27491;&#21017;&#34920;&#36798;&#24335;&#23545;&#26631;&#39064;&#36827;&#34892;&#21305;&#37197;</span>
+<span style="color: #7fffd4;">#IfWinActive</span> ahk_class ExploreWClass|CabinetWClass
+  <span style="color: #40E0D0;">&#22312;</span><span style="color: #ffa07a;">"&#25105;&#30340;&#30005;&#33041;"</span> &#26377;&#8220;&#25105;&#30340;&#25991;&#26723;&#8221; &#20013;&#36215;&#20316;&#29992;&#30340;&#20195;&#30721;&#20889;&#22312;&#36825;&#37324;
+<span style="color: #7fffd4;">#IfWinActive</span> 
+
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-06-15</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/autohotkey/">AutoHotKey</a>, <a href="/tags/windows/">Windows</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/AutoHotKey_1.html";
+          var disqus_url = "http://jixiuf.github.io/blog/AutoHotKey_1.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

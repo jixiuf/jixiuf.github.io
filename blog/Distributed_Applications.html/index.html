@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>Distributed_Applications.org - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="Distributed_Applications.org" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>Distributed_Applications.org</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org12e8299">distributed application 某节点挂了后，此种application 会在另外一个节点上启动</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org12e8299" class="outline-2">
+<h2 id="org12e8299">distributed application 某节点挂了后，此种application 会在另外一个节点上启动</h2>
+<div class="outline-text-2" id="text-org12e8299">
+<p>
+<a href="http://www.erlang.org/doc/design_principles/distributed_applications.html">http://www.erlang.org/doc/design_principles/distributed_applications.html</a><br />
+erl -name c@l92.168.0.44 -config c.config<br />
+erl -name c2@l92.168.0.44 -config c2.config<br />
+erl -name c3@l92.168.0.44 -config c3.config<br />
+erl -name emacs@l92.168.0.44 -config master.config<br />
+</p>
+<blockquote>
+<p>
+distributed = [{Application, [Timeout,] NodeDesc}]<br />
+					NodeDesc = [Node | {Node,&#x2026;,Node}]<br />
+</p>
+</blockquote>
+<p>
+NodeDesc 表示此种Application可以在哪些节点上启动，优先级按NodeDesc[]中出现的顺序而定，但在{} 中的节点优先级相同<br />
+比如:<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-erlang">{distributed, [{game_log_server, 5000, ['emacs@192.168.0.44', {'c@192.168.0.44','c2@192.168.0.44','c3@192.168.0.44' }]}]}
+</pre>
+</div>
+<p>
+game_log_server 会优先在'emacs@192.168.0.44'上启动，当'emacs@192.168.0.44'当掉后，会从{'c@192.168.0.44','c2@192.168.0.44','c3@192.168.0.44' }<br />
+中选择一个节点，在此节点上启动game_log_server application<br />
+Timeout<br />
+ 表示等待多少ms 才决定在其他节点上来启动此 application(即当前节点或许会在Timeout时间内重启成功。)<br />
+</p>
+
+<blockquote>
+<p>
+sync_nodes_mandatory = [Node]<br />
+    Specifies which other nodes must be started (within the timeout specified by sync_nodes_timeout.<br />
+sync_nodes_optional = [Node]<br />
+    Specifies which other nodes can be started (within the timeout specified by sync_nodes_timeout.<br />
+sync_nodes_timeout = integer() | infinity<br />
+    Specifies how many milliseconds to wait for the other nodes to start.<br />
+</p>
+</blockquote>
+
+<p>
+When started, the node will wait for all nodes specified by sync_nodes_mandatory and sync_nodes_optional to come up<br />
+在启动当前节点的过程中，会等待 sync_nodes_mandatory 与 sync_nodes_optional属性中指定的节点启动后才启动,如果sync_nodes_mandatory<br />
+中有任一节点启动失败，则此停止此节点的启动<br />
+所有这些节点中<br />
+distributed and sync_nodes_timeout,两属性的值必须相同.<br />
+当所有distributed属性中指定的节点启动成功后，此 application会首先在emacs@192.168.0.44上启动<br />
+application:start(Application)<br />
+Module:start(normal, StartArgs)<br />
+当 emacs@192.168.0.44 当掉后,首先会尝试在等5000ms 让 emacs@192.168.0.44重启。<br />
+application会在新的节点上以<br />
+Module:start(normal, StartArgs)的方式重启，<br />
+例外是如果此 application 定义的tart_phases(<a href="http://www.erlang.org/doc/design_principles/included_applications.html">http://www.erlang.org/doc/design_principles/included_applications.html</a>)<br />
+则 Module:start({failover, Node}, StartArgs)<br />
+</p>
+
+<p>
+如果 emacs@192.168.0.44重启了。则此时 Takeover 事件会发生，即此 application会在 emacs@192.168.0.44 上重启，而 在old node<br />
+上stop<br />
+Module:start({takeover, Node}, StartArgs)<br />
+</p>
+</div>
+<ul class="org-ul">
+<li><a id="org27487bf"></a>master.config<br />
+<div class="outline-text-4" id="text-org27487bf">
+<div class="org-src-container">
+<pre class="src src-erlang">[{kernel,
+  [{distributed, [{game_log_server, 5000, ['emacs@192.168.0.44', {'c@192.168.0.44','c2@192.168.0.44' }]}]},
+   {sync_nodes_mandatory, ['c@192.168.0.44','c2@192.168.0.44' ]}, % mandatory托管
+   {sync_nodes_timeout, 5000}
+  ]
+ }
+].
+</pre>
+</div>
+</div>
+</li>
+<li><a id="orgf6bec1b"></a>c.config<br />
+<div class="outline-text-4" id="text-orgf6bec1b">
+<div class="org-src-container">
+<pre class="src src-erlang">%% http://www.erlang.org/doc/design_principles/distributed_applications.html
+%% erl -name emacs@l92.168.0.44 -config master.config
+%% erl -name c@l92.168.0.44 -config c.config
+%% erl -name c2@l92.168.0.44 -config c2.config
+%% erl -name c3@l92.168.0.44 -config c3.config
+[{kernel,
+  [{distributed, [{game_log_server, 5000, ['emacs@192.168.0.44', {'c@192.168.0.44','c2@192.168.0.44' }]}]},
+   {sync_nodes_mandatory, ['emacs@192.168.0.44','c2@192.168.0.44' ]},
+   {sync_nodes_timeout, 5000}
+  ]
+ }
+].
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-erlang">%% http://www.erlang.org/doc/design_principles/distributed_applications.html
+%% erl -name emacs@l92.168.0.44 -config master.config
+%% erl -name c@l92.168.0.44 -config c.config
+%% erl -name c2@l92.168.0.44 -config c2.config
+%% erl -name c3@l92.168.0.44 -config c3.config
+[{kernel,
+  [{distributed, [{game_log_server, 5000, ['emacs@192.168.0.44', {'c@192.168.0.44','c2@192.168.0.44' }]}]},
+   {sync_nodes_mandatory, ['c@192.168.0.44','emacs@192.168.0.44' ]},
+   {sync_nodes_timeout, 5000}
+  ]
+ }
+].
+</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-04-06</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/erlang/">Erlang</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/Distributed_Applications.html";
+          var disqus_url = "http://jixiuf.github.io/blog/Distributed_Applications.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

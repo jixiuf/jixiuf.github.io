@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>mochiweb 的使用 及 可开tcp连接数的(http长连接) 测试 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>mochiweb 的使用 及 可开tcp连接数的(http长连接) 测试</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orga2ce72f">1. 测试代码位置</a></li>
+<li><a href="#org4675c27">2. mochiweb 的使用</a></li>
+<li><a href="#org3a81ddf">3. 可开tcp连接数的(http长连接) 测试</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orga2ce72f" class="outline-2">
+<h2 id="orga2ce72f"><span class="section-number-2">1</span> 测试代码位置</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+<a href="https://github.com/jixiuf/helloerlang/tree/master/mochiweb_test">https://github.com/jixiuf/helloerlang/tree/master/mochiweb_test</a>
+</p>
+</div>
+</div>
+<div id="outline-container-org4675c27" class="outline-2">
+<h2 id="org4675c27"><span class="section-number-2">2</span> mochiweb 的使用</h2>
+<div class="outline-text-2" id="text-2">
+<ol class="org-ol">
+<li><p>
+先得到源码
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">git clone git://github.com/mochi/mochiweb.git
+</pre>
+</div></li>
+<li>在根目录下make 进行编译</li>
+<li><div class="org-src-container">
+<pre class="src src-sh">make app <span style="color: #40E0D0;">PROJECT</span>=mochiweb_test
+</pre>
+</div>
+<p>
+然后在mochiweb 同级目录下会生成mochiweb<sub>test目录</sub>
+在这个目录下，运行make
+对这个项目进行一定的准备工作，比如得到它depend 的项目mochiweb(会上网继续下载mochiweb)
+启动mochiweb ,
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">./start-dev.sh
+</pre>
+</div>
+<p>
+然后在浏览器里访问<a href="http://localhost:8080/">http://localhost:8080/</a>
+</p></li>
+</ol>
+<p>
+mochiweb<sub>test</sub><sub>web.erl</sub> 模块是处理具体业务 的模块。
+比如:
+</p>
+<div class="org-src-container">
+<pre class="src src-erlang">....
+		case Path of
+		    "time" -&gt;%% 新增了 /timer 这个 URL，它是一个 HTTP Chunked 的例子
+		    Response = Req:ok({"text/plain", chunked}),
+		    time(Response);
+		    _ -&gt;
+			Req:serve_file(Path, DocRoot)
+		end;
+...
+
+
+%% 打印当前时间，间隔一秒，再在已经打开的 http 连接之上，再次打印，这也就是所谓 HTTP长连接/ServerPush 的一种
+time(Resp)-&gt;
+    Resp:write_chunk(io_lib:format("The time is: ~p~n",
+				   [calendar:local_time()])),
+    timer:sleep(1000),
+    time(Resp)        .
+</pre>
+</div>
+<p>
+  当访问<a href="http://localhost:8080/time">http://localhost:8080/time</a> 时,调用 time(Resp )方法进行处理,变是一种长
+  连接
+在对 src/目录下的erl 文件进行编辑后，运行make 命令，在
+        ./start-dev.sh启动模式下，会自动加载编译的文件，只需要在浏览器中刷新即
+        可
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org3a81ddf" class="outline-2">
+<h2 id="org3a81ddf"><span class="section-number-2">3</span> 可开tcp连接数的(http长连接) 测试</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+参考了<a href="http://www.metabrew.com/article/a-million-user-comet-application-with-mochiweb-part-1">http://www.metabrew.com/article/a-million-user-comet-application-with-mochiweb-part-1</a>
+tcp<sub>load</sub><sub>test.erl</sub>
+</p>
+<div class="org-src-container">
+<pre class="src src-erlang">%% tcp_load_test:start(10000).
+%%或
+%% tcp_load_test:start("http://localhost:8080/time",10000).
+%% 实是际访问
+%% http://localhost:8080/time?id=1
+%% ...
+%% http://localhost:8080/time?id=10000
+</pre>
+</div>
+<p>
+结果似乎是连接达到4000的时候，cpu 占用率已经极大，响应变慢
+达到4900时，测试用的客户端，因
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">eheap_alloc: Cannot allocate 583848200 bytes of memory (of type <span style="color: #ffa07a;">"heap"</span>).
+</pre>
+</div>
+<p>
+  退出,
+  客户端的cpu 似乎比mochiweb服务器的占用率大，故，若非单机测试，结果或许会好一
+  些.
+结果以下面格式在客户端显示出来
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"> {Active, Closed, Chunks}
+{&#27963;&#21160;&#36830;&#25509;&#25968;&#65292;&#20851;&#38381;&#30340;&#36830;&#25509;&#25968;(&#27979;&#35797;&#36807;&#31243;&#20013;&#22987;&#32456;&#20026;0),&#30001;&#26381;&#21153;&#31471;&#31471;&#21457;&#36865;&#30340;chunks&#24635;&#25968;}
+
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-06-26</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/erlang/">Erlang</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/mochiweb_http_load.html";
+          var disqus_url = "http://jixiuf.github.io/blog/mochiweb_http_load.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; qq &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

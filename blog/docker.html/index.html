@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>docker学习过程 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="docker学习过程" />
+    <meta name="keywords" content="docker Centos" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>docker学习过程</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orga3d6edd">link</a></li>
+<li><a href="#org2d94002">安装</a>
+<ul>
+<li><a href="#orga53196a">安装特定的版本</a></li>
+</ul>
+</li>
+<li><a href="#orgdc8977c">pull 镜像</a></li>
+<li><a href="#orgc6bd524">列出镜像 docker images</a></li>
+<li><a href="#org349edd9">删除镜像 docker rmi imageId</a></li>
+<li><a href="#orgcf2f574">创建镜像 docker commit</a></li>
+<li><a href="#orgf63bef1">镜像的备份 恢复(save and load)</a></li>
+<li><a href="#org2548a1d">容器的备份 恢复 (export and import)</a></li>
+<li><a href="#orgb90c93b">save 与export 的区别</a></li>
+<li><a href="#org6a59122">DockerFile</a></li>
+<li><a href="#org48743e6">把容器放到后面运行 attach</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orga3d6edd" class="outline-2">
+<h2 id="orga3d6edd">link</h2>
+<div class="outline-text-2" id="text-orga3d6edd">
+<p>
+<a href="http://dockerpool.com/static/books/docker_practice/basic_concept/repository.html">教程</a><br />
+<a href="http://www.oschina.net/translate/why-you-dont-need-to-run-sshd-in-docker">为什么不需要在 Docker 容器中运行 sshd</a><br />
+<a href="http://blog.csdn.net/u010397369/article/details/41045251">如何进入Docker容器</a><br />
+</p>
+</div>
+</div>
+<div id="outline-container-org2d94002" class="outline-2">
+<h2 id="org2d94002">安装</h2>
+<div class="outline-text-2" id="text-org2d94002">
+<p>
+centos 7 下的安装<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">sudo yum install docker
+sudo service start docker
+sudo chkconfig docker on
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#36825;&#19968;&#37096; &#20250;&#20174;&#32593;&#19978; pull hello-world &#36825;&#20010;&#38236;&#20687;</span>
+sudo docker run hello-world
+</pre>
+</div>
+</div>
+<div id="outline-container-orga53196a" class="outline-3">
+<h3 id="orga53196a">安装特定的版本</h3>
+<div class="outline-text-3" id="text-orga53196a">
+<p>
+centos8 默认安装的docker是1.8 版本 ，<br />
+经常出现一个bug (Layer already being pulled by another client)<br />
+<a href="https://github.com/docker/docker/releases">https://github.com/docker/docker/releases</a><br />
+比如以docker1.9.1 为例<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">wget https://get.docker.com/builds/Linux/x86_64/docker-1.9.1
+sudo mv docker-1.9.1 /usr/local/bin/docker
+ <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">centos7 &#19978; &#20316;&#20026;&#26381;&#21153;&#21551;&#21160;</span>
+wget https://github.com/docker/docker/raw/master/contrib/init/systemd/docker.service
+wget https://raw.githubusercontent.com/docker/docker/master/contrib/init/systemd/docker.socket
+sudo mv docker.socket /etc/systemd/system
+sudo mv docker.service  /etc/systemd/system
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgdc8977c" class="outline-2">
+<h2 id="orgdc8977c">pull 镜像</h2>
+<div class="outline-text-2" id="text-orgdc8977c">
+<p>
+理论上:<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">sudo docker pull centos
+sudo docker pull ubuntu:12.04
+&#22914;&#26524;&#33021;&#19979;&#36733;&#19979;&#26469; &#21017;&#29992;&#19979;&#38754;&#36825;&#21477;&#23601;&#21487;run &#20043;
+docker run -t -i centos /bin/bash
+</pre>
+</div>
+<p>
+网速的原因，下载太慢。所以国内 使用如下方法<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">sudo docker pull dl.dockerpool.com:5000/ubuntu:12.04
+sudo docker pull dl.dockerpool.com:5000/centos
+</pre>
+</div>
+<p>
+centos7 上 会报类似如下错误<br />
+</p>
+<blockquote>
+<p>
+Error response from daemon: invalid registry endpoint <a href="https://dl.dockerpool.com:5000/v0/">https://dl.dockerpool.com:5000/v0/</a>: unable to ping registry endpoint <a href="https://dl.dockerpool.com:5000/v0/">https://dl.dockerpool.com:5000/v0/</a><br />
+v2 ping attempt failed with error: Get <a href="https://dl.dockerpool.com:5000/v2/">https://dl.dockerpool.com:5000/v2/</a>: tls: oversized record received with length 28012<br />
+v1 ping attempt failed with error: Get <a href="https://dl.dockerpool.com:5000/v1/_ping">https://dl.dockerpool.com:5000/v1/_ping</a>: tls: oversized record received with length 28012. If this private registry supports only HTTP or HTTPS with an unknown CA certificate, please add `&#x2013;insecure-registry dl.dockerpool.com:5000` to the daemon's arguments. In the case of HTTPS, if you have access to the registry's CA certificate, no need for the flag; simply place the CA certificate at /etc/docker/certs.d/dl.dockerpool.com:5000/ca.crt IT<br />
+</p>
+</blockquote>
+<p>
+解决办法<br />
+修改 /etc/sysconfig/docker<br />
+</p>
+<blockquote>
+<p>
+OPTIONS='&#x2013;selinux-enabled'<br />
+</p>
+</blockquote>
+<p>
+为<br />
+</p>
+<blockquote>
+<p>
+OPTIONS='&#x2013;selinux-enabled &#x2013;insecure-registry dl.dockerpool.com:5000'<br />
+</p>
+</blockquote>
+<p>
+重启<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">systemctl restart docker.service
+</pre>
+</div>
+<p>
+下载完毕后需要这样启动<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">docker run -t -i dl.dockerpool.com:5000/centos /bin/bash
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc6bd524" class="outline-2">
+<h2 id="orgc6bd524">列出镜像 docker images</h2>
+<div class="outline-text-2" id="text-orgc6bd524">
+<blockquote>
+<p>
+root@localhost ~ # docker images<br />
+REPOSITORY                      TAG                 IMAGE ID            CREATED             VIRTUAL SIZE<br />
+docker.io/centos                latest              60e65a8e4030        3 weeks ago         196.6 MB<br />
+docker.io/hello-world           latest              975b84d108f1        3 months ago        960 B<br />
+dl.dockerpool.com:5000/centos   latest              87e5b6b3ccc1        15 months ago       224 MB<br />
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-org349edd9" class="outline-2">
+<h2 id="org349edd9">删除镜像 docker rmi imageId</h2>
+<div class="outline-text-2" id="text-org349edd9">
+<div class="org-src-container">
+<pre class="src src-sh">docker rmi imageId
+docker rmi --force=true imageId
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgcf2f574" class="outline-2">
+<h2 id="orgcf2f574">创建镜像 docker commit</h2>
+<div class="outline-text-2" id="text-orgcf2f574">
+<div class="org-src-container">
+<pre class="src src-sh">docker run -t -i centos /bin/bash
+</pre>
+</div>
+<blockquote>
+<p>
+root@localhost ~ #<br />
+[root@c00aeccfb3a6 /]#<br />
+</p>
+</blockquote>
+<p>
+官网上运行后的效果是这样的 提示符 @后面的是CONTAINER ID<br />
+你会发现这个CONTAINER Id 跟 docker images 列出的 docker.io/centos 的imageId 不一样<br />
+你 run 出来之后 对其进行的修改 可以用这个CONTAINER Id 来标志出来<br />
+比如我 yum install zsh 之后<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">root@localhost ~ <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">docker commit -m "install zsh" -p -a "jixiuf" c00aeccfb3a6 docker.io/centos:with-zsh</span>
+ab3fb905f9cfb1de43519cb5975e582761ce4a0a83facd96c786a525a40b2da4
+</pre>
+</div>
+<p>
+-p 的意思是如果此container 正在运行中在commit 的过程中会pause 之， 使之暂停<br />
+你会发现 docker images 后 会多出个 docker.io/centos with-zsh<br />
+</p>
+<blockquote>
+<p>
+root@localhost ~ # docker images<br />
+REPOSITORY                      TAG                 IMAGE ID            CREATED             VIRTUAL SIZE<br />
+docker.io/centos                with-zsh            ab3fb905f9cf        28 seconds ago      261.7 MB<br />
+docker.io/centos                latest              60e65a8e4030        3 weeks ago         196.6 MB<br />
+docker.io/hello-world           latest              975b84d108f1        3 months ago        960 B<br />
+dl.dockerpool.com:5000/centos   latest              87e5b6b3ccc1        15 months ago       224 MB<br />
+</p>
+</blockquote>
+<p>
+#+END_HTML<br />
+随后就可以这样使用with-zsh 这个镜像<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">docker run -t -i centos:with-zsh
+</pre>
+</div>
+
+<p>
+查看所有的容器列表的命令是：docker ps -a ，显示最近一个容器的命令是：docker ps -l，<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">deployer@bogon ~ $ docker ps -l
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                     PORTS               NAMES
+2ddd2f107676        centos              <span style="color: #ffa07a;">"bash"</span>              14 minutes ago      Exited (0) 3 seconds ago                       gigantic_meninsky
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf63bef1" class="outline-2">
+<h2 id="orgf63bef1">镜像的备份 恢复(save and load)</h2>
+<div class="outline-text-2" id="text-orgf63bef1">
+<div class="org-src-container">
+<pre class="src src-sh">docker save -o image.tar imageid
+docker save imageid|gzip &gt;image.tar.gz
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">docker load -i image.tar
+cat image.tar.gz|gunzip|docker load
+</pre>
+</div>
+<p>
+load 完之后 docker images<br />
+会发现多出一个无名无姓的imageId<br />
+需要用docker tag 为之打标签<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">docker tag iamgeId golang:1.5
+docker tag iamgeId debian:latest
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org2548a1d" class="outline-2">
+<h2 id="org2548a1d">容器的备份 恢复 (export and import)</h2>
+<div class="outline-text-2" id="text-org2548a1d">
+<div class="org-src-container">
+<pre class="src src-sh">docker export &lt;CONTAINER ID&gt; &gt; /home/export.tar
+cat /home/export.tar | sudo docker import - reposName:latest
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb90c93b" class="outline-2">
+<h2 id="orgb90c93b">save 与export 的区别</h2>
+<div class="outline-text-2" id="text-orgb90c93b">
+<p>
+导出后再导入(exported-imported)<br />
+的镜像会丢失所有的历史，而保存后再加载（saveed-loaded）的镜像没有丢失<br />
+历史和层(layer)。这意味着使用导出后再导入的方式，你将无法回滚到之前的<br />
+层(layer)，同时，使用保存后再加载的方式持久化整个镜像，就可以做到层回<br />
+滚（可以执行docker tag &lt;LAYER ID&gt; &lt;IMAGE NAME&gt;来回滚之前的层）。<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6a59122" class="outline-2">
+<h2 id="org6a59122">DockerFile</h2>
+<div class="outline-text-2" id="text-org6a59122">
+<div class="org-src-container">
+<pre class="src src-sh">docker build  -t tagname .
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#19981;&#29983;&#25104;&#38236;&#20687;&#65292;&#21482;&#26681;&#25454;imageid &#26469;&#25214;&#23545;&#24212;&#30340;&#38236;&#20687;</span>
+docker build  .
+docker build --rm=true .
+</pre>
+</div>
+<p>
+Dockerfile example:<br />
+</p>
+<blockquote>
+<p>
+FROM docker.io/centos:latest<br />
+</p>
+
+<p>
+Run yum install -y go<br />
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-org48743e6" class="outline-2">
+<h2 id="org48743e6">把容器放到后面运行 attach</h2>
+<div class="outline-text-2" id="text-org48743e6">
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#36825;&#37324;&#21152;&#20102;-d &#25918;&#21040;&#21518;&#21488;&#36816;&#34892;&#65292; &#21516;&#26102;&#21152;-t -i &#21542;&#21017;bash &#20250;&#31435;&#21363;&#36864;&#20986;</span>
+sudo docker run -d  -ti --name=mylinux debian:jessie bash
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">sudo docker attach mylinux
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#20284;&#20046;&#35201;&#31561;&#20960;&#31186;&#38047;&#25165;&#33021;&#31561;&#21040;&#25552;&#31034;&#31526;&#20986;&#29616;</span>
+</pre>
+</div>
+<p>
+attach 上之后 Ctrl-p Ctrl-q deattach<br />
+</p>
+
+<p>
+docker run -t -i → can be detached with ^P^Q and reattached with docker attach<br />
+docker run -i → cannot be detached with ^P^Q; will disrupt stdin<br />
+docker run → cannot be detached with ^P^Q; can SIGKILL client; can reattach with docker attach<br />
+对于 docker run 未加 -t -i 的 可以用 kill -9 pid 一定要加-9<br />
+或者 启动attach 时加参数   &#x2013;sig-proxy=false 然后直接用Ctrl-c 退出就可以了<br />
+意思是 不会把 给attach 进程的信息 发给 daemon 的进程<br />
+如<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">d attach --sig-proxy=false centos
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2016-01-19</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/docker/">Docker</a>, <a href="/tags/linux/">Linux</a>, <a href="/tags/centos/">Centos</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/docker.html";
+          var disqus_url = "http://jixiuf.github.io/blog/docker.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

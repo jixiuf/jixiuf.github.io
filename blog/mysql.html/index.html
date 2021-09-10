@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>mysql拾 遗 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="mysql.org" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>mysql拾 遗</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org88b005b">MyISAM</a></li>
+<li><a href="#orgdc81702">Archive</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org88b005b" class="outline-2">
+<h2 id="org88b005b">MyISAM</h2>
+<div class="outline-text-2" id="text-org88b005b">
+<p>
+MyISAM表如果在创建选项里指定为DELAY_KEY_WRITE的话，它不会立即将改变的索引数据写<br />
+到硬盘，而是将这个改变缓存到内存中。当表被关闭或者缓冲区需要修整时，它会将索引<br />
+一次性写到硬盘。这个特性可以在修改很频繁的表上极大的提高性能。但是当一个服务器<br />
+或者操作系统崩溃时，这些索引肯定会被损坏，当然也需要修复。你可通过写一个脚本来<br />
+在每次重启服务器前先用myisamchk来检查一下，或者你也可以使用自动修复选项。(即使<br />
+你不使用DELAY_KEY_WRITE，这些安全性保障也是一个很好的习惯。)你既可以对整个数据<br />
+库设置延迟的索引更新，也可以只针对某些表来进行设置。<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgdc81702" class="outline-2">
+<h2 id="orgdc81702">Archive</h2>
+<div class="outline-text-2" id="text-orgdc81702">
+<p>
+Archive引擎只支持INSERT和SELECT语句，并且它不支持索引。它比MyISAM使用更少的磁<br />
+盘IO，因此它会在写操作之前将数据缓存并利用zlib来压缩。而SELECT查询操作则需要一<br />
+个全表扫描。因此Archive表是日志和数据采集的理想选择，在这些应用中，一般分析是需<br />
+要扫描整张表或者需要在一个备份主机上进行快速的INSERT操作。备份从机上可以为相同<br />
+的表选用一个不同的存储引擎，这意味着从机上的表可以有索引，以达到快速分析的目的<br />
+</p>
+
+<p>
+Archive引擎支持行级别的锁以及一个特殊的缓冲系统以期达到高并发的写操作。它在查<br />
+询时会将整个表扫描一次。它同时也会将批量写操作屏蔽直到全部的写操作完成。这些<br />
+特性模拟了事务和MVCC行为的一些方面，但是Archive引擎并不是一个事务型引擎。它只<br />
+是一个优化了插入操作以及压缩了数据的引擎。<br />
+</p>
+
+
+<p>
+  并发性需求的最好的衡量标准是你的工作量。如果你只量需要插入和写操作的并发性的<br />
+话，不管你相信不相信，MyISAM是一个很不错的选择。如果你需要许多操作混合执行而互<br />
+不影响的话，一个支持行锁的引擎将会是比较不错的选择。<br />
+</p>
+
+<p>
+假如你想要用MysQL来实时记录从呼叫中心的电话来的每一个电话的日志记录。或者你可能<br />
+已经为Apache安装了mod_log_sql模块，这样你就可以将网站所有的访问记录到数据库中。<br />
+在这样的一个应用中，速度可能是最重要的目标，你不想要数据库成为瓶颈。MyISAM和<br />
+Archive存储引擎将会是很好的选择，因为它们只有很低的开销并且可以一秒钟插入成千上<br />
+万条记录。PBXT存储引擎也可能特别适合这个目的。<br />
+</p>
+
+<p>
+然而，如果你决定对已经记录的数据进行分析总结，那么事情就开始变得有趣了。根据<br />
+你所使用的查询的不同，有很大的可能性因为数据采集的影响而使得整个插入过程变慢。<br />
+这个时候你应该怎么办？<br />
+</p>
+
+<p>
+解决方案是利用MySQL的内置复制特性来将数据克隆到第二台服务器（从机）上，然后在从<br />
+机上运行对于对于时间和CPU要求比较高的查询。这使得主机只是插入操作，并且可以使<br />
+你在从机上运行任何你需要的查询而不必担心对日志实时性的影响<br />
+</p>
+
+<p>
+你也可以将查询分成开销很小的查询来完成任务，但是不要指望这个策略能一直有效，<br />
+因为你的程序的规模一直在增长。<br />
+</p>
+
+<p>
+  另外的一个选择是使用Merge表。Merge表不会总是将日志记录到同一个表，可以通过调<br />
+整应用使得日志按照需求记录到按年、月、日分表的表中去，比如web_log_2009_01或者<br />
+web_log_2009_01_01。然后定义一个Merge表，它包含了你想要进行综合分析的数据。如果<br />
+你需要分析一天或者一周的数据，那么这个策略可以直接使用，而你只需要创建分得更细<br />
+的表，比如web_logs_2008_01_01。你的应用将日志插入到一张表中，而你而在其他的表上<br />
+进行查询。<br />
+</p>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-04-22</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/mysql/">Mysql</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/mysql.html";
+          var disqus_url = "http://jixiuf.github.io/blog/mysql.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

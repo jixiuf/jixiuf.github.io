@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>linux IO性能测试     - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="llinux_benchum.org" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>linux IO性能测试    </h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org7297fd9">1. 使用fio进行I/O性能测试</a>
+<ul>
+<li><a href="#org099252b">1.1. fio的命令行参数</a>
+<ul>
+<li><a href="#org6608d14">1.1.1. 和异步I/O相关的几个参数：</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org0e494d5">2. 描述IO性能的几个参数</a>
+<ul>
+<li><a href="#org5866136">2.1. fio 测试例子</a></li>
+</ul>
+</li>
+<li><a href="#org012168c">3. link</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org7297fd9" class="outline-2">
+<h2 id="org7297fd9"><span class="section-number-2">1</span> 使用fio进行I/O性能测试</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+yum install libaio libaio-devel fio
+</p>
+
+<p>
+fio是一个非常灵活的I/O测试工具,支持多线程或进程模拟等I/O操作来进行压
+力测试，project官网为fio
+</p>
+
+<p>
+应用使用IO通常有二种方式：同步和异步。 同步的IO一次只能发出一个IO请
+求，等待内核完成才返回，这样对于单个线程iodepth总是小于1，但是可以透
+过多个线程并发执行来解决，通常我们会用16-32根线程同时工作把iodepth塞
+满。 异步的话就是用类似libaio这样的linux native aio一次提交一批，然
+后等待一批的完成，减少交互的次数，会更有效率
+</p>
+</div>
+
+<div id="outline-container-org099252b" class="outline-3">
+<h3 id="org099252b"><span class="section-number-3">1.1</span> fio的命令行参数</h3>
+<div class="outline-text-3" id="text-1-1">
+<ol class="org-ol">
+<li>-name=hello
+运行的job名。例如–name=randread01 这个随便取，</li>
+<li>-filename=/var/data01/test<sub>io</sub>
+测试过程使用的文件，一般指向一个不存在的文件，fio会以随机的数据生成
+这个文件。也可以直接指向块设备文件。</li>
+<li>readwrite=str或rw=str 指定测试 各种读写性能， 如
+如-rw=randread,
+Type of I/O pattern.  Accepted values are:           
+read   Sequential reads. 序列读
+write  Sequential writes.序列写
+randread    Random reads. 随机读
+randwrite    Random writes. 随机写
+rw, readwrite    Mixed sequential reads and writes. 混合的序列读
+randrw Mixed random reads and writes. 混合的随机读写</li>
+
+<li>rwmixwrite=30,当rw=randrw,或rw=readwrite时
+在混合读写的模式下，写占30%</li>
+
+<li>-direct=true 或-direct=1(centos 我试了-direct=true不行， )
+测试过程跳过系统buffer，默认为direct=false。测试过程绕过机器自带
+的buffer。使测试结果更真实。</li>
+<li>-bs=4k
+每次I/O操作的块大小，默认为bs=4K。</li>
+<li>-bsrange=4k-16k 同上，每次提交的block size，例如bsrange=4k-16k 指
+定一个范转</li>
+<li>-runtime =300 测试时间（秒）</li>
+<li>-size=5G 表示io达到5G才结束测试 ，如果有其他测试条件限制，则可能
+达不到这个大小， 比如-runtime=10,可能测试10s之后读取的大小并没达
+到5G就结束了</li>
+<li>numjobs =8 并发执行的线程数</li>
+
+<li><p>
+-ioengine=libaio   指定使用的engine,默认 -ioengine=sync
+</p>
+
+<p>
+FIO是测试IOPS的非常好的工具，用来对硬件进行压力测试和验证，支持
+13种不同的I/O引擎，包括:sync,mmap, libaio, posixaio, SG v3,
+splice, null, network, syslet, guasi, solarisaio 等等。
+</p></li>
+
+<li>group<sub>reporting</sub> 显示进程汇总结果</li>
+<li>zero<sub>buffer</sub> 用0初始化系统buffer</li>
+<li>lockmem=4g 限定使用4g的内存进行测试</li>
+</ol>
+</div>
+<div id="outline-container-org6608d14" class="outline-4">
+<h4 id="org6608d14"><span class="section-number-4">1.1.1</span> 和异步I/O相关的几个参数：</h4>
+<div class="outline-text-4" id="text-1-1-1">
+<ol class="org-ol">
+<li>iodepth<sub>batch</sub>=4
+Number of I/Os to submit at once. Default: iodepth.</li>
+<li>iodepth<sub>batch</sub><sub>complete</sub>=int
+This defines how many pieces of IO to retrieve at once. It defaults
+to 1 which means that we’ll ask for a minimum of 1 IO in the
+retrieval process from the kernel. The IO retrieval will go on
+until we hit the limit set by iodepth<sub>low</sub>. If this variable is set
+to 0, then fio will always check for completed events before
+queuing more IO. This helps reduce IO latency, at the cost of more
+retrieval system calls.</li>
+<li>iodepth<sub>low</sub>=int
+Low watermark indicating when to start filling the queue again. Default: iodepth.</li>
+<li>iodepth=4 Number of I/O units to keep in flight against the file.
+libaio 等异步IO engine中，会调用io<sub>setup准备可以一次提交iodepth个IO</sub>
+的上下文，同时申请个io请求队列用于保持IO。 在压测进行的时候，系统会
+生成特定的IO请求，往io请求队列里面扔，当队列里面的IO个数达到
+iodepth<sub>batch值的时候</sub>，就调用io<sub>submit批次提交请求</sub>，然后开始调用
+io<sub>getevents开始收割已经完成的IO</sub>。 每次收割多少呢？由于收割的时候，
+超时时间设置为0，所以有多少已完成就算多少，最多可以收割
+iodepth<sub>batch</sub><sub>complete值个</sub>。随着收割，IO队列里面的IO数就少了，那么
+需要补充新的IO。 什么时候补充呢？当IO数目降到iodepth<sub>low值的时候</sub>，
+就重新填充，保证OS可以看到至少iodepth<sub>low数目的io在电梯口排队着</sub>。
+（摘自参考3)</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org0e494d5" class="outline-2">
+<h2 id="org0e494d5"><span class="section-number-2">2</span> 描述IO性能的几个参数</h2>
+<div class="outline-text-2" id="text-2">
+<ol class="org-ol">
+<li>IOPS (Input/Output Operations Per Second)，
+ 即每秒进行读写（I/O）操作的次数，多用于数据库等场合，衡量随机访问的性能。
+IOPS是指存储每秒可接受多少次主机发出的访问，主机的一次IO需要多次访问存储才可以完成。</li>
+<li>bw 传输带宽。bw=113672KB/s,</li>
+</ol>
+</div>
+
+
+<div id="outline-container-org5866136" class="outline-3">
+<h3 id="org5866136"><span class="section-number-3">2.1</span> fio 测试例子</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+测试序列读， 每次读取大小4k的块，默认的ioengine=sync,运行60s(runtime),-direct=1,跳过buffer
+下面的测试的结束 每秒读取速度bw=112297KB/s，,112297KB/s*60s=6820320 KB=6660.7MB
+其中iops=28074
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">        fio -filename=/tmp/hello -direct=1 -bs=4k -rw=read -size=5G -numjobs=8 -runtime=60 -group_reporting -name=test_for_sync
+
+test_for_sync: (<span style="color: #40E0D0;">g</span>=0): <span style="color: #40E0D0;">rw</span>=read, <span style="color: #40E0D0;">bs</span>=4K-4K/4K-4K/4K-4K, <span style="color: #40E0D0;">ioengine</span>=sync, <span style="color: #40E0D0;">iodepth</span>=1
+...
+test_for_sync: (<span style="color: #40E0D0;">g</span>=0): <span style="color: #40E0D0;">rw</span>=read, <span style="color: #40E0D0;">bs</span>=4K-4K/4K-4K/4K-4K, <span style="color: #40E0D0;">ioengine</span>=sync, <span style="color: #40E0D0;">iodepth</span>=1
+fio-2.0.13
+Starting 8 processes
+Jobs: 8 (<span style="color: #40E0D0;">f</span>=8): [RRRRRRRR] [100.0% done] [89262K/0K/0K /s] [22.4K/0 /0  iops] [eta 00m:00s]
+test_for_sync: (<span style="color: #40E0D0;">groupid</span>=0, <span style="color: #40E0D0;">jobs</span>=8): <span style="color: #40E0D0;">err</span>= 0: <span style="color: #40E0D0;">pid</span>=3303: Thu Jan 15 12:59:35 2015
+  <span style="color: #F8F8F8;">read</span> : <span style="color: #40E0D0;">io</span>=6580.3MB, <span style="color: #40E0D0;">bw</span>=112297KB/s, <span style="color: #40E0D0;">iops</span>=28074 , <span style="color: #40E0D0;">runt</span>= 60001msec
+    clat (usec): <span style="color: #40E0D0;">min</span>=36 , <span style="color: #40E0D0;">max</span>=10252 , <span style="color: #40E0D0;">avg</span>=281.03, <span style="color: #40E0D0;">stdev</span>=206.24
+     lat (usec): <span style="color: #40E0D0;">min</span>=36 , <span style="color: #40E0D0;">max</span>=10253 , <span style="color: #40E0D0;">avg</span>=281.52, <span style="color: #40E0D0;">stdev</span>=206.33
+    clat percentiles (usec):
+     |  1.00th=[   69],  5.00th=[   86], 10.00th=[  100], 20.00th=[  123],
+     | 30.00th=[  149], 40.00th=[  187], 50.00th=[  235], 60.00th=[  286],
+     | 70.00th=[  346], 80.00th=[  414], 90.00th=[  516], 95.00th=[  612],
+     | 99.00th=[  892], 99.50th=[ 1096], 99.90th=[ 1960], 99.95th=[ 2384],
+     | 99.99th=[ 4576]
+    bw (KB/s)  : <span style="color: #40E0D0;">min</span>=10136, <span style="color: #40E0D0;">max</span>=17056, <span style="color: #40E0D0;">per</span>=12.52%, <span style="color: #40E0D0;">avg</span>=14061.48, <span style="color: #40E0D0;">stdev</span>=1019.32
+    lat (usec) : <span style="color: #40E0D0;">50</span>=0.01%, <span style="color: #40E0D0;">100</span>=9.80%, <span style="color: #40E0D0;">250</span>=43.21%, <span style="color: #40E0D0;">500</span>=35.96%, <span style="color: #40E0D0;">750</span>=9.00%
+    lat (usec) : <span style="color: #40E0D0;">1000</span>=1.37%
+    lat (msec) : <span style="color: #40E0D0;">2</span>=0.56%, <span style="color: #40E0D0;">4</span>=0.08%, <span style="color: #40E0D0;">10</span>=0.01%, <span style="color: #40E0D0;">20</span>=0.01%
+  cpu          : <span style="color: #40E0D0;">usr</span>=1.83%, <span style="color: #40E0D0;">sys</span>=16.68%, <span style="color: #40E0D0;">ctx</span>=2984386, <span style="color: #40E0D0;">majf</span>=0, <span style="color: #40E0D0;">minf</span>=238
+  IO depths    : <span style="color: #40E0D0;">1</span>=100.0%, <span style="color: #40E0D0;">2</span>=0.0%, <span style="color: #40E0D0;">4</span>=0.0%, <span style="color: #40E0D0;">8</span>=0.0%, <span style="color: #40E0D0;">16</span>=0.0%, <span style="color: #40E0D0;">32</span>=0.0%, &gt;=<span style="color: #40E0D0;">64</span>=0.0%
+     submit    : <span style="color: #40E0D0;">0</span>=0.0%, <span style="color: #40E0D0;">4</span>=100.0%, <span style="color: #40E0D0;">8</span>=0.0%, <span style="color: #40E0D0;">16</span>=0.0%, <span style="color: #40E0D0;">32</span>=0.0%, <span style="color: #40E0D0;">64</span>=0.0%, &gt;=<span style="color: #40E0D0;">64</span>=0.0%
+     complete  : <span style="color: #40E0D0;">0</span>=0.0%, <span style="color: #40E0D0;">4</span>=100.0%, <span style="color: #40E0D0;">8</span>=0.0%, <span style="color: #40E0D0;">16</span>=0.0%, <span style="color: #40E0D0;">32</span>=0.0%, <span style="color: #40E0D0;">64</span>=0.0%, &gt;=<span style="color: #40E0D0;">64</span>=0.0%
+     issued    : <span style="color: #40E0D0;">total</span>=<span style="color: #40E0D0;">r</span>=1684486/w=0/d=0, <span style="color: #40E0D0;">short</span>=<span style="color: #40E0D0;">r</span>=0/w=0/d=0
+
+Run status group 0 (all jobs):
+   READ: <span style="color: #40E0D0;">io</span>=6580.3MB, <span style="color: #40E0D0;">aggrb</span>=112297KB/s, <span style="color: #40E0D0;">minb</span>=112297KB/s, <span style="color: #40E0D0;">maxb</span>=112297KB/s, <span style="color: #40E0D0;">mint</span>=60001msec, <span style="color: #40E0D0;">maxt</span>=60001msec
+
+Disk stats (read/write):
+  vda: <span style="color: #40E0D0;">ios</span>=1683677/19, <span style="color: #40E0D0;">merge</span>=32/5, <span style="color: #40E0D0;">ticks</span>=133192/0, <span style="color: #40E0D0;">in_queue</span>=130762, <span style="color: #40E0D0;">util</span>=87.74%
+</pre>
+</div>
+
+<p>
+测试序列写， 每次写大小4k的块，默认的ioengine=sync,运行60s(runtime),-direct=1,跳过buffer
+  下面的测试的结束 每秒写速bw=12042KB/s,
+  bw=12042KB/s,
+  iops=3010 
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">     fio -filename=/tmp/hello -direct=1 -bs=4k -rw=write -size=5G -numjobs=8 -runtime=60 -group_reporting -name=test_for_sync
+test_for_sync: (<span style="color: #40E0D0;">g</span>=0): <span style="color: #40E0D0;">rw</span>=write, <span style="color: #40E0D0;">bs</span>=4K-4K/4K-4K/4K-4K, <span style="color: #40E0D0;">ioengine</span>=sync, <span style="color: #40E0D0;">iodepth</span>=1
+...
+test_for_sync: (<span style="color: #40E0D0;">g</span>=0): <span style="color: #40E0D0;">rw</span>=write, <span style="color: #40E0D0;">bs</span>=4K-4K/4K-4K/4K-4K, <span style="color: #40E0D0;">ioengine</span>=sync, <span style="color: #40E0D0;">iodepth</span>=1
+fio-2.0.13
+Starting 8 processes
+Jobs: 8 (<span style="color: #40E0D0;">f</span>=8): [WWWWWWWW] [100.0% done] [0K/13750K/0K /s] [0 /3437 /0  iops] [eta 00m:00s]
+test_for_sync: (<span style="color: #40E0D0;">groupid</span>=0, <span style="color: #40E0D0;">jobs</span>=8): <span style="color: #40E0D0;">err</span>= 0: <span style="color: #40E0D0;">pid</span>=3287: Thu Jan 15 12:57:28 2015
+  write: <span style="color: #40E0D0;">io</span>=722564KB, <span style="color: #40E0D0;">bw</span>=12042KB/s, <span style="color: #40E0D0;">iops</span>=3010 , <span style="color: #40E0D0;">runt</span>= 60005msec
+    clat (usec): <span style="color: #40E0D0;">min</span>=180 , <span style="color: #40E0D0;">max</span>=360366 , <span style="color: #40E0D0;">avg</span>=2565.01, <span style="color: #40E0D0;">stdev</span>=15235.83
+     lat (usec): <span style="color: #40E0D0;">min</span>=180 , <span style="color: #40E0D0;">max</span>=360367 , <span style="color: #40E0D0;">avg</span>=2565.56, <span style="color: #40E0D0;">stdev</span>=15235.85
+    clat percentiles (usec):
+     |  1.00th=[  205],  5.00th=[  221], 10.00th=[  229], 20.00th=[  243],
+     | 30.00th=[  255], 40.00th=[  266], 50.00th=[  274], 60.00th=[  286],
+     | 70.00th=[  298], 80.00th=[  318], 90.00th=[  358], 95.00th=[  430],
+     | 99.00th=[83456], 99.50th=[89600], 99.90th=[201728], 99.95th=[238592],
+     | 99.99th=[305152]
+    bw (KB/s)  : <span style="color: #40E0D0;">min</span>=    1, <span style="color: #40E0D0;">max</span>=11098, <span style="color: #40E0D0;">per</span>=12.87%, <span style="color: #40E0D0;">avg</span>=1549.70, <span style="color: #40E0D0;">stdev</span>=549.80
+    lat (usec) : <span style="color: #40E0D0;">250</span>=25.00%, <span style="color: #40E0D0;">500</span>=71.04%, <span style="color: #40E0D0;">750</span>=0.74%, <span style="color: #40E0D0;">1000</span>=0.25%
+    lat (msec) : <span style="color: #40E0D0;">2</span>=0.32%, <span style="color: #40E0D0;">4</span>=0.07%, <span style="color: #40E0D0;">10</span>=0.02%, <span style="color: #40E0D0;">20</span>=0.01%, <span style="color: #40E0D0;">50</span>=0.03%
+    lat (msec) : <span style="color: #40E0D0;">100</span>=2.23%, <span style="color: #40E0D0;">250</span>=0.26%, <span style="color: #40E0D0;">500</span>=0.03%
+  cpu          : <span style="color: #40E0D0;">usr</span>=0.24%, <span style="color: #40E0D0;">sys</span>=2.92%, <span style="color: #40E0D0;">ctx</span>=438926, <span style="color: #40E0D0;">majf</span>=0, <span style="color: #40E0D0;">minf</span>=223
+  IO depths    : <span style="color: #40E0D0;">1</span>=100.0%, <span style="color: #40E0D0;">2</span>=0.0%, <span style="color: #40E0D0;">4</span>=0.0%, <span style="color: #40E0D0;">8</span>=0.0%, <span style="color: #40E0D0;">16</span>=0.0%, <span style="color: #40E0D0;">32</span>=0.0%, &gt;=<span style="color: #40E0D0;">64</span>=0.0%
+     submit    : <span style="color: #40E0D0;">0</span>=0.0%, <span style="color: #40E0D0;">4</span>=100.0%, <span style="color: #40E0D0;">8</span>=0.0%, <span style="color: #40E0D0;">16</span>=0.0%, <span style="color: #40E0D0;">32</span>=0.0%, <span style="color: #40E0D0;">64</span>=0.0%, &gt;=<span style="color: #40E0D0;">64</span>=0.0%
+     complete  : <span style="color: #40E0D0;">0</span>=0.0%, <span style="color: #40E0D0;">4</span>=100.0%, <span style="color: #40E0D0;">8</span>=0.0%, <span style="color: #40E0D0;">16</span>=0.0%, <span style="color: #40E0D0;">32</span>=0.0%, <span style="color: #40E0D0;">64</span>=0.0%, &gt;=<span style="color: #40E0D0;">64</span>=0.0%
+     issued    : <span style="color: #40E0D0;">total</span>=<span style="color: #40E0D0;">r</span>=0/w=180641/d=0, <span style="color: #40E0D0;">short</span>=<span style="color: #40E0D0;">r</span>=0/w=0/d=0
+
+Run status group 0 (all jobs):
+  WRITE: <span style="color: #40E0D0;">io</span>=722564KB, <span style="color: #40E0D0;">aggrb</span>=12041KB/s, <span style="color: #40E0D0;">minb</span>=12041KB/s, <span style="color: #40E0D0;">maxb</span>=12041KB/s, <span style="color: #40E0D0;">mint</span>=60005msec, <span style="color: #40E0D0;">maxt</span>=60005msec
+
+Disk stats (read/write):
+  vda: <span style="color: #40E0D0;">ios</span>=291/186942, <span style="color: #40E0D0;">merge</span>=58/65444, <span style="color: #40E0D0;">ticks</span>=1083/200563, <span style="color: #40E0D0;">in_queue</span>=201568, <span style="color: #40E0D0;">util</span>=93.38%
+
+</pre>
+</div>
+
+<p>
+测试随机读， 每次读大小4k的块，默认的ioengine=sync,运行60s(runtime),-direct=1,跳过buffer
+  下面的测试的结束 每秒写速bw=4213KB/s,
+  bw=4213KB/s,
+  iops=1053 
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">root@10-9-26-206 /home/deployer <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">fio -filename=/tmp/hello -direct=1 -bs=4k -rw=randread -size=5G -numjobs=8 -runtime=60 -group_reporting -name=test_for_sync</span>
+test_for_sync: (<span style="color: #40E0D0;">g</span>=0): <span style="color: #40E0D0;">rw</span>=randread, <span style="color: #40E0D0;">bs</span>=4K-4K/4K-4K/4K-4K, <span style="color: #40E0D0;">ioengine</span>=sync, <span style="color: #40E0D0;">iodepth</span>=1
+...
+test_for_sync: (<span style="color: #40E0D0;">g</span>=0): <span style="color: #40E0D0;">rw</span>=randread, <span style="color: #40E0D0;">bs</span>=4K-4K/4K-4K/4K-4K, <span style="color: #40E0D0;">ioengine</span>=sync, <span style="color: #40E0D0;">iodepth</span>=1
+fio-2.0.13
+Starting 8 processes
+Jobs: 8 (<span style="color: #40E0D0;">f</span>=8): [rrrrrrrr] [100.0% done] [2517K/0K/0K /s] [629 /0 /0  iops] [eta 00m:00s]
+test_for_sync: (<span style="color: #40E0D0;">groupid</span>=0, <span style="color: #40E0D0;">jobs</span>=8): <span style="color: #40E0D0;">err</span>= 0: <span style="color: #40E0D0;">pid</span>=3321: Thu Jan 15 13:01:58 2015
+  <span style="color: #F8F8F8;">read</span> : <span style="color: #40E0D0;">io</span>=252888KB, <span style="color: #40E0D0;">bw</span>=4213.1KB/s, <span style="color: #40E0D0;">iops</span>=1053 , <span style="color: #40E0D0;">runt</span>= 60013msec
+    clat (usec): <span style="color: #40E0D0;">min</span>=63 , <span style="color: #40E0D0;">max</span>=541652 , <span style="color: #40E0D0;">avg</span>=7586.27, <span style="color: #40E0D0;">stdev</span>=18598.84
+     lat (usec): <span style="color: #40E0D0;">min</span>=63 , <span style="color: #40E0D0;">max</span>=541653 , <span style="color: #40E0D0;">avg</span>=7586.70, <span style="color: #40E0D0;">stdev</span>=18598.84
+    clat percentiles (usec):
+     |  1.00th=[  100],  5.00th=[  116], 10.00th=[  129], 20.00th=[  151],
+     | 30.00th=[  181], 40.00th=[  278], 50.00th=[ 2896], 60.00th=[ 5344],
+     | 70.00th=[ 7776], 80.00th=[10560], 90.00th=[18816], 95.00th=[28800],
+     | 99.00th=[55040], 99.50th=[75264], 99.90th=[333824], 99.95th=[411648],
+     | 99.99th=[505856]
+    bw (KB/s)  : <span style="color: #40E0D0;">min</span>=   29, <span style="color: #40E0D0;">max</span>=  930, <span style="color: #40E0D0;">per</span>=12.69%, <span style="color: #40E0D0;">avg</span>=534.74, <span style="color: #40E0D0;">stdev</span>=148.09
+    lat (usec) : <span style="color: #40E0D0;">100</span>=0.87%, <span style="color: #40E0D0;">250</span>=37.45%, <span style="color: #40E0D0;">500</span>=5.08%, <span style="color: #40E0D0;">750</span>=1.51%, <span style="color: #40E0D0;">1000</span>=0.49%
+    lat (msec) : <span style="color: #40E0D0;">2</span>=1.56%, <span style="color: #40E0D0;">4</span>=7.69%, <span style="color: #40E0D0;">10</span>=23.95%, <span style="color: #40E0D0;">20</span>=12.04%, <span style="color: #40E0D0;">50</span>=7.99%
+    lat (msec) : <span style="color: #40E0D0;">100</span>=1.04%, <span style="color: #40E0D0;">250</span>=0.21%, <span style="color: #40E0D0;">500</span>=0.10%, <span style="color: #40E0D0;">750</span>=0.01%
+  cpu          : <span style="color: #40E0D0;">usr</span>=0.13%, <span style="color: #40E0D0;">sys</span>=0.69%, <span style="color: #40E0D0;">ctx</span>=63574, <span style="color: #40E0D0;">majf</span>=0, <span style="color: #40E0D0;">minf</span>=237
+  IO depths    : <span style="color: #40E0D0;">1</span>=100.0%, <span style="color: #40E0D0;">2</span>=0.0%, <span style="color: #40E0D0;">4</span>=0.0%, <span style="color: #40E0D0;">8</span>=0.0%, <span style="color: #40E0D0;">16</span>=0.0%, <span style="color: #40E0D0;">32</span>=0.0%, &gt;=<span style="color: #40E0D0;">64</span>=0.0%
+     submit    : <span style="color: #40E0D0;">0</span>=0.0%, <span style="color: #40E0D0;">4</span>=100.0%, <span style="color: #40E0D0;">8</span>=0.0%, <span style="color: #40E0D0;">16</span>=0.0%, <span style="color: #40E0D0;">32</span>=0.0%, <span style="color: #40E0D0;">64</span>=0.0%, &gt;=<span style="color: #40E0D0;">64</span>=0.0%
+     complete  : <span style="color: #40E0D0;">0</span>=0.0%, <span style="color: #40E0D0;">4</span>=100.0%, <span style="color: #40E0D0;">8</span>=0.0%, <span style="color: #40E0D0;">16</span>=0.0%, <span style="color: #40E0D0;">32</span>=0.0%, <span style="color: #40E0D0;">64</span>=0.0%, &gt;=<span style="color: #40E0D0;">64</span>=0.0%
+     issued    : <span style="color: #40E0D0;">total</span>=<span style="color: #40E0D0;">r</span>=63222/w=0/d=0, <span style="color: #40E0D0;">short</span>=<span style="color: #40E0D0;">r</span>=0/w=0/d=0
+
+Run status group 0 (all jobs):
+   READ: <span style="color: #40E0D0;">io</span>=252888KB, <span style="color: #40E0D0;">aggrb</span>=4213KB/s, <span style="color: #40E0D0;">minb</span>=4213KB/s, <span style="color: #40E0D0;">maxb</span>=4213KB/s, <span style="color: #40E0D0;">mint</span>=60013msec, <span style="color: #40E0D0;">maxt</span>=60013msec
+
+Disk stats (read/write):
+  vda: <span style="color: #40E0D0;">ios</span>=63198/20, <span style="color: #40E0D0;">merge</span>=59/7, <span style="color: #40E0D0;">ticks</span>=478381/139, <span style="color: #40E0D0;">in_queue</span>=478588, <span style="color: #40E0D0;">util</span>=99.96%
+</pre>
+</div>
+
+<p>
+测试随机写， 每次写大小4k的块，默认的ioengine=sync,运行60s(runtime),-direct=1,跳过buffer
+  下面的测试的结束 每秒写速bw=10185KB/s,
+  bw=10185KB/s,
+  iops=2546 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">root@10-9-26-206 /home/deployer <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">fio -filename=/tmp/hello -direct=1 -bs=4k -rw=randwrite -size=5G -numjobs=8 -runtime=60 -group_reporting -name=test_for_sync</span>
+test_for_sync: (<span style="color: #40E0D0;">g</span>=0): <span style="color: #40E0D0;">rw</span>=randwrite, <span style="color: #40E0D0;">bs</span>=4K-4K/4K-4K/4K-4K, <span style="color: #40E0D0;">ioengine</span>=sync, <span style="color: #40E0D0;">iodepth</span>=1
+...
+test_for_sync: (<span style="color: #40E0D0;">g</span>=0): <span style="color: #40E0D0;">rw</span>=randwrite, <span style="color: #40E0D0;">bs</span>=4K-4K/4K-4K/4K-4K, <span style="color: #40E0D0;">ioengine</span>=sync, <span style="color: #40E0D0;">iodepth</span>=1
+fio-2.0.13
+Starting 8 processes
+Jobs: 8 (<span style="color: #40E0D0;">f</span>=8): [wwwwwwww] [100.0% done] [0K/13066K/0K /s] [0 /3266 /0  iops] [eta 00m:00s]
+test_for_sync: (<span style="color: #40E0D0;">groupid</span>=0, <span style="color: #40E0D0;">jobs</span>=8): <span style="color: #40E0D0;">err</span>= 0: <span style="color: #40E0D0;">pid</span>=3350: Thu Jan 15 13:04:49 2015
+  write: <span style="color: #40E0D0;">io</span>=611160KB, <span style="color: #40E0D0;">bw</span>=10185KB/s, <span style="color: #40E0D0;">iops</span>=2546 , <span style="color: #40E0D0;">runt</span>= 60003msec
+    clat (usec): <span style="color: #40E0D0;">min</span>=178 , <span style="color: #40E0D0;">max</span>=576922 , <span style="color: #40E0D0;">avg</span>=814.41, <span style="color: #40E0D0;">stdev</span>=9221.25
+     lat (usec): <span style="color: #40E0D0;">min</span>=178 , <span style="color: #40E0D0;">max</span>=576925 , <span style="color: #40E0D0;">avg</span>=815.03, <span style="color: #40E0D0;">stdev</span>=9221.33
+    clat percentiles (usec):
+     |  1.00th=[  207],  5.00th=[  223], 10.00th=[  231], 20.00th=[  247],
+     | 30.00th=[  258], 40.00th=[  270], 50.00th=[  282], 60.00th=[  294],
+     | 70.00th=[  306], 80.00th=[  326], 90.00th=[  362], 95.00th=[  410],
+     | 99.00th=[ 1080], 99.50th=[44288], 99.90th=[89600], 99.95th=[205824],
+     | 99.99th=[403456]
+    bw (KB/s)  : <span style="color: #40E0D0;">min</span>=   54, <span style="color: #40E0D0;">max</span>= 2686, <span style="color: #40E0D0;">per</span>=12.86%, <span style="color: #40E0D0;">avg</span>=1309.78, <span style="color: #40E0D0;">stdev</span>=486.44
+    lat (usec) : <span style="color: #40E0D0;">250</span>=22.61%, <span style="color: #40E0D0;">500</span>=74.73%, <span style="color: #40E0D0;">750</span>=1.20%, <span style="color: #40E0D0;">1000</span>=0.40%
+    lat (msec) : <span style="color: #40E0D0;">2</span>=0.40%, <span style="color: #40E0D0;">4</span>=0.07%, <span style="color: #40E0D0;">10</span>=0.04%, <span style="color: #40E0D0;">20</span>=0.01%, <span style="color: #40E0D0;">50</span>=0.07%
+    lat (msec) : <span style="color: #40E0D0;">100</span>=0.39%, <span style="color: #40E0D0;">250</span>=0.04%, <span style="color: #40E0D0;">500</span>=0.04%, <span style="color: #40E0D0;">750</span>=0.01%
+  cpu          : <span style="color: #40E0D0;">usr</span>=0.23%, <span style="color: #40E0D0;">sys</span>=2.03%, <span style="color: #40E0D0;">ctx</span>=313192, <span style="color: #40E0D0;">majf</span>=0, <span style="color: #40E0D0;">minf</span>=223
+  IO depths    : <span style="color: #40E0D0;">1</span>=100.0%, <span style="color: #40E0D0;">2</span>=0.0%, <span style="color: #40E0D0;">4</span>=0.0%, <span style="color: #40E0D0;">8</span>=0.0%, <span style="color: #40E0D0;">16</span>=0.0%, <span style="color: #40E0D0;">32</span>=0.0%, &gt;=<span style="color: #40E0D0;">64</span>=0.0%
+     submit    : <span style="color: #40E0D0;">0</span>=0.0%, <span style="color: #40E0D0;">4</span>=100.0%, <span style="color: #40E0D0;">8</span>=0.0%, <span style="color: #40E0D0;">16</span>=0.0%, <span style="color: #40E0D0;">32</span>=0.0%, <span style="color: #40E0D0;">64</span>=0.0%, &gt;=<span style="color: #40E0D0;">64</span>=0.0%
+     complete  : <span style="color: #40E0D0;">0</span>=0.0%, <span style="color: #40E0D0;">4</span>=100.0%, <span style="color: #40E0D0;">8</span>=0.0%, <span style="color: #40E0D0;">16</span>=0.0%, <span style="color: #40E0D0;">32</span>=0.0%, <span style="color: #40E0D0;">64</span>=0.0%, &gt;=<span style="color: #40E0D0;">64</span>=0.0%
+     issued    : <span style="color: #40E0D0;">total</span>=<span style="color: #40E0D0;">r</span>=0/w=152790/d=0, <span style="color: #40E0D0;">short</span>=<span style="color: #40E0D0;">r</span>=0/w=0/d=0
+
+Run status group 0 (all jobs):
+  WRITE: <span style="color: #40E0D0;">io</span>=611160KB, <span style="color: #40E0D0;">aggrb</span>=10185KB/s, <span style="color: #40E0D0;">minb</span>=10185KB/s, <span style="color: #40E0D0;">maxb</span>=10185KB/s, <span style="color: #40E0D0;">mint</span>=60003msec, <span style="color: #40E0D0;">maxt</span>=60003msec
+
+Disk stats (read/write):
+  vda: <span style="color: #40E0D0;">ios</span>=2/152711, <span style="color: #40E0D0;">merge</span>=0/13, <span style="color: #40E0D0;">ticks</span>=20/56057, <span style="color: #40E0D0;">in_queue</span>=56017, <span style="color: #40E0D0;">util</span>=93.28%
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org012168c" class="outline-2">
+<h2 id="org012168c"><span class="section-number-2">3</span> link</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+<a href="http://debugo.com/fio-test">http://debugo.com/fio-test</a>
+</p>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2015-01-15</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/linux/">Linux</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/linux_io_benchmark.html";
+          var disqus_url = "http://jixiuf.github.io/blog/linux_io_benchmark.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

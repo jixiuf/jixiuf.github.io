@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>Gentoo 拾遗 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="gentoo.org" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>Gentoo 拾遗</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org2f73723">内核配置</a></li>
+<li><a href="#org3eaf8d0">make.conf 示例</a></li>
+<li><a href="#org18473a3">link</a></li>
+</ul>
+</div>
+</div>
+<p>
+prelink -amR<br />
+lafilefixer &#x2013;justfixit<br />
+revdep-rebuild &#x2013;library libnss3.so.12<br />
+/usr/sbin/libpng-1.4.x-update.sh<br />
+perl-cleaner &#x2013;all<br />
+python-updater<br />
+sys-apps/busybox-1.17.4 编译 :清缓存,删/var/tmp/portage/  export LC_ALL=en_US.UTF-8<br />
+</p>
+
+<div id="outline-container-org2f73723" class="outline-2">
+<h2 id="org2f73723">内核配置</h2>
+<div class="outline-text-2" id="text-org2f73723">
+<ol class="org-ol">
+<li>filesystem 的语言设置<br />
+ntfs  936 utf8<br />
+ext4<br />
+cdrom/udf<br />
+file system&#x2013;network file system &#x2013;CIFS support() 其他的不用变<br /></li>
+
+<li>DeviceDriver&#x2013;Graphics&#x2013;Support for frame buffer&#x2013;VESA/VGA<br /></li>
+<li>ipv6[*]<br /></li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org3eaf8d0" class="outline-2">
+<h2 id="org3eaf8d0">make.conf 示例</h2>
+<div class="outline-text-2" id="text-org3eaf8d0">
+<div class="org-src-container">
+<pre class="src src-sh" id="orga8307e3">  <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">for debug glibc</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">FEATURES="splitdebug nostrip"</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">CFLAGS="-march=native -O2 -pipe -mfpmath=sse -ggdb"</span>
+<span style="color: #40E0D0;">CFLAGS</span>=<span style="color: #ffa07a;">"-march=native -O2 -pipe -fomit-frame-pointer -mfpmath=sse -DSYSTEM_PURESIZE_EXTRA=600000 "</span>
+<span style="color: #40E0D0;">LDFLAGS</span>=<span style="color: #ffa07a;">"-Wl,-O2,--as-needed"</span>
+<span style="color: #40E0D0;">CXXFLAGS</span>=<span style="color: #ffa07a;">"${CFLAGS}"</span>
+<span style="color: #40E0D0;">CHOST</span>=<span style="color: #ffa07a;">"i686-pc-linux-gnu"</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">For dev boxes, I'd recommend the following make.conf tweaks:</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">1) Remove "-fomit-frame-pointer" from CFLAGS/CXXFLAGS (if applicable).</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">2) Add "-ggdb" to your CFLAGS/CXXFLAGS.</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">3) Add "splitdebug" to FEATURES.</span>
+
+<span style="color: #40E0D0;">ACCEPT_KEYWORDS</span>=<span style="color: #ffa07a;">"x86"</span>
+<span style="color: #40E0D0;">ACCEPT_LICENSE</span>=<span style="color: #ffa07a;">"Broadcom license dlj-1.1 IBM-J1.5 PUEL AdobeFlash-10.3 Oracle-BCLA-JavaSE"</span>
+<span style="color: #40E0D0;">MAKEOPTS</span>=<span style="color: #ffa07a;">"-j3"</span>
+<span style="color: #40E0D0;">USE</span>=<span style="color: #ffa07a;">"-qt3 -qt4 -eds -esd -arts  -cups -fortran -kde -gnome -bluetooth -wlan emacs midi nptl nptlonly  laptop X xvmc dbus udev -hal  unicode truetype cjk  alsa  system-sqlite sqlite sqlite3 directfb ffmpeg -ipv6"</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">USE="-qt3 -qt4 -eds -esd -arts -ipv6 -cups -fortran -kde -gnome -bluetooth wlan emacs gstreamer midi firefox nptl nptlonly  laptop X svg gif jpeg xvmc dbus udev -hal  unicode truetype cjk  alsa oss  oss4  system-sqlite sqlite sqlite3 directfb ffmpeg"</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">RPMDIR="/resource/gentoo/rpm"</span>
+<span style="color: #40E0D0;">DISTDIR</span>=<span style="color: #ffa07a;">"/resource/gentoo/distfiles"</span>
+<span style="color: #40E0D0;">PKGDIR</span>=<span style="color: #ffa07a;">"/resource/gentoo/binPackages"</span>
+<span style="color: #40E0D0;">FEATURES</span>=<span style="color: #ffa07a;">"ccache sandbox parallel-fetch buildsyspkg buildpkg -userfetch"</span>
+<span style="color: #40E0D0;">CCACHE_DIR</span>=<span style="color: #ffa07a;">"/resource/gentoo/ccache/"</span>
+<span style="color: #40E0D0;">CCACHE_SIZE</span>=<span style="color: #ffa07a;">"1G"</span>
+<span style="color: #40E0D0;">VIDEO_CARDS</span>=<span style="color: #ffa07a;">"nvidia"</span>
+<span style="color: #40E0D0;">LINGUAS</span>=<span style="color: #ffa07a;">"zh_CN.UTF-8 zh_CN zh_CN.GBK zh_CN.gb2312 zh_TW zh_TW.UTF-8   zh en en_US  en_US.UTF-8"</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">GENTOO_MIRRORS="http://gentoo.binarycompass.org"</span>
+<span style="color: #40E0D0;">INPUT_DEVICES</span>=<span style="color: #ffa07a;">"keyboard mouse evdev"</span>
+<span style="color: #40E0D0;">AUTOCLEAN</span>=<span style="color: #ffa07a;">"yes"</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#22799;&#38376;&#22823;&#23398;mirrors.xmu.edu.cn</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">SYNC="rsync://mirrors.xmu.edu.cn/gentoo-portage"</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">http://60.191.81.189/gentoo \</span>
+<span style="color: #40E0D0;">GENTOO_MIRRORS</span>=<span style="color: #ffa07a;">"\</span>
+<span style="color: #ffa07a;">/home/jixiuf/distfiles \</span>
+<span style="color: #ffa07a;">http://mirrors.sohu.com/gentoo/ \</span>
+<span style="color: #ffa07a;">http://mirrors.163.com/gentoo/ \</span>
+<span style="color: #ffa07a;">http://distfiles.gentoo.org \</span>
+<span style="color: #ffa07a;">http://mirrors.xmu.edu.cn/gentoo \</span>
+<span style="color: #ffa07a;">http://gentoo.netnitco.net/ \</span>
+<span style="color: #ffa07a;">http://61.135.158.199 \</span>
+<span style="color: #ffa07a;">http://mirrors.acm.cs.rpi.edu/gentoo/ \</span>
+<span style="color: #ffa07a;">http://gentoo.aditsu.net \</span>
+<span style="color: #ffa07a;">http://gentoo.139pay.com \</span>
+<span style="color: #ffa07a;">http://128.111.24.43/pub/mirrors/linux/gentoo \</span>
+<span style="color: #ffa07a;">http://129.101.198.59/pub/gentoo \</span>
+<span style="color: #ffa07a;">ftp://ftp.lecl.net/pub/gentoo/ \</span>
+<span style="color: #ffa07a;">http://gentoo.cites.uiuc.edu/pub/gentoo/ \</span>
+<span style="color: #ffa07a;">http://gentoo.chem.wisc.edu/gentoo/ \</span>
+<span style="color: #ffa07a;">http://ftp.gentoo.or.kr/ \</span>
+<span style="color: #ffa07a;">http://ftp.ncnu.edu.tw/Linux/Gentoo \</span>
+<span style="color: #ffa07a;">ftp://ftp3.tsinghua.edu.cn/mirror/gentoo \</span>
+<span style="color: #ffa07a;">ftp://ftp.sjtu.edu.cn/distfiles \</span>
+<span style="color: #ffa07a;">http://linux.ntcu.net/ftp/dists/gentoo \</span>
+<span style="color: #ffa07a;">"</span>
+source /resource/gentoo/layman/make.conf
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">PORTDIR_OVERLAY="/resource/gentoo/layman/crossdev/ $PORTDIR_OVERLAY"</span>
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">wget</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">FETCHCOMMAND="/usr/bin/wget -t 3 -T 60 --passive-ftp -O \"\${DISTDIR}/\${FILE}\" \"\${URI}\""</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">RESUMECOMMAND="/usr/bin/wget -c -t 3 -T 60 --passive-ftp -O \"\${DISTDIR}/\${FILE}\" \"\${URI}\""</span>
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">axel</span>
+<span style="color: #40E0D0;">FETCHCOMMAND</span>=<span style="color: #ffa07a;">'/usr/bin/axel -a -o "\${DISTDIR}/\${FILE}" "\${URI}" '</span>
+<span style="color: #40E0D0;">RESUMECOMMAND</span>=<span style="color: #ffa07a;">"${FETCHCOMMAND}"</span>
+
+<span style="color: #40E0D0;">CLEAN_DELAY</span>=<span style="color: #ffa07a;">"3"</span>
+<span style="color: #40E0D0;">EMERGE_WARNING_DELAY</span>=<span style="color: #ffa07a;">"5"</span>
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">try 3 times to download</span>
+<span style="color: #40E0D0;">PORTAGE_FETCH_CHECKSUM_TRY_MIRRORS</span>=<span style="color: #ffa07a;">"2"</span>
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">EMERGE_DEFAULT_OPTS="--autounmask=n --quiet-build=y -q"</span>
+<span style="color: #40E0D0;">EMERGE_DEFAULT_OPTS</span>=<span style="color: #ffa07a;">"--autounmask=n --quiet-build=n "</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">revdep-rebuild</span>
+<span style="color: #40E0D0;">SEARCH_DIRS_MASK</span>=<span style="color: #ffa07a;">"/db /java /mnt "</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org18473a3" class="outline-2">
+<h2 id="org18473a3">link</h2>
+<div class="outline-text-2" id="text-org18473a3">
+<p>
+<a href="http://mirrors.sohu.com/gentoo/releases/x86/autobuilds/current-iso/stage3-i686-20121213.tar.bz2">http://mirrors.sohu.com/gentoo/releases/x86/autobuilds/current-iso/stage3-i686-20121213.tar.bz2</a><br />
+<a href="http://mirrors.sohu.com/gentoo/releases/snapshots/current/portage-latest.tar.xz">http://mirrors.sohu.com/gentoo/releases/snapshots/current/portage-latest.tar.xz</a><br />
+</p>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-12-24</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/linux/">Linux</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/gentoo.html";
+          var disqus_url = "http://jixiuf.github.io/blog/gentoo.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

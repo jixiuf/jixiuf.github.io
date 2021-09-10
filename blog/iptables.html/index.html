@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>iptables防火墙 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="iptables防火墙" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>iptables防火墙</h1>
+<div class="org-src-container">
+<pre class="src src-sh">
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#20116;&#20010;&#26816;&#26597;&#28857;PREROUTING &#65292;FORWARD POSTROUTING INPUT OUTPUT</span>
+<span style="color: #AEAEAE;">#   </span><span style="color: #AEAEAE;">&#19968;&#20010;&#25968;&#25454;&#21253;&#20174;prerouting &#36827;&#20837;&#25105;&#30340;&#26426;&#22120;&#65292;&#23427;&#26377;&#20004;&#20010;&#21435;&#21521;&#65292;&#19968;&#26159;&#32463;&#36807;input &#35775;&#38382;&#25105;&#26426;&#22120;&#19978;&#30340;&#24212;&#29992;&#31243;&#24207;&#65292;&#21518;&#32463;output ,postrouting</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#27969;&#36208;&#65292;&#21478;&#19968;&#20010;&#21435;&#21521;&#26159;&#65306;&#30452;&#25509;&#32463;forward postrouting &#27969;&#21521;&#21035;&#30340;&#26426;&#22120;&#65292;&#20063;&#23601;&#26159;&#35828;&#25105;&#30340;&#26426;&#22120;&#21482;&#26159;&#20805;&#24403;&#36335;&#30001;&#65292;&#25968;&#25454;&#21253;&#32463;&#25105;&#30340;&#26426;&#22120;&#21040;&#20854;&#20182;&#26426;&#22120;&#19978;</span>
+<span style="color: #AEAEAE;">#</span>
+<span style="color: #AEAEAE;">#      </span><span style="color: #AEAEAE;">PREROUTING ----------------&gt;FORWARD---------------------&gt; POSTROUTING</span>
+<span style="color: #AEAEAE;">#                   </span><span style="color: #AEAEAE;">|                                ^</span>
+<span style="color: #AEAEAE;">#                   </span><span style="color: #AEAEAE;">|                                |</span>
+<span style="color: #AEAEAE;">#                   </span><span style="color: #AEAEAE;">INPUT                           OUTPUT</span>
+<span style="color: #AEAEAE;">#                   </span><span style="color: #AEAEAE;">|                                |</span>
+<span style="color: #AEAEAE;">#                   </span><span style="color: #AEAEAE;">v                                |</span>
+<span style="color: #AEAEAE;">#                    </span><span style="color: #AEAEAE;">---&gt;&#25105;&#26426;&#22120;&#19978;&#30340;&#24212;&#29992;&#31243;&#24207;----------&gt;</span>
+<span style="color: #AEAEAE;">#</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">iptables &#30340;&#32467;&#26500;&#30001;&#19978;&#21040;&#19979;&#26159;:&#34920;(table)&#65292;&#35268;&#21017;&#38142;(chain)&#65292;&#35268;&#21017;(rule) &#65292;&#34920;&#30001;&#35268;&#21017;&#38142;&#32452;&#25104;&#65292;&#35268;&#21017;&#38142;&#30001;&#19968;&#26465;&#26465;&#35268;&#21017;&#32452;&#25104;</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">iptables &#40664;&#35748;&#26377;&#19977;&#24352;&#34920;filter ,nat ,mangle ,   &#20351;&#29992;-t &#21442;&#25968;&#25351;&#23450;&#23545;&#21738;&#24352;&#34920;&#25805;&#20316;&#65292;&#22914;&#26524;&#19981;&#25351;&#23450;,&#21017;&#40664;&#35748;&#26159;&#23545;filter &#34920;&#36827;&#34892;&#25805;&#20316;</span>
+<span style="color: #AEAEAE;">#</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">filter &#40664;&#35748;&#26377;&#19977;&#26465;&#20869;&#24314;&#30340;&#35268;&#21017;&#38142;, INPUT FORWARD OUTPUT</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">nat     &#12290;&#12290;&#12290;&#12290;&#12290;&#12290;&#12290;&#12290;&#12290;&#12290;&#12290; POSTROUTING ,OUTPUT PREROUTING</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">mangle  .....&#20004;.............    OUTPUT PREROUTING</span>
+<span style="color: #AEAEAE;">#</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">iptables &#21629;&#20196;&#30340;&#19968;&#33324;&#26684;&#24335; iptables [ -t table]  &#25805;&#20316;  [ chain] [options ]</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#19968;&#20010;&#26597;&#23545;&#23436;&#25972;&#21442;&#25968;&#30340;&#31034;&#20363;</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">iptables -t filter      -I    INPUT 2    -i eth0  -s 10.2.1.111 --sport 1234 -d 10.2.1.123 --dport 22   -j ACCEPT</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">iptables -t filter      -I    OUTPUT 2    -i eth0  -d 10.2.1.123  --dport 22 -s 10.2.1.123  --sport 1234   -j ACCEPT</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#36825;&#26465;&#21629;&#20196;&#26159;&#65306;&#22312;filter &#34920;&#20013;&#30340;INPUT &#38142;&#19978; &#25554;&#20837;&#19968;&#26465;&#35268;&#21017;&#22312;2&#22788;(&#27492;&#35268;&#21017;&#25490;&#22312;&#31532;&#20108;&#20010;&#20301;&#32622;) ,&#35268;&#21017;&#30340;&#20855;&#20307;&#65306;&#20174;&#25105;&#30340;eth0 &#32593;&#21345;&#32852;&#25105;&#65292;&#19988;&#23545;&#26041;&#26426;&#30340;ip &#26159;10.2.1.111 &#23545;&#26041;&#31471;&#21475;1234,&#35775;&#38382;&#25105;&#30340;ip :10.2.1.123 &#25105;&#30340;22&#31471;&#21475; ,&#26102;&#25165;&#25509;&#21463;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#28982;&#21518;&#26159;&#65292;&#20174;&#25105;&#30340;ip 10.2.1.123:22 &#21521;10.2.1.111:1234 &#32463;eth0 &#32593;&#21345;&#21457;&#20986;&#30340;&#21253;&#25918;&#34892;</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">iptables -F  ,&#28165;&#31354;filter &#30340;&#25152;&#26377;&#35268;&#21017;&#38142;</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">iptables -t nat -F &#28165;&#31354;nat &#34920;&#30340;&#25152;&#26377;&#35268;&#21017;&#38142;</span>
+<span style="color: #AEAEAE;">###################################################################################################</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#20851;&#20110;INPUT ,OUTPUT &#37117;&#26159;&#30456;&#23545;&#20110;&#8220;&#25105;&#8221;&#36825;&#21488;&#26426;&#22120;&#65292;&#21363;INPUT  &#65306;&#34920;&#31034;&#21521;&#25105;&#36755;&#20837;&#25968;&#25454;&#65292;OUTPUT &#34920;&#31034;&#8220;&#25105;&#8221;&#21521;&#22806;&#36755;&#20986;&#25968;&#25454;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#32780;-s -d --sport --dport &#20998;&#21035;&#34920;&#31034; &#28304;ip(source) ,&#30446;&#26631;ip(destination) ,&#28304;ip&#30340;&#31471;&#21475;&#65292;&#30446;&#26631;ip&#30340;&#31471;&#21475;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#24403;&#22312;&#23545;INPUT &#20316;&#22788;&#29702;&#30340;&#26102;&#20505;&#65292;-s &#25351;&#30340;&#26159;&#23545;&#26041;&#30340;&#26426;&#22120;&#65292;-d  &#25351;&#30340;&#26159;&#25105;&#36825;&#21488;&#26426;&#22120;,&#22240;&#20026;&#25968;&#25454;&#26159;&#20174;&#23545;&#26041;&#30340;&#26426;&#22120;&#27969;&#21521;&#25105;&#30340;&#65292;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#32780;&#23545;OUTPUT &#20316;&#22788;&#29702;&#30340;&#26102;&#20505;   -s &#25351;&#30340;&#26159;&#25105;&#65292;&#32780;-d &#25351;&#30340;&#26159;&#23545;&#26041;&#30340;&#26426;&#22120;</span>
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#27491;&#30830;&#20351;&#29992;&#38450;&#28779;&#22681;&#65292;&#19968;&#33324;&#40664;&#35748;&#35774;&#20026;&#25298;&#32477;&#25152;&#26377;&#65292;&#28982;&#21518;&#21482;&#24320;&#25918;&#38656;&#35201;&#24320;&#25918;&#30340;&#65292;&#32780;&#19981;&#26159;&#20801;&#25918;&#25152;&#26377;&#65292;&#21482;&#25298;&#32477;&#38656;&#35201;&#25298;&#32477;&#30340;</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#39318;&#20808;&#21551;&#21160;iptables &#26381;&#21153;/etc/init.d/iptables start</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#25105;&#29992;&#30340;&#26159;gentoo &#31995;&#32479;&#35013;&#19978;iptables &#21518;&#65292;&#31532;&#19968;&#27425;&#36816;&#34892; &#23427;&#23427;&#25552;&#31034;&#25105;&#35201;&#20808;&#36816;&#34892;/etc/init.d/iptables save &#65292;&#22909;&#20687;&#26159;&#20570;&#19968;&#20123;&#21021;&#22987;&#21270;&#25110;&#32773;&#20445;&#23384;&#19968;&#20123;&#25991;&#20214;&#65292;</span>
+/etc/init.d/iptables save
+/etc/init.d/iptables start
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#21551;&#21160;&#21518;&#30475;&#19968;&#19979;&#40664;&#35748;&#30340;&#35775;&#38382;&#35268;&#21017;</span>
+iptables -L &#25110;&#32773;iptables -L --line-number &#26174;&#31034;&#34892;&#21495;&#65292; -v &#35814;&#32454;&#20449;&#24687;
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination
+
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#40664;&#35748;&#24773;&#20917;&#19979;&#26159;policy &#26159;ACCEPT    &#65292;&#31561;&#20110;&#27809;&#26377;&#38450;&#28779;&#22681;,&#29616;&#22312;&#20462;&#25913;&#40664;&#35748;&#30340;policy</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#27880;&#24847;&#21315;&#19975;&#19981;&#35201;&#20351;&#29992;&#36828;&#31243;ssh &#36830;&#25509;&#36827;&#34892;&#36825;&#20010;&#25805;&#20316;&#65292;&#22240;&#20026;&#23427;&#20063;&#20250;&#20851;&#38381;ssh &#20351;&#29992;&#30340;22 &#31471;&#21475;&#65292;</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#20351;&#29992;ssh &#36830;&#25509; &#65292;&#39318;&#20808;&#24320;&#25918;&#20102;22 &#31471;&#21475;&#20877;&#36827;&#34892;&#19979;&#38754;&#19977;&#26465;&#21629;&#20196;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">sshd</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#20801;&#35768;&#20219;&#20309;&#26426;&#22120;&#21521;&#25105;&#30340;22 &#31471;&#21475;&#21457;&#20986;&#35831;&#27714;</span>
+<span style="color: #AEAEAE;">#  </span><span style="color: #AEAEAE;">&#36825;&#37324;&#27809;&#29992;&#29992;-t &#21017;&#40664;&#35748;&#26159;-t filter</span>
+                        iptables -A INPUT  -p tcp --dport 22      -j ACCEPT
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#31561;&#20215;&#20110;:iptables -t filter  -A INPUT  -p tcp --dport 22      -j ACCEPT</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#20801;&#35768;&#25105;&#30340;22&#31471;&#21475;&#21521;&#22806;&#36755;&#20986;&#25968;&#25454;</span>
+                        iptables -A OUTPUT  -p tcp --sport 22      -j ACCEPT
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#22914;&#26524;&#21482;&#38480;&#26576;&#20123;&#29305;&#23450;ip &#30340;&#26426;&#22120;&#35775;&#38382;&#25105;,&#19978;&#38754;&#20004;&#26465;&#35201;&#25442;&#25104;</span>
+                        iptables -A INPUT  -p tcp --dport 22  -s 10.2.1.110     -j ACCEPT
+                        iptables -A OUTPUT  -p tcp --sport 22 -d 10.2.1.110     -j ACCEPT
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#29616;&#22312;&#21482;&#26377;ip&#20026;10.2.1.110&#30340;ip &#21487;&#20197;&#35775;&#38382;&#25105;</span>
+<span style="color: #AEAEAE;">#</span>
+iptables -P INPUT  DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#40664;&#35748;&#30340;&#31574;&#30053;&#21482;&#33021;&#26159;ACCEPT &#65292;DROP &#65292;&#19981;&#33021;&#26159;REJECT</span>
+Chain INPUT (policy DROP)
+target     prot opt source               destination
+
+Chain FORWARD (policy DROP)
+target     prot opt source               destination
+
+Chain OUTPUT (policy DROP)
+target     prot opt source               destination
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#29616;&#22312;&#26080;&#35770;INPUT ,OUTPUT ,FORWARD &#40664;&#35748;&#37117;&#26159;&#20002;&#21253;(drop&#25298;&#32477;)&#65292;&#32780;&#19981;&#26159;accept &#25509;&#21463;</span>
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#27492;&#26102;&#25105;&#26497;&#24230;&#23433;&#20840;&#65292;&#31561;&#20110;&#27809;&#36830;&#32593;&#65292;&#25105;&#19981;&#33021;&#35775;&#38382;&#21035;&#20154;&#65292;&#21035;&#20154;&#19981;&#33021;&#35775;&#38382;&#25105;</span>
+
+
+
+&#20026;&#20309; iptables &#30340; rule &#37117;&#20250;&#20808;&#20889;&#36825;&#34892;&#21465;&#36848;&#22312;&#21069;&#38754;&#19981;&#26159;&#27809;&#36947;&#29702;&#30340;
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#31532;&#19968;&#26465;&#35268;&#21017; &#20801;&#35768;&#24050;&#24314;&#31435;&#30340;&#25110;&#30456;&#20851;&#36830;&#30340;&#36890;&#34892;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">iptables &#30340;&#35268;&#21017;&#38656;&#35201;&#19968;&#26465;&#26465;&#36941;&#21382;&#21305;&#37197;&#25152;&#26377;&#35268;&#21017;&#65292;&#30452;&#21040;&#25214;&#21040;&#21305;&#37197;&#30340;&#25165;&#32467;&#26463;&#65292;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#36825;&#37324;&#23545;&#24050;&#32463;&#24314;&#31435;&#36830;&#25509;&#30340;&#21253;&#30452;&#25509;&#25918;&#34892;&#65292;&#20197;&#25552;&#39640;iptables &#25928;&#29575;</span>
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#29616;&#22312;&#25105;&#24819;&#19978;&#32593;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#20551;&#22914;&#25105;&#24819;&#35775;&#38382;&#23545;&#26041;&#30340;80 &#31471;&#21475;&#65292;&#20854;&#23454;&#21253;&#25324;&#20102;&#20004;&#20010;&#26041;&#38754;&#65292;&#19968;&#26159;&#25105;&#26377;&#26435;&#38480;&#21521;&#23545;&#26041;&#30340;80 &#31471;&#21475;&#21457;&#20986;&#35831;&#27714;&#65292;&#20108;&#26159;&#26377;&#26435;&#38480;&#20174;&#23545;&#26041;&#30340;80 &#31471;&#21475;&#21462;&#24471;&#25968;&#25454;&#65292;&#36825;&#37324;&#21482;&#35268;&#23450;&#23545;&#26041;&#30340;80 &#31471;&#21475;&#65292;&#32780;&#27809;&#26377;&#35268;&#23450;&#25105;&#20174;&#21738;&#20010;&#31471;&#21475;&#21435;&#35775;&#38382;&#23427;&#30340;80 ,&#24847;&#21619;&#30528;&#25105;&#21487;&#20197;&#20174;&#20219;&#24847;&#31471;&#21475;&#35775;&#38382;&#23545;&#26041;&#30340;80&#31471;&#21475;,&#36825;&#37324;&#31471;&#21475;&#37117;&#26159;tcp &#31867;&#22411;&#30340;</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#20801;&#35768;&#25105;&#21521;&#23545;&#26041;&#30340;80 &#31471;&#21475;&#21457;&#20986;&#35831;&#27714;</span>
+iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#20801;&#35768;&#23545;&#26041;&#30340;80 &#31471;&#21475;&#21521;&#25105;&#36820;&#22238;&#25968;&#25454;</span>
+iptables -A INPUT -p tcp --sport 80 -j ACCEPT
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#34429;&#28982;&#25105;&#20204;&#27492;&#26102;&#21487;&#20197;&#35775;&#38382;&#23545;&#26041;&#30340;80 &#31471;&#21475;&#65292;&#20294;&#26159;&#25105;&#20204;&#22312;&#27983;&#35272;&#22120;&#20013;&#36755;&#20837;www.baidu.com &#24182;&#19981;&#33021;&#26174;&#31034;&#23545;&#26041;&#30340;&#32593;&#39029;&#65292;&#20294;&#26159;http://202.108.22.142/ &#30830;&#21487;&#20197;&#12290;&#22240;&#20026;&#22312;&#36825;&#20010;&#36807;&#31243;&#20013;&#36824;&#35201;&#36827;&#34892;dns&#22495;&#21517;&#35299;&#26512;,&#21448;&#35201;&#26377;&#21478;&#19968;&#20010;&#26435;&#38480;&#65292;&#37027;&#23601;&#26159;&#20801;&#35768;&#25105;&#21521;dns server &#30340;udp 53 &#31471;&#21475;&#35831;&#27714;&#65292;&#24182;&#20801;&#35768;&#20174;&#23427;&#36820;&#22238;&#25968;&#25454;</span>
+ iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+ iptables -A INPUT -p udp --sport 53 -j ACCEPT
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#36825;&#37324;&#27809;&#26377;&#25351;&#23450;dns server &#30340;ip &#22320;&#22336;&#65292;&#22914;&#26524;&#24819;&#36793;dns server &#30340;ip &#20063;&#20570;&#38480;&#23450;&#30340;&#35805;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#21487;&#20197;&#36825;&#26679;&#20889;</span>
+ iptables -A OUTPUT -p udp -d 211.64.208.1 --dport 53 -j ACCEPT
+ iptables -A INPUT -p udp -s 211.64.208.1  --sport 53 -j ACCEPT
+
+<span style="color: #AEAEAE;">#</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#25105;&#26657;&#22253;&#32593;&#29992;drcom &#36827;&#34892;&#27969;&#37327;&#35745;&#36153;&#35201;&#24320;upd 61440 &#31471;&#21475;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">drcom</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#20801;&#35768;211.64.208.160 &#20174;&#23427;&#30340;61440 (sport) &#31471;&#21475;&#36830;&#25509;&#21040;&#25105;&#30340;&#26426;&#22120;&#30340;61440 (dport)</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-s &#34920;&#31034;&#28304;&#65292;&#34920;&#31034;&#20174;&#21738;&#21488;&#26426;&#22120;&#21521;&#25105;&#21457;&#36865;&#25968;&#25454;</span>
+iptables -A INPUT  -p udp --sport 61440 --dport 61440 -s 211.64.208.160 -j ACCEPT
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#20801;&#35768; &#25105;&#30340;&#26426;&#22120; &#20174;61440(sport) &#31471;&#21475; &#21521;211.64.208.160 &#30340;61440(dport)&#31471;&#21475;&#21457;&#36865;&#25968;&#25454;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-d &#25351;&#23450;&#23545;&#26041;&#26426;&#22120;(&#30446;&#26631;&#26426;&#22120;)</span>
+iptables -A OUTPUT  -p udp --sport 61440 --dport 61440 -d 211.64.208.160 -j ACCEPT
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#30446;&#21069;&#20026;&#27490;&#65292;&#37117;&#26159;&#20316;&#20026;&#19968;&#20010;&#23458;&#25143;&#21435;&#35775;&#38382;&#21035;&#20154;&#65292;&#22914;&#26524;&#25105;&#35201;&#22312;&#25105;&#30340;&#30005;&#33041;&#19978;&#26550;&#35774;&#20010;&#26381;&#21153;&#22120;&#21448;&#24403;&#22914;&#20309;&#21602;&#65292;&#27604;&#22914;&#26550;&#35774;sshd &#21450;web &#26381;&#21153;&#22120;</span>
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">web&#26381;&#21153;&#22120;&#65292;&#24320;&#25918;80&#31471;&#21475;</span>
+iptables -A INPUT -p tcp  --dport 80 -j ACCEPT
+iptables -A OUTPUT  -p tcp  --sport 80 -j ACCEPT
+
+
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#24320;&#25918;ftp &#26381;&#21153;</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">iptables -A INPUT -m state &#8211;state ESTABLISHED,RELATED -j ACCEPT</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#20801;&#35768;&#36830;&#25509;&#20445;&#25345;&#30340;&#34987;&#21160;&#35775;&#38382;&#12290;</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">ftp&#21327;&#35758;&#26159;&#19968;&#20010;&#31616;&#21333;&#12289;&#20445;&#23494;&#24615;&#24046;&#65288;&#26126;&#30721;&#65289;&#30340;tcp&#21327;&#35758;&#65292;&#23427;&#30340;&#24037;&#20316;&#21407;&#29702;&#26159;&#23458;&#25143;&#31471;&#20808;&#36830;&#26381;&#21153;&#22120;&#31471;&#30340;21&#31471;&#21475;&#65292;&#28982;&#21518;&#32463;&#36807;3&#27493;&#30340;&#25569;&#25163;&#20197;&#21518;&#24314;&#31435;&#20102;&#19968;&#26465;&#36830;&#25509;&#12290;&#35201;&#27880;&#24847;&#30340;&#26159;&#65292;&#36825;&#26465;&#36830;&#25509;&#21482;&#21487;&#20197;&#29992;&#26469;&#20256;&#36755;ftp&#30340;&#21629;&#20196;&#65292;&#21482;&#26377;&#36825;&#26465;&#36830;&#25509;&#30340;&#35805;&#26159;&#20160;&#20040;&#37117;&#20256;&#19981;&#20102;&#30340;&#65292;&#23601;&#31639;&#26159;&#29992;&#8220;ls&#8221;&#21629;&#20196;&#26469;&#26597;&#30475;&#25991;&#20214;&#20063;&#19981;&#34892;&#12290;</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#24314;&#31435;&#20102;&#21629;&#20196;&#30340;&#36830;&#25509;&#20197;&#21518;&#65292;&#26381;&#21153;&#22120;&#31471;&#23601;&#35201;&#24314;&#31435;&#19968;&#26465;&#25968;&#25454;&#30340;&#36830;&#25509;&#12290;&#25968;&#25454;&#30340;&#36830;&#25509;&#21448;&#20998;&#20026;&#20027;&#21160;&#27169;&#24335;&#65288;port&#65289;&#21644;&#34987;&#21160;&#27169;&#24335;&#65288;passive&#65289;&#12290;ftp&#40664;&#35748;&#26159;&#34987;&#21160;&#27169;&#24335;&#65292;&#20027;&#21160;&#21644;&#34987;&#21160;&#20043;&#38388;&#20351;&#29992;"pass"&#21629;&#20196;&#20999;&#25442;&#12290;&#20027;&#21160;&#27169;&#24335;&#36890;&#36807;20&#31471;&#21475;&#19982;&#23458;&#25143;&#31471;&#30456;&#36830;&#65292;&#32780;&#34987;&#21160;&#27169;&#24335;&#21364;&#20351;&#29992;1024&#20197;&#21518;&#30340;&#31471;&#21475;&#19982;&#23458;&#25143;&#31471;&#30456;&#36830;&#12290;&#30001;&#20110;1024&#20197;&#21518;&#30340;&#31471;&#21475;&#26159;&#38543;&#26426;&#20998;&#37197;&#30340;&#65292;&#25152;&#20197;&#22312;&#34987;&#21160;&#27169;&#24335;&#19979;&#25105;&#20204;&#26159;&#19981;&#30693;&#36947;&#26381;&#21153;&#31471;&#26159;&#20351;&#29992;&#20160;&#20040;&#31471;&#21475;&#19982;&#23458;&#25143;&#31471;&#36830;&#25509;&#30340;&#12290;&#20063;&#23601;&#26159;&#35828;&#65292;&#25105;&#20204;&#26159;&#19981;&#30693;&#36947;iptables&#35201;&#24320;&#25918;&#20160;&#20040;&#31471;&#21475;&#12290;</span>
+<span style="color: #AEAEAE;">#</span>
+<span style="color: #AEAEAE;">#</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">1 &#22312;/etc/conf.d/iptables&#37197;&#32622;&#25991;&#20214;&#20013; &#21152;&#20837; &#22914;&#19979;&#35821;&#21477;(&#19981;&#21516;&#21457;&#34892;&#29256;&#21487;&#33021;&#25991;&#20214;&#20301;&#32622;&#19981;&#21516;)</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">IPTABLES_MODULES="ip_conntrack_ftp"</span>
+<span style="color: #AEAEAE;">#</span>
+iptables -A INPUT  -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+iptables -A INPUT -p tcp --dport 21 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 21 -j ACCEPT
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#20027;&#21160;&#27169;&#24335;&#20351;&#29992;20&#31471;&#21475;</span>
+iptables -A OUTPUT -p tcp --sport 20 -j ACCEPT
+iptables -A INPUT -p tcp --dport 20 -j ACCEPT
+
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#23545;&#20110;lo &#35774;&#22791;&#30340;&#25968;&#25454;&#21253;&#37117;&#25918;&#34892; &#65292;&#20063;&#23601;&#26159;&#26412;&#26426;&#25968;&#25454; -i &#34920;&#31034;&#36755;&#20837;&#65292;-o &#34920;&#31034;&#36755;&#20986;</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#34920;&#31034;&#25152;&#26377;&#20174;lo &#26469;&#30340;&#25968;&#25454;accept</span>
+iptables  -t filter  -I  INPUT l -i lo  -j ACCEPT
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#34920;&#31034;&#27969;&#21521;lo &#30340;&#25968;&#25454;accept</span>
+iptables  -t filter  -I   OUTPUT 1 -o lo  -j ACCEPT
+<span style="color: #AEAEAE;">#</span>
+<span style="color: #AEAEAE;">#</span>
+<span style="color: #AEAEAE;">#</span>
+<span style="color: #AEAEAE;">#</span>
+
+
+&#21478;&#22806;&#33509;&#26159;&#36305;&#30340; iptables rule &#24456;&#38271;&#30340;&#35805;, &#19968;&#33324;&#35201;&#25645;&#37197; -N &#24314;&#31435;&#19981;&#21516;&#30340; chain &#26469;&#36339;&#36291;&#21628;&#21483;&#20351;&#29992;, &#36825;&#26679;&#25928;&#29575;&#25165;&#20250;&#22909;.
+&#27604;&#26041;&#24120;&#35265;&#19968;&#33324;&#20363;&#23376;&#35828;&#26126;:
+iptables -A INPUT -p tcp -s 192.168.1.1 -p tcp --dport 25 -j DROP
+iptables -A INPUT -p tcp -s 192.168.1.10 -p tcp --dport 25 -j DROP
+iptables -A INPUT -p tcp -s 192.168.1.20 -p tcp --dport 25 -j DROP
+iptables -A INPUT -p tcp -s 192.168.1.30 -p tcp --dport 25 -j DROP
+
+&#36825;&#20010;&#36890;&#24120;&#21487;&#20197;&#25913;&#25104;:
+iptables -N BAN_INPUT_PORT25
+iptables -A BAN_INPUT_PORT25 -p tcp -s 192.168.1.1 -j DROP
+iptables -A BAN_INPUT_PORT25 -p tcp -s 192.168.1.10 -j DROP
+iptables -A BAN_INPUT_PORT25 -p tcp -s 192.168.1.20 -j DROP
+iptables -A BAN_INPUT_PORT25 -p tcp -s 192.168.1.30 -j DROP
+iptables -A INPUT -p tcp --dport 25 -j BAN_INPUT_PORT25
+
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#38450;&#27490;DoS&#25915;&#20987;</span>
+iptables -A INPUT -p tcp --dport 22 -m limit --limit 25/minute --limit-burst 20 -j ACCEPT
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-m limit: &#21551;&#29992;limit&#25193;&#23637;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#8211;limit 25/minute: &#20801;&#35768;&#26368;&#22810;&#27599;&#20998;&#38047;25&#20010;&#36830;&#25509;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#8211;limit-burst 20: &#24403;&#36798;&#21040;20&#20010;&#36830;&#25509;&#21518;&#65292;&#25165;&#21551;&#29992;&#19978;&#36848;25/minute&#38480;&#21046;</span>
+
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#20851;&#20110;&#22320;&#22336;&#36716;&#25442;&#65292;&#19968;&#33324;&#26159;&#22312;&#32593;&#20851;&#19978;&#20316;&#25805;&#20316;&#65292;&#32593;&#20851;&#19978;&#19968;&#33324;&#26377;&#20004;&#20010;&#32593;&#21345;&#65292;&#19968;&#20010;&#26377;&#22806;&#32593;&#30340;&#22320;&#22336;&#65292;&#21487;&#20197;&#19982;&#22806;&#32593;&#20114;&#35775;&#65292;&#19968;&#20010;&#26377;&#20869;&#32593;&#30340;ip&#65292;&#21487;&#20197;&#19982;&#20869;&#32593;&#20114;&#35775;&#12290;&#38656;&#35201;&#22320;&#22336;&#36716;&#25442;&#30340;&#24773;&#20917;&#65306;&#26381;&#21153;&#26550;&#35774;&#22312;&#20869;&#32593;&#30340;&#26576;&#21488;&#26426;&#19978;&#65292;&#22806;&#32593;&#36890;&#36807;&#35775;&#38382;&#32593;&#20851;&#30340;80&#31471;&#21475;&#65292;&#21017;&#35748;&#20026;&#26159;&#35775;&#38382;&#36825;&#21488;&#20869;&#32593;&#30340;80&#31471;&#21475;&#65292;&#21363;&#20445;&#25252;&#20869;&#32593;&#26381;&#21153;&#22120;&#65292;&#21478;&#19968;&#31181;&#24773;&#20917;&#65292;&#20869;&#32593;&#26426;&#22120;&#35775;&#38382;&#22806;&#32593;&#65292;&#21017;&#23558;&#20869;&#32593;&#21457;&#20986;&#30340;&#25968;&#25454;&#21253;&#30340;&#28304;&#22320;&#22336;&#25913;&#25104;&#21487;&#20197;&#22806;&#32593;&#35775;&#38382;&#30340;&#20844;&#32593;ip(&#32593;&#20851;&#30340;&#22320;&#22336;),</span>
+&#20869;&#32593;&#35775;&#38382;&#22806;&#32593;&#65292;&#20316;&#28304;&#22320;&#22336;&#36716;&#25442;&#65292;&#21363;&#23558;&#21457;&#20986;&#21435;&#30340;&#25968;&#25454;&#21253;&#30340;&#28304;&#22320;&#22336;&#25913;&#25104;&#22806;&#32593;&#35782;&#21035;&#25105;&#32593;&#20851;&#30340;&#22320;&#22336;&#65292;&#22312;POSTROUTING &#38142;&#19978;&#20570;&#28304;&#22320;&#22336;&#36716;&#25442;
+iptables -t nat -A POSTROUTING  -s 192.168.0.0/24 -j  SNAT --to 192.168.1.1(&#32593;&#20851;&#30340;ip)
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#20063;&#21487;&#20197;&#19981;&#20855;&#20307;&#25351;&#23450;&#32593;&#20851;&#30340;ip ,&#22312;&#32593;&#20851;ip&#32463;&#24120;&#21464;&#21160;&#30340;&#24773;&#20917;&#19979;,masquerade ,&#20266;&#35013;&#30340;&#24847;&#24605;&#65292;&#34920;&#31034;&#20266;&#35013;&#25104;&#32593;&#20851;&#30340;ip</span>
+iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -j MASQUERADE
+
+&#22806;&#32593;&#35775;&#38382;&#20869;&#32593;&#65306;&#19968;&#33324;&#20316;&#26381;&#21153;&#22120;&#29992;&#30340;&#26102;&#20505;&#65292;&#36825;&#31181;&#24773;&#20917;&#19968;&#33324;&#26159;&#35775;&#38382;&#32593;&#20851;&#30340;&#26576;&#20010;&#31471;&#21475;&#65292;&#28982;&#21518;&#32593;&#20851;&#30340;iptables &#23558;&#23427;&#26144;&#23556;&#25104;&#20869;&#32593;&#26576;&#21488;&#26426;&#22120;&#30340;&#23545;&#24212;&#30340;&#31471;&#21475;
+&#36825;&#20010;&#26102;&#20505;&#27983;&#35272;&#37324;&#36755;&#20837;http://192.168.1.1:80 &#23454;&#38469;&#26159;&#35775;&#38382;&#20869;&#32593;&#30340;http://192.168.0.100:80 ,&#22240;&#20026;&#26159;&#20869;&#32593;&#65292;&#25152;&#20197;&#22806;&#32593;&#30452;&#25509;&#36755;&#20837;
+http://192.168.0.100:80 &#26159;&#26080;&#27861;&#35775;&#38382;&#30340;,192.168.1.1 &#26159;&#32593;&#20851;&#65292;&#20063;&#23601;&#26159;&#26412;&#26426;
+iptables -t nat -A PREROUTING -d 192.168.1.1 --dport 80 -j DNAT --to 192.168.0.100:80
+
+
+
+
+
+
+&#23436;&#25972;&#30340;&#33050;&#26412;:
+sudo /etc/init.d/iptables save
+sudo /etc/init.d/iptable restart
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#28165;&#31354;&#34920;&#20013;&#35268;&#21017;&#38142;</span>
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#36825;&#37324;&#23545;&#24050;&#32463;&#24314;&#31435;&#36830;&#25509;&#30340;&#21253;&#30452;&#25509;&#25918;&#34892;&#65292;&#20197;&#25552;&#39640;iptables &#25928;&#29575;(&#27492;&#26465;&#35268;&#21017;&#36890;&#24120;&#25918;&#22312;&#31532;&#19968;&#26465;)</span>
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#24320;&#25918;sshd&#26381;&#21153;</span>
+iptables -A INPUT  -p tcp --dport 22      -j ACCEPT
+iptables -A OUTPUT  -p tcp --sport 22      -j ACCEPT
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#40664;&#35748;drop &#25152;&#26377;&#21253;</span>
+iptables -P INPUT  DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#26412;&#26426;&#35774;&#22791;&#25918;&#34892;</span>
+iptables  -t filter  -I  INPUT 1 -i lo  -j ACCEPT
+iptables  -t filter  -I   OUTPUT 1 -o lo  -j ACCEPT
+
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">dns &#26381;&#21153;&#22120;</span>
+iptables -A INPUT -p udp --sport 53 -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -p tcp --sport 53 -j ACCEPT
+iptables -A INPUT -p tcp --dport 53 -j ACCEPT
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">dns</span>
+ iptables -A OUTPUT -p udp   --dport 53 -j ACCEPT
+ iptables -A INPUT -p udp --sport 53  -j ACCEPT
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#19978;&#32593;</span>
+iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --sport 80 -j ACCEPT
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">drcom</span>
+iptables -A INPUT  -p udp --sport 61440 --dport 61440 -s 211.64.208.160 -j ACCEPT
+iptables -A OUTPUT  -p udp --sport 61440 --dport 61440 -d 211.64.208.160 -j ACCEPT
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">ftp</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#22312;&#37197;&#32622;&#25991;&#20214;&#20013;&#21152;&#20837;  IPTABLES_MODULES="ip_conntrack_ftp"</span>
+iptables -I INPUT  2 -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -I OUTPUT 2  -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -p tcp --dport 21 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 21 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 20 -j ACCEPT
+iptables -A INPUT -p tcp --dport 20 -j ACCEPT
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">web &#26381;&#21153;</span>
+Alearcla
+e
+extexi
+iptables -A INPUT -p tcp  --dport 80 -j ACCEPT
+iptables -A OUTPUT  -p tcp  --sport 80 -j ACCEPT
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">dhcp &#65292;&#20351;&#29992;dhcp &#33719;&#24471;ip ,</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">dhcp</span>
+iptables -A INPUT -p udp --sport 67 --dport 68 -j ACCEPT
+</pre>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-04-29</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/linux/">Linux</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/iptables.html";
+          var disqus_url = "http://jixiuf.github.io/blog/iptables.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>emacs字体 配色相关的配置 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="emacs字体 配色相关的配置" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>emacs字体 配色相关的配置</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org5cdda72">字体相关配置</a></li>
+<li><a href="#orgccc7b28">我的emacs 配色(暗色系)</a></li>
+<li><a href="#org3ed228d">查看当前字体信息</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org5cdda72" class="outline-2">
+<h2 id="org5cdda72">字体相关配置</h2>
+<div class="outline-text-2" id="text-org5cdda72">
+<blockquote>
+<p>
+如果配置好了， 下面20个汉字与40个英文字母应该等长<br />
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa|<br />
+你你你你你你你你你你你你你你你你你你你你|<br />
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,|<br />
+。。。。。。。。。。。。。。。。。。。。|<br />
+1111111111111111111111111111111111111111|<br />
+東東東東東東東東東東東東東東東東東東東東|<br />
+ここここここここここここここここここここ|<br />
+ｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺｺ|<br />
+까까까까까까까까까까까까까까까까까까까까|<br />
+</p>
+</blockquote>
+<p>
+默认mac 下的emacs 字体设置已经非常好了， 不需要额外的配置<br />
+<a href="http://zhuoqiang.me/torture-emacs.html">http://zhuoqiang.me/torture-emacs.html</a> 这里有关于如何配字体的一篇文件<br />
+感觉还不错 可以参考下<br />
+<img src="/assets/blog/00009-emacs-theme.html/emacs-font.jpg" alt="emacs-font.jpg" /><br />
+</p>
+</div>
+</div>
+<div id="outline-container-orgccc7b28" class="outline-2">
+<h2 id="orgccc7b28">我的emacs 配色(暗色系)</h2>
+<div class="outline-text-2" id="text-orgccc7b28">
+<p>
+<img src="/assets/blog/00009-emacs-theme.html/emacs-color.jpg" alt="emacs-color.jpg" /><br />
+具体的配置可以参见<a href="https://github.com/jixiuf/emacs_conf/blob/master/site-lisp/joseph/custom-file.el">https://github.com/jixiuf/emacs_conf/blob/master/site-lisp/joseph/custom-file.el</a><br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq-default</span> window-system-default-frame-alist
+              '( (x <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">if frame created on x display</span>
+                  (alpha . 93)
+                  (cursor-color . <span style="color: #ffa07a;">"green"</span>)
+                  )
+                 (ns <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">if frame created on mac</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(border-color . "black")</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(cursor-color . "green")</span>
+                  (alpha . 93)
+                  (height . 55)
+                  (width . 150)
+                  (left . 200)
+                  (top . 20)
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(foreground-color . "green")</span>
+                  <span style="color: #AEAEAE;">;;  </span><span style="color: #AEAEAE;">(background-color . "black") ;;</span>
+                  <span style="color: #AEAEAE;">;;  </span><span style="color: #AEAEAE;">;; (background-color . "#263111")</span>
+                  <span style="color: #AEAEAE;">;;  </span><span style="color: #AEAEAE;">(cursor-color . "green")</span>
+                  <span style="color: #AEAEAE;">;;  </span><span style="color: #AEAEAE;">(mouse-color ."gold")</span>
+                  <span style="color: #AEAEAE;">;;  </span><span style="color: #AEAEAE;">(mouse-color . "Gainsboro")</span>
+                  <span style="color: #AEAEAE;">;;         </span><span style="color: #AEAEAE;">(font . "-unknown-DejaVu Sans Mono-normal-normal-normal-*-15-*-*-*-m-0-iso10646-1")</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(font . "fontset-mymac")</span>
+                  <span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">(font . "Menlo-14")</span>
+                  )
+                 (w32
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(font . "fontset-w32")</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(background-color . "#0C1021")</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(background-mode . dark)</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(border-color . "black")</span>
+                  (alpha . 95)
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(cursor-color . "#A7A7A7")</span>
+                  (cursor-color . <span style="color: #ffa07a;">"green"</span>)
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(foreground-color . "#F8F8F8")</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(mouse-color . "sienna1")</span>
+
+                  (height . 30)
+                  (width . 100)
+                  (left . 200)
+                  (top . 20)
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(visibility . nil)</span>
+                  <span style="color: #AEAEAE;">;;         </span><span style="color: #AEAEAE;">(font . "fontset-gbk")</span>
+                  )
+                 (nil <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">if on term</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(background-color . "#0C1021")</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(background-mode . dark)</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(border-color . "black")</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(cursor-color . "#A7A7A7")</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(cursor-color . "green")</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(foreground-color . "#F8F8F8")</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(mouse-color . "sienna1")</span>
+                  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">(font . "fontset-mymac")</span>
+                  )))
+
+(custom-set-faces
+ <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">custom-set-faces was added by Custom.</span>
+ <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">If you edit it by hand, you could mess it up, so be careful.</span>
+ <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">Your init file should contain only one such instance.</span>
+ <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">If there is more than one, they won't work right.</span>
+ '(default ((t (<span style="color: #F8F8F8;">:inherit</span> nil <span style="color: #F8F8F8;">:stipple</span> nil <span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"#222"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#eeeeec"</span> <span style="color: #F8F8F8;">:inverse-video</span> nil <span style="color: #F8F8F8;">:box</span> nil <span style="color: #F8F8F8;">:strike-through</span> nil <span style="color: #F8F8F8;">:overline</span> nil <span style="color: #F8F8F8;">:underline</span> nil <span style="color: #F8F8F8;">:slant</span> normal <span style="color: #F8F8F8;">:weight</span> normal <span style="color: #F8F8F8;">:height</span> 1 <span style="color: #F8F8F8;">:width</span> normal <span style="color: #F8F8F8;">:foundry</span> <span style="color: #ffa07a;">"default"</span> <span style="color: #F8F8F8;">:family</span> <span style="color: #ffa07a;">"default"</span>))))
+ '(buffers-tab ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"#0C1021"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#F8F8F8"</span>))))
+ '(completions-common-part ((t (<span style="color: #F8F8F8;">:inherit</span> default <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Cyan"</span>))))
+ '(completions-first-difference ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"black"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Gold2"</span> <span style="color: #F8F8F8;">:weight</span> extra-bold <span style="color: #F8F8F8;">:height</span> 1.3))))
+ '(cursor ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"tomato"</span>))))
+ '(custom-comment-tag ((t (<span style="color: #F8F8F8;">:inherit</span> default))))
+ '(custom-face-tag ((t (<span style="color: #F8F8F8;">:inherit</span> default))))
+ '(custom-group-tag ((t (<span style="color: #F8F8F8;">:inherit</span> variable-pitch <span style="color: #F8F8F8;">:weight</span> bold <span style="color: #F8F8F8;">:height</span> 1.2))))
+ '(custom-variable-tag ((t (<span style="color: #F8F8F8;">:inherit</span> default <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(diff-added ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"OliveDrab1"</span>))))
+ '(diff-changed ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"yellow"</span>))))
+ '(diff-context ((t (<span style="color: #F8F8F8;">:inherit</span> default))))
+ '(diff-file-header ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"tan1"</span>))))
+ '(diff-function ((t (<span style="color: #F8F8F8;">:inherit</span> diff-header <span style="color: #F8F8F8;">:inverse-video</span> t))))
+ '(diff-header ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"light steel blue"</span>))))
+ '(diff-hunk-header ((t (<span style="color: #F8F8F8;">:inherit</span> diff-header <span style="color: #F8F8F8;">:inverse-video</span> t))))
+ '(diff-index ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Magenta"</span>))))
+ '(diff-nonexistent ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"yellow"</span>))))
+ '(diff-refine-added ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray26"</span>))))
+ '(diff-refine-changed ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray26"</span>))))
+ '(diff-refine-removed ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray26"</span>))))
+ '(diff-removed ((t (<span style="color: #F8F8F8;">:inherit</span> font-lock-comment-face <span style="color: #F8F8F8;">:slant</span> italic))))
+ '(dired-directory ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"Blue4"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"gray"</span>))))
+ '(ediff-current-diff-A ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"dark cyan"</span>))))
+ '(ediff-current-diff-Ancestor ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"dark red"</span>))))
+ '(ediff-current-diff-B ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"chocolate4"</span>))))
+ '(ediff-current-diff-C ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"sea green"</span>))))
+ '(ediff-even-diff-A ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray33"</span>))))
+ '(ediff-even-diff-Ancestor ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray40"</span>))))
+ '(ediff-even-diff-B ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray35"</span>))))
+ '(ediff-even-diff-C ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray49"</span>))))
+ '(ediff-fine-diff-A ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"cadet blue"</span>))))
+ '(ediff-fine-diff-Ancestor ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"sienna1"</span>))))
+ '(ediff-fine-diff-B ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"SlateGray4"</span>))))
+ '(ediff-fine-diff-C ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"saddle brown"</span>))))
+ '(ediff-odd-diff-A ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray49"</span>))))
+ '(ediff-odd-diff-B ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray50"</span>))))
+ '(ediff-odd-diff-C ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray30"</span>))))
+ '(erc-command-indicator-face ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"Purple"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(erc-direct-msg-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Yellow"</span>))))
+ '(erc-header-line ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"GreenYellow"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Gold"</span>))))
+ '(erc-input-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Cyan2"</span>))))
+ '(erc-my-nick-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Goldenrod"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(erc-nick-default-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Chartreuse"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(erl-fdoc-name-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"green"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(<span style="color: #ffc0cb;">error</span> ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"red"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(flymake-errline ((t (<span style="color: #F8F8F8;">:inherit</span> error <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"red"</span>))))
+ '(font-lock-builtin-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#F8F8F8"</span>))))
+ '(font-lock-comment-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#AEAEAE"</span>))))
+ '(font-lock-constant-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#D8FA3C"</span>))))
+ '(font-lock-doc-string-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"DarkOrange"</span>))))
+ '(font-lock-done-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Green"</span> <span style="color: #F8F8F8;">:box</span> (<span style="color: #F8F8F8;">:line-width</span> 2 <span style="color: #F8F8F8;">:color</span> <span style="color: #ffa07a;">"grey75"</span> <span style="color: #F8F8F8;">:style</span> released-button) <span style="color: #F8F8F8;">:height</span> 1.2))) t)
+ '(font-lock-function-name-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#FF6400"</span>))))
+ '(font-lock-keyword-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#FBDE2D"</span>))))
+ '(font-lock-preprocessor-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Aquamarine"</span>))))
+ '(font-lock-reference-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"SlateBlue"</span>))))
+ '(font-lock-regexp-grouping-backslash ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#E9C062"</span>))))
+ '(font-lock-regexp-grouping-construct ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"red"</span>))))
+ '(font-lock-string-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"light salmon"</span>))))
+ '(font-lock-todo-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Red"</span> <span style="color: #F8F8F8;">:box</span> (<span style="color: #F8F8F8;">:line-width</span> 2 <span style="color: #F8F8F8;">:color</span> <span style="color: #ffa07a;">"grey75"</span> <span style="color: #F8F8F8;">:style</span> released-button) <span style="color: #F8F8F8;">:height</span> 1.2))) t)
+ '(font-lock-type-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#8DA6CE"</span>))))
+ '(font-lock-variable-name-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#40E0D0"</span>))))
+ '(font-lock-warning-face ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Pink"</span>))))
+ '(gui-element ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"#D4D0C8"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"black"</span>))))
+ '(helm-grep-file ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"cyan1"</span> <span style="color: #F8F8F8;">:underline</span> t))))
+ '(helm-match ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"gold1"</span>))))
+ '(helm-selection ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray26"</span> <span style="color: #F8F8F8;">:underline</span> t))))
+ '(helm-source-header ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray46"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"yellow"</span> <span style="color: #F8F8F8;">:weight</span> bold <span style="color: #F8F8F8;">:height</span> 1.3 <span style="color: #F8F8F8;">:family</span> <span style="color: #ffa07a;">"Sans Serif"</span>))))
+ '(helm-visible-mark ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray43"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"orange1"</span>))))
+ '(highlight ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"darkolivegreen"</span>))))
+ '(highline-face ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"SeaGreen"</span>))))
+ '(hl-paren-face ((t (<span style="color: #F8F8F8;">:overline</span> t <span style="color: #F8F8F8;">:underline</span> t <span style="color: #F8F8F8;">:weight</span> extra-bold))) t)
+ '(isearch ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"seashell4"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"green1"</span>))))
+ '(joseph-scroll-highlight-line-face ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"cadetblue4"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"white"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(linum ((t (<span style="color: #F8F8F8;">:inherit</span> (shadow default) <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"green"</span>))))
+ '(linum-relative-current-face ((t (<span style="color: #F8F8F8;">:inherit</span> linum <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#FBDE2D"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(linum-relative-face ((t (<span style="color: #F8F8F8;">:inherit</span> linum <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"dark gray"</span>))))
+ '(log-view-file ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"DodgerBlue"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(log-view-message ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Goldenrod"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(magit-branch ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Green"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(magit-branch-local ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"coral1"</span>))))
+ '(magit-branch-remote ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"green1"</span>))))
+ '(magit-diff-added ((t (<span style="color: #F8F8F8;">:inherit</span> diff-added))))
+ '(magit-diff-added-highlight ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray26"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"green4"</span>))))
+ '(magit-diff-context ((t (<span style="color: #F8F8F8;">:inherit</span> diff-context))))
+ '(magit-diff-file-heading ((t (<span style="color: #F8F8F8;">:inherit</span> diff-file-header))))
+ '(magit-diff-hunk-heading ((t (<span style="color: #F8F8F8;">:inherit</span> diff-hunk-header <span style="color: #F8F8F8;">:inverse-video</span> t))))
+ '(magit-diff-removed ((t (<span style="color: #F8F8F8;">:inherit</span> diff-removed))))
+ '(magit-header ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"DodgerBlue"</span>))))
+ '(magit-log-author ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Green"</span>))))
+ '(magit-log-date ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"cyan"</span>))))
+ '(magit-section-heading ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"gray29"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(minibuffer-prompt ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"salmon1"</span>))))
+ '(mode-line ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"grey75"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"black"</span>))))
+ '(mode-line-buffer-id ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"dark olive green"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"beige"</span>))))
+ '(mode-line-highlight ((((class color) (min-colors 88)) nil)))
+ '(mode-line-inactive ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"dark olive green"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"dark khaki"</span> <span style="color: #F8F8F8;">:weight</span> light))))
+ '(org-agenda-date ((t (<span style="color: #F8F8F8;">:inherit</span> org-agenda-structure))) t)
+ '(org-agenda-date-today ((t (<span style="color: #F8F8F8;">:inherit</span> org-agenda-date <span style="color: #F8F8F8;">:underline</span> t))) t)
+ '(org-agenda-date-weekend ((t (<span style="color: #F8F8F8;">:inherit</span> org-agenda-date <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"green"</span>))) t)
+ '(org-agenda-done ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#269926"</span>))))
+ '(org-agenda-restriction-lock ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"#FFB273"</span>))))
+ '(org-agenda-structure ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#4671D5"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(org-date ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"medium sea green"</span> <span style="color: #F8F8F8;">:underline</span> t))))
+ '(org-document-info ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"tomato1"</span>))))
+ '(org-document-title ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"orchid1"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(org-done ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#008500"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(org-drawer ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"purple1"</span>))))
+ '(org-ellipsis ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#FF7400"</span> <span style="color: #F8F8F8;">:underline</span> t))))
+ '(org-footnote ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#1240AB"</span> <span style="color: #F8F8F8;">:underline</span> t))))
+ '(org-hide ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"gray20"</span>))))
+ '(org-level-1 ((t (<span style="color: #F8F8F8;">:inherit</span> outline-1 <span style="color: #F8F8F8;">:box</span> nil))))
+ '(org-level-2 ((t (<span style="color: #F8F8F8;">:inherit</span> outline-2 <span style="color: #F8F8F8;">:box</span> nil))))
+ '(org-level-3 ((t (<span style="color: #F8F8F8;">:inherit</span> outline-3 <span style="color: #F8F8F8;">:box</span> nil))))
+ '(org-level-4 ((t (<span style="color: #F8F8F8;">:inherit</span> outline-4 <span style="color: #F8F8F8;">:box</span> nil))))
+ '(org-level-5 ((t (<span style="color: #F8F8F8;">:inherit</span> outline-5 <span style="color: #F8F8F8;">:box</span> nil))))
+ '(org-level-6 ((t (<span style="color: #F8F8F8;">:inherit</span> outline-6 <span style="color: #F8F8F8;">:box</span> nil))))
+ '(org-level-7 ((t (<span style="color: #F8F8F8;">:inherit</span> outline-7 <span style="color: #F8F8F8;">:box</span> nil))))
+ '(org-level-8 ((t (<span style="color: #F8F8F8;">:inherit</span> outline-8 <span style="color: #F8F8F8;">:box</span> nil))))
+ '(org-scheduled-previously ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#FF7400"</span>))))
+ '(org-tag ((t (<span style="color: #F8F8F8;">:weight</span> bold))))
+ '(org-todo ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"#FF6961"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(region ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"DarkSlateGray"</span>))))
+ '(text-cursor ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"yellow"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"black"</span>))))
+ '(tooltip ((t (<span style="color: #F8F8F8;">:inherit</span> variable-pitch <span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"systeminfowindow"</span> <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"DarkGreen"</span> <span style="color: #F8F8F8;">:height</span> 2.5))))
+ '(underline ((nil (<span style="color: #F8F8F8;">:underline</span> nil))))
+ '(vhl/default-face ((t (<span style="color: #F8F8F8;">:background</span> <span style="color: #ffa07a;">"DarkSlateGray"</span>))))
+ '(warning ((t (<span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Salmon"</span> <span style="color: #F8F8F8;">:weight</span> bold))))
+ '(web-mode-html-tag-bracket-face ((t (<span style="color: #F8F8F8;">:inherit</span> web-mode-html-tag-face))))
+ '(woman-addition ((t (<span style="color: #F8F8F8;">:inherit</span> font-lock-builtin-face <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Tan2"</span>))))
+ '(woman-bold ((t (<span style="color: #F8F8F8;">:inherit</span> bold <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"yellow2"</span>))))
+ '(woman-italic ((t (<span style="color: #F8F8F8;">:inherit</span> italic <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"green"</span>))))
+ '(woman-unknown ((t (<span style="color: #F8F8F8;">:inherit</span> font-lock-warning-face <span style="color: #F8F8F8;">:foreground</span> <span style="color: #ffa07a;">"Firebrick"</span>)))))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org3ed228d" class="outline-2">
+<h2 id="org3ed228d">查看当前字体信息</h2>
+<div class="outline-text-2" id="text-org3ed228d">
+<p>
+  把光标移动到某个字上,C-uC-x=<br />
+ 会显示出此文字的详细信息,包括它的text-property<br />
+比如<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">             position: 51 of 6777 (1%), column: 0
+            character: a (displayed as a) (codepoint 97, <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">o141, #x61)</span>
+    preferred charset: ascii (ASCII (ISO646 IRV))
+code point<span style="color: #FBDE2D;"> in</span> charset: 0x61
+               syntax: w        which means: word
+             category: .:Base, L:Left-to-right (strong), a:ASCII, l:Latin, r:Roman
+          buffer code: <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">x61</span>
+            file code: <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">x61 (encoded by coding system utf-8)</span>
+              display: by this font (glyph code)
+    xft:-unknown-DejaVu Sans Mono-normal-normal-normal-*-15-*-*-*-m-0-iso10646-1 (<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">x44)</span>
+
+Character code properties: customize what to show
+  name: LATIN SMALL LETTER A
+  general-category: Ll (Letter, Lowercase)
+  decomposition: (97) (<span style="color: #ffa07a;">'a'</span>)
+
+There are text properties here:
+  fontified            t
+  helm-realvalue       [Show]
+  help-echo            <span style="color: #ffa07a;">"/home/jixiuf/documents/org/src/emacs/auto-insert-and-yasnippet.org"</span>
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2015-10-19</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/emacs/">Emacs</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/00009-emacs-theme.html";
+          var disqus_url = "http://jixiuf.github.io/blog/00009-emacs-theme.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

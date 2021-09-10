@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>cocos2dx HelloWorld - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="cocos2dx HelloWorld" />
+    <meta name="keywords" content="Cocos2dx" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>cocos2dx HelloWorld</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgabf178a">mac 上安装</a>
+<ul>
+<li><a href="#org5ff5099">如果要进行android 开发，</a></li>
+<li><a href="#org8278231">HelloWorld</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgabf178a" class="outline-2">
+<h2 id="orgabf178a">mac 上安装</h2>
+<div class="outline-text-2" id="text-orgabf178a">
+<p>
+git clone <a href="https://github.com/cocos2d/cocos2d-x.git">https://github.com/cocos2d/cocos2d-x.git</a><br />
+用下面两个命令 可以查看当前git 有哪些分支 ，与tag ,然后 决定用哪个版本<br />
+git branch -v -a<br />
+git tag<br />
+当前官网最新版是3.10，<br />
+所以 决定用 cocos2d-x-3.10 这个tag 内的代码<br />
+git checkout  cocos2d-x-3.10<br />
+</p>
+
+<p>
+python download-deps.py<br />
+似乎 官方要求python 版本是2.7.   3.x似乎不行。<br />
+会下载一些依赖的第3方库<br />
+git submodule update &#x2013;init<br />
+然后执行<br />
+python setup.py<br />
+执行此脚本后 会修改 .bash_profile 或 .zshrc ,在其中加入一些变量<br />
+如果进行android 开发，  ，需要安装好相应的<br />
+</p>
+</div>
+
+
+<div id="outline-container-org5ff5099" class="outline-3">
+<h3 id="org5ff5099">如果要进行android 开发，</h3>
+<div class="outline-text-3" id="text-org5ff5099">
+<p>
+执行python setup.py 之前  需要安装android sdk 与ndk<br />
+使用brew 安装即可<br />
+brew install android-sdk<br />
+brew install android-ndk<br />
+进行 android 开发 最好下载 android studio<br />
+</p>
+
+<p>
+并配置相应的变量<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">appendPath(newPath)</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#22914;&#26524;newPath &#24050;&#32463;&#22312;PATH&#19979;&#20102;&#65292; &#21017;&#19981;&#28155;&#21152;</span>
+<span style="color: #FF6400;">appendPath</span>(){
+    <span style="color: #40E0D0;">addPath</span>=<span style="color: #ffa07a;">"$1"</span>
+    <span style="color: #FBDE2D;">if</span> [ -d $<span style="color: #40E0D0;">addPath</span> ]; <span style="color: #FBDE2D;">then</span>
+        <span style="color: #40E0D0;">PATH</span>=<span style="color: #ffa07a;">"${PATH/:$addPath}"</span>     <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">remove if already there (&#21253;&#25324;&#20998;&#38548;&#31526;&#65292;)</span>
+        <span style="color: #40E0D0;">PATH</span>=<span style="color: #ffa07a;">"${PATH/$addPath}"</span>      <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">remove if already there (&#19981;&#21253;&#25324;&#20998;&#38548;&#31526;,&#20027;&#35201;&#22312;&#34892;&#39318;&#26102;)</span>
+        <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">PATH</span>=$<span style="color: #40E0D0;">PATH</span>:$<span style="color: #40E0D0;">addPath</span>
+    <span style="color: #FBDE2D;">fi</span>
+}
+<span style="color: #FF6400;">prependPath</span>(){
+    <span style="color: #40E0D0;">addPath</span>=<span style="color: #ffa07a;">"$1"</span>
+    <span style="color: #FBDE2D;">if</span> [ -d $<span style="color: #40E0D0;">addPath</span> ]; <span style="color: #FBDE2D;">then</span>
+        <span style="color: #40E0D0;">PATH</span>=<span style="color: #ffa07a;">"${PATH/:$addPath}"</span>     <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">remove if already there (&#21253;&#25324;&#20998;&#38548;&#31526;&#65292;)</span>
+        <span style="color: #40E0D0;">PATH</span>=<span style="color: #ffa07a;">"${PATH/$addPath}"</span>      <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">remove if already there (&#19981;&#21253;&#25324;&#20998;&#38548;&#31526;,&#20027;&#35201;&#22312;&#34892;&#39318;&#26102;)</span>
+        <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">PATH</span>=$<span style="color: #40E0D0;">addPath</span>:$<span style="color: #40E0D0;">PATH</span>
+    <span style="color: #FBDE2D;">fi</span>
+}
+
+<span style="color: #FBDE2D;">if</span> [ <span style="color: #ffa07a;">"$HOME/Library/Android/sdk"</span> ]; <span style="color: #FBDE2D;">then</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ANDROID_HOME</span>=$<span style="color: #40E0D0;">HOME</span>/Library/Android/sdk
+    appendPath <span style="color: #ffa07a;">"$HOME/Library/Android/sdk/platform-tools"</span>
+    appendPath <span style="color: #ffa07a;">"$HOME/Library/Android/sdk/tools"</span>
+<span style="color: #FBDE2D;">fi</span>
+<span style="color: #FBDE2D;">if</span> [ -d /usr/local/opt/android-sdk ]; <span style="color: #FBDE2D;">then</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ANDROID_HOME</span>=/usr/local/opt/android-sdk
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ANDROID_SDK_ROOT</span>=/usr/local/opt/android-sdk
+    prependPath <span style="color: #ffa07a;">"$ANDROID_HOME/bin"</span>
+    prependPath <span style="color: #ffa07a;">"$ANDROID_HOME/tools"</span>
+    prependPath <span style="color: #ffa07a;">"$ANDROID_HOME/platform-tools"</span>
+<span style="color: #FBDE2D;">fi</span>
+<span style="color: #FBDE2D;">if</span> [ -d /usr/local/opt/android-ndk ]; <span style="color: #FBDE2D;">then</span>
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">NDK_ROOT</span>=/usr/local/opt/android-ndk
+    <span style="color: #F8F8F8;">export</span> <span style="color: #40E0D0;">ANDROID_NDK_ROOT</span>=/usr/local/opt/android-ndk
+    prependPath <span style="color: #ffa07a;">"$NDK_ROOT/bin"</span>
+<span style="color: #FBDE2D;">fi</span>
+
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org8278231" class="outline-3">
+<h3 id="org8278231">HelloWorld</h3>
+<div class="outline-text-3" id="text-org8278231">
+<p>
+创建一个helloworld 项目<br />
+</p>
+
+<p>
+执行完 python setup.py 后， 重新打开一个terminal ,或者按其提示 执行相应的source ~/.bash_profile 或source ~/.zshrc<br />
+后 可以使用cocos 这个命令来创建项目<br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">cocos new MyGame -p com.your_company.mygame -l cpp -d NEW_PROJECTS_DIR
+-p package
+-l language cpp or lua
+-d directory
+</pre>
+</div>
+<p>
+在-d 指定的目录下 ，会创建一个完整的项目<br />
+如<br />
+cocos new hellocpp -p org.jf.hellocpp -l cpp -d /tmp/hellocpp<br />
+</p>
+<blockquote>
+<p>
+目录结构基本如下<br />
+jixiuf@jixiuf-mac-home /tmp/hellocpp $ tree -L 2 .<br />
+.<br />
+└── hellocpp<br />
+    ├── CMakeLists.txt<br />
+    ├── Classes<br />
+    ├── Resources<br />
+    ├── cocos2d<br />
+    ├── proj.android<br />
+    ├── proj.android-studio<br />
+    ├── proj.ios_mac<br />
+    ├── proj.linux<br />
+    ├── proj.win10<br />
+    ├── proj.win32<br />
+    └── proj.win8.1-universal<br />
+</p>
+</blockquote>
+
+<p>
+用xcode 打开 proj.ios_mac 项目 即可运行此helloworld<br />
+</p>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2016-05-03</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/cocos2dx/">Cocos2dx</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/cocos2dx.html";
+          var disqus_url = "http://jixiuf.github.io/blog/cocos2dx.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>nginx拾遗 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="nginx.org" />
+    <meta name="keywords" content="nginx" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>nginx拾遗</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org7c1681b">nginx 做反向代理配置示例</a></li>
+<li><a href="#orgd89b8bd">利用nginx 做简单的认证</a></li>
+<li><a href="#orga91f164">利用nginx 404错误 下载某个文件</a></li>
+<li><a href="#org63f188b">nginx init.d script</a></li>
+<li><a href="#orgf0bcd1f">nginx 编译安装支持https(ssl)</a>
+<ul>
+<li><a href="#org9bce800">自己颁发证书给自己</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org7c1681b" class="outline-2">
+<h2 id="org7c1681b">nginx 做反向代理配置示例</h2>
+<div class="outline-text-2" id="text-org7c1681b">
+<p>
+/etc/nginx/conf.d/your.dns.com.conf<br />
+比如 tomcat 兼听127.0.1:10080端口，<br />
+当通过域名 your.dns.com 访问 此机器的 80端口时 ，访问会被转到到tomcat 上<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">  upstream your.dns.com{
+        server 127.0.0.1:10080;
+}
+
+server {
+  listen  80;
+
+  server_name your.dns.com;
+
+  access_log  /data/logs/nginx/your.dns.com.http.log;
+
+  location / {
+
+    proxy_set_header Host $<span style="color: #40E0D0;">http_host</span>;
+    proxy_set_header X-Real-IP $<span style="color: #40E0D0;">remote_addr</span>;
+    proxy_set_header X-Scheme $<span style="color: #40E0D0;">scheme</span>;
+    proxy_pass http://your.dns.com;
+  }
+}
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">upstream your.dns.com{
+        server 127.0.0.1:8888;
+}
+server {
+  listen  80;
+
+  server_name your.dns.com;
+
+  access_log  /var/log/nginx/yourdns.com.http.log  main;
+
+  location ~ /.*<span style="color: #ffa07a;">\.</span>(gif|jpg|png|htm|html|css|js|flv|ico|swf|mp4)$ {
+  root /data/deployer/apache-tomcat-8.0.21/webapps/ROOT;
+  <span style="color: #FBDE2D;">break</span>;
+  }
+  <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">location /{</span>
+   <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">root /data/deployer/apache-tomcat-8.0.21/webapps/ROOT;</span>
+    <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">index  html/index.html html/index.htm;</span>
+  <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">}</span>
+  location / {
+        proxy_pass http://your.dns.com/;
+        proxy_pass_header Server;
+        proxy_set_header Host $<span style="color: #40E0D0;">http_host</span>;
+        proxy_set_header X-Real-IP $<span style="color: #40E0D0;">remote_addr</span>;
+        proxy_set_header X-Scheme $<span style="color: #40E0D0;">scheme</span>;
+        index html/index.html html/index.htm;
+ }
+
+  <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">/usr/share/nginx/html/404.html</span>
+  error_page   500 502 503 504  /50x.html;
+  error_page   404  /404.html;
+  location = /50x.html {
+    root   html;
+  }
+
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd89b8bd" class="outline-2">
+<h2 id="orgd89b8bd">利用nginx 做简单的认证</h2>
+<div class="outline-text-2" id="text-orgd89b8bd">
+<p>
+开发了简单的网站 ，但是没有 认证功能。 又不想不加认证 暴露在外网环境下<br />
+可以用此方法进行 用户名密码认证<br />
+</p>
+
+<p>
+使用nignx反向代理kibana<br />
+nginx配置Http Basic Auth账号密码登陆<br />
+<a href="http://trac.edgewall.org/export/10770/trunk/contrib/htpasswd.py">http://trac.edgewall.org/export/10770/trunk/contrib/htpasswd.py</a> （nginx wiki里推荐的）<br />
+运行示例<br />
+chmod 755 htpasswd.py<br />
+./htpasswd.py -c -b htpasswd username password<br />
+这个脚本会生成一个htpasswd 文件，里面存username 及加密后的password, nginx 配置中 会引用这个文件<br />
+#-c为生成文件 htpasswd为文件名<br />
+</p>
+
+<p>
+比如 /etc/nginx/conf.d/elk.dev.yourdns.com.conf<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">server {
+    listen 80;
+    <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">listen [::]:80;</span>
+    server_name elk.dev.yourdns.com;
+        location / {
+        auth_basic <span style="color: #ffa07a;">"Password please"</span>;
+        auth_basic_user_file /etc/nginx/conf.d/htpasswd;  <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#25351;&#21521;&#20320;&#21018;&#29983;&#25104;&#30340; htpasswd &#25991;&#20214;</span>
+        proxy_pass http://127.0.0.1:5601/;   <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#35748;&#35777;&#20043;&#21518; &#21487;&#20197;&#35775;&#38382;&#27492;&#20869;&#23481;</span>
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $<span style="color: #40E0D0;">remote_addr</span>;
+        proxy_set_header X-Forwarded-For $<span style="color: #40E0D0;">proxy_add_x_forwarded_for</span>;
+
+        }
+
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orga91f164" class="outline-2">
+<h2 id="orga91f164">利用nginx 404错误 下载某个文件</h2>
+<div class="outline-text-2" id="text-orga91f164">
+<p>
+随便访问一个不存在的路么， 会下载/tmp/static.txt 这个文件，<br />
+用于快速搭建一个web 服务器 传文件<br />
+</p>
+
+<p>
+python -m SimpleHTTPServer 8888<br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">server {
+    listen 80 default;
+
+    location /test {
+        root /;
+        try_files /tmp/static.txt =404;
+    }
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org63f188b" class="outline-2">
+<h2 id="org63f188b">nginx init.d script</h2>
+<div class="outline-text-2" id="text-org63f188b">
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">!/bin/</span><span style="color: #FBDE2D;">sh</span>
+<span style="color: #AEAEAE;">#</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">nginx - this script starts and stops the nginx daemon</span>
+<span style="color: #AEAEAE;">#</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">chkconfig:   - 85 15</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">description:  Nginx is an HTTP(S) server, HTTP(S) reverse \</span>
+<span style="color: #AEAEAE;">#               </span><span style="color: #AEAEAE;">proxy and IMAP/POP3 proxy server</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">processname: nginx</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">config:      /etc/nginx/nginx.conf</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">config:      /etc/sysconfig/nginx</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">pidfile:     /var/run/nginx.pid</span>
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">Source function library.</span>
+. /etc/rc.d/init.d/functions
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">Source networking configuration.</span>
+. /etc/sysconfig/network
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">Check that networking is up.</span>
+[ <span style="color: #ffa07a;">"$NETWORKING"</span> = <span style="color: #ffa07a;">"no"</span> ] &amp;&amp; <span style="color: #FBDE2D;">exit</span> 0
+
+<span style="color: #40E0D0;">nginx</span>=<span style="color: #ffa07a;">"/usr/sbin/nginx"</span>
+<span style="color: #40E0D0;">prog</span>=$(basename $<span style="color: #40E0D0;">nginx</span>)
+
+<span style="color: #40E0D0;">sysconfig</span>=<span style="color: #ffa07a;">"/etc/sysconfig/$prog"</span>
+<span style="color: #40E0D0;">lockfile</span>=<span style="color: #ffa07a;">"/var/lock/subsys/nginx"</span>
+<span style="color: #40E0D0;">pidfile</span>=<span style="color: #ffa07a;">"/var/run/${prog}.pid"</span>
+
+<span style="color: #40E0D0;">NGINX_CONF_FILE</span>=<span style="color: #ffa07a;">"/etc/nginx/nginx.conf"</span>
+
+[ -f $<span style="color: #40E0D0;">sysconfig</span> ] &amp;&amp; . $<span style="color: #40E0D0;">sysconfig</span>
+
+
+<span style="color: #FF6400;">start</span>() {
+    [ -x $<span style="color: #40E0D0;">nginx</span> ] || <span style="color: #FBDE2D;">exit</span> 5
+    [ -f $<span style="color: #40E0D0;">NGINX_CONF_FILE</span> ] || <span style="color: #FBDE2D;">exit</span> 6
+    <span style="color: #F8F8F8;">echo</span> -n $<span style="color: #ffa07a;">"Starting $prog: "</span>
+    daemon $<span style="color: #40E0D0;">nginx</span> -c $<span style="color: #40E0D0;">NGINX_CONF_FILE</span>
+    <span style="color: #40E0D0;">retval</span>=$<span style="color: #40E0D0;">?</span>
+    <span style="color: #F8F8F8;">echo</span>
+    [ $<span style="color: #40E0D0;">retval</span> -eq 0 ] &amp;&amp; touch $<span style="color: #40E0D0;">lockfile</span>
+    <span style="color: #FBDE2D;">return</span> $<span style="color: #40E0D0;">retval</span>
+}
+
+<span style="color: #FF6400;">stop</span>() {
+    <span style="color: #F8F8F8;">echo</span> -n $<span style="color: #ffa07a;">"Stopping $prog: "</span>
+    killproc -p $<span style="color: #40E0D0;">pidfile</span> $<span style="color: #40E0D0;">prog</span>
+    <span style="color: #40E0D0;">retval</span>=$<span style="color: #40E0D0;">?</span>
+    <span style="color: #F8F8F8;">echo</span>
+    [ $<span style="color: #40E0D0;">retval</span> -eq 0 ] &amp;&amp; rm -f $<span style="color: #40E0D0;">lockfile</span>
+    <span style="color: #FBDE2D;">return</span> $<span style="color: #40E0D0;">retval</span>
+}
+
+<span style="color: #FF6400;">restart</span>() {
+    configtest_q || <span style="color: #FBDE2D;">return</span> 6
+    stop
+    start
+}
+
+<span style="color: #FF6400;">reload</span>() {
+    configtest_q || <span style="color: #FBDE2D;">return</span> 6
+    <span style="color: #F8F8F8;">echo</span> -n $<span style="color: #ffa07a;">"Reloading $prog: "</span>
+    killproc -p $<span style="color: #40E0D0;">pidfile</span> $<span style="color: #40E0D0;">prog</span> -HUP
+    <span style="color: #F8F8F8;">echo</span>
+}
+
+<span style="color: #FF6400;">configtest</span>() {
+    $<span style="color: #40E0D0;">nginx</span> -t -c $<span style="color: #40E0D0;">NGINX_CONF_FILE</span>
+}
+
+<span style="color: #FF6400;">configtest_q</span>() {
+    $<span style="color: #40E0D0;">nginx</span> -t -q -c $<span style="color: #40E0D0;">NGINX_CONF_FILE</span>
+}
+
+<span style="color: #FF6400;">rh_status</span>() {
+    status $<span style="color: #40E0D0;">prog</span>
+}
+
+<span style="color: #FF6400;">rh_status_q</span>() {
+    rh_status &gt;/dev/null 2&gt;&amp;1
+}
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">Upgrade the binary with no downtime.</span>
+<span style="color: #FF6400;">upgrade</span>() {
+    local <span style="color: #40E0D0;">oldbin_pidfile</span>=<span style="color: #ffa07a;">"${pidfile}.oldbin"</span>
+
+    configtest_q || <span style="color: #FBDE2D;">return</span> 6
+    <span style="color: #F8F8F8;">echo</span> -n $<span style="color: #ffa07a;">"Upgrading $prog: "</span>
+    killproc -p $<span style="color: #40E0D0;">pidfile</span> $<span style="color: #40E0D0;">prog</span> -USR2
+    <span style="color: #40E0D0;">retval</span>=$<span style="color: #40E0D0;">?</span>
+    sleep 1
+    <span style="color: #FBDE2D;">if</span> [[ -f ${<span style="color: #40E0D0;">oldbin_pidfile</span>} &amp;&amp; -f ${<span style="color: #40E0D0;">pidfile</span>} ]];  <span style="color: #FBDE2D;">then</span>
+        killproc -p $<span style="color: #40E0D0;">oldbin_pidfile</span> $<span style="color: #40E0D0;">prog</span> -QUIT
+        success $<span style="color: #ffa07a;">"$prog online upgrade"</span>
+        <span style="color: #F8F8F8;">echo</span>
+        <span style="color: #FBDE2D;">return</span> 0
+    <span style="color: #FBDE2D;">else</span>
+        failure $<span style="color: #ffa07a;">"$prog online upgrade"</span>
+        <span style="color: #F8F8F8;">echo</span>
+        <span style="color: #FBDE2D;">return</span> 1
+    <span style="color: #FBDE2D;">fi</span>
+}
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">Tell nginx to reopen logs</span>
+<span style="color: #FF6400;">reopen_logs</span>() {
+    configtest_q || <span style="color: #FBDE2D;">return</span> 6
+    <span style="color: #F8F8F8;">echo</span> -n $<span style="color: #ffa07a;">"Reopening $prog logs: "</span>
+    killproc -p $<span style="color: #40E0D0;">pidfile</span> $<span style="color: #40E0D0;">prog</span> -USR1
+    <span style="color: #40E0D0;">retval</span>=$<span style="color: #40E0D0;">?</span>
+    <span style="color: #F8F8F8;">echo</span>
+    <span style="color: #FBDE2D;">return</span> $<span style="color: #40E0D0;">retval</span>
+}
+
+<span style="color: #FBDE2D;">case</span> <span style="color: #ffa07a;">"$1"</span><span style="color: #FBDE2D;"> in</span>
+    start)
+        rh_status_q &amp;&amp; <span style="color: #FBDE2D;">exit</span> 0
+        $<span style="color: #40E0D0;">1</span>
+        ;;
+    stop)
+        rh_status_q || <span style="color: #FBDE2D;">exit</span> 0
+        $<span style="color: #40E0D0;">1</span>
+        ;;
+    restart|configtest|reopen_logs)
+        $<span style="color: #40E0D0;">1</span>
+        ;;
+    force-reload|upgrade)
+        rh_status_q || <span style="color: #FBDE2D;">exit</span> 7
+        upgrade
+        ;;
+    reload)
+        rh_status_q || <span style="color: #FBDE2D;">exit</span> 7
+        $<span style="color: #40E0D0;">1</span>
+        ;;
+    status|status_q)
+        rh_$<span style="color: #40E0D0;">1</span>
+        ;;
+    condrestart|try-restart)
+        rh_status_q || <span style="color: #FBDE2D;">exit</span> 7
+        restart
+        ;;
+    *)
+        <span style="color: #F8F8F8;">echo</span> $<span style="color: #ffa07a;">"Usage: $0 {start|stop|reload|configtest|status|force-reload|upgrade|restart|reopen_logs}"</span>
+        <span style="color: #FBDE2D;">exit</span> 2
+<span style="color: #FBDE2D;">esac</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf0bcd1f" class="outline-2">
+<h2 id="orgf0bcd1f">nginx 编译安装支持https(ssl)</h2>
+<div class="outline-text-2" id="text-orgf0bcd1f">
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">yum install -y zsh</span>
+yum install -y gcc gcc-c++
+yum install -y zip unzip
+yum install -y gcc zlib-devel bzip2 bzip2-devel readline-devel sqlite sqlite-devel openssl-devel
+yum install -y libtool
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">nginx</span>
+mkdir -p /path/to
+mkdir packages &amp;&amp; <span style="color: #F8F8F8;">cd</span> packages
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#22823;&#23567;&#20889;&#36716;&#25442;&#31532;&#19977;&#26041;module</span>
+wget -c https://github.com/replay/ngx_http_lower_upper_case/archive/master.zip -O ngx_http_lower_upper_case.zip
+unzip ngx_http_lower_upper_case.zip -d /path/to
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#25171;&#21360;&#31532;&#19977;&#26041;module</span>
+wget -c https://github.com/openresty/echo-nginx-module/archive/v0.59.tar.gz -O echo-nginx-module-0.59.tar.gz
+tar -zxvf echo-nginx-module-0.59.tar.gz -C /path/to
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">pcre&#21253; &#29992;&#26469;&#23454;&#29616;rewrite</span>
+wget http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz
+tar -zxvf pcre-8.35.tar.gz
+mv pcre-8.35 /usr/local/src/.
+<span style="color: #F8F8F8;">cd</span> /usr/local/src/pcre-8.35
+./configure &amp;&amp; make &amp;&amp; make install
+make clean
+
+<span style="color: #F8F8F8;">cd</span> ~/packages
+wget -c http://nginx.org/download/nginx-1.11.1.tar.gz
+tar -zxvf nginx-1.11.1.tar.gz -C /usr/local/
+ln -s /usr/local/nginx-1.11.1 /usr/local/nginx
+mkdir -p /etc/nginx/conf
+<span style="color: #F8F8F8;">cd</span> /usr/local/nginx
+./configure --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_ssl_module --with-pcre=/usr/local/src/pcre-8.35 --add-module=/path/to/echo-nginx-module-0.59 --add-module=/path/to/ngx_http_lower_upper_case-master --conf-path=/etc/nginx/conf
+make &amp;&amp; make install
+ln -s /usr/local/nginx/sbin/nginx /usr/sbin/nginx
+</pre>
+</div>
+</div>
+<div id="outline-container-org9bce800" class="outline-3">
+<h3 id="org9bce800">自己颁发证书给自己</h3>
+<div class="outline-text-3" id="text-org9bce800">
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #F8F8F8;">cd</span> /usr/local/nginx/conf
+openssl genrsa -des3 -out server.key 1024
+openssl req -new -key server.key -out server.csr
+openssl rsa -in server.key -out server_nopwd.key
+openssl x509 -req -days 365 -in server.csr -signkey server_nopwd.key -out server.crt
+</pre>
+</div>
+<blockquote>
+<p>
+server {<br />
+    listen 443;<br />
+    ssl on;<br />
+    ssl_certificate  /usr/local/nginx/conf/server.crt;<br />
+    ssl_certificate_key  /usr/local/nginx/conf/server_nopwd.key;<br />
+}<br />
+</p>
+</blockquote>
+<blockquote>
+<p>
+upstream login{<br />
+server 127.0.0.1:8080;<br />
+}<br />
+</p>
+
+<p>
+map $http_accept_language $language {<br />
+default  zh_tw;<br />
+~*^zh-cn zh_cn;<br />
+~*^en    en;<br />
+~*^zh,   zh_cn;<br />
+}<br />
+</p>
+
+<p>
+server {<br />
+listen  443;<br />
+server_name login.casino.najaplus.com;<br />
+</p>
+
+<p>
+ssl_certificate     /data/casino/nginx/login.crt;<br />
+ssl_certificate_key /data/casino/nginx/login.key;<br />
+</p>
+
+<p>
+ssl on;<br />
+ssl_session_cache  builtin:1000  shared:SSL:10m;<br />
+ssl_protocols  TLSv1 TLSv1.1 TLSv1.2;<br />
+ssl_ciphers HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4;<br />
+ssl_prefer_server_ciphers on;<br />
+</p>
+
+<p>
+gzip on;<br />
+gzip_min_length  100;<br />
+gzip_buffers  8 32k;<br />
+gzip_types  text/plain text/css application/x-javascript text/xml application/xml text/javascript;<br />
+gzip_vary on;<br />
+</p>
+
+<p>
+set $root_dir /data/webgame;<br />
+</p>
+
+<p>
+location = /casino.html {<br />
+    if ( \(query_string ~* ^(.*)language=([\w|_]*)(&|\)) ) {<br />
+    set $language $2;<br />
+    }<br />
+    lower $suffix $language;<br />
+</p>
+
+<p>
+    rewrite /casino.html /casino_$suffix.html; # permanent 用于重定向<br />
+}<br />
+</p>
+
+<p>
+location ~* (.*\.html)$ {<br />
+    root $root_dir;<br />
+    add_header Cache-Control 'no-store';<br />
+    error_page 405 =200 $1; # 支持静态网页POST<br />
+}<br />
+</p>
+
+<p>
+location  ~* \.(proto|json|gif|jpg|jpeg|bmp|png|ico|txt|js|css)$ {<br />
+    root $root_dir;<br />
+    expires 30d;<br />
+    access_log off;<br />
+}<br />
+</p>
+
+<p>
+rewrite_log on;<br />
+access_log  /data/logs/nginx/login.http.log;<br />
+error_log   /data/logs/nginx/login.http.log;<br />
+</p>
+
+<p>
+location / {<br />
+    proxy_set_header Host $http_host;<br />
+    proxy_set_header X-Real-IP $remote_addr;<br />
+    proxy_set_header X-Scheme $scheme;<br />
+    proxy_pass <a href="http://login">http://login</a>;<br />
+}<br />
+}<br />
+</p>
+</blockquote>
+<blockquote>
+<p>
+server {<br />
+    listen 443;<br />
+    server_name www.demo2.com;<br />
+</p>
+
+<p>
+ssl on;<br />
+ssl_certificate      /data/nginx/server.crt;<br />
+ssl_certificate_key  /data/nginx/server.key;<br />
+</p>
+
+<p>
+ssl_session_timeout  5m;<br />
+</p>
+
+<p>
+ssl_protocols  SSLv2 SSLv3 TLSv1;<br />
+ssl_ciphers  ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;<br />
+ssl_prefer_server_ciphers   on;<br />
+</p>
+
+<p>
+access_log  /data/logs/nginx/demo2.log;<br />
+</p>
+
+<p>
+    location / {<br />
+	proxy_pass <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a>;<br />
+	proxy_http_version 1.1;<br />
+	proxy_set_header Upgrade $http_upgrade;<br />
+	proxy_set_header Connection "upgrade";<br />
+    }<br />
+}<br />
+</p>
+</blockquote>
+
+<blockquote>
+<p>
+upstream ssl{<br />
+	 server 127.0.0.1:8080;<br />
+ }<br />
+</p>
+
+<p>
+server {<br />
+listen 443;<br />
+server_name www.demo3.com;<br />
+</p>
+
+<p>
+ssl_certificate /data/nginx/server.crt;<br />
+ssl_certificate_key /data/nginx/server.key;<br />
+</p>
+
+<p>
+ssl_session_cache  builtin:1000  shared:SSL:10m;<br />
+ssl_protocols  TLSv1 TLSv1.1 TLSv1.2;<br />
+ssl_ciphers HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4;<br />
+ssl_prefer_server_ciphers on;<br />
+</p>
+
+<p>
+gzip on;<br />
+gzip_min_length  100;<br />
+gzip_buffers  8 32k;<br />
+gzip_types  text/plain text/css application/x-javascript text/xml application/xml text/javascript;<br />
+gzip_vary on;<br />
+</p>
+
+<p>
+location ~* \.(html)$ {<br />
+    root /data/webserver;<br />
+    add_header Cache-Control 'no-store';<br />
+}<br />
+</p>
+
+<p>
+location  ~* \.(proto|json|gif|jpg|jpeg|bmp|png|ico|txt|js|css)$ {<br />
+    root /data/webserver;<br />
+    expires 7d;<br />
+</p>
+
+<p>
+}<br />
+</p>
+
+<p>
+error_page 405 =200 @405;<br />
+location @405<br />
+{<br />
+    root  /data/webserver;<br />
+}<br />
+</p>
+
+<p>
+error_log  /data/logs/nginx/ssl.http.log;<br />
+access_log  /data/logs/nginx/ssl.http.log;<br />
+</p>
+
+<p>
+location / {<br />
+    proxy_set_header Host $http_host;<br />
+    proxy_set_header X-Real-IP $remote_addr;<br />
+    proxy_set_header X-Scheme $scheme;<br />
+    proxy_pass <a href="http://ssl">http://ssl</a>;<br />
+}<br />
+}<br />
+</p>
+</blockquote>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2016-05-09</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/nginx/">Nginx</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/nginx.html";
+          var disqus_url = "http://jixiuf.github.io/blog/nginx.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

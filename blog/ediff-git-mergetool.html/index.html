@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>使用Emacs中的Ediff 作为git mergetool使用的工具进行文件合并 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="使用Emacs中的Ediff 作为git mergetool使用的工具进行文件合并" />
+    <meta name="keywords" content="Emacs Ediff git merge " />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>使用Emacs中的Ediff 作为git mergetool使用的工具进行文件合并</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org096c9b8">在.emacs 中加入以下代码</a></li>
+<li><a href="#orga97c500">修改~/.gitconfig 文件，</a></li>
+</ul>
+</div>
+</div>
+<p>
+关于什么是Ediff 什么是Git 就不作详细介绍了，简单讲Ediff是Emacs进行文件比较、<br />
+合并的工具，Git 是与svn 一样的版本控制工具。我个人的许多代码都用git进行管理。<br />
+运行git mergetool 命令时会对有冲突的文件进行合并，<br />
+我这里使用了emacsclient ，避免每次都要打开一个Emacs进程。<br />
+总共分为两大步:<br />
+</p>
+<div id="outline-container-org096c9b8" class="outline-2">
+<h2 id="org096c9b8">在.emacs 中加入以下代码</h2>
+<div class="outline-text-2" id="text-org096c9b8">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">git mergetool &#20351;&#29992;ediff ,&#21069;&#25552;&#21487;&#20197;&#27491;&#24120;&#20351;&#29992;emacsclient ,&#24182;&#19988;Emacs&#24050;&#32463;&#21551;&#21160;&#12290;</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">~/.gitconfig</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">[mergetool "ediff"]</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">cmd = emacsclient --eval \"(git-mergetool-emacsclient-ediff \\\"$LOCAL\\\" \\\"$REMOTE\\\" \\\"$BASE\\\" \\\"$MERGED\\\")\"</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">trustExitCode = false</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">[mergetool]</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">prompt = false</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">[merge]</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">tool = ediff</span>
+<span style="color: #AEAEAE;">;;</span>
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">Setup for ediff.</span>
+<span style="color: #AEAEAE;">;;</span>
+<span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">(require 'ediff)</span>
+
+(<span style="color: #FBDE2D;">defvar</span> <span style="color: #40E0D0;">ediff-after-quit-hooks</span> nil
+  <span style="color: #ffa07a;">"* Hooks to run after ediff or emerge is quit."</span>)
+
+(<span style="color: #FBDE2D;">defadvice</span> <span style="color: #FF6400;">ediff-quit</span> (after edit-after-quit-hooks activate)
+  (run-hooks 'ediff-after-quit-hooks))
+
+(<span style="color: #FBDE2D;">setq</span> git-mergetool-emacsclient-ediff-active nil)
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">local-ediff-frame-maximize</span> ()
+  (<span style="color: #FBDE2D;">when</span> (boundp 'display-usable-bounds)
+    (<span style="color: #FBDE2D;">let*</span> ((bounds (display-usable-bounds))
+           (x (nth 0 bounds))
+           (y (nth 1 bounds))
+           (width (/ (nth 2 bounds) (frame-char-width)))
+           (height (/ (nth 3 bounds) (frame-char-height))))
+      (set-frame-width (selected-frame) width)
+      (set-frame-height (selected-frame) height)
+      (set-frame-position (selected-frame) x y))  )
+  )
+(<span style="color: #FBDE2D;">setq</span> ediff-window-setup-function 'ediff-setup-windows-plain)
+(<span style="color: #FBDE2D;">setq</span> ediff-split-window-function 'split-window-horizontally)
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">local-ediff-before-setup-hook</span> ()
+  (<span style="color: #FBDE2D;">setq</span> local-ediff-saved-frame-configuration (current-frame-configuration))
+  (<span style="color: #FBDE2D;">setq</span> local-ediff-saved-window-configuration (current-window-configuration))
+  (local-ediff-frame-maximize)
+  (<span style="color: #FBDE2D;">if</span> git-mergetool-emacsclient-ediff-active
+      (raise-frame)))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">local-ediff-quit-hook</span> ()
+  (set-frame-configuration local-ediff-saved-frame-configuration)
+  (set-window-configuration local-ediff-saved-window-configuration))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">local-ediff-suspend-hook</span> ()
+  (set-frame-configuration local-ediff-saved-frame-configuration)
+  (set-window-configuration local-ediff-saved-window-configuration))
+
+(add-hook 'ediff-before-setup-hook 'local-ediff-before-setup-hook)
+(add-hook 'ediff-quit-hook 'local-ediff-quit-hook 'append)
+(add-hook 'ediff-suspend-hook 'local-ediff-suspend-hook 'append)
+
+<span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">Useful for ediff merge from emacsclient.</span>
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">git-mergetool-emacsclient-ediff</span> (local remote base merged)
+  (<span style="color: #FBDE2D;">setq</span> git-mergetool-emacsclient-ediff-active t)
+  (<span style="color: #FBDE2D;">if</span> (file-readable-p base)
+      (ediff-merge-files-with-ancestor local remote base nil merged)
+    (ediff-merge-files local remote nil merged))
+  (recursive-edit))
+
+(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">git-mergetool-emacsclient-ediff-after-quit-hook</span> ()
+  (exit-recursive-edit))
+
+(add-hook 'ediff-after-quit-hooks 'git-mergetool-emacsclient-ediff-after-quit-hook 'append)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orga97c500" class="outline-2">
+<h2 id="orga97c500">修改~/.gitconfig 文件，</h2>
+<div class="outline-text-2" id="text-orga97c500">
+<p>
+在其中加入以下代码<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c">[mergetool <span style="color: #ffa07a;">"ediff"</span>]
+cmd = emacsclient --eval \"(git-mergetool-emacsclient-ediff \\\"$LOCAL\\\" \\\"$REMOTE\\\" \\\"$BASE\\\" \\\"$MERGED\\\")\"
+trustExitCode = <span style="color: #D8FA3C;">false</span>
+[mergetool]
+prompt = <span style="color: #D8FA3C;">false</span>
+[merge]
+tool = ediff
+
+
+</pre>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-07-04</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/emacs/">Emacs</a>, <a href="/tags/git/">Git</a>, <a href="/tags/ediff/">Ediff</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/ediff-git-mergetool.html";
+          var disqus_url = "http://jixiuf.github.io/blog/ediff-git-mergetool.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

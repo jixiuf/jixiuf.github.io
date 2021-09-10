@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>emacs 入门第一课：Emacs里的基本概念 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="" />
+    <meta name="keywords" content="emacs 入门" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>emacs 入门第一课：Emacs里的基本概念</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgcb2adab">无聊的开场白</a></li>
+<li><a href="#org95ecd1e">buffer（缓冲区）</a></li>
+<li><a href="#orga729f94">window（窗口）与frame</a></li>
+<li><a href="#org7da9c23">Emacs的mode</a></li>
+<li><a href="#org59c6ffb">Emacs Lisp</a></li>
+<li><a href="#org58a7275">函数function、命令command、键绑定keybinding</a></li>
+<li><a href="#org7027d2b">kill  delete kill-save  yank  king-ring</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgcb2adab" class="outline-2">
+<h2 id="orgcb2adab">无聊的开场白</h2>
+<div class="outline-text-2" id="text-orgcb2adab">
+<p>
+所谓“名不正则言不顺,言不顺则事不成，事不成则礼乐不兴，礼乐不兴则刑<br />
+罚不中，刑罚不中则民无所措手足”又所谓“瞽不知黑白者，非以其名也，以<br />
+其取也。”（瞎子所以不知黑白，不是因为他说不出黑白这两个名词，而是他<br />
+不能在实际中选取出黑白的东西来）。概念不清的结果，必然导致‘民无所措<br />
+手足’，所以第一课主要介绍一下Emacs 中的一些概念，为Emacs正名。<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org95ecd1e" class="outline-2">
+<h2 id="org95ecd1e">buffer（缓冲区）</h2>
+<div class="outline-text-2" id="text-org95ecd1e">
+<p>
+Emacs并不直接对文件进行操作, 它是把文件加载进buffer, 用户直接操作<br />
+buffer, 只有当用户确定把buffer中所做的修改写入文件时, Emacs才把<br />
+buffer中的内容写入文件. buffer实际上就是一个内存缓冲区, 这和一般编<br />
+辑器中都一样, 应该很好理解。另外,一个buffer并不一定与某一特定的文<br />
+件关联,这种不与文件关联的buffer里的内容，在Emacs退出时，会丢失。<br />
+Emacs 认为不与文件关联的buffer里的内容，用户并不关心,所以退出时直<br />
+接丢弃。buffer 的概念是Emacs 里的精髓，它使Emacs的操作方式得以统一，<br />
+也是Emacs为什么能靠键盘完成全部操作的一个原因。Emacs里很少有弹出窗<br />
+口，虽然Emacs 也实现了用弹出窗口等来实现一定的操作，比如使用<br />
+Windows里的对话框打开文件、保存文件，但除了初学者很少有人会使用它<br />
+们。因为有弹出窗口必然设及到窗口的管理，比如移动窗口、调整窗口的大<br />
+小、焦点的转移等，它会使事情变得复杂。Emacs里进行操作的时候把一切<br />
+东西都以文本的方式来处理，比如就以选择文件为例，普通的程序一般用<br />
+Windows 里的“打开文件”，然后用鼠标点选特定的文件，而这些文件一般<br />
+是以List 这样的窗口组件来组织。在Emacs 一般仅仅把所有的文件名放到<br />
+一个buffer 里，一行一个，你想选中一个文件，只要把光标移动到文件所<br />
+在行回车就可以了。而在buffer里绑定的所有快捷键：移动到下一行、上一<br />
+行，翻页等等操作在你“打开文件”时依然可以使用。Emacs也会新建某些<br />
+buffer 来进行相应的操作，Emacs自已使用的buffer 一般用"<b>" 引起来，<br />
+比如用来记录你进行了哪些操作的*Message</b> buffer ,及进行补全时用的<br />
+<b>Completions</b> buffer ,这样的buffer 不与文件关联，所以你关闭Emacs时<br />
+这些buffer里的内容会被丢弃，因为没有保存的必要。<br />
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orga729f94" class="outline-2">
+<h2 id="orga729f94">window（窗口）与frame</h2>
+<div class="outline-text-2" id="text-orga729f94">
+<p>
+这两个概念与浏览器里的window ,frame 概念正好颠倒。由于Emacs很早就<br />
+诞生了（1984年由Richard Stallman发起）,它诞生的时候，Windows还在娘<br />
+胎里孕育(孕育了六年才出Windows3.0)。它的窗口概念和现在基于窗口的操<br />
+作系统中的窗口概念不是一样的.我们把你可以用Windows下的Alt+Tab键进<br />
+行切换的窗口称为‘Windows窗口’，而把Emacs里的window称为‘window’<br />
+或者‘Emacs窗口’ Emacs中的window是用来显示buffer的一个区域，也就<br />
+是说buffer是抽象的,window是具体的，你看得见的 它并不像Windows窗口<br />
+拥有自己的标题栏,系统菜单栏. frame, Emacs中的frame就是Windows窗口,<br />
+可以用Alt+Tab键在窗口间切换. 同一个Emacs进程可以用多个frame,(你可<br />
+以通过菜单栏里的File~new Frame来创建一个frame)(我一般只用一个<br />
+frame)注意他们是同一个进程里的两个Windows窗口，所以他们之间可以共<br />
+享信息，而一个frame 里可以打开多个window。如图<br />
+<img src="/assets/blog/00003-emacs-first-class.html/emacs-window-frame.JPG" alt="emacs-window-frame.JPG" /> 显示了两个frame ,每个frame 里分别有<br />
+4 、3个窗口（不算最下方只有一行的minibuffer,其实minibuffer也是一个<br />
+特殊的buffer,它用于接受命令及显示回显信息。）<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7da9c23" class="outline-2">
+<h2 id="org7da9c23">Emacs的mode</h2>
+<div class="outline-text-2" id="text-org7da9c23">
+<p>
+建立一个微小的基本功能的集合，然后把所有复杂功能作为这些基本功能的组合。<br />
+这体现了一种程序设计的哲学。不同于 Windows, 也不同于 UNIX，它更好的协<br />
+调了程序的灵活性和同一性。这句话说的应该是Emacs时的mode 的概念，Emacs<br />
+里的mode 分major mode ,minor mode两种。 major-mode 是专门用来做某一特<br />
+定的事情的。打开的某一个特定文件（Emacs称为buffer)不能同时启用多个<br />
+major mode。比如专门为c ,java 语言编写用的c-mode ,java-mode。你不能让<br />
+一个文件同时处于java-mode 和c-mode. 而minor mode 则可以在一个buffer 同<br />
+时启用多个minor mode 如在mode-line 上显示行号的Line-Number mode 列号的<br />
+Column-Number , 高亮显示匹配的括号的Show-Paren mode ,mode-line 上显示<br />
+时间的 Display-Time ,对关键字进行语法着色的Font-Lock。你觉得进行java<br />
+编辑时它的某个功能用着不爽，或者你想给它添加一点小功能，你可以把它写成<br />
+一个minor-mode ,minor-mode 可以在特定的major-mode里启用，也就是说在其<br />
+他的major mode里不启用。这样可以节省不必要的开支。<br />
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org59c6ffb" class="outline-2">
+<h2 id="org59c6ffb">Emacs Lisp</h2>
+<div class="outline-text-2" id="text-org59c6ffb">
+<p>
+Emacs最基础的部分是用c写的，其他部分都是用Emacs Lisp语言写的（Emacs<br />
+Lisp占大约2/3），也就是说 ,Emacs 用c语言写了一个lisp 语言的解释器，而<br />
+emacs普通的操作大部分由elisp 语言实现，从本质上讲，你自已的配置文件中<br />
+的内容与Emacs 程序自带的elisp脚本没什么区别，都是由c语言实现的部分拿来<br />
+解释执行的。这就是为什么Emacs 的扩展性很强、定制性很强的原因。普通的程<br />
+序的定制都是通过在菜单里点点选选来实现，而Emacs却是用一种编程语言Emacs<br />
+Lisp(elisp)。只要这门编程语言能做，你就能让你的Emacs实现特定的功能,有<br />
+人戏称Emacs实际是做了一个lisp 解释器，而它的编辑器功能只是凑巧实现的。<br />
+所以说九个人的Emacs,会有十种不同的配置版本。Emacs Lisp语言是基于lisp语<br />
+言的. lisp是LISt Processor的缩写, 即链表处理语言, 所以lisp语言的操作都<br />
+是基于链表的, 它的语法也是链表结构, 链表第一个元素表示函数名, 其他元素<br />
+是参数, 比如通常语言中的a+b, 在lisp就是(+ a b).而<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-c">a=((c+d) *  e)
+</pre>
+</div>
+<p>
+对应的lisp 就是:<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq</span> a (* (+ c d) e))
+</pre>
+</div>
+<p>
+lisp 的语法初看上去很吓人，但是想一想小学学的加减乘除优先级里的括号<br />
+或许你会有一点他乡遇故知的感觉。<br />
+</p>
+</div>
+</div>
+
+
+
+<div id="outline-container-org58a7275" class="outline-2">
+<h2 id="org58a7275">函数function、命令command、键绑定keybinding</h2>
+<div class="outline-text-2" id="text-org58a7275">
+<p>
+ 函数不用多解释，命令是一种特殊的函数，在这种函数内部通常第一个调用<br />
+的函数是(interactive) ，表示这是一个可交互的函数，即命令，命令可以<br />
+与按键进行绑定也可以直接输入命令名调用这个命令，而普通的函数不能。<br />
+keybinding 就是将一个命令与某个快捷键进行关联，在Windows 里普通程序<br />
+的键绑定一般是Ctrl+c ,或者Ctrl+Alt+c 这种同时按下两个键或者三个键。<br />
+这种按键Emacs当然也可以，Emacs还有一种Windows普通程序不具有的按键方<br />
+式:key sequence,键序列，即你按顺序按下一连串的快捷键而只执行一个命<br />
+令。首先说一下Ctrl Alt Shift 等按键在Emacs里怎么表示，C表示Ctrl ,如<br />
+C-a 表示Ctrl+a,M 表示Alt ,S表示Shift .而键序列形如:"C-x C-c",表示先<br />
+按下Ctrl-x ,再按下Ctrl+c,注意在这个过程中你可以一直按着Ctrl不放，所<br />
+以"C-x C-c"虽然是四个字母，其实你只需要按三个键，且不用同时按。<br />
+“C-x C-c” 是退出emacs的意思。"C-x"称为前缀，因为你只按下C-x它并不<br />
+执行任何操作。Emacs的快捷键是通过keymap来控制的. 也就是记录<br />
+keysequence分别绑定了什么命令的一张表，在你按下一些键的时候，Emacs<br />
+会通过这张表查看你的操作对应哪个命令，然后执行这个操作就可以了。<br />
+keymap有全局和局部之分. 每个mode都会有一个自己的局部的keymap, 局部<br />
+的keymap会覆盖全局的keymap, 另外如果对应的major mode有开启的minor<br />
+mode, 而且这个minor mode有keymap的话, 这个minor mode的keymap会覆盖<br />
+major mode的keymap. 另外在Emacs中的每个操作都对应一个命令，包括你用<br />
+鼠标点击菜单，以及输入一个简单的字母。“正名”的好处不言而喻，你可<br />
+以通过名字呼唤它，可以将一系列名字连贯起来从而执行一系列的操作。比<br />
+如默认情况下C-k,是删除从光标到行末的所有内容，我偏偏不喜欢，我C-k偏<br />
+要删除整行内容 ，而假如此时光标在行首的话C-k的功能就是删除整行内容<br />
+了，而C-a 是跳到行首于是实现删除整行这个功能的实现可以通过C-a C-k这<br />
+种方式来实现，于是有了下面这个命令<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defun</span> <span style="color: #FF6400;">my-kill-whole-line</span>()
+  (<span style="color: #FBDE2D;">interactive</span>) <span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">&#36825;&#20010;&#26159;&#21629;&#20196;&#24517;&#39035;&#35201;&#35843;&#29992;&#19968;&#20010;&#20989;&#25968;&#65292;&#34920;&#31034;&#25105;&#26159;&#19968;&#20010;&#21629;&#20196;&#65292;&#32780;&#19981;&#20165;&#20165;&#26159;&#26222;&#36890;&#30340;&#20989;&#25968;</span>
+  (beginning-of-line)  <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">&#36339;&#21040;&#34892;&#39318;&#65292;&#65292;&#40664;&#35748;C-a &#32465;&#23450;&#30340;&#20989;&#25968;</span>
+  (kill-line)  <span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">&#36825;&#20010;&#26159;&#21024;&#38500;&#20809;&#26631;&#21040;&#34892;&#26411;&#20043;&#38388;&#20869;&#23481;&#30340;&#20989;&#25968;&#65292;&#40664;&#35748;&#32465;&#23450;&#20026;C-k</span>
+  )
+
+(global-set-key (kbd <span style="color: #ffa07a;">"C-k"</span>) 'my-kill-whole-line)  <span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">&#36825;&#20010;&#23558;my-kill-whole-line&#37325;&#26032;&#32465;&#23450;&#21040;C-k</span>
+&#19978;
+</pre>
+</div>
+<p>
+把它保存到配置文件.emacs 中，C-k 就是删除整行内容了。<br />
+</p>
+</div>
+</div>
+<div id="outline-container-org7027d2b" class="outline-2">
+<h2 id="org7027d2b">kill  delete kill-save  yank  king-ring</h2>
+<div class="outline-text-2" id="text-org7027d2b">
+<p>
+kill等同于剪切，delete 就是删除的意思，kill 与delete 的不同是 kill<br />
+掉的内容会放到kill-ring（剪切环）里，你可以重新取回你kill的内容,而<br />
+delete掉的内容则直接丢弃无法取回。kill-save 或者kill-and-save 则等<br />
+同于复制 ,先把它kill掉然后把它save回来，yank 等同于粘贴,kill-ring<br />
+是名词kill掉的东西会放到这里面，kill-ring 与系统剪切版的不同是剪切<br />
+版只能存放一份kill掉的内容，而emacs可以存多份,ring ，环嘛，当然不只<br />
+一个。注意kill delete kill-save 并不是具体的命令，<br />
+kill-word,kill-region,kill-line ,kill-ring-save,kill-region<br />
+delete-char delete-region 才是具体的命令或函数默认的等同于cut copy<br />
+paste 的相应操作是<br />
+</p>
+</div>
+<ul class="org-ul">
+<li><a id="orge152f57"></a>C-w ,kill-regin           cut<br /></li>
+<li><a id="org320c58c"></a>M-w ,kill-ring-save       copy<br /></li>
+<li><a id="orgf3e8581"></a>C-y, yank                 paste<br /></li>
+<li><a id="org22e8f37"></a>M-y   yank-pop           从kill-ring 里取出以前的内容，按时间顺序，（前提是你按下一次C-y）<br /></li>
+</ul>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-06-01</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/emacs/">Emacs</a>, <a href="/tags/linux/">Linux</a>, <a href="/tags/windows/">Windows</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/00003-emacs-first-class.html";
+          var disqus_url = "http://jixiuf.github.io/blog/00003-emacs-first-class.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

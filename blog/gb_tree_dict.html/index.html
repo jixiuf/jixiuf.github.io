@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>gb_tree dict proplist orddict - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="erlang.org" />
+    <meta name="keywords" content="erlang" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>gb_tree dict proplist orddict</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgdd6474b">and or andalso orelse</a></li>
+<li><a href="#org0741850">Key-Value 存储</a>
+<ul>
+<li><a href="#org9f17408">对于小数据量，  有proplist 和 orddict</a></li>
+<li><a href="#orgbddf329">对于大数据量 有dicts gb_trees</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgdd6474b" class="outline-2">
+<h2 id="orgdd6474b">and or andalso orelse</h2>
+<div class="outline-text-2" id="text-orgdd6474b">
+<p>
+Expr1 orelse Expr2 Expr2可能被短路， 不运算<br />
+Expr1 or Expr2 Expr2一定会被运算<br />
+Expr1 andalso Expr2 Expr2一定会被运算<br />
+Expr1 and Expr2 Expr2可能被短路， 不运算<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0741850" class="outline-2">
+<h2 id="org0741850">Key-Value 存储</h2>
+<div class="outline-text-2" id="text-org0741850">
+</div>
+<div id="outline-container-org9f17408" class="outline-3">
+<h3 id="org9f17408">对于小数据量，  有proplist 和 orddict</h3>
+<div class="outline-text-3" id="text-org9f17408">
+</div>
+<ul class="org-ul">
+<li><a id="org79a4610"></a>proplist<br />
+<div class="outline-text-4" id="text-org79a4610">
+<p>
+提供了，<br />
+proplists:delete/2, proplists:get_value/2, proplists:get_all_values/2, proplists:lookup/2 and<br />
+proplists:lookup_all/2.<br />
+没有add or update 方法，只能手工使用 [H|T] 的方式自已处理，其内部结构[{Key,Value}].<br />
+可以使用lists:keyreplace/4.进行处理<br />
+</p>
+</div>
+</li>
+<li><a id="org486584b"></a>orddict<br />
+<div class="outline-text-4" id="text-org486584b">
+<p>
+the whole list is sorted for faster average lookup,<br />
+75左右个元素时效率最高<br />
+</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="outline-container-orgbddf329" class="outline-3">
+<h3 id="orgbddf329">对于大数据量 有dicts gb_trees</h3>
+<div class="outline-text-3" id="text-orgbddf329">
+</div>
+<ul class="org-ul">
+<li><a id="org23d3ede"></a>dicts 适于读多于写的<br />
+<div class="outline-text-4" id="text-org23d3ede">
+<p>
+Dicts are thus very good choices to scale orddicts up whenever it is needed.<br />
+</p>
+</div>
+</li>
+<li><a id="org636a2f0"></a>gb_trees适于写多于读的<br />
+<div class="outline-text-4" id="text-org636a2f0">
+<p>
+正常的gb_trees:enter/2, gb_trees:lookup/2 and gb_trees:delete_any/2<br />
+smart 的：gb_trees:insert/3, gb_trees:get/2, gb_trees:update/3 and gb_trees:delete/2.<br />
+smart的之处在于，它认为要处理的key在 gb_trees中存在，所以一些检查不必做，速度会快一点。<br />
+</p>
+
+<p>
+<a href="https://github.com/jixiuf/helloerlang/tree/master/benchmark/src">https://github.com/jixiuf/helloerlang/tree/master/benchmark/src</a><br />
+</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2011-11-20</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/erlang/">Erlang</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/gb_tree_dict.html";
+          var disqus_url = "http://jixiuf.github.io/blog/gb_tree_dict.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>rsync.org - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="rsync.org" />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>rsync.org</h1>
+<p>
+rsyncd.conf<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">/etc/rsyncd.conf</span>
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">Minimal configuration file for rsync daemon</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">See rsync(1) and rsyncd.conf(5) man pages for help</span>
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">This line is required by the /etc/init.d/rsyncd script</span>
+pid file = /var/run/rsyncd.pid
+use chroot = yes
+<span style="color: #F8F8F8;">read</span> only = yes
+
+[sql_remote]
+   path = /tmp/sql_remote
+    <span style="color: #F8F8F8;">read</span> only = no
+    write <span style="color: #40E0D0;">only</span>= yes
+    auth <span style="color: #40E0D0;">users</span>= root jixiuf
+    secrets <span style="color: #40E0D0;">file</span>=/etc/rsyncd_pass.conf
+    strict <span style="color: #40E0D0;">modes</span>=no
+   comment = sql remote
+    <span style="color: #40E0D0;">uid</span>=0
+    <span style="color: #40E0D0;">gid</span>=0
+   <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">exclude = /distfiles /packages</span>
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">Simple example for enabling your own local rsync server</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">[gentoo-portage]</span>
+<span style="color: #AEAEAE;">#  </span><span style="color: #AEAEAE;">path = /usr/portage</span>
+<span style="color: #AEAEAE;">#  </span><span style="color: #AEAEAE;">comment = Gentoo Portage tree</span>
+<span style="color: #AEAEAE;">#  </span><span style="color: #AEAEAE;">exclude = /distfiles /packages</span>
+</pre>
+</div>
+<p>
+/etc/rsyncd_pass.conf<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">jixiuf:jixiuf
+root:root
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">rsync  -ahqzt  /home/jixiuf/Linux-C.pdf jixiuf@127.0.0.1::sql_remote  --password-file=/home/jixiuf/passwd
+-a &#23384;&#26723;&#27169;&#24335;
+-h &#20445;&#23384;&#30828;&#36830;&#25509;
+-q &#21046;&#27490;&#38750;&#38169;&#35823;&#20449;&#24687;
+-z &#21387;&#32553;&#25991;&#20214;&#25968;&#25454;&#22312;&#20256;&#36755;
+-t &#32500;&#25252;&#20462;&#25913;&#26102;&#38388;
+-delete &#21024;&#38500;&#20110;&#22810;&#20313;&#25991;&#20214;
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">cat /home/jixiuf/passwd
+jixiuf
+</pre>
+</div>
+<p>
+inotify监控目录 inotify-tools<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">/bin/sh</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">REMOTE_IP=192.168.1.202</span>
+<span style="color: #40E0D0;">REMOTE_IP</span>=127.0.0.1
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#20197;&#19979;&#30446;&#24405;&#35201;&#20197; /&#32467;&#23614;,</span>
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#30456;&#23545;&#36335;&#24452; &#21487;&#20197;&#21253;&#21547;&#26412;&#22320;ip&#20316;&#20026;&#30446;&#24405;&#21517;&#30340;&#19968;&#37096;&#20998;&#20197;&#20415;&#21306;&#20998;&#19981;&#21516;&#26381;&#21153;&#22120;</span>
+<span style="color: #40E0D0;">REMOTE_DEST_DIR</span>=tmp/
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#32477;&#23545;&#36335;&#24452;</span>
+<span style="color: #40E0D0;">LOCAL_SRC_DIR</span>=/home/jixiuf/lszm2/server/game_server/sql_dest/
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#20197;&#19978;&#30446;&#24405;&#35201;&#20197;/&#32467;&#23614;</span>
+<span style="color: #40E0D0;">USER_NAME</span>=jixiuf
+<span style="color: #40E0D0;">RSYNC_PASSWORD</span>=jixiuf
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">--password-file=FILE</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">DST=rsync@$REMOTE_IP:$REMOTE_DEST_DIR</span>
+<span style="color: #40E0D0;">DST</span>=$<span style="color: #40E0D0;">USER_NAME</span>@$<span style="color: #40E0D0;">REMOTE_IP</span>::sql_remote/$<span style="color: #40E0D0;">REMOTE_DEST_DIR</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">rsync /home/jixiuf/notes.org $REMOTE_IP::$REMOTE_DIR</span>
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#22312;&#23545;&#30446;&#24405;&#36827;&#34892;&#30417;&#25511;&#20043;&#21069;&#65292;&#20808;&#25226;&#24050;&#32463;&#23384;&#22312;&#30340;&#25991;&#20214;&#12288;&#19978;&#20256;&#21040;&#26381;&#21153;&#22120;</span>
+<span style="color: #40E0D0;">FileCnt</span>=<span style="font-weight: bold;">`find $LOCAL_SRC_DIR  -maxdepth 2 -type f  -name "*.sql"|wc -l`</span>
+<span style="color: #FBDE2D;">if</span> ! [ $<span style="color: #40E0D0;">FileCnt</span> == 0 ] ; <span style="color: #FBDE2D;">then</span>
+    <span style="color: #FBDE2D;">for</span> i<span style="color: #FBDE2D;"> in</span> <span style="font-weight: bold;">`find $LOCAL_SRC_DIR -maxdepth 2 -type f  -name "*.sql"`</span>
+    <span style="color: #FBDE2D;">do</span>
+        <span style="color: #40E0D0;">relativePath</span>=${<span style="color: #40E0D0;">i</span>:${#<span style="color: #40E0D0;">LOCAL_SRC_DIR</span>}}
+        <span style="color: #F8F8F8;">echo</span> $<span style="color: #40E0D0;">relativePath</span>
+        <span style="color: #F8F8F8;">cd</span> $<span style="color: #40E0D0;">LOCAL_SRC_DIR</span> &amp;&amp; <span style="color: #40E0D0;">RSYNC_PASSWORD</span>=$<span style="color: #40E0D0;">RSYNC_PASSWORD</span> rsync  -ahqztR   --exclude <span style="color: #ffa07a;">'*~'</span> --exclude <span style="color: #ffa07a;">'.#*'</span>    $<span style="color: #40E0D0;">relativePath</span>$<span style="color: #40E0D0;">File</span> $<span style="color: #40E0D0;">DST</span>
+        <span style="color: #40E0D0;">exit_status</span>=$<span style="color: #40E0D0;">?</span>
+    <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#22914;&#26524;&#25104;&#21151;&#20256;&#21040;&#26381;&#21153;&#22120;&#65292;&#21017;&#21024;&#38500;&#26412;&#22320;&#30340;&#25991;&#20214;</span>
+        <span style="color: #FBDE2D;">if</span> [ $<span style="color: #40E0D0;">exit_status</span>==0 ]  ; <span style="color: #FBDE2D;">then</span>
+            <span style="color: #F8F8F8;">echo</span> rm $<span style="color: #40E0D0;">i</span>
+            rm -f $<span style="color: #40E0D0;">i</span>
+        <span style="color: #FBDE2D;">fi</span>
+    <span style="color: #FBDE2D;">done</span>
+<span style="color: #FBDE2D;">fi</span>
+
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">rsync</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-a &#23384;&#26723;&#27169;&#24335;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-h &#20445;&#23384;&#30828;&#36830;&#25509;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-q &#21046;&#27490;&#38750;&#38169;&#35823;&#20449;&#24687;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-z &#21387;&#32553;&#25991;&#20214;&#25968;&#25454;&#22312;&#20256;&#36755;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-t &#32500;&#25252;&#20462;&#25913;&#26102;&#38388;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-delete &#21024;&#38500;&#20110;&#22810;&#20313;&#25991;&#20214;</span>
+inotifywait -mrq --exclude <span style="color: #ffa07a;">'.#.*'</span> -e moved_to,create ${<span style="color: #40E0D0;">LOCAL_SRC_DIR</span>} | <span style="color: #FBDE2D;">while </span><span style="color: #F8F8F8;">read</span> Dir Type File
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-m &#26159;&#20445;&#25345;&#19968;&#30452;&#30417;&#21548;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-r &#26159;&#36882;&#24402;&#26597;&#30475;&#30446;&#24405;</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-q &#26159;&#25171;&#21360;&#20986;&#20107;&#20214;</span>
+<span style="color: #FBDE2D;">do</span>
+    <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">echo $File , $Dir,$Type</span>
+    <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">${#&#21464;&#37327;&#21517;}&#24471;&#21040;&#23383;&#31526;&#20018;&#38271;&#24230;</span>
+    <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">${&#21464;&#37327;&#21517;:&#36215;&#22987;}&#24471;&#21040;&#23376;&#23383;&#31526;&#20018;</span>
+    <span style="color: #40E0D0;">relativePath</span>=${<span style="color: #40E0D0;">Dir</span>:${#<span style="color: #40E0D0;">LOCAL_SRC_DIR</span>}}
+    <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">-R &#20351;&#29992;&#30456;&#23545;&#36335;&#24452;&#65292;&#12288;&#25152;&#20197;&#20808;cd&#21040;&#26681;&#30446;&#24405;</span>
+    <span style="color: #F8F8F8;">cd</span> $<span style="color: #40E0D0;">LOCAL_SRC_DIR</span> &amp;&amp; <span style="color: #40E0D0;">RSYNC_PASSWORD</span>=$<span style="color: #40E0D0;">RSYNC_PASSWORD</span> rsync  -ahqztR   --exclude <span style="color: #ffa07a;">'*~'</span> --exclude <span style="color: #ffa07a;">'.#*'</span>    $<span style="color: #40E0D0;">relativePath</span>$<span style="color: #40E0D0;">File</span> $<span style="color: #40E0D0;">DST</span>
+    <span style="color: #40E0D0;">exit_status</span>=$<span style="color: #40E0D0;">?</span>
+    <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#22914;&#26524;&#25104;&#21151;&#20256;&#21040;&#26381;&#21153;&#22120;&#65292;&#21017;&#21024;&#38500;&#26412;&#22320;&#30340;&#25991;&#20214;</span>
+    <span style="color: #FBDE2D;">if</span> [ $<span style="color: #40E0D0;">exit_status</span>==0 ]  ; <span style="color: #FBDE2D;">then</span>
+        <span style="color: #F8F8F8;">echo</span> rm $<span style="color: #40E0D0;">Dir</span>$<span style="color: #40E0D0;">File</span>
+        rm -f $<span style="color: #40E0D0;">Dir</span>$<span style="color: #40E0D0;">File</span>
+    <span style="color: #FBDE2D;">fi</span>
+    <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#20026;&#20102;&#20197;&#38450;&#19975;&#19968;&#26377;&#28431;&#32593;&#20043;&#40060;&#65292;&#27599;&#27425;&#26377;&#26032;&#30340;&#25991;&#20214;&#21019;&#24314;&#26102;&#20063;&#36827;&#34892;&#19968;&#27425;&#20840;&#30446;&#24405;&#25195;&#25551;</span>
+    <span style="color: #40E0D0;">FileCnt</span>=<span style="font-weight: bold;">`find $LOCAL_SRC_DIR  -maxdepth 2 -type f  -name "*.sql"|wc -l`</span>
+    <span style="color: #FBDE2D;">if</span> ! [ $<span style="color: #40E0D0;">FileCnt</span> == 0 ] ; <span style="color: #FBDE2D;">then</span>
+        <span style="color: #FBDE2D;">for</span> i<span style="color: #FBDE2D;"> in</span> <span style="font-weight: bold;">`find $LOCAL_SRC_DIR -maxdepth 2 -type f  -name "*.sql"`</span>
+        <span style="color: #FBDE2D;">do</span>
+            <span style="color: #40E0D0;">relativePath</span>=${<span style="color: #40E0D0;">i</span>:${#<span style="color: #40E0D0;">LOCAL_SRC_DIR</span>}}
+            <span style="color: #F8F8F8;">echo</span> $<span style="color: #40E0D0;">relativePath</span>
+            <span style="color: #F8F8F8;">cd</span> $<span style="color: #40E0D0;">LOCAL_SRC_DIR</span> &amp;&amp; <span style="color: #40E0D0;">RSYNC_PASSWORD</span>=$<span style="color: #40E0D0;">RSYNC_PASSWORD</span> rsync  -ahqztR   --exclude <span style="color: #ffa07a;">'*~'</span> --exclude <span style="color: #ffa07a;">'.#*'</span>    $<span style="color: #40E0D0;">relativePath</span>$<span style="color: #40E0D0;">File</span> $<span style="color: #40E0D0;">DST</span>
+            <span style="color: #40E0D0;">exit_status</span>=$<span style="color: #40E0D0;">?</span>
+    <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#22914;&#26524;&#25104;&#21151;&#20256;&#21040;&#26381;&#21153;&#22120;&#65292;&#21017;&#21024;&#38500;&#26412;&#22320;&#30340;&#25991;&#20214;</span>
+            <span style="color: #FBDE2D;">if</span> [ $<span style="color: #40E0D0;">exit_status</span>==0 ]  ; <span style="color: #FBDE2D;">then</span>
+                <span style="color: #F8F8F8;">echo</span> rm $<span style="color: #40E0D0;">i</span>
+                rm -f $<span style="color: #40E0D0;">i</span>
+            <span style="color: #FBDE2D;">fi</span>
+        <span style="color: #FBDE2D;">done</span>
+    <span style="color: #FBDE2D;">fi</span>
+    <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">end &#20026;&#20102;&#20197;&#38450;&#19975;&#19968;&#26377;&#28431;&#32593;&#20043;&#40060;&#65292;&#27599;&#27425;&#26377;&#26032;&#30340;&#25991;&#20214;&#21019;&#24314;&#26102;&#20063;&#36827;&#34892;&#19968;&#27425;&#20840;&#30446;&#24405;&#25195;&#25551;</span>
+<span style="color: #FBDE2D;">done</span>
+<span style="color: #AEAEAE;">#</span>
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">rsync  -ahqzt  /home/jixiuf/Linux-C.pdf jixiuf@127.0.0.1::sql_remote  --password-file=/home/jixiuf/passwd</span>
+
+</pre>
+</div>
+
+
+<div class="org-src-container">
+<pre class="src src-sh">/usr/local/bin/inotifywait -mrq -e modify,delete,create,attrib ${<span style="color: #40E0D0;">src</span>}
+-m &#26159;&#20445;&#25345;&#19968;&#30452;&#30417;&#21548;
+-r &#26159;&#36882;&#24402;&#26597;&#30475;&#30446;&#24405;
+-q &#26159;&#25171;&#21360;&#20986;&#20107;&#20214;
+</pre>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2012-11-01</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/linux/">Linux</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/rsync.html";
+          var disqus_url = "http://jixiuf.github.io/blog/rsync.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

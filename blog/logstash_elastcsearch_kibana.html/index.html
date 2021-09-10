@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>logstash elasticsearch kibana 日志分析系统 docker 镜像构建 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="keywords" content="logstash elasticsearch kibana" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>logstash elasticsearch kibana 日志分析系统 docker 镜像构建</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orga54e2c8">本库地址 https://github.com/jixiuf/logstashdocker</a></li>
+<li><a href="#orgfca4508">官方docker 镜像</a></li>
+<li><a href="#orga1cae75">生成 包含 logstash elasticsearch kibana 的 docker 镜像</a></li>
+<li><a href="#orgb6010b1">运行镜像</a></li>
+</ul>
+</li>
+<li><a href="#org194390b">logstash</a></li>
+<li><a href="#orgb8d9794">Elasticsearch</a></li>
+<li><a href="#org244a195">kibana</a>
+<ul>
+<li><a href="#orgd55c717">kibana 加认证功能。</a></li>
+<li><a href="#orgdd272b5">kibana 的一些查询</a></li>
+<li><a href="#orgff712a7">demo</a></li>
+<li><a href="#org4f7fbc1">kibana 的迁移</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orga54e2c8" class="outline-3">
+<h3 id="orga54e2c8">本库地址 <a href="https://github.com/jixiuf/logstashdocker">https://github.com/jixiuf/logstashdocker</a></h3>
+</div>
+<div id="outline-container-orgfca4508" class="outline-3">
+<h3 id="orgfca4508">官方docker 镜像</h3>
+<div class="outline-text-3" id="text-orgfca4508">
+<p>
+<a href="https://hub.docker.com/_/logstash/">https://hub.docker.com/_/logstash/</a><br />
+<a href="https://hub.docker.com/_/kibana/">https://hub.docker.com/_/kibana/</a><br />
+<a href="https://hub.docker.com/_/elasticsearch/">https://hub.docker.com/_/elasticsearch/</a><br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">docker pull logstash
+docker pull kibana
+docker pull elasticsearch
+</pre>
+</div>
+<p>
+demo<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">sudo docker run -it --name logstash-1 --rm -v <span style="color: #ffa07a;">"/data/mygame/config/"</span>:/config-dir logstash logstash -f /config-dir/logstash_mygame.conf
+<span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">es kibana &#30446;&#21069;&#22312;&#21516;&#19968;&#20010;&#26426;&#22120;&#19978;</span>
+sudo docker run -d --name es-1 -e <span style="color: #40E0D0;">ES_HEAP_SIZE</span>=1G -p 9200:9200 -v <span style="color: #ffa07a;">"/data/mygame/es/logs/"</span>:/usr/share/elasticsearch/logs  -v <span style="color: #ffa07a;">"/data/mygame/es/data/"</span>:/usr/share/elasticsearch/data elasticsearch -Des.cluster.name=<span style="color: #ffa07a;">"mygame"</span> -De.bootstrap.mlockall=true -Des.node.name=<span style="color: #ffa07a;">"mygame-node-1"</span>
+sudo docker run --name kibana --link es-1:elasticsearch -p 5601:5601 -d kibana
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga1cae75" class="outline-3">
+<h3 id="orga1cae75">生成 包含 logstash elasticsearch kibana 的 docker 镜像</h3>
+<div class="outline-text-3" id="text-orga1cae75">
+<p>
+网速可以的话，用官方的docker 镜像还是不错的，<br />
+直接本目录下<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">sudo make
+</pre>
+</div>
+<p>
+或<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">docker build -t najaplus/logstash:latest  .
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb6010b1" class="outline-3">
+<h3 id="orgb6010b1">运行镜像</h3>
+<div class="outline-text-3" id="text-orgb6010b1">
+<div class="org-src-container">
+<pre class="src src-sh">sudo  docker run -t -i najaplus/logstash bash
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org194390b" class="outline-2">
+<h2 id="org194390b">logstash</h2>
+<div class="outline-text-2" id="text-org194390b">
+<p>
+logstash 主要功能，收集与解析数据，<br />
+从 日志文件或redis 队列中解析出日志数据，经过logstash 一些filter plugin<br />
+解析转换为格式化的内容(json) ,存储到某个地方( 可以是redis ,file,elasticseatch),<br />
+以便进行数据分析与统计<br />
+</p>
+</div>
+
+<ul class="org-ul">
+<li><a id="orgfe1161d"></a>测试logstash 是否成功安装<br />
+<div class="outline-text-4" id="text-orgfe1161d">
+<p>
+在镜像中运行<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">logstash -e <span style="color: #ffa07a;">'input { stdin { } } output { stdout {} }'</span>
+</pre>
+</div>
+<p>
+此时会进入交互式提示界面 ，然后输入任意字符如 "hello" 会有如下提示<br />
+</p>
+<blockquote>
+<p>
+2016-05-06T17:30:17.219Z 40b8994c31cb hello<br />
+</p>
+</blockquote>
+</div>
+</li>
+
+<li><a id="org4c19e89"></a>logstash 官网 快速入门<br />
+<div class="outline-text-4" id="text-org4c19e89">
+<p>
+<a href="https://www.elastic.co/guide/en/logstash/current/getting-started-with-logstash.html">https://www.elastic.co/guide/en/logstash/current/getting-started-with-logstash.html</a><br />
+</p>
+</div>
+</li>
+<li><a id="org725c075"></a>logstash demo<br />
+<div class="outline-text-4" id="text-org725c075">
+<p>
+logstash_demo 目录下有几个demo<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">logstash -f logstash1.conf
+logstash -f logstash1.conf  --auto-reload
+</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+
+<div id="outline-container-orgb8d9794" class="outline-2">
+<h2 id="orgb8d9794">Elasticsearch</h2>
+<div class="outline-text-2" id="text-orgb8d9794">
+<p>
+主要功能， 数据的存储与检索，基于json 格式存储，<br />
+基于Lucene<br />
+</p>
+</div>
+
+<ul class="org-ul">
+<li><a id="orgdfb876a"></a>elasticsearch 的几个主要概念<br />
+<ul class="org-ul">
+<li><a id="org3b27145"></a>Cluster 集群<br />
+<div class="outline-text-5" id="text-org3b27145">
+<p>
+集群有个名字， 防止不同集群间混淆<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">elasticsearch --cluster.name my_cluster_name --node.name my_node_name
+</pre>
+</div>
+<p>
+默认名称 elasticsearch<br />
+</p>
+</div>
+</li>
+
+<li><a id="org185f391"></a>Node 节点<br />
+<div class="outline-text-5" id="text-org185f391">
+<p>
+一个cluster 下分多个node<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">elasticsearch --cluster.name my_cluster_name --node.name my_node_name
+</pre>
+</div>
+<p>
+默认名称 elasticsearch<br />
+如果只启动一个node 相当于<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">elasticsearch  --cluster.name elasticsearch --node.name elasticsearch
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org0573c6d"></a>Index<br />
+<div class="outline-text-5" id="text-org0573c6d">
+<p>
+一些具有共性的documents 的集合，可以认为 一个<br />
+index 就是一个类别,比如我把游戏1的信息存到index1上 游戏2的信息存<br />
+到index2上index 有名字一个cluster 可以有任意多个index<br />
+</p>
+</div>
+</li>
+
+<li><a id="orgc6566f7"></a>Type<br />
+<div class="outline-text-5" id="text-orgc6566f7">
+<p>
+Index 下可以定义多个Type<br />
+可以认为是编程语言里的struct/class<br />
+a type is defined for documents that have a set of common fields.<br />
+</p>
+</div>
+</li>
+
+<li><a id="orga81fee6"></a>Document<br />
+<div class="outline-text-5" id="text-orga81fee6">
+<p>
+docuemnt 存储具体和信息，如果Type 当成java里的Class ,则Document 可以认为是这个Class 的实例<br />
+在 elasticsearch中它实际是一个json<br />
+</p>
+</div>
+</li>
+
+<li><a id="org7018ceb"></a>Shards&amp;Replication<br />
+<div class="outline-text-5" id="text-org7018ceb">
+<p>
+架构层面上的东西 ，<br />
+可以进行分片，及主从 这个可以参考mysql 的数据库分片 与主从<br />
+一个index 内的数据量可能极大，可以将index 分成多片(称为shard)<br />
+当定义index 时 ，可以指定将此index 分成n个shards<br />
+</p>
+
+<p>
+Each shard is in itself a fully-functional and independent<br />
+"index" that can be hosted on any node in the cluster.<br />
+可以认为index 与shards是逻辑上的， 而 cluster 与node 上架构上的。<br />
+一个index 分为多个shards(s1,s2,s3) ，一个cluster 分为多个node(n1,n2,n3)<br />
+将shard s1,s2,s3 分别放到n1,n2,n3节点上<br />
+</p>
+
+<p>
+而Replication 可以认为是从库，<br />
+存在的意义，<br />
+</p>
+<ol class="org-ol">
+<li>备份，及当某个node 挂了 可以failover, 以保证 高可用性(hight available)<br /></li>
+<li><p>
+查询可以在从库上进行<br />
+</p>
+
+<p>
+默认情况下 一个index 有5个shard, 每个shard 有一个 replica shards,即共有10个shards<br />
+通常情况下 replica shard 肯定跟primary shard 不在同一个节点上(这样从库还真正有意义)<br />
+</p></li>
+</ol>
+</div>
+</li>
+</ul>
+</li>
+
+
+<li><a id="orgaa85598"></a>启动<br />
+<div class="outline-text-4" id="text-orgaa85598">
+<p>
+elasticsearch 基于Lucene,而Lucene 使用java 编写，所以java jdk 是安装所必须的<br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">elasticsearch
+&#25110;
+elasticsearch --cluster.name my_cluster_name --node.name my_node_name
+</pre>
+</div>
+<p>
+启动之后9200端口会监听http 请求<br />
+</p>
+</div>
+</li>
+
+<li><a id="org71a9c94"></a>检查节点状态<br />
+<div class="outline-text-4" id="text-org71a9c94">
+<div class="org-src-container">
+<pre class="src src-sh">curl <span style="color: #ffa07a;">'localhost:9200/_cat/health?v'</span>
+</pre>
+</div>
+<blockquote>
+<p>
+deployer@iZ94badqop7Z logstash_demo/demo1 (master) $ curl 'localhost:9200/_cat/health?v'<br />
+epoch      timestamp cluster       status node.total node.data shards pri relo init unassign pending_tasks max_task_wait_time active_shards_percent<br />
+1462637474 00:11:14  elasticsearch yellow          1         1      5   5    0    0        5             0                  -                 50.0%<br />
+</p>
+</blockquote>
+</div>
+</li>
+
+<li><a id="org6530a2b"></a>查看各线程拥堵情况<br />
+<div class="outline-text-4" id="text-org6530a2b">
+<p>
+GET /_cat/thread_pool?v<br />
+</p>
+</div>
+</li>
+<li><a id="org4ad0ffd"></a>获取node 列表<br />
+<div class="outline-text-4" id="text-org4ad0ffd">
+<div class="org-src-container">
+<pre class="src src-sh">curl <span style="color: #ffa07a;">'localhost:9200/_cat/nodes?v'</span>
+</pre>
+</div>
+<blockquote>
+<p>
+deployer@iZ94badqop7Z logstash_demo/demo1 $<br />
+host         ip           heap.percent ram.percent load node.role master name<br />
+120.24.77.58 120.24.77.58            7          92 0.17 d         *      zjh<br />
+</p>
+</blockquote>
+</div>
+</li>
+
+<li><a id="orgd2dda99"></a>查看集群上有哪个index<br />
+<div class="outline-text-4" id="text-orgd2dda99">
+<div class="org-src-container">
+<pre class="src src-sh">curl <span style="color: #ffa07a;">'localhost:9200/_cat/indices?v'</span>
+</pre>
+</div>
+<blockquote>
+<p>
+health status index               pri rep docs.count docs.deleted store.size pri.store.size<br />
+yellow open   logstash-2016.05.07   5   1          6            0     17.3kb         17.3kb<br />
+</p>
+</blockquote>
+<p>
+可以看到index 的名字， primary个数 ，replica个数 ,docuemnts数量，<br />
+</p>
+</div>
+</li>
+
+<li><a id="org8ba20de"></a>创建一个index<br />
+<div class="outline-text-4" id="text-org8ba20de">
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPUT <span style="color: #ffa07a;">'localhost:9200/customer?pretty'</span>
+</pre>
+</div>
+<blockquote>
+<p>
+{<br />
+"acknowledged" : true<br />
+}<br />
+</p>
+</blockquote>
+<div class="org-src-container">
+<pre class="src src-sh"> <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#25351;&#23450; shard &#19982;replicas &#25968;&#37327;</span>
+curl -XPUT <span style="color: #ffa07a;">'http://localhost:9200/twitter/'</span> -d <span style="color: #ffa07a;">'{</span>
+<span style="color: #ffa07a;">    "settings" : {</span>
+<span style="color: #ffa07a;">        "index" : {</span>
+<span style="color: #ffa07a;">            "number_of_shards" : 3,</span>
+<span style="color: #ffa07a;">            "number_of_replicas" : 2</span>
+<span style="color: #ffa07a;">        }</span>
+<span style="color: #ffa07a;">    }</span>
+<span style="color: #ffa07a;">}'</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org9da49ed"></a>删除某个index<br />
+<div class="outline-text-4" id="text-org9da49ed">
+<div class="org-src-container">
+<pre class="src src-sh">curl -XDELETE <span style="color: #ffa07a;">'localhost:9200/customer?pretty'</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="orgebce8cc"></a>创建某个Type 的Documents<br />
+<div class="outline-text-4" id="text-orgebce8cc">
+<p>
+这里在index:customer上创建了一个type 为 external id=1的document<br />
+如果id=1的已经存在，则会替换之<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPUT <span style="color: #ffa07a;">'localhost:9200/customer/external/1?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">    {</span>
+<span style="color: #ffa07a;">    "name": "John Doe"</span>
+<span style="color: #ffa07a;">    }'</span>
+</pre>
+</div>
+<blockquote>
+<p>
+{<br />
+"_index" : "customer",<br />
+"_type" : "external",<br />
+"_id" : "1",<br />
+"_version" : 1,<br />
+"_shards" : {<br />
+"total" : 2,<br />
+"successful" : 1,<br />
+"failed" : 0<br />
+},<br />
+"created" : true<br />
+}<br />
+</p>
+</blockquote>
+<p>
+实际情况上 ，在创建document 时， 不必手动去创建相应的index,执行上述命令， 如果没有index:customer,则会自动创建<br />
+</p>
+
+<p>
+curl -XPUT 'localhost:9200/custome2r/external/1?pretty' -d '<br />
+{<br />
+"name": "John Doe"<br />
+}'<br />
+</p>
+</div>
+</li>
+
+<li><a id="org1a9e7ad"></a>查询某个document<br />
+<div class="outline-text-4" id="text-org1a9e7ad">
+<div class="org-src-container">
+<pre class="src src-sh">curl -XGET <span style="color: #ffa07a;">'localhost:9200/customer/external/1?pretty'</span>
+</pre>
+</div>
+<blockquote>
+<p>
+{<br />
+"_index" : "customer",<br />
+"_type" : "external",<br />
+"_id" : "1",<br />
+"_version" : 1,<br />
+"found" : true,<br />
+"_source" : {<br />
+"name" : "John Doe"<br />
+}<br />
+}<br />
+</p>
+</blockquote>
+</div>
+</li>
+
+<li><a id="org1d71485"></a>update document<br />
+<div class="outline-text-4" id="text-org1d71485">
+<p>
+update 实际是先删除后增加<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/customer/external/1/_update?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{</span>
+<span style="color: #ffa07a;">  "doc": { "name": "Jane Doe","age":11 }</span>
+<span style="color: #ffa07a;">}'</span>
+</pre>
+</div>
+<p>
+通过script 修改age 的值  +5<br />
+script 文档 <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html">https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html</a><br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/customer/external/1/_update?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{</span>
+<span style="color: #ffa07a;">  "script" : "ctx._source.age += 5"</span>
+<span style="color: #ffa07a;">}'</span>
+</pre>
+</div>
+<p>
+目前的版本，script 操作只能会对一个docuemnt ,以后或许会支持类似于sql update 的操作 ，同时修改多个<br />
+</p>
+</div>
+</li>
+
+<li><a id="org58ecfd5"></a>delete document<br />
+<div class="outline-text-4" id="text-org58ecfd5">
+<div class="org-src-container">
+<pre class="src src-sh">curl -XDELETE <span style="color: #ffa07a;">'localhost:9200/customer/external/2?pretty'</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="orgaec094a"></a>批量操作<br />
+<div class="outline-text-4" id="text-orgaec094a">
+<p>
+同时创建id=1,2的 type:external<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/customer/external/_bulk?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">    {"index":{"_id":"1"}}</span>
+<span style="color: #ffa07a;">    {"name": "John Doe" }</span>
+<span style="color: #ffa07a;">    {"index":{"_id":"2"}}</span>
+<span style="color: #ffa07a;">    {"name": "Jane Doe" }</span>
+<span style="color: #ffa07a;">    '</span>
+</pre>
+</div>
+<p>
+修改一个， 同时删除另一个<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/customer/external/_bulk?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{"update":{"_id":"1"}}</span>
+<span style="color: #ffa07a;">{"doc": { "name": "John Doe becomes Jane Doe" } }</span>
+<span style="color: #ffa07a;">{"delete":{"_id":"2"}}</span>
+<span style="color: #ffa07a;">'</span>
+</pre>
+</div>
+</div>
+
+<ul class="org-ul">
+<li><a id="orga5c6cb8"></a>批量从文件导入<br />
+<div class="outline-text-5" id="text-orga5c6cb8">
+<p>
+假如有文件 account.json<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-js">{<span style="color: #ffa07a;">"index"</span>:{<span style="color: #ffa07a;">"_id"</span>:<span style="color: #ffa07a;">"1"</span>}}
+{<span style="color: #ffa07a;">"account_number"</span>:1,<span style="color: #ffa07a;">"balance"</span>:39225,<span style="color: #ffa07a;">"firstname"</span>:<span style="color: #ffa07a;">"Amber"</span>,<span style="color: #ffa07a;">"lastname"</span>:<span style="color: #ffa07a;">"Duke"</span>,<span style="color: #ffa07a;">"age"</span>:32,<span style="color: #ffa07a;">"gender"</span>:<span style="color: #ffa07a;">"M"</span>,<span style="color: #ffa07a;">"address"</span>:<span style="color: #ffa07a;">"880 Holmes Lane"</span>,<span style="color: #ffa07a;">"employer"</span>:<span style="color: #ffa07a;">"Pyrami"</span>,<span style="color: #ffa07a;">"email"</span>:<span style="color: #ffa07a;">"amberduke@pyrami.com"</span>,<span style="color: #ffa07a;">"city"</span>:<span style="color: #ffa07a;">"Brogan"</span>,<span style="color: #ffa07a;">"state"</span>:<span style="color: #ffa07a;">"IL"</span>}
+{<span style="color: #ffa07a;">"index"</span>:{<span style="color: #ffa07a;">"_id"</span>:<span style="color: #ffa07a;">"6"</span>}}
+{<span style="color: #ffa07a;">"account_number"</span>:6,<span style="color: #ffa07a;">"balance"</span>:5686,<span style="color: #ffa07a;">"firstname"</span>:<span style="color: #ffa07a;">"Hattie"</span>,<span style="color: #ffa07a;">"lastname"</span>:<span style="color: #ffa07a;">"Bond"</span>,<span style="color: #ffa07a;">"age"</span>:36,<span style="color: #ffa07a;">"gender"</span>:<span style="color: #ffa07a;">"M"</span>,<span style="color: #ffa07a;">"address"</span>:<span style="color: #ffa07a;">"671 Bristol Street"</span>,<span style="color: #ffa07a;">"employer"</span>:<span style="color: #ffa07a;">"Netagy"</span>,<span style="color: #ffa07a;">"email"</span>:<span style="color: #ffa07a;">"hattiebond@netagy.com"</span>,<span style="color: #ffa07a;">"city"</span>:<span style="color: #ffa07a;">"Dante"</span>,<span style="color: #ffa07a;">"state"</span>:<span style="color: #ffa07a;">"TN"</span>}
+{<span style="color: #ffa07a;">"index"</span>:{<span style="color: #ffa07a;">"_id"</span>:<span style="color: #ffa07a;">"13"</span>}}
+{<span style="color: #ffa07a;">"account_number"</span>:13,<span style="color: #ffa07a;">"balance"</span>:32838,<span style="color: #ffa07a;">"firstname"</span>:<span style="color: #ffa07a;">"Nanette"</span>,<span style="color: #ffa07a;">"lastname"</span>:<span style="color: #ffa07a;">"Bates"</span>,<span style="color: #ffa07a;">"age"</span>:28,<span style="color: #ffa07a;">"gender"</span>:<span style="color: #ffa07a;">"F"</span>,<span style="color: #ffa07a;">"address"</span>:<span style="color: #ffa07a;">"789 Madison Street"</span>,<span style="color: #ffa07a;">"employer"</span>:<span style="color: #ffa07a;">"Quility"</span>,<span style="color: #ffa07a;">"email"</span>:<span style="color: #ffa07a;">"nanettebates@quility.com"</span>,<span style="color: #ffa07a;">"city"</span>:<span style="color: #ffa07a;">"Nogal"</span>,<span style="color: #ffa07a;">"state"</span>:<span style="color: #ffa07a;">"VA"</span>}
+{<span style="color: #ffa07a;">"index"</span>:{<span style="color: #ffa07a;">"_id"</span>:<span style="color: #ffa07a;">"18"</span>}}
+{<span style="color: #ffa07a;">"account_number"</span>:18,<span style="color: #ffa07a;">"balance"</span>:4180,<span style="color: #ffa07a;">"firstname"</span>:<span style="color: #ffa07a;">"Dale"</span>,<span style="color: #ffa07a;">"lastname"</span>:<span style="color: #ffa07a;">"Adams"</span>,<span style="color: #ffa07a;">"age"</span>:33,<span style="color: #ffa07a;">"gender"</span>:<span style="color: #ffa07a;">"M"</span>,<span style="color: #ffa07a;">"address"</span>:<span style="color: #ffa07a;">"467 Hutchinson Court"</span>,<span style="color: #ffa07a;">"employer"</span>:<span style="color: #ffa07a;">"Boink"</span>,<span style="color: #ffa07a;">"email"</span>:<span style="color: #ffa07a;">"daleadams@boink.com"</span>,<span style="color: #ffa07a;">"city"</span>:<span style="color: #ffa07a;">"Orick"</span>,<span style="color: #ffa07a;">"state"</span>:<span style="color: #ffa07a;">"MD"</span>}
+{<span style="color: #ffa07a;">"index"</span>:{<span style="color: #ffa07a;">"_id"</span>:<span style="color: #ffa07a;">"20"</span>}}
+{<span style="color: #ffa07a;">"account_number"</span>:20,<span style="color: #ffa07a;">"balance"</span>:16418,<span style="color: #ffa07a;">"firstname"</span>:<span style="color: #ffa07a;">"Elinor"</span>,<span style="color: #ffa07a;">"lastname"</span>:<span style="color: #ffa07a;">"Ratliff"</span>,<span style="color: #ffa07a;">"age"</span>:36,<span style="color: #ffa07a;">"gender"</span>:<span style="color: #ffa07a;">"M"</span>,<span style="color: #ffa07a;">"address"</span>:<span style="color: #ffa07a;">"282 Kings Place"</span>,<span style="color: #ffa07a;">"employer"</span>:<span style="color: #ffa07a;">"Scentric"</span>,<span style="color: #ffa07a;">"email"</span>:<span style="color: #ffa07a;">"elinorratliff@scentric.com"</span>,<span style="color: #ffa07a;">"city"</span>:<span style="color: #ffa07a;">"Ribera"</span>,<span style="color: #ffa07a;">"state"</span>:<span style="color: #ffa07a;">"WA"</span>}
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/account/_bulk?pretty'</span> --data-binary <span style="color: #ffa07a;">"@account.json"</span>
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">curl <span style="color: #ffa07a;">'localhost:9200/_cat/indices?v</span>
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">curl <span style="color: #ffa07a;">'localhost:9200/_cat/indices?v'</span>
+health index pri rep docs.count docs.deleted store.size pri.store.size
+yellow bank    5   1       1000            0    424.4kb        424.4kb
+</pre>
+</div>
+</div>
+</li>
+</ul>
+</li>
+
+<li><a id="org320617f"></a>查看mapping<br />
+<div class="outline-text-4" id="text-org320617f">
+<p>
+mapping 主要功能是用来指定 field 的类型的，<br />
+默认在创建document 时， 有dynamic mapping 机制 自动指定field 类型等，<br />
+比如上面创建 customer/external 时<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"> <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#26597;&#30475;index=customer ,type=external &#23545;&#24212;&#30340; mapping</span>
+ <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#21487;&#20197;&#30475;&#21040;&#65292;&#23427;&#26377;&#19968;&#20010;field:name &#23545;&#24212;&#31867;&#22411;&#20026;string</span>
+ curl -XGET <span style="color: #ffa07a;">'http://localhost:9200/customer/_mapping/external?pretty'</span>
+{
+  <span style="color: #ffa07a;">"customer"</span> : {
+    <span style="color: #ffa07a;">"mappings"</span> : {
+      <span style="color: #ffa07a;">"external"</span> : {
+        <span style="color: #ffa07a;">"properties"</span> : {
+          <span style="color: #ffa07a;">"name"</span> : {
+            <span style="color: #ffa07a;">"type"</span> : <span style="color: #ffa07a;">"string"</span>
+          }
+        }
+      }
+    }
+  }
+}
+</pre>
+</div>
+<p>
+#查看所有index 的mappin<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XGET <span style="color: #ffa07a;">'http://localhost:9200/_mapping?pretty'</span>
+ &#25110;
+curl -XGET <span style="color: #ffa07a;">'http://localhost:9200/_all/_mapping?pretty'</span>
+</pre>
+</div>
+<p>
+查看某两个index 的mapping<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XGET <span style="color: #ffa07a;">'http://localhost:9200/_mapping/twitter,kimchy'</span>
+&#25110;
+curl -XGET <span style="color: #ffa07a;">'http://localhost:9200/_all/_mapping/tweet,book'</span>
+</pre>
+</div>
+</div>
+</li>
+<li><a id="org4a55240"></a>put mapping<br />
+<div class="outline-text-4" id="text-org4a55240">
+<p>
+put mapping ,可以实现<br />
+</p>
+</div>
+<ul class="org-ul">
+<li><a id="org4b9bc3a"></a>创建index 时 指定mapping<br />
+<div class="outline-text-5" id="text-org4b9bc3a">
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST localhost:9200/test -d <span style="color: #ffa07a;">'{</span>
+<span style="color: #ffa07a;">    "settings" : {</span>
+<span style="color: #ffa07a;">        "number_of_shards" : 1</span>
+<span style="color: #ffa07a;">    },</span>
+<span style="color: #ffa07a;">    "mappings" : {</span>
+<span style="color: #ffa07a;">        "type1" : {</span>
+<span style="color: #ffa07a;">            "properties" : {</span>
+<span style="color: #ffa07a;">                "field1" : { "type" : "string", "index" : "not_analyzed" }</span>
+<span style="color: #ffa07a;">            }</span>
+<span style="color: #ffa07a;">        }</span>
+<span style="color: #ffa07a;">    }</span>
+<span style="color: #ffa07a;">}'</span>
+
+</pre>
+</div>
+</div>
+</li>
+<li><a id="org155f031"></a>向一个已经存在的index 加一个新的type (index 似乎必须存在)<br />
+<div class="outline-text-5" id="text-org155f031">
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPUT <span style="color: #ffa07a;">'http://localhost:9200/gold'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{"mappings":{</span>
+<span style="color: #ffa07a;">      "gold_change":{</span>
+<span style="color: #ffa07a;">          "properties":{</span>
+<span style="color: #ffa07a;">              "uin":{</span>
+<span style="color: #ffa07a;">                  "type":"string",</span>
+<span style="color: #ffa07a;">                  "index":"not_analyzed"</span>
+<span style="color: #ffa07a;">              },</span>
+<span style="color: #ffa07a;">              "change":{</span>
+<span style="color: #ffa07a;">                  "type":"long"</span>
+<span style="color: #ffa07a;">              },</span>
+<span style="color: #ffa07a;">              "timestamp":{</span>
+<span style="color: #ffa07a;">                  "type":"date",</span>
+<span style="color: #ffa07a;">                  "format" : "strict_date_optional_time||epoch_millis"</span>
+<span style="color: #ffa07a;">              }</span>
+
+<span style="color: #ffa07a;">          }</span>
+<span style="color: #ffa07a;">      }</span>
+<span style="color: #ffa07a;">}}</span>
+<span style="color: #ffa07a;">'</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#27880;&#19978;&#38754; "index":"not_analyzed" &#35828;&#26126; &#19981;&#23545;uin &#36827;&#34892;&#20998;&#35789;(&#25226;uin &#23545;&#24212;&#30340;&#20869;&#23481;&#24403;&#25104;&#19968;&#20010;&#23436;&#25972;&#30340;term) ,&#21487;&#25509;&#21463;&#30340;&#31867;&#22411;"no","analyzed"</span>
+ <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">no &#34920;&#31034;&#65292; &#27492;&#23383;&#27573;&#19981;&#21487;&#26597;&#35810; analyzed &#34920;&#31034;&#20250;&#36827;&#34892;&#20998;&#35789;</span>
+ <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#26356;&#22810;&#21442;&#25968; &#65292;&#35265;</span>
+ <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">https://www.elastic.co/guide/en/elasticsearch/reference/current//mapping-index.html</span>
+
+</pre>
+</div>
+</div>
+</li>
+<li><a id="org7abf2f3"></a>向一个已经存在的type 加一个新的field<br />
+<div class="outline-text-5" id="text-org7abf2f3">
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPUT <span style="color: #ffa07a;">'http://localhost:9200/gold/_mapping/gold_change'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;"> {</span>
+<span style="color: #ffa07a;">   "properties": {</span>
+<span style="color: #ffa07a;">     "name": {</span>
+<span style="color: #ffa07a;">       "type": "string"</span>
+<span style="color: #ffa07a;">     }</span>
+<span style="color: #ffa07a;">   }</span>
+<span style="color: #ffa07a;"> }'</span>
+</pre>
+</div>
+<p>
+不能实现的功能，<br />
+如果一个type 已经存的某field ,则不能修改在field 的类型。<br />
+要想修改 只能在 未创建任何document 之前 put mapping<br />
+通常情况下， 如果未手动put mapping<br />
+在创建第一个document 时， 会自动创建相应的mapping<br />
+但是此时 ，mapping 里出现的field 类型后期不能进行修改了。<br />
+如果自动创建的mapping 不能满足你的需求。 则要提前创建。<br />
+比如， 本可能是时间的字段， 默认可能会是long<br />
+实际是个long , 本默认是string<br />
+</p>
+</div>
+</li>
+</ul>
+</li>
+
+<li><a id="org4a702d4"></a>mapping types<br />
+<div class="outline-text-4" id="text-org4a702d4">
+<p>
+string, date, long, double, boolean or ip<br />
+object, nested 等json 或对象 等特殊类型<br />
+geo_point, geo_shape, or completion等表示地图信息的类型<br />
+date 需要指定format<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-js"><span style="color: #ffa07a;">"timestamp"</span>:{
+  <span style="color: #ffa07a;">"type"</span>:<span style="color: #ffa07a;">"date"</span>,
+  <span style="color: #ffa07a;">"format"</span> : <span style="color: #ffa07a;">"strict_date_optional_time||epoch_millis"</span>
+}
+
+<span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">&#25110;</span>
+#<span style="color: #ffa07a;">"format"</span>: <span style="color: #ffa07a;">"yyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"</span>
+
+
+</pre>
+</div>
+
+
+<p>
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current//mapping.html#mapping-type">https://www.elastic.co/guide/en/elasticsearch/reference/current//mapping.html#mapping-type</a><br />
+需要特别说明的一点是 。<br />
+同一个index 下 ， 相同名字的field ,不类在哪个type 中， 必须保证 此field 的类型 处处相同<br />
+即 ，title 字段可能出现在user 可能出现在group 中 ， 不论在哪里 title 必须都是string 或别的类型<br />
+</p>
+</div>
+</li>
+
+
+
+<li><a id="org6a46c00"></a>Index Template<br />
+<div class="outline-text-4" id="text-org6a46c00">
+<p>
+template 存在的意义是，比如logstash 在创建index  可能是根据日期<br />
+创建不同的index ，以避免某个index 数据量过大，<br />
+如 每月建一个index,<br />
+为了保证这些每月自动创建的index 对其mapping,setting 进行定制，<br />
+保证其属性一致。 从而出现了template<br />
+template 需要一个index pattern,来匹配决定 新创建的index 是否需要应用此模版<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#21482;&#35201;&#26032;&#21019;&#24314;&#30340;index &#21069;&#32512;&#26159;"gold-*" &#65292;&#23601;&#20250;&#24212;&#29992;&#27492; template</span>
+curl -XPUT <span style="color: #ffa07a;">'http://localhost:9200/_template/gold_template'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{</span>
+<span style="color: #ffa07a;">  "template": "gold-*",</span>
+<span style="color: #ffa07a;">  "settings": {</span>
+<span style="color: #ffa07a;">    "number_of_shards": 1</span>
+<span style="color: #ffa07a;">  },</span>
+<span style="color: #ffa07a;">  "mappings": {</span>
+<span style="color: #ffa07a;">    "gold_change": {</span>
+<span style="color: #ffa07a;">      "_source": {</span>
+<span style="color: #ffa07a;">        "enabled": false</span>
+<span style="color: #ffa07a;">      },</span>
+<span style="color: #ffa07a;">      "properties": {</span>
+<span style="color: #ffa07a;">        "host_name": {</span>
+<span style="color: #ffa07a;">          "type": "string",</span>
+<span style="color: #ffa07a;">          "index": "not_analyzed"</span>
+<span style="color: #ffa07a;">        },</span>
+<span style="color: #ffa07a;">        "created_at": {</span>
+<span style="color: #ffa07a;">          "type": "date",</span>
+<span style="color: #ffa07a;">          "format": "EEE MMM dd HH:mm:ss Z YYYY"</span>
+<span style="color: #ffa07a;">        }</span>
+<span style="color: #ffa07a;">      }</span>
+<span style="color: #ffa07a;">    }</span>
+<span style="color: #ffa07a;">  }</span>
+<span style="color: #ffa07a;"> }</span>
+<span style="color: #ffa07a;">  '</span>
+
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org56f30fa"></a>Search<br />
+<ul class="org-ul">
+<li><a id="org4f0d25c"></a>查所有<br />
+<div class="outline-text-5" id="text-org4f0d25c">
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">&#20004;&#31181;&#26041;&#24335;&#65292; &#19968;&#31181;&#36890;&#36807;&#21442;&#25968; &#65292;&#19968;&#31181;&#36890;&#36807;request body &#21457;&#36865;json&#20869;&#23481;</span>
+curl <span style="color: #ffa07a;">'localhost:9200/bank/_search?q=*&amp;pretty'</span>
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#25110;</span>
+curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;"> {</span>
+<span style="color: #ffa07a;"> "query": { "match_all": {} }</span>
+<span style="color: #ffa07a;"> }'</span>
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-js">   {
+<span style="color: #ffa07a;">"took"</span> : 63,
+<span style="color: #ffa07a;">"timed_out"</span> : <span style="color: #D8FA3C;">false</span>,
+<span style="color: #ffa07a;">"_shards"</span> : {
+  <span style="color: #ffa07a;">"total"</span> : 5,
+  <span style="color: #ffa07a;">"successful"</span> : 5,
+  <span style="color: #ffa07a;">"failed"</span> : 0
+},
+<span style="color: #ffa07a;">"hits"</span> : {
+  <span style="color: #ffa07a;">"total"</span> : 1000,
+  <span style="color: #ffa07a;">"max_score"</span> : 1.0,
+  <span style="color: #ffa07a;">"hits"</span> : [ {
+    <span style="color: #ffa07a;">"_index"</span> : <span style="color: #ffa07a;">"bank"</span>,
+    <span style="color: #ffa07a;">"_type"</span> : <span style="color: #ffa07a;">"account"</span>,
+    <span style="color: #ffa07a;">"_id"</span> : <span style="color: #ffa07a;">"1"</span>,
+    <span style="color: #ffa07a;">"_score"</span> : 1.0, <span style="color: #ffa07a;">"_source"</span> : {<span style="color: #ffa07a;">"account_number"</span>:1,<span style="color: #ffa07a;">"balance"</span>:39225,<span style="color: #ffa07a;">"firstname"</span>:<span style="color: #ffa07a;">"Amber"</span>,<span style="color: #ffa07a;">"lastname"</span>:<span style="color: #ffa07a;">"Duke"</span>,<span style="color: #ffa07a;">"age"</span>:32,<span style="color: #ffa07a;">"gender"</span>:<span style="color: #ffa07a;">"M"</span>,<span style="color: #ffa07a;">"address"</span>:<span style="color: #ffa07a;">"880 Holmes Lane"</span>,<span style="color: #ffa07a;">"employer"</span>:<span style="color: #ffa07a;">"Pyrami"</span>,<span style="color: #ffa07a;">"email"</span>:<span style="color: #ffa07a;">"amberduke@pyrami.com"</span>,<span style="color: #ffa07a;">"city"</span>:<span style="color: #ffa07a;">"Brogan"</span>,<span style="color: #ffa07a;">"state"</span>:<span style="color: #ffa07a;">"IL"</span>}
+  }, {
+    <span style="color: #ffa07a;">"_index"</span> : <span style="color: #ffa07a;">"bank"</span>,
+    <span style="color: #ffa07a;">"_type"</span> : <span style="color: #ffa07a;">"account"</span>,
+    <span style="color: #ffa07a;">"_id"</span> : <span style="color: #ffa07a;">"6"</span>,
+    <span style="color: #ffa07a;">"_score"</span> : 1.0, <span style="color: #ffa07a;">"_source"</span> : {<span style="color: #ffa07a;">"account_number"</span>:6,<span style="color: #ffa07a;">"balance"</span>:5686,<span style="color: #ffa07a;">"firstname"</span>:<span style="color: #ffa07a;">"Hattie"</span>,<span style="color: #ffa07a;">"lastname"</span>:<span style="color: #ffa07a;">"Bond"</span>,<span style="color: #ffa07a;">"age"</span>:36,<span style="color: #ffa07a;">"gender"</span>:<span style="color: #ffa07a;">"M"</span>,<span style="color: #ffa07a;">"address"</span>:<span style="color: #ffa07a;">"671 Bristol Street"</span>,<span style="color: #ffa07a;">"employer"</span>:<span style="color: #ffa07a;">"Netagy"</span>,<span style="color: #ffa07a;">"email"</span>:<span style="color: #ffa07a;">"hattiebond@netagy.com"</span>,<span style="color: #ffa07a;">"city"</span>:<span style="color: #ffa07a;">"Dante"</span>,<span style="color: #ffa07a;">"state"</span>:<span style="color: #ffa07a;">"TN"</span>}
+  }
+  ...
+  ]}}
+
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org3bf14b9"></a>查询语法<br />
+<div class="outline-text-5" id="text-org3bf14b9">
+<p>
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html">https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html</a><br />
+查询语法，包含两个Context: Query Context和Filter Context<br />
+Filter 用来 过滤document 是否包含在结果集中，主要用于过滤掉不符合的document<br />
+而Query context 是搜索引擎层面的，用来计算给定的关键词与document 的匹配度<br />
+它会计算一个score ,来标定这个这键字与document的匹配度。当然它也会过滤掉一些不匹配的document<br />
+而filter 是不计算score的 。<br />
+</p>
+
+<p>
+可以认为 filter context ,是严格过滤的， 即，  通常条件类似<br />
+status==1<br />
+age&gt;0<br />
+age&lt;10<br />
+name=="age"<br />
+而 query context ,是基于字符匹配层面的"匹配"（搜索引擎）<br />
+比如<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">  {</span>
+<span style="color: #ffa07a;">    "query": {</span>
+<span style="color: #ffa07a;">      "bool": {</span>
+<span style="color: #ffa07a;">        "must": [</span>
+<span style="color: #ffa07a;">          { "match": { "title":   "Search"        }},</span>
+<span style="color: #ffa07a;">          { "match": { "content": "Elasticsearch" }}</span>
+<span style="color: #ffa07a;">        ],</span>
+<span style="color: #ffa07a;">        "filter": [</span>
+<span style="color: #ffa07a;">          { "term":  { "status": "published" }},</span>
+<span style="color: #ffa07a;">          { "range": { "publish_date": { "gte": "2015-01-01" }}}</span>
+<span style="color: #ffa07a;">        ]</span>
+<span style="color: #ffa07a;">      }</span>
+<span style="color: #ffa07a;">    }</span>
+<span style="color: #ffa07a;">  }</span>
+</pre>
+</div>
+<p>
+filter:中 指定<br />
+</p>
+<ol class="org-ol">
+<li>status必须== "published"<br /></li>
+<li>publish_date &gt; 2015-01-01<br /></li>
+</ol>
+<p>
+query 中 bool must,match 则是query context的<br />
+意即，使用bool 这类的must 子句来query ,(must 可以理解为 and or not 中的and)<br />
+而两个match ,则是要匹配的条件，<br />
+即title 中含"search",content中含 "Elasticsearch"<br />
+</p>
+</div>
+
+<ul class="org-ul">
+<li><a id="orge9ea1e1"></a>size 指定返回多少个结果<br />
+<div class="outline-text-6" id="text-orge9ea1e1">
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{</span>
+<span style="color: #ffa07a;">"query": { "match_all": {} },</span>
+<span style="color: #ffa07a;"> "size": 1</span>
+<span style="color: #ffa07a;">}'</span>
+</pre>
+</div>
+</div>
+</li>
+<li><a id="org27b2658"></a>from and sort 返回结果集的 第3，4，5条<br />
+<div class="outline-text-6" id="text-org27b2658">
+<p>
+from 控制从哪条记录起始(0based)<br />
+sort：使用balance 降序排列<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{</span>
+<span style="color: #ffa07a;">"query": { "match_all": {} },</span>
+<span style="color: #ffa07a;">  "from":2,</span>
+<span style="color: #ffa07a;"> "size": 3,</span>
+<span style="color: #ffa07a;">  "sort": { "balance": { "order": "desc" } }</span>
+<span style="color: #ffa07a;">}'</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org9a96568"></a>只返回特定的字段 _source<br />
+<div class="outline-text-6" id="text-org9a96568">
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{</span>
+<span style="color: #ffa07a;">"query": { "match_all": {} },</span>
+<span style="color: #ffa07a;">  "from":2,</span>
+<span style="color: #ffa07a;"> "size": 3,</span>
+<span style="color: #ffa07a;">  "sort": { "balance": { "order": "desc" } },</span>
+<span style="color: #ffa07a;">  "_source":["account_number","balance"]</span>
+<span style="color: #ffa07a;">}'</span>
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-js">      {
+  <span style="color: #ffa07a;">"took"</span> : 10,
+  <span style="color: #ffa07a;">"errors"</span> : <span style="color: #D8FA3C;">true</span>,
+  <span style="color: #ffa07a;">"timed_out"</span> : <span style="color: #D8FA3C;">false</span>,
+  <span style="color: #ffa07a;">"_shards"</span> : {
+    <span style="color: #ffa07a;">"total"</span> : 5,
+    <span style="color: #ffa07a;">"successful"</span> : 5,
+    <span style="color: #ffa07a;">"failed"</span> : 0
+  },
+  <span style="color: #ffa07a;">"hits"</span> : {
+    <span style="color: #ffa07a;">"total"</span> : 8,
+    <span style="color: #ffa07a;">"max_score"</span> : <span style="color: #D8FA3C;">null</span>,
+    <span style="color: #ffa07a;">"hits"</span> : [ {
+      <span style="color: #ffa07a;">"_index"</span> : <span style="color: #ffa07a;">"bank"</span>,
+      <span style="color: #ffa07a;">"_type"</span> : <span style="color: #ffa07a;">"account"</span>,
+      <span style="color: #ffa07a;">"_id"</span> : <span style="color: #ffa07a;">"1"</span>,
+      <span style="color: #ffa07a;">"_score"</span> : <span style="color: #D8FA3C;">null</span>,
+      <span style="color: #ffa07a;">"_source"</span> : {
+        <span style="color: #ffa07a;">"account_number"</span> : 1,
+        <span style="color: #ffa07a;">"balance"</span> : 39225
+      },
+      <span style="color: #ffa07a;">"sort"</span> : [ 39225 ]
+    }, {
+      <span style="color: #ffa07a;">"_index"</span> : <span style="color: #ffa07a;">"bank"</span>,
+      <span style="color: #ffa07a;">"_type"</span> : <span style="color: #ffa07a;">"account"</span>,
+      <span style="color: #ffa07a;">"_id"</span> : <span style="color: #ffa07a;">"13"</span>,
+      <span style="color: #ffa07a;">"_score"</span> : <span style="color: #D8FA3C;">null</span>,
+      <span style="color: #ffa07a;">"_source"</span> : {
+        <span style="color: #ffa07a;">"account_number"</span> : 13,
+        <span style="color: #ffa07a;">"balance"</span> : 32838
+      },
+      <span style="color: #ffa07a;">"sort"</span> : [ 32838 ]
+    }, {
+      <span style="color: #ffa07a;">"_index"</span> : <span style="color: #ffa07a;">"bank"</span>,
+      <span style="color: #ffa07a;">"_type"</span> : <span style="color: #ffa07a;">"account"</span>,
+      <span style="color: #ffa07a;">"_id"</span> : <span style="color: #ffa07a;">"37"</span>,
+      <span style="color: #ffa07a;">"_score"</span> : <span style="color: #D8FA3C;">null</span>,
+      <span style="color: #ffa07a;">"_source"</span> : {
+        <span style="color: #ffa07a;">"account_number"</span> : 37,
+        <span style="color: #ffa07a;">"balance"</span> : 18612
+      },
+      <span style="color: #ffa07a;">"sort"</span> : [ 18612 ]
+    } ]
+  }
+}
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org96f3241"></a>Full Text Query (全文搜索) "match" "multi_match" 匹配级别的<br />
+<div class="outline-text-6" id="text-org96f3241">
+<p>
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current//full-text-queries.html">https://www.elastic.co/guide/en/elasticsearch/reference/current//full-text-queries.html</a><br />
+</p>
+
+<p>
+查 account_number=37的<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{</span>
+<span style="color: #ffa07a;">"query": { "match":{"account_number":37} },</span>
+<span style="color: #ffa07a;">"_source":["account_number","balance"]</span>
+<span style="color: #ffa07a;">}'</span>
+</pre>
+</div>
+<p>
+match_phrase似乎跟match 是一样的(返回结果好像是一样的)<br />
+词组级别的查询<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{</span>
+<span style="color: #ffa07a;">"query": { "match_phrase":{"account_number":37} },</span>
+<span style="color: #ffa07a;">"_source":["account_number","balance"]</span>
+<span style="color: #ffa07a;">}'</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-js">      {
+  <span style="color: #ffa07a;">"took"</span> : 33,
+  <span style="color: #ffa07a;">"timed_out"</span> : <span style="color: #D8FA3C;">false</span>,
+  <span style="color: #ffa07a;">"_shards"</span> : {
+    <span style="color: #ffa07a;">"total"</span> : 5,
+    <span style="color: #ffa07a;">"successful"</span> : 5,
+    <span style="color: #ffa07a;">"failed"</span> : 0
+  },
+  <span style="color: #ffa07a;">"hits"</span> : {
+    <span style="color: #ffa07a;">"total"</span> : 1,
+    <span style="color: #ffa07a;">"max_score"</span> : 0.30685282,
+    <span style="color: #ffa07a;">"hits"</span> : [ {
+      <span style="color: #ffa07a;">"_index"</span> : <span style="color: #ffa07a;">"bank"</span>,
+      <span style="color: #ffa07a;">"_type"</span> : <span style="color: #ffa07a;">"account"</span>,
+      <span style="color: #ffa07a;">"_id"</span> : <span style="color: #ffa07a;">"37"</span>,
+      <span style="color: #ffa07a;">"_score"</span> : 0.30685282,
+      <span style="color: #ffa07a;">"_source"</span> : {
+        <span style="color: #ffa07a;">"account_number"</span> : 37,
+        <span style="color: #ffa07a;">"balance"</span> : 18612
+      }
+    } ]
+  }
+}
+</pre>
+</div>
+</div>
+<ul class="org-ul">
+<li><a id="org207381e"></a>根据字段查询选定条件的 (term 级别)<br />
+<div class="outline-text-7" id="text-org207381e">
+<p>
+term, terms,range, exists,missing,prefix,wildcard ,regex,,type<br />
+term 可以认为 那个字段 严格==查询的内容<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/zjh_login*/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{</span>
+<span style="color: #ffa07a;">    "query": {</span>
+<span style="color: #ffa07a;">          "term":{ "text":"hello world" }</span>
+<span style="color: #ffa07a;">     }</span>
+<span style="color: #ffa07a;">}'</span>
+&#20551;&#22914;text&#23383;&#27573;&#30340;mapping ,&#25351;&#23450;text &#36827;&#34892;&#20998;&#35789;&#65292;
+&#20551;&#22914;&#26377;&#20010;document.text=<span style="color: #ffa07a;">"hello world"</span>,
+&#21017;&#21305;&#37197;&#22833;&#36133;&#65292; &#22240;&#20026;text &#34987;&#20998;&#35789;&#25104;&#20102;<span style="color: #ffa07a;">"hello"</span> &#21644;<span style="color: #ffa07a;">"world"</span>
+<span style="color: #ffa07a;">"hello world"</span>!=<span style="color: #ffa07a;">"hello"</span> <span style="color: #ffa07a;">"hello world"</span>!=<span style="color: #ffa07a;">"world"</span>
+&#25152;&#20197;&#19981;&#21305;&#37197;
+
+</pre>
+</div>
+</div>
+</li>
+</ul>
+</li>
+<li><a id="org59038d4"></a>bool 语法（must,must_not,should）<br />
+<div class="outline-text-6" id="text-org59038d4">
+<p>
+相当于 and not or<br />
+</p>
+
+<p>
+查 gender==M and age==32<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">  {</span>
+<span style="color: #ffa07a;">    "query": {</span>
+<span style="color: #ffa07a;">      "bool": {</span>
+<span style="color: #ffa07a;">          "must": [</span>
+<span style="color: #ffa07a;">                  { "match": { "gender": "M" } },</span>
+<span style="color: #ffa07a;">                  { "match": { "age": "32" } }</span>
+<span style="color: #ffa07a;">          ]</span>
+<span style="color: #ffa07a;">      }</span>
+<span style="color: #ffa07a;">    }</span>
+<span style="color: #ffa07a;">  }'</span>
+</pre>
+</div>
+<p>
+查 age==31 or age==32<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">  {</span>
+<span style="color: #ffa07a;">    "query": {</span>
+<span style="color: #ffa07a;">      "bool": {</span>
+<span style="color: #ffa07a;">          "should": [</span>
+<span style="color: #ffa07a;">                  { "match": { "age": "31" } },</span>
+<span style="color: #ffa07a;">                  { "match": { "age": "32" } }</span>
+<span style="color: #ffa07a;">          ]</span>
+<span style="color: #ffa07a;">      }</span>
+<span style="color: #ffa07a;">    }</span>
+<span style="color: #ffa07a;">  }'</span>
+</pre>
+</div>
+<p>
+查  (gender=M and age==32) and( balance!= 32838 and balance!= 18612 )<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">  {</span>
+<span style="color: #ffa07a;">    "query": {</span>
+<span style="color: #ffa07a;">      "bool": {</span>
+<span style="color: #ffa07a;">          "must": [</span>
+<span style="color: #ffa07a;">                  { "match": { "gender": "M" } },</span>
+<span style="color: #ffa07a;">                  { "match": { "age": "32" } }</span>
+<span style="color: #ffa07a;">          ],</span>
+<span style="color: #ffa07a;">          "must_not": [</span>
+<span style="color: #ffa07a;">                  { "match": { "balance" : 32838} },</span>
+<span style="color: #ffa07a;">                  { "match": { "balance" : 18612} }</span>
+<span style="color: #ffa07a;">          ]</span>
+<span style="color: #ffa07a;">      }</span>
+<span style="color: #ffa07a;">    }</span>
+<span style="color: #ffa07a;">  }'</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org302eb6b"></a>filter 结果集的过滤<br />
+<div class="outline-text-6" id="text-org302eb6b">
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">  {</span>
+<span style="color: #ffa07a;">    "query": {</span>
+<span style="color: #ffa07a;">      "bool": {</span>
+<span style="color: #ffa07a;">          "must": [{ "match": { "gender": "M" } }],</span>
+<span style="color: #ffa07a;">          "filter": {"range":{ "balance":{"gte":10,"lte":20000}}}</span>
+<span style="color: #ffa07a;">      }</span>
+<span style="color: #ffa07a;">      }</span>
+<span style="color: #ffa07a;">  }'</span>
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="orga9ef76e"></a>Aggregations(合计) ==sql group by<br />
+<div class="outline-text-6" id="text-orga9ef76e">
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{</span>
+<span style="color: #ffa07a;">    "size": 0,</span>
+<span style="color: #ffa07a;">    "aggs": {</span>
+<span style="color: #ffa07a;">        "group_by_state_just_a_name": {</span>
+<span style="color: #ffa07a;">            "terms":{"field":"state"}</span>
+<span style="color: #ffa07a;">        }</span>
+<span style="color: #ffa07a;">    }</span>
+<span style="color: #ffa07a;">}'</span>
+</pre>
+</div>
+<p>
+这里terms 是按field:state 进行统计其数量， 以计 {state:"mystate",count:100} 的形式返回<br />
+size=0 意思是说只返回 统计结果 即下面的 aggregations里的数据,而hits 结果为空<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #FBDE2D;">SELECT</span> <span style="color: #FBDE2D;">state</span>, <span style="color: #F8F8F8;">COUNT</span>(*) <span style="color: #FBDE2D;">FROM</span> bank <span style="color: #FBDE2D;">GROUP</span> <span style="color: #FBDE2D;">BY</span> <span style="color: #FBDE2D;">state</span> <span style="color: #FBDE2D;">ORDER</span> <span style="color: #FBDE2D;">BY</span> <span style="color: #F8F8F8;">COUNT</span>(*) <span style="color: #FBDE2D;">DESC</span>
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-js">      {
+  <span style="color: #ffa07a;">"took"</span> : 5,
+  <span style="color: #ffa07a;">"timed_out"</span> : <span style="color: #D8FA3C;">false</span>,
+  <span style="color: #ffa07a;">"_shards"</span> : {
+    <span style="color: #ffa07a;">"total"</span> : 5,
+    <span style="color: #ffa07a;">"successful"</span> : 5,
+    <span style="color: #ffa07a;">"failed"</span> : 0
+  },
+  <span style="color: #ffa07a;">"hits"</span> : {
+    <span style="color: #ffa07a;">"total"</span> : 8,
+    <span style="color: #ffa07a;">"max_score"</span> : 0.0,
+    <span style="color: #ffa07a;">"hits"</span> : [ ]
+  },
+  <span style="color: #ffa07a;">"aggregations"</span> : {
+    <span style="color: #ffa07a;">"group_by_state"</span> : {
+      <span style="color: #ffa07a;">"doc_count_error_upper_bound"</span> : 0,
+      <span style="color: #ffa07a;">"sum_other_doc_count"</span> : 0,
+      <span style="color: #ffa07a;">"buckets"</span> : [ {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"il"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"in"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"md"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"ok"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"pa"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"tn"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"va"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"wa"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1
+      } ]
+    }
+  }
+}
+
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-sh">curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{</span>
+<span style="color: #ffa07a;">  "size": 0,</span>
+<span style="color: #ffa07a;">  "aggs": {</span>
+<span style="color: #ffa07a;">    "group_by_state": {</span>
+<span style="color: #ffa07a;">      "terms": {</span>
+<span style="color: #ffa07a;">        "field": "state",</span>
+<span style="color: #ffa07a;">        "order": {</span>
+<span style="color: #ffa07a;">          "average_balance": "desc"</span>
+<span style="color: #ffa07a;">        }</span>
+<span style="color: #ffa07a;">      },</span>
+<span style="color: #ffa07a;">      "aggs": {</span>
+<span style="color: #ffa07a;">        "average_balance": {</span>
+<span style="color: #ffa07a;">          "avg": {</span>
+<span style="color: #ffa07a;">            "field": "balance"</span>
+<span style="color: #ffa07a;">          }</span>
+<span style="color: #ffa07a;">        }</span>
+<span style="color: #ffa07a;">      }</span>
+<span style="color: #ffa07a;">    }</span>
+<span style="color: #ffa07a;">  }</span>
+<span style="color: #ffa07a;">}'</span>
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-js">{
+  <span style="color: #ffa07a;">"took"</span> : 5,
+  <span style="color: #ffa07a;">"timed_out"</span> : <span style="color: #D8FA3C;">false</span>,
+  <span style="color: #ffa07a;">"_shards"</span> : {
+    <span style="color: #ffa07a;">"total"</span> : 5,
+    <span style="color: #ffa07a;">"successful"</span> : 5,
+    <span style="color: #ffa07a;">"failed"</span> : 0
+  },
+  <span style="color: #ffa07a;">"hits"</span> : {
+    <span style="color: #ffa07a;">"total"</span> : 8,
+    <span style="color: #ffa07a;">"max_score"</span> : 0.0,
+    <span style="color: #ffa07a;">"hits"</span> : [ ]
+  },
+  <span style="color: #ffa07a;">"aggregations"</span> : {
+    <span style="color: #ffa07a;">"group_by_state"</span> : {
+      <span style="color: #ffa07a;">"doc_count_error_upper_bound"</span> : 0,
+      <span style="color: #ffa07a;">"sum_other_doc_count"</span> : 0,
+      <span style="color: #ffa07a;">"buckets"</span> : [ {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"il"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1,
+        <span style="color: #ffa07a;">"average_balance"</span> : {
+          <span style="color: #ffa07a;">"value"</span> : 39225.0
+        }
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"in"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1,
+        <span style="color: #ffa07a;">"average_balance"</span> : {
+          <span style="color: #ffa07a;">"value"</span> : 48086.0
+        }
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"md"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1,
+        <span style="color: #ffa07a;">"average_balance"</span> : {
+          <span style="color: #ffa07a;">"value"</span> : 4180.0
+        }
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"ok"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1,
+        <span style="color: #ffa07a;">"average_balance"</span> : {
+          <span style="color: #ffa07a;">"value"</span> : 18612.0
+        }
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"pa"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1,
+        <span style="color: #ffa07a;">"average_balance"</span> : {
+          <span style="color: #ffa07a;">"value"</span> : 40540.0
+        }
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"tn"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1,
+        <span style="color: #ffa07a;">"average_balance"</span> : {
+          <span style="color: #ffa07a;">"value"</span> : 5686.0
+        }
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"va"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1,
+        <span style="color: #ffa07a;">"average_balance"</span> : {
+          <span style="color: #ffa07a;">"value"</span> : 32838.0
+        }
+      }, {
+        <span style="color: #ffa07a;">"key"</span> : <span style="color: #ffa07a;">"wa"</span>,
+        <span style="color: #ffa07a;">"doc_count"</span> : 1,
+        <span style="color: #ffa07a;">"average_balance"</span> : {
+          <span style="color: #ffa07a;">"value"</span> : 16418.0
+        }
+      } ]
+    }
+  }
+}
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">    curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{</span>
+<span style="color: #ffa07a;">  "size": 0,</span>
+<span style="color: #ffa07a;">  "aggs": {</span>
+<span style="color: #ffa07a;">    "group_by_age": {</span>
+<span style="color: #ffa07a;">      "range": {</span>
+<span style="color: #ffa07a;">        "field": "age",</span>
+<span style="color: #ffa07a;">        "ranges": [</span>
+<span style="color: #ffa07a;">          {</span>
+<span style="color: #ffa07a;">            "from": 20,</span>
+<span style="color: #ffa07a;">            "to": 30</span>
+<span style="color: #ffa07a;">          },</span>
+<span style="color: #ffa07a;">          {</span>
+<span style="color: #ffa07a;">            "from": 30,</span>
+<span style="color: #ffa07a;">            "to": 40</span>
+<span style="color: #ffa07a;">          },</span>
+<span style="color: #ffa07a;">          {</span>
+<span style="color: #ffa07a;">            "from": 40,</span>
+<span style="color: #ffa07a;">            "to": 50</span>
+<span style="color: #ffa07a;">          }</span>
+<span style="color: #ffa07a;">        ]</span>
+<span style="color: #ffa07a;">      }</span>
+<span style="color: #ffa07a;">    }</span>
+<span style="color: #ffa07a;">  }</span>
+<span style="color: #ffa07a;">}'</span>
+
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-js">        curl -XPOST <span style="color: #ffa07a;">'localhost:9200/bank/_search?pretty'</span> -d <span style="color: #ffa07a;">'</span>
+<span style="color: #ffa07a;">{</span>
+<span style="color: #ffa07a;">  "size": 0,</span>
+<span style="color: #ffa07a;">  "aggs": {</span>
+<span style="color: #ffa07a;">    "group_by_age": {</span>
+<span style="color: #ffa07a;">      "range": {</span>
+<span style="color: #ffa07a;">        "field": "age",</span>
+<span style="color: #ffa07a;">        "ranges": [</span>
+<span style="color: #ffa07a;">          {</span>
+<span style="color: #ffa07a;">            "from": 20,</span>
+<span style="color: #ffa07a;">            "to": 30</span>
+<span style="color: #ffa07a;">          },</span>
+<span style="color: #ffa07a;">          {</span>
+<span style="color: #ffa07a;">            "from": 30,</span>
+<span style="color: #ffa07a;">            "to": 40</span>
+<span style="color: #ffa07a;">          },</span>
+<span style="color: #ffa07a;">          {</span>
+<span style="color: #ffa07a;">            "from": 40,</span>
+<span style="color: #ffa07a;">            "to": 50</span>
+<span style="color: #ffa07a;">          }</span>
+<span style="color: #ffa07a;">        ]</span>
+<span style="color: #ffa07a;">      }</span>
+<span style="color: #ffa07a;">    }</span>
+<span style="color: #ffa07a;">  }</span>
+<span style="color: #ffa07a;">}'</span>
+</pre>
+</div>
+</div>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+
+<li><a id="orgad609a9"></a>elasticsearch 启动参数<br />
+<div class="outline-text-4" id="text-orgad609a9">
+<p>
+配置 elasticsearch 的JVM 参数<br />
+</p>
+<blockquote>
+nil</blockquote>
+<p>
+两个环境变量， 尽量不要修改JAVA_OPTS,保持原样, 而修改 ES_JAVA_OPTS<br />
+ES_HEAP_SIZE 设置 heap 大小(min =max=this)<br />
+ES_MIN_MEM ES_MAX_MEM (分别设置min max )官方不推荐<br />
+提前设置好  max-open-files<br />
+ulimit -n 查看<br />
+</p>
+
+<p>
+Virtual memoryedit<br />
+</p>
+
+<p>
+Elasticsearch uses a hybrid mmapfs / niofs directory by default to<br />
+store its indices. The default operating system limits on mmap<br />
+counts is likely to be too low, which may result in out of memory<br />
+exceptions. On Linux, you can increase the limits by running the<br />
+following command as root:<br />
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">sysctl -w vm.max_map_count=262144
+</pre>
+</div>
+<p>
+To set this value permanently, update the vm.max_map_count setting<br />
+in /etc/sysctl.conf.<br />
+</p>
+
+<p>
+If you installed Elasticsearch using a package (.deb, .rpm) this<br />
+setting will be changed automatically. To verify, run sysctl<br />
+vm.max_map_count.<br />
+</p>
+</div>
+
+
+<ul class="org-ul">
+<li><a id="org2e10b64"></a>停用 swap<br />
+<div class="outline-text-5" id="text-org2e10b64">
+<div class="org-src-container">
+<pre class="src src-sh">sudo swapoff -a
+&#25110;&#32773;
+config/elasticsearch.yml
+&#20013;&#37197;&#32622; bootstrap.mlockall: true
+&#31105;&#27490;&#23558;&#20869;&#23384;&#20013;&#30340; elasticsearch&#25968;&#25454; &#20132;&#25442;&#20986;&#20869;&#23384;
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org882a4a8"></a>mlockall<br /></li>
+</ul>
+</li>
+
+<li><a id="org6a8182a"></a>配置<br />
+<div class="outline-text-4" id="text-org6a8182a">
+<p>
+/etc/elasticsearch/elasticsearch.yml<br />
+有些参数也可以在配置文件中配置<br />
+</p>
+<blockquote>
+<p>
+node.name: zjh<br />
+cluster.name: my-application<br />
+path.data: /data/zjh/es/data<br />
+path.logs: /data/zjh/es/log<br />
+network.host: 0.0.0.0<br />
+http.port: 9200<br />
+indices.memory.index_buffer_size: 30%<br />
+thread_pool:<br />
+    write:<br />
+	size: 32<br />
+	queue_size: 4000<br />
+</p>
+</blockquote>
+<blockquote>
+<p>
+-Xms31g<br />
+-Xmx31g<br />
+</p>
+
+<p>
+-XX:+UseG1GC<br />
+-XX:MaxGCPauseMillis=200<br />
+-XX:+AlwaysPreTouch<br />
+-Xss1m<br />
+-Djava.awt.headless=true<br />
+-Dfile.encoding=UTF-8<br />
+-Djna.nosys=true<br />
+-XX:-OmitStackTraceInFastThrow<br />
+-Dio.netty.noUnsafe=true<br />
+-Dio.netty.noKeySetOptimization=true<br />
+-Dio.netty.recycler.maxCapacityPerThread=0<br />
+-Dlog4j.shutdownHookEnabled=false<br />
+-Dlog4j2.disable.jmx=true<br />
+-Djava.io.tmpdir=${ES_TMPDIR}<br />
+-XX:+HeapDumpOnOutOfMemoryError<br />
+-XX:HeapDumpPath=data<br />
+-XX:ErrorFile=logs/hs_err_pid%p.log<br />
+8:-XX:+PrintGCDetails<br />
+8:-XX:+PrintGCDateStamps<br />
+8:-XX:+PrintTenuringDistribution<br />
+8:-XX:+PrintGCApplicationStoppedTime<br />
+8:-Xloggc:logs/gc.log<br />
+8:-XX:+UseGCLogFileRotation<br />
+8:-XX:NumberOfGCLogFiles=32<br />
+8:-XX:GCLogFileSize=64m<br />
+9-:-Xlog:gc*,gc+age=trace,safepoint:file=logs/gc.log:utctime,pid,tags:filecount=32,filesize=64m<br />
+9-:-Djava.locale.providers=COMPAT<br />
+</p>
+</blockquote>
+<p>
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-service.html">https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-service.html</a><br />
+centos7 上 配置成service<br />
+一些配置 在这两个文件里<br />
+/usr/lib/systemd/system/elasticsearch.service<br />
+/usr/lib/sysctl.d/elasticsearch.conf<br />
+</p>
+</div>
+</li>
+</ul>
+</div>
+
+<div id="outline-container-org244a195" class="outline-2">
+<h2 id="org244a195">kibana</h2>
+<div class="outline-text-2" id="text-org244a195">
+<p>
+数据的可视化， 主要功能 从 elasticsearch 中查询数据， 将数据以图表的形式展示<br />
+</p>
+</div>
+
+<div id="outline-container-orgd55c717" class="outline-3">
+<h3 id="orgd55c717">kibana 加认证功能。</h3>
+<div class="outline-text-3" id="text-orgd55c717">
+<p>
+默认情况下kibana 没有任何认证，如果需要放到外网访问， 很不安全。<br />
+elasticsearch 官网有个插件 shield 可以实现认证及权限控制等功能。<br />
+但是需要付费，<br />
+目前我只需要一个简单认证就可以。<br />
+可以使用nginx来挡。<br />
+可以参考 <a href="http://jixiuf.github.io/blog/nginx%E6%8B%BE%E9%81%97/">http://jixiuf.github.io/blog/nginx%E6%8B%BE%E9%81%97/</a><br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgdd272b5" class="outline-3">
+<h3 id="orgdd272b5">kibana 的一些查询</h3>
+<div class="outline-text-3" id="text-orgdd272b5">
+<p>
+搜索框里可以<br />
+</p>
+<blockquote>
+<p>
+reason:"test" # 查reason ="test"<br />
+age:[3 20]  # range 查询<br />
+可也以直接输入 elasticsearch 的json 查询语法<br />
+</p>
+</blockquote>
+<p>
+kibana 的可视化 是在上述查询出来的数据上 进行 统计<br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgff712a7" class="outline-3">
+<h3 id="orgff712a7">demo</h3>
+<div class="outline-text-3" id="text-orgff712a7">
+<p>
+比如 我打印这样的日志 记录游戏资产变化（金币、钻石等通过key来区分）<br />
+</p>
+<blockquote>
+<p>
+2016-05-10_17:43:29 {"logtype":"assets_change","uin":"144150668431540282","key":6,"before":8,"after":4,"change":-4,"reason":"assets_sell_consume","timestamp":1462873382304931}<br />
+2016-05-10_17:43:29 {"logtype":"assets_change","uin":"144150668431540282","key":1,"before":19729900,"after":19769900,"change":40000,"reason":"assets_sell_obtain","timestamp":1462873382304931}<br />
+</p>
+</blockquote>
+<p>
+根据这样的记录我可以以图表的形式分析资产变化的原因，每天资产是增是减<br />
+<img src="/assets/blog/logstash_elastcsearch_kibana.html/elk_demo1.png" alt="elk_demo1.png" /><br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4f7fbc1" class="outline-3">
+<h3 id="org4f7fbc1">kibana 的迁移</h3>
+<div class="outline-text-3" id="text-org4f7fbc1">
+<p>
+你在kibana 界面里做的配置及 创建的查询 视图都保存在<br />
+elasticsearch 内一个 叫 .kibana 的index 下<br />
+所以 当你在别的机器上想得到相同配置 相同视图的kibana<br />
+就得把 elasticsearch 的.kibana 节点复制到你的新机器上<br />
+</p>
+
+<p>
+这里重点说下怎么把kibana4的配置导出并迁移。 如果你不偷懒，可以自己<br />
+用pyhton写个elasticsearch的导出程序，实现起来很简单….. 如果你跟我<br />
+一样很偷懒，那么就直接用现成的工具。 elasticdump是个node.js开发的一<br />
+个小而精的elasticsearch导出程序。<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh">sudo yum install npm
+npm install -g elasticdump
+</pre>
+</div>
+
+<p>
+导出，也可以用来做elasticsearch的备份，elasticdump可以选择性的导出data和mapping。<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#20855;&#20307;&#37197;&#32622;&#20449;&#24687;</span>
+elasticdump --ignore-errors=true  --scrollTime=120m  --bulk=true --input=http://ip1:9200/.kibana   --output=data.json  --type=data
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#23548;&#20986;mapping&#20449;&#24687;</span>
+elasticdump --ignore-errors=true  --scrollTime=120m  --bulk=true --input=http://ip1:9200/.kibana   --output=mapping.json  --type=mapping
+</pre>
+</div>
+<p>
+咱们再把刚才备份的数据，导入到目标elasticsearch上<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-sh"><span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#23548;&#20837;mapping</span>
+elasticdump --input=mapping.json  --output=http://ip2:9200/.kibana --type=mapping
+
+<span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">&#23548;&#20837;&#20855;&#20307;&#30340;kibana&#37197;&#32622;&#20449;&#24687;</span>
+elasticdump --input=data.json  --output=http://ip2:9200/.kibana --type=data
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2016-05-09</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/logstash+elasticsearch+kibana/">logstash+elasticsearch+kibana</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/logstash_elastcsearch_kibana.html";
+          var disqus_url = "http://jixiuf.github.io/blog/logstash_elastcsearch_kibana.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>

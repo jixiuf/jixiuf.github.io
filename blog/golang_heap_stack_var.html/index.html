@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <title>golang 变量倒底是在堆上还是栈上分配的分析 - 拾遗笔记</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="纪秀峰" />
+    <meta name="description" content="golang 变量倒底是在堆上还是栈上分配的分析" />
+    <meta name="keywords" content="golang heap stack" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <!-- <link rel="stylesheet" href="/media/css/prettify.css" type="text/css"> -->
+  </head>
+  <body class="container">
+<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- ji -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6633117582073327"
+     data-ad-slot="1629980291"
+     data-ad-format="link"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+    
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">拾遗笔记</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="http://github.com/jixiuf">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+        <form method="get" id="searchform" action="http://www.google.com/search">
+          <input type="text" class="field" name="q" id="s" placeholder="Search">
+          <input type="hidden" name="as_sitesearch" value="jixiuf.github.io">
+        </form>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>golang 变量倒底是在堆上还是栈上分配的分析</h1>
+<p>
+下面一段代码 ，附上行号， 主要用来分析 stu ,stu2,stu3 3个变量 究竟是在堆上分配，<br />
+还 是在栈上分配,<br />
+主要使用 gdb 调试， 来查看3个变量的地址<br />
+</p>
+<div class="org-src-container">
+<pre class="src src-go"> 1 package main
+ 2
+ 3 import (
+ 4  "fmt"
+ 5 )
+ 6
+ 7 type Stu struct {
+ 8  age int
+ 9 }
+10
+11 func (stu *Stu) test() {
+12  var i int
+13  fmt.Println(i)
+14 }
+15 func test(stu *Stu) {
+16  var i int
+17  fmt.Println(i)
+18
+19 }
+20 func main() {
+21  var stu Stu
+22  stu2 := Stu{1}
+23  stu3 := &amp;Stu{1}
+24  stu.test()
+25  stu2.test()
+26  stu3.test()
+27  test(&amp;stu)
+28  test(&amp;stu2)
+29  test(stu3)
+30  fmt.Println(stu, stu2, stu3)
+31
+32 }
+33
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-sh">GNU gdb (GDB) 7.7
+<span style="color: #FF6400;">Copyright</span> (C) 2014 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <a href="http://gnu.org/licenses/gpl.html&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type &quot;show copying&quot;
+and &quot;show warranty&quot; for details.
+This GDB was configured as &quot;x86_64-apple-darwin13.1.0&quot;.
+Type &quot;show configuration&quot; for configuration details.
+For bug reporting instructions, please see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;.
+Find the GDB manual and other documentation resources online at:
+&lt;http://www.gnu.org/software/gdb/documentation/">&lt;http://gnu.org/licenses/gpl.html&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type </a><span style="color: #ffa07a;"><a href="http://gnu.org/licenses/gpl.html&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type &quot;show copying&quot;
+and &quot;show warranty&quot; for details.
+This GDB was configured as &quot;x86_64-apple-darwin13.1.0&quot;.
+Type &quot;show configuration&quot; for configuration details.
+For bug reporting instructions, please see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;.
+Find the GDB manual and other documentation resources online at:
+&lt;http://www.gnu.org/software/gdb/documentation/">"show copying"</a></span><a href="http://gnu.org/licenses/gpl.html&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type &quot;show copying&quot;
+and &quot;show warranty&quot; for details.
+This GDB was configured as &quot;x86_64-apple-darwin13.1.0&quot;.
+Type &quot;show configuration&quot; for configuration details.
+For bug reporting instructions, please see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;.
+Find the GDB manual and other documentation resources online at:
+&lt;http://www.gnu.org/software/gdb/documentation/">
+and </a><span style="color: #ffa07a;"><a href="http://gnu.org/licenses/gpl.html&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type &quot;show copying&quot;
+and &quot;show warranty&quot; for details.
+This GDB was configured as &quot;x86_64-apple-darwin13.1.0&quot;.
+Type &quot;show configuration&quot; for configuration details.
+For bug reporting instructions, please see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;.
+Find the GDB manual and other documentation resources online at:
+&lt;http://www.gnu.org/software/gdb/documentation/">"show warranty"</a></span><a href="http://gnu.org/licenses/gpl.html&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type &quot;show copying&quot;
+and &quot;show warranty&quot; for details.
+This GDB was configured as &quot;x86_64-apple-darwin13.1.0&quot;.
+Type &quot;show configuration&quot; for configuration details.
+For bug reporting instructions, please see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;.
+Find the GDB manual and other documentation resources online at:
+&lt;http://www.gnu.org/software/gdb/documentation/"> for details.
+This GDB was configured as </a><span style="color: #ffa07a;"><a href="http://gnu.org/licenses/gpl.html&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type &quot;show copying&quot;
+and &quot;show warranty&quot; for details.
+This GDB was configured as &quot;x86_64-apple-darwin13.1.0&quot;.
+Type &quot;show configuration&quot; for configuration details.
+For bug reporting instructions, please see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;.
+Find the GDB manual and other documentation resources online at:
+&lt;http://www.gnu.org/software/gdb/documentation/">"x86_64-apple-darwin13.1.0"</a></span><a href="http://gnu.org/licenses/gpl.html&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type &quot;show copying&quot;
+and &quot;show warranty&quot; for details.
+This GDB was configured as &quot;x86_64-apple-darwin13.1.0&quot;.
+Type &quot;show configuration&quot; for configuration details.
+For bug reporting instructions, please see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;.
+Find the GDB manual and other documentation resources online at:
+&lt;http://www.gnu.org/software/gdb/documentation/">.
+Type </a><span style="color: #ffa07a;"><a href="http://gnu.org/licenses/gpl.html&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type &quot;show copying&quot;
+and &quot;show warranty&quot; for details.
+This GDB was configured as &quot;x86_64-apple-darwin13.1.0&quot;.
+Type &quot;show configuration&quot; for configuration details.
+For bug reporting instructions, please see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;.
+Find the GDB manual and other documentation resources online at:
+&lt;http://www.gnu.org/software/gdb/documentation/">"show configuration"</a></span><a href="http://gnu.org/licenses/gpl.html&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type &quot;show copying&quot;
+and &quot;show warranty&quot; for details.
+This GDB was configured as &quot;x86_64-apple-darwin13.1.0&quot;.
+Type &quot;show configuration&quot; for configuration details.
+For bug reporting instructions, please see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;.
+Find the GDB manual and other documentation resources online at:
+&lt;http://www.gnu.org/software/gdb/documentation/"> for configuration details.
+For bug reporting instructions, please see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;.
+Find the GDB manual and other documentation resources online at:
+&lt;http://www.gnu.org/software/gdb/documentation/&gt;</a>.
+For help, type <span style="color: #ffa07a;">"help"</span>.
+Type <span style="color: #ffa07a;">"apropos word"</span> to search for commands related to <span style="color: #ffa07a;">"word"</span>...
+Reading symbols from c...done.
+Loading Go Runtime support.
+(gdb) l
+11      func (stu *Stu) <span style="color: #F8F8F8;">test</span>() {
+12              var i int
+13              fmt.Println(i)
+14      }
+15      func test(stu *Stu) {
+16              var i int
+17              fmt.Println(i)
+18
+19      }
+20      func main() {
+(gdb) b 12  (&#22312;12&#34892; &#25171;&#19978;&#26029;&#28857;
+Breakpoint 1 at 0x2019: file /private/tmp/c.go, line 12.
+(gdb) b 16 (&#22312;16&#34892;  &#25171;&#19978;&#26029;&#28857;
+Breakpoint 2 at 0x20a9: file /private/tmp/c.go, line 16.
+(gdb) r   &#21551;&#21160;&#35843;&#35797;
+Starting program: /private/tmp/c
+[New Thread 0x1a0b of process 28719]
+[New Thread 0x1b03 of process 28719]
+[New Thread 0x1c03 of process 28719]
+
+Breakpoint 1, main.(*Stu).test (<span style="color: #40E0D0;">stu</span>=0x2210361ed8) at /private/tmp/c.go:12
+12              var i int
+(gdb) p stu   (&#21551;&#21160;&#35843;&#35797;&#21518; &#22312;&#31532;&#19968;&#20010;&#26029;&#28857;&#22788;&#65288;12&#34892;&#65289; &#20572;&#20303;&#65292; &#25171;&#21360;stu &#30340;&#24403;&#21069;&#22320;&#22336;
+$<span style="color: #40E0D0;">1</span> = (main.Stu *) 0x2210361ed8
+(gdb) c
+Continuing.
+0
+
+Breakpoint 1, main.(*Stu).test (<span style="color: #40E0D0;">stu</span>=0x2210361ee0) at /private/tmp/c.go:12
+12              var i int
+(gdb) p stu  (&#21551;&#21160;&#35843;&#35797;&#21518;  &#31532;2&#27425;&#22312;12&#34892;&#20572;&#20303;&#65292; &#25171;&#21360;stu &#30340;&#24403;&#21069;&#22320;&#22336;&#65292;&#23454;&#38469;&#26159;stu2 &#21464;&#37327;&#30340;&#22320;&#22336;,stu2,&#19982;stu &#30340;&#22320;&#22336;&#65292;&#24456;&#25509;&#36817;&#65292; &#35828;&#26126;&#20998;&#37197;&#22312;&#21516;&#19968;&#22788;&#65288; &#35201;&#20040;&#37117;&#22312;&#22534;&#22312; &#35201;&#20040;&#37117;&#22312;&#26632;&#19978;)
+$<span style="color: #40E0D0;">2</span> = (main.Stu *) 0x2210361ee0
+(gdb) c
+Continuing.
+0
+
+Breakpoint 1, main.(*Stu).test (<span style="color: #40E0D0;">stu</span>=0x2101f0018) at /private/tmp/c.go:12
+12              var i int
+(gdb) p stu  (&#21551;&#21160;&#35843;&#35797;&#21518;  &#31532;3&#27425;&#22312;12&#34892;&#20572;&#20303;&#65292; &#25171;&#21360;stu &#30340;&#24403;&#21069;&#22320;&#22336;&#65292;&#23454;&#38469;&#26159;stu3 &#21464;
+&#37327;&#30340;&#22320;&#22336;,stu3&#30340;&#22320;&#22336;,&#19982;stu&#30340;&#22320;&#22336;&#24046;&#36317;&#24456;&#22823;&#65292; &#35828;&#26126;&#19981;&#26159;&#20998;&#37197;&#22312;&#21516;&#19968;&#22788;&#65292;&#22312;main &#20989;&#25968;&#20013;&#65292;
+&#23450;&#20041;stu3&#26102;&#20351;&#29992;&#36807;&amp; &#25805;&#20316;&#31526;&#65292; &#25152;&#20197;&#21487;&#20197;&#22522;&#26412;&#32943;&#23450; stu3 &#26159;&#20998;&#37197;&#22312;&#22534;&#19978; &#65292;&#32780; stu stu2&#26159;&#20998;&#37197;&#22312;&#26632;
+&#19978;
+&#25105;&#36824;&#26377;&#19968;&#20010;&#30097;&#38382; &#65292; &#23601;&#26159; &#65288;&#26159;&#19981;&#26159;&#25152;&#26377;&amp;&#21462;&#22320;&#22336;&#37117;&#20250;&#23548;&#33268;&#21464;&#37327;&#22312;&#26894;&#19978;&#20998;&#37197;?&#65289;&#65292;&#27604;&#22914;&#22312;27 28 &#34892;
+&#30340;&#35843;&#29992;&#65292;&#20063;&#23545;stu ,stu2&#36827;&#34892;&#20102;&#21462;&#22336;&#22336;&#25805;&#20316;&#65292;
+&#19979;&#38754;&#32487;&#32493;&#36319;&#36394;16&#34892;&#22788;&#30340;&#20195;&#30721;&#65292;stu,stu2 &#30340;&#22320;&#22336;&#65292;&#24182;&#27809;&#26377;&#22240;&#20026;&#23545;&#21464;&#37327;&#21462;&#22320;&#22336;&#25805;&#20316;&#65292;&#32780;&#23548;&#33268;&#19982;
+ stu3 &#19968;&#26679;&#37117;&#20998;&#37197;&#22312;&#22534;&#19978;&#65292;
+ &#32467;&#35770;     &amp;Stu{1} &#23450;&#20041;&#30340;&#21464;&#37327;&#26159;&#22312;&#22534;&#19978;&#65292;
+         s:=Stu{} &#23450;&#20041;&#30340;&#21464;&#37327;&#22312;&#26632;&#19978;&#65292;&#21363;&#20351;&#20197;&#21518;&amp;s, &#21462;s &#30340;&#22320;&#22336;&#65292; &#20063;&#19981;&#20250;&#23548;&#33268;s &#20998;&#37197;&#22312;&#22534;&#19978;
+
+$<span style="color: #40E0D0;">3</span> = (main.Stu *) 0x2101f0018
+(gdb) c
+Continuing.
+0
+
+Breakpoint 2, main.test (<span style="color: #40E0D0;">stu</span>=0x2210361ed8) at /private/tmp/c.go:16
+16              var i int
+(gdb) p stu
+$<span style="color: #40E0D0;">4</span> = (main.Stu *) 0x2210361ed8
+(gdb) c
+Continuing.
+0
+
+Breakpoint 2, main.test (<span style="color: #40E0D0;">stu</span>=0x2210361ee0) at /private/tmp/c.go:16
+16              var i int
+(gdb) p stu
+$<span style="color: #40E0D0;">5</span> = (main.Stu *) 0x2210361ee0
+(gdb) c
+Continuing.
+0
+[Switching to Thread 0x1b03 of process 28719]
+
+Breakpoint 2, main.test (<span style="color: #40E0D0;">stu</span>=0x2101f0018) at /private/tmp/c.go:16
+16              var i int
+(gdb) p stu
+$<span style="color: #40E0D0;">6</span> = (main.Stu *) 0x2101f0018
+(gdb) c
+Continuing.
+0
+{0} {1} &amp;{1}
+[Inferior 1 (process 28719) exited normally]
+(gdb) q
+
+
+</pre>
+</div>
+
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2014-05-06</span>
+        <span title="last modification date" class="post-info">2021-09-10</span>
+        <span title="tags" class="post-info"><a href="/tags/golang/">Golang</a></span>
+        <span title="author" class="post-info">纪秀峰</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          //var disqus_developer = 1;
+          var disqus_identifier = "/blog/golang_heap_stack_var.html";
+          var disqus_url = "http://jixiuf.github.io/blog/golang_heap_stack_var.html";
+          var disqus_shortname = 'jixiuf';
+          /* * * DON'T EDIT BELOW THIS LINE * * */
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <div class="ds-thread"></div>
+        <script type="text/javascript">
+          var duoshuoQuery = {short_name:'jixiuf'};
+          (function() {
+          var ds = document.createElement('script');
+          ds.type = 'text/javascript';ds.async = true;
+          ds.src = 'http://static.duoshuo.com/embed.js';
+          ds.charset = 'UTF-8';
+          (document.getElementsByTagName('head')[0]
+          || document.getElementsByTagName('body')[0]).appendChild(ds);
+          })();
+        </script>
+      </section>
+      <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script> -->
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 27.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:jixiuf &lt;at&gt; gmail &lt;dot&gt; com">纪秀峰</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>
