@@ -47,11 +47,11 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org1815d86">Link/1</a></li>
-<li><a href="#org6a4539d">unlink/1</a></li>
-<li><a href="#orgfd53fc4">spawn_link/3</a></li>
-<li><a href="#orgafb2c4a">ping 示例</a></li>
-<li><a href="#org3572b46">进程异常退出时,往往不是自行处理,而是邮父进程进行处理,即如果发现子进程退出,可以重启之.</a></li>
+<li><a href="#org76a6920">Link/1</a></li>
+<li><a href="#org62ceb89">unlink/1</a></li>
+<li><a href="#orgffc47d2">spawn_link/3</a></li>
+<li><a href="#org78aa904">ping 示例</a></li>
+<li><a href="#org7eb5d49">进程异常退出时,往往不是自行处理,而是邮父进程进行处理,即如果发现子进程退出,可以重启之.</a></li>
 </ul>
 </div>
 </div>
@@ -73,18 +73,18 @@ Exiting_Process_Id是即将终止的进程的进程标识，Reason可以是任�
 EXIT信号将被忽略<br />
 </p>
 
-<div id="outline-container-org1815d86" class="outline-2">
-<h2 id="org1815d86">Link/1</h2>
-<div class="outline-text-2" id="text-org1815d86">
+<div id="outline-container-org76a6920" class="outline-2">
+<h2 id="org76a6920">Link/1</h2>
+<div class="outline-text-2" id="text-org76a6920">
 <p>
 通过执行BIF link(Pid)便可创建链接。调用link(Pid)时，若调用进程和Pid之间已经<br />
 存在链接，则不会产生任何影响。<br />
 </p>
 </div>
 </div>
-<div id="outline-container-org6a4539d" class="outline-2">
-<h2 id="org6a4539d">unlink/1</h2>
-<div class="outline-text-2" id="text-org6a4539d">
+<div id="outline-container-org62ceb89" class="outline-2">
+<h2 id="org62ceb89">unlink/1</h2>
+<div class="outline-text-2" id="text-org62ceb89">
 <p>
 进程终止时，它所持有的链接都将被删除。也可以通过执行BIF unlink(Pid)显式删除<br />
 链接。由于所有链接都是双向的，删除这一端到另一端的链接的同时，另一端的到这一<br />
@@ -93,9 +93,9 @@ EXIT信号将被忽略<br />
 </p>
 </div>
 </div>
-<div id="outline-container-orgfd53fc4" class="outline-2">
-<h2 id="orgfd53fc4">spawn_link/3</h2>
-<div class="outline-text-2" id="text-orgfd53fc4">
+<div id="outline-container-orgffc47d2" class="outline-2">
+<h2 id="orgffc47d2">spawn_link/3</h2>
+<div class="outline-text-2" id="text-orgffc47d2">
 <p>
 BIF spawn_link/3在创建新进程的同时还会在调用进程和新进程间建立链接。<br />
 其行为可以定义为：<br />
@@ -141,9 +141,9 @@ sleep(ms)-&gt;
 </div>
 </div>
 
-<div id="outline-container-orgafb2c4a" class="outline-2">
-<h2 id="orgafb2c4a">ping 示例</h2>
-<div class="outline-text-2" id="text-orgafb2c4a">
+<div id="outline-container-org78aa904" class="outline-2">
+<h2 id="org78aa904">ping 示例</h2>
+<div class="outline-text-2" id="text-org78aa904">
 <div class="org-src-container">
 <pre class="src src-erlang">-module(ping).
 -compile([export_all]).
@@ -193,8 +193,8 @@ start()-&gt;
 </div>
 </div>
 </div>
-<div id="outline-container-org3572b46" class="outline-2">
-<h2 id="org3572b46">进程异常退出时,往往不是自行处理,而是邮父进程进行处理,即如果发现子进程退出,可以重启之.</h2>
+<div id="outline-container-org7eb5d49" class="outline-2">
+<h2 id="org7eb5d49">进程异常退出时,往往不是自行处理,而是邮父进程进行处理,即如果发现子进程退出,可以重启之.</h2>
 </div>
 
 </div>

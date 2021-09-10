@@ -47,42 +47,42 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc6a5c5c">`C-cC-s'  `C-uC-cC-s'</a></li>
-<li><a href="#orgf137a95">indent 定位信息</a>
+<li><a href="#org9e4ed3e">`C-cC-s'  `C-uC-cC-s'</a></li>
+<li><a href="#org00f9bbc">indent 定位信息</a>
 <ul>
-<li><a href="#org83d3c79">(函数相关的定位)function related Symbols</a></li>
-<li><a href="#org50a0d5a">类相关的定位 Class related Symbols</a></li>
-<li><a href="#org0a0b4ce">Conditional Construct Symbols if else for子句</a></li>
-<li><a href="#org3605ecb">switch case 子句</a></li>
-<li><a href="#orgcdefb29">})', `([ ])' and `(&lt; &gt;)', are treated as brace lists too.  An example:</a></li>
-<li><a href="#orgaf39389">括号匹配,参数相关</a></li>
-<li><a href="#org41d00c5">其他</a></li>
-<li><a href="#orgbca928b">java 相关</a></li>
-<li><a href="#orga50b206">statement</a></li>
+<li><a href="#org7c2d6cb">(函数相关的定位)function related Symbols</a></li>
+<li><a href="#org491eb54">类相关的定位 Class related Symbols</a></li>
+<li><a href="#orgeef80ae">Conditional Construct Symbols if else for子句</a></li>
+<li><a href="#org45afd81">switch case 子句</a></li>
+<li><a href="#org055231f">})', `([ ])' and `(&lt; &gt;)', are treated as brace lists too.  An example:</a></li>
+<li><a href="#orgd0f7b13">括号匹配,参数相关</a></li>
+<li><a href="#org9964385">其他</a></li>
+<li><a href="#org9929eff">java 相关</a></li>
+<li><a href="#org8cfc458">statement</a></li>
 </ul>
 </li>
-<li><a href="#orgc72eaab">c-offsets-alist</a></li>
-<li><a href="#orgf9a78bd">示例</a></li>
-<li><a href="#org2a5d75e">style</a></li>
+<li><a href="#orgca4fa37">c-offsets-alist</a></li>
+<li><a href="#org610d8fa">示例</a></li>
+<li><a href="#org0c330bb">style</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgc6a5c5c" class="outline-2">
-<h2 id="orgc6a5c5c">`C-cC-s'  `C-uC-cC-s'</h2>
-<div class="outline-text-2" id="text-orgc6a5c5c">
+<div id="outline-container-org9e4ed3e" class="outline-2">
+<h2 id="org9e4ed3e">`C-cC-s'  `C-uC-cC-s'</h2>
+<div class="outline-text-2" id="text-org9e4ed3e">
 <p>
 显示当前行的indent信息<br />
 </p>
 </div>
 </div>
-<div id="outline-container-orgf137a95" class="outline-2">
-<h2 id="orgf137a95">indent 定位信息</h2>
-<div class="outline-text-2" id="text-orgf137a95">
+<div id="outline-container-org00f9bbc" class="outline-2">
+<h2 id="org00f9bbc">indent 定位信息</h2>
+<div class="outline-text-2" id="text-org00f9bbc">
 </div>
-<div id="outline-container-org83d3c79" class="outline-3">
-<h3 id="org83d3c79">(函数相关的定位)function related Symbols</h3>
-<div class="outline-text-3" id="text-org83d3c79">
+<div id="outline-container-org7c2d6cb" class="outline-3">
+<h3 id="org7c2d6cb">(函数相关的定位)function related Symbols</h3>
+<div class="outline-text-3" id="text-org7c2d6cb">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #8DA6CE;">void</span>                           <span style="color: #AEAEAE;">/* </span><span style="color: #AEAEAE;">((topmost-intro 1)), top-level &#34920;&#36798;&#31034;&#30340;&#31532;&#19968;&#34892;,</span><span style="color: #AEAEAE;"> */</span>
 <span style="color: #FF6400;">swap</span>( <span style="color: #8DA6CE;">int</span>&amp; a, <span style="color: #8DA6CE;">int</span>&amp; b )         <span style="color: #AEAEAE;">/* </span><span style="color: #AEAEAE;">((topmost-intro-cont 2)) &#26159;topmost-intro &#30340;continuation(&#32487;&#32493;)</span><span style="color: #AEAEAE;"> */</span>
@@ -97,9 +97,9 @@
 </div>
 </div>
 </div>
-<div id="outline-container-org50a0d5a" class="outline-3">
-<h3 id="org50a0d5a">类相关的定位 Class related Symbols</h3>
-<div class="outline-text-3" id="text-org50a0d5a">
+<div id="outline-container-org491eb54" class="outline-3">
+<h3 id="org491eb54">类相关的定位 Class related Symbols</h3>
+<div class="outline-text-3" id="text-org491eb54">
 <div class="org-src-container">
 <pre class="src src-c++"> <span style="color: #FBDE2D;">class</span> <span style="color: #8DA6CE;">Bass</span>                     <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((topmost-intro 1))</span>
    : <span style="color: #FBDE2D;">public</span> Guitar,           <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((inher-intro 2) inheritance(&#32487;&#25215;), &#32487;&#25215;&#35821;&#21477;&#30340;&#24320;&#22987;)</span>
@@ -123,9 +123,9 @@
 </div>
 </div>
 </div>
-<div id="outline-container-org0a0b4ce" class="outline-3">
-<h3 id="org0a0b4ce">Conditional Construct Symbols if else for子句</h3>
-<div class="outline-text-3" id="text-org0a0b4ce">
+<div id="outline-container-orgeef80ae" class="outline-3">
+<h3 id="orgeef80ae">Conditional Construct Symbols if else for子句</h3>
+<div class="outline-text-3" id="text-orgeef80ae">
 <div class="org-src-container">
 <pre class="src src-c++"><span style="color: #8DA6CE;">void</span> <span style="color: #FF6400;">spam</span>( <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">index</span> )         <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((topmost-intro 1))</span>
 {                              <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((defun-open 2))</span>
@@ -146,9 +146,9 @@
 </div>
 </div>
 </div>
-<div id="outline-container-org3605ecb" class="outline-3">
-<h3 id="org3605ecb">switch case 子句</h3>
-<div class="outline-text-3" id="text-org3605ecb">
+<div id="outline-container-org45afd81" class="outline-3">
+<h3 id="org45afd81">switch case 子句</h3>
+<div class="outline-text-3" id="text-org45afd81">
 <div class="org-src-container">
 <pre class="src src-c++"><span style="color: #8DA6CE;">void</span> <span style="color: #FF6400;">spam</span>( <span style="color: #FBDE2D;">enum</span> <span style="color: #8DA6CE;">Ingredient</span> <span style="color: #40E0D0;">i</span> )  <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((topmost-intro 1)) </span>
 {                               <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((defun-open 1))</span>
@@ -171,9 +171,9 @@
 </div>
 </div>
 </div>
-<div id="outline-container-orgcdefb29" class="outline-3">
-<h3 id="orgcdefb29">})', `([ ])' and `(&lt; &gt;)', are treated as brace lists too.  An example:</h3>
-<div class="outline-text-3" id="text-orgcdefb29">
+<div id="outline-container-org055231f" class="outline-3">
+<h3 id="org055231f">})', `([ ])' and `(&lt; &gt;)', are treated as brace lists too.  An example:</h3>
+<div class="outline-text-3" id="text-org055231f">
 <div class="org-src-container">
 <pre class="src src-c++"> <span style="color: #FBDE2D;">static</span> <span style="color: #8DA6CE;">char</span>* <span style="color: #40E0D0;">ingredients</span>[] =   <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((topmost-intro 1))</span>
 {                              <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((brace-list-open 2))</span>
@@ -185,9 +185,9 @@
 </div>
 </div>
 </div>
-<div id="outline-container-orgaf39389" class="outline-3">
-<h3 id="orgaf39389">括号匹配,参数相关</h3>
-<div class="outline-text-3" id="text-orgaf39389">
+<div id="outline-container-orgd0f7b13" class="outline-3">
+<h3 id="orgd0f7b13">括号匹配,参数相关</h3>
+<div class="outline-text-3" id="text-orgd0f7b13">
 <div class="org-src-container">
 <pre class="src src-c++"><span style="color: #8DA6CE;">void</span> <span style="color: #FF6400;">a_function</span>( <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">line1</span>,     <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((topmost-intro 1))</span>
                  <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">line2</span> );   <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((arglist-cont-nonempty 1 16)) &#34920;&#31034;&#36825;&#26159; (arglist-cont,&#24182;&#19988;noempty &#34920;&#31034;&#27492;&#34892;&#21253;&#21547; &#20102;&#21491;&#25324;&#21495;) </span>
@@ -210,9 +210,9 @@
 </div>
 </div>
 </div>
-<div id="outline-container-org41d00c5" class="outline-3">
-<h3 id="org41d00c5">其他</h3>
-<div class="outline-text-3" id="text-org41d00c5">
+<div id="outline-container-org9964385" class="outline-3">
+<h3 id="org9964385">其他</h3>
+<div class="outline-text-3" id="text-org9964385">
 <div class="org-src-container">
 <pre class="src src-c++"><span style="color: #8DA6CE;">void</span> <span style="color: #D8FA3C;">Bass</span>::<span style="color: #FF6400;">play</span>( <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">volume</span> )                                         <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((topmost-intro 1))</span>
 <span style="color: #FBDE2D;">const</span>                                                                 <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((func-decl-cont 1)) function&#22768;&#26126;&#33509;&#22810;&#34892;&#26102;,&#30340;&#32487;&#32493;</span>
@@ -235,9 +235,9 @@ string.  This line should get `string<span style="color: #ffc0cb;">'</span> synt
 </div>
 </div>
 </div>
-<div id="outline-container-orgbca928b" class="outline-3">
-<h3 id="orgbca928b">java 相关</h3>
-<div class="outline-text-3" id="text-orgbca928b">
+<div id="outline-container-org9929eff" class="outline-3">
+<h3 id="org9929eff">java 相关</h3>
+<div class="outline-text-3" id="text-org9929eff">
 <div class="org-src-container">
 <pre class="src src-java"><span style="color: #D8FA3C;">@Test</span>                          <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((topmost-intro 1))</span>
 <span style="color: #FBDE2D;">public</span> <span style="color: #8DA6CE;">void</span> <span style="color: #FF6400;">watch</span>(<span style="color: #8DA6CE;">Observable</span> <span style="color: #40E0D0;">o</span>) { <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((annotation-top-cont 2)) &#23545;method class&#36827;&#34892; annotation&#22768;&#26126;</span>
@@ -254,9 +254,9 @@ string.  This line should get `string<span style="color: #ffc0cb;">'</span> synt
 </div>
 </div>
 </div>
-<div id="outline-container-orga50b206" class="outline-3">
-<h3 id="orga50b206">statement</h3>
-<div class="outline-text-3" id="text-orga50b206">
+<div id="outline-container-org8cfc458" class="outline-3">
+<h3 id="org8cfc458">statement</h3>
+<div class="outline-text-3" id="text-org8cfc458">
 <div class="org-src-container">
 <pre class="src src-c++"><span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">res</span> = ({                    <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((topmost-intro 1))</span>
     <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">y</span> = foo (); <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">z</span>;  <span style="color: #AEAEAE;">// </span><span style="color: #AEAEAE;">((inexpr-statement) (statement-block-intro 1)) ,(inexpr-statement)&#34920;&#31034;&#23427;&#22788;&#20110;&#19968;&#20010;statement&#30340;&#20869;&#37096;&#30340;&#34920;&#36798;&#31034;</span>
@@ -269,9 +269,9 @@ string.  This line should get `string<span style="color: #ffc0cb;">'</span> synt
 </div>
 </div>
 
-<div id="outline-container-orgc72eaab" class="outline-2">
-<h2 id="orgc72eaab">c-offsets-alist</h2>
-<div class="outline-text-2" id="text-orgc72eaab">
+<div id="outline-container-orgca4fa37" class="outline-2">
+<h2 id="orgca4fa37">c-offsets-alist</h2>
+<div class="outline-text-2" id="text-orgca4fa37">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">  (<span style="color: #FBDE2D;">setq</span> c-offsets-alist
         ' ((statement . 0)
@@ -291,9 +291,9 @@ string.  This line should get `string<span style="color: #ffc0cb;">'</span> synt
 </div>
 </div>
 </div>
-<div id="outline-container-orgf9a78bd" class="outline-2">
-<h2 id="orgf9a78bd">示例</h2>
-<div class="outline-text-2" id="text-orgf9a78bd">
+<div id="outline-container-org610d8fa" class="outline-2">
+<h2 id="org610d8fa">示例</h2>
+<div class="outline-text-2" id="text-org610d8fa">
 <div class="org-src-container">
 <pre class="src src-c">      1: <span style="color: #8DA6CE;">int</span> add( <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">val</span>, <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">incr</span>, <span style="color: #8DA6CE;">int</span> <span style="color: #40E0D0;">doit</span> )
       2: {
@@ -327,9 +327,9 @@ string.  This line should get `string<span style="color: #ffc0cb;">'</span> synt
 </div>
 </div>
 
-<div id="outline-container-org2a5d75e" class="outline-2">
-<h2 id="org2a5d75e">style</h2>
-<div class="outline-text-2" id="text-org2a5d75e">
+<div id="outline-container-org0c330bb" class="outline-2">
+<h2 id="org0c330bb">style</h2>
+<div class="outline-text-2" id="text-org0c330bb">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defconst</span> <span style="color: #40E0D0;">my-c-style</span>
   '((c-tab-always-indent        . t)

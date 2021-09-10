@@ -47,58 +47,58 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org0685ad5">GNU Emacs For Mac OS X&#xa0;&#xa0;&#xa0;<span class="tag"><span class="Emacs">Emacs</span></span></a></li>
-<li><a href="#orgc006400">使用brew 命令安装</a>
+<li><a href="#org397f09a">GNU Emacs For Mac OS X&#xa0;&#xa0;&#xa0;<span class="tag"><span class="Emacs">Emacs</span></span></a></li>
+<li><a href="#orgb19bcb6">使用brew 命令安装</a>
 <ul>
-<li><a href="#org2453b1c">安装 带图形界面的emacs</a></li>
-<li><a href="#org29aae44">安装 不带图形界面的emacs,只能在终端下使用的，</a></li>
+<li><a href="#org85a0c03">安装 带图形界面的emacs</a></li>
+<li><a href="#orgd8b155f">安装 不带图形界面的emacs,只能在终端下使用的，</a></li>
 </ul>
 </li>
-<li><a href="#org3d675e3">从源代码编译emacs</a>
+<li><a href="#org3bf6f7e">从源代码编译emacs</a>
 <ul>
-<li><a href="#org0b7c333">获取emacs 源码</a></li>
-<li><a href="#org2b6b9cb">只编译终端下可用的版本 编译完后 会安装到/usr/local/bin/下</a></li>
-<li><a href="#org4a64665">编译 图形界面的</a></li>
+<li><a href="#org7c584fc">获取emacs 源码</a></li>
+<li><a href="#org350243c">只编译终端下可用的版本 编译完后 会安装到/usr/local/bin/下</a></li>
+<li><a href="#org1e15d69">编译 图形界面的</a></li>
 </ul>
 </li>
-<li><a href="#org4bdc8fb">mac 启动时自动启动 emacs &#x2013;daemon进程</a></li>
-<li><a href="#org205e5c2">~/bin/em emacsclient 封装</a></li>
-<li><a href="#orge1b2f8e">让emacs 支持编辑 plist 文件</a></li>
-<li><a href="#org69eedee">让emacs 支持编辑 applescript 脚本</a></li>
-<li><a href="#org425dbf1">emacs 与 iTerm2</a>
+<li><a href="#orgfce98ce">mac 启动时自动启动 emacs &#x2013;daemon进程</a></li>
+<li><a href="#orgeda7832">~/bin/em emacsclient 封装</a></li>
+<li><a href="#org9e1ea76">让emacs 支持编辑 plist 文件</a></li>
+<li><a href="#org0c05a5a">让emacs 支持编辑 applescript 脚本</a></li>
+<li><a href="#org6f59c1d">emacs 与 iTerm2</a>
 <ul>
-<li><a href="#org74afa74">iTerm2 下 的emacs 绑定 C-, C-; Ctrl-return 等按键的问题</a></li>
-<li><a href="#org5c81f66">在Finder 中使用iTerm2 中的emacs/emacsclient 打开文件</a></li>
+<li><a href="#org5c42449">iTerm2 下 的emacs 绑定 C-, C-; Ctrl-return 等按键的问题</a></li>
+<li><a href="#org16b063f">在Finder 中使用iTerm2 中的emacs/emacsclient 打开文件</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org0685ad5" class="outline-2">
-<h2 id="org0685ad5">GNU Emacs For Mac OS X&#xa0;&#xa0;&#xa0;<span class="tag"><span class="Emacs">Emacs</span></span></h2>
-<div class="outline-text-2" id="text-org0685ad5">
+<div id="outline-container-org397f09a" class="outline-2">
+<h2 id="org397f09a">GNU Emacs For Mac OS X&#xa0;&#xa0;&#xa0;<span class="tag"><span class="Emacs">Emacs</span></span></h2>
+<div class="outline-text-2" id="text-org397f09a">
 <p>
 <a href="http://emacsformacosx.com/">http://emacsformacosx.com/</a><br />
   去这里下载 ，下载完  托动到 /Applications/目录就可以了<br />
 </p>
 </div>
 </div>
-<div id="outline-container-orgc006400" class="outline-2">
-<h2 id="orgc006400">使用brew 命令安装</h2>
-<div class="outline-text-2" id="text-orgc006400">
+<div id="outline-container-orgb19bcb6" class="outline-2">
+<h2 id="orgb19bcb6">使用brew 命令安装</h2>
+<div class="outline-text-2" id="text-orgb19bcb6">
 </div>
-<div id="outline-container-org2453b1c" class="outline-3">
-<h3 id="org2453b1c">安装 带图形界面的emacs</h3>
-<div class="outline-text-3" id="text-org2453b1c">
+<div id="outline-container-org85a0c03" class="outline-3">
+<h3 id="org85a0c03">安装 带图形界面的emacs</h3>
+<div class="outline-text-3" id="text-org85a0c03">
 <div class="org-src-container">
 <pre class="src src-sh">brew install emacs --cocoa
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org29aae44" class="outline-3">
-<h3 id="org29aae44">安装 不带图形界面的emacs,只能在终端下使用的，</h3>
-<div class="outline-text-3" id="text-org29aae44">
+<div id="outline-container-orgd8b155f" class="outline-3">
+<h3 id="orgd8b155f">安装 不带图形界面的emacs,只能在终端下使用的，</h3>
+<div class="outline-text-3" id="text-orgd8b155f">
 <p>
 mac 自带了emacs22 ，但是版本太老所以需要删掉<br />
 </p>
@@ -119,13 +119,13 @@ brew install emacs
 </div>
 </div>
 
-<div id="outline-container-org3d675e3" class="outline-2">
-<h2 id="org3d675e3">从源代码编译emacs</h2>
-<div class="outline-text-2" id="text-org3d675e3">
+<div id="outline-container-org3bf6f7e" class="outline-2">
+<h2 id="org3bf6f7e">从源代码编译emacs</h2>
+<div class="outline-text-2" id="text-org3bf6f7e">
 </div>
-<div id="outline-container-org0b7c333" class="outline-3">
-<h3 id="org0b7c333">获取emacs 源码</h3>
-<div class="outline-text-3" id="text-org0b7c333">
+<div id="outline-container-org7c584fc" class="outline-3">
+<h3 id="org7c584fc">获取emacs 源码</h3>
+<div class="outline-text-3" id="text-org7c584fc">
 <div class="org-src-container">
 <pre class="src src-sh">git clone  git://git.sv.gnu.org/emacs.git
 &#25110;&#32773;
@@ -134,9 +134,9 @@ git clone  git://git.sv.gnu.org/emacs.git --depth=1
 </div>
 </div>
 </div>
-<div id="outline-container-org2b6b9cb" class="outline-3">
-<h3 id="org2b6b9cb">只编译终端下可用的版本 编译完后 会安装到/usr/local/bin/下</h3>
-<div class="outline-text-3" id="text-org2b6b9cb">
+<div id="outline-container-org350243c" class="outline-3">
+<h3 id="org350243c">只编译终端下可用的版本 编译完后 会安装到/usr/local/bin/下</h3>
+<div class="outline-text-3" id="text-org350243c">
 <div class="org-src-container">
 <pre class="src src-sh">  <span style="color: #F8F8F8;">cd</span> emacs
   ./configure --without-ns
@@ -155,9 +155,9 @@ git clone  git://git.sv.gnu.org/emacs.git --depth=1
 </div>
 </div>
 </div>
-<div id="outline-container-org4a64665" class="outline-3">
-<h3 id="org4a64665">编译 图形界面的</h3>
-<div class="outline-text-3" id="text-org4a64665">
+<div id="outline-container-org1e15d69" class="outline-3">
+<h3 id="org1e15d69">编译 图形界面的</h3>
+<div class="outline-text-3" id="text-org1e15d69">
 <div class="org-src-container">
 <pre class="src src-sh"><span style="color: #F8F8F8;">cd</span> emacs
  ./configure
@@ -173,9 +173,9 @@ git clone  git://git.sv.gnu.org/emacs.git --depth=1
 </div>
 </div>
 
-<div id="outline-container-org4bdc8fb" class="outline-2">
-<h2 id="org4bdc8fb">mac 启动时自动启动 emacs &#x2013;daemon进程</h2>
-<div class="outline-text-2" id="text-org4bdc8fb">
+<div id="outline-container-orgfce98ce" class="outline-2">
+<h2 id="orgfce98ce">mac 启动时自动启动 emacs &#x2013;daemon进程</h2>
+<div class="outline-text-2" id="text-orgfce98ce">
 <p>
 ~/Library/LaunchAgents/emacs-daemon.plist<br />
 把这个文件放到~/Library/LaunchAgents/目录下 ，重起下电脑，就会启动emacs &#x2013;deamon 进程<br />
@@ -211,9 +211,9 @@ git clone  git://git.sv.gnu.org/emacs.git --depth=1
 </div>
 </div>
 </div>
-<div id="outline-container-org205e5c2" class="outline-2">
-<h2 id="org205e5c2">~/bin/em emacsclient 封装</h2>
-<div class="outline-text-2" id="text-org205e5c2">
+<div id="outline-container-orgeda7832" class="outline-2">
+<h2 id="orgeda7832">~/bin/em emacsclient 封装</h2>
+<div class="outline-text-2" id="text-orgeda7832">
 <p>
 写了个脚本命名为  ~/bin/em  封装emacsclient,配合emacs &#x2013;daemon 使用<br />
 </p>
@@ -271,9 +271,9 @@ git clone  git://git.sv.gnu.org/emacs.git --depth=1
 </div>
 </div>
 
-<div id="outline-container-orge1b2f8e" class="outline-2">
-<h2 id="orge1b2f8e">让emacs 支持编辑 plist 文件</h2>
-<div class="outline-text-2" id="text-orge1b2f8e">
+<div id="outline-container-org9e1ea76" class="outline-2">
+<h2 id="org9e1ea76">让emacs 支持编辑 plist 文件</h2>
+<div class="outline-text-2" id="text-org9e1ea76">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(add-to-list 'jka-compr-compression-info-list
              [<span style="color: #ffa07a;">"\\.plist$"</span>
@@ -288,9 +288,9 @@ git clone  git://git.sv.gnu.org/emacs.git --depth=1
 </div>
 </div>
 </div>
-<div id="outline-container-org69eedee" class="outline-2">
-<h2 id="org69eedee">让emacs 支持编辑 applescript 脚本</h2>
-<div class="outline-text-2" id="text-org69eedee">
+<div id="outline-container-org0c05a5a" class="outline-2">
+<h2 id="org0c05a5a">让emacs 支持编辑 applescript 脚本</h2>
+<div class="outline-text-2" id="text-org0c05a5a">
 <p>
 ~/.emacs.d/bin/applescript-helper.sh<br />
 </p>
@@ -321,13 +321,13 @@ git clone  git://git.sv.gnu.org/emacs.git --depth=1
 </div>
 </div>
 </div>
-<div id="outline-container-org425dbf1" class="outline-2">
-<h2 id="org425dbf1">emacs 与 iTerm2</h2>
-<div class="outline-text-2" id="text-org425dbf1">
+<div id="outline-container-org6f59c1d" class="outline-2">
+<h2 id="org6f59c1d">emacs 与 iTerm2</h2>
+<div class="outline-text-2" id="text-org6f59c1d">
 </div>
-<div id="outline-container-org74afa74" class="outline-3">
-<h3 id="org74afa74">iTerm2 下 的emacs 绑定 C-, C-; Ctrl-return 等按键的问题</h3>
-<div class="outline-text-3" id="text-org74afa74">
+<div id="outline-container-org5c42449" class="outline-3">
+<h3 id="org5c42449">iTerm2 下 的emacs 绑定 C-, C-; Ctrl-return 等按键的问题</h3>
+<div class="outline-text-3" id="text-org5c42449">
 <p>
 我喜欢使用 <a href="https://iterm2.com/">iTerm2</a>这款终端<br />
 但是在终端下的emacs 有些按键是不能按的,比如C-, C-;<br />
@@ -352,9 +352,9 @@ git clone  git://git.sv.gnu.org/emacs.git --depth=1
 </p>
 </div>
 </div>
-<div id="outline-container-org5c81f66" class="outline-3">
-<h3 id="org5c81f66">在Finder 中使用iTerm2 中的emacs/emacsclient 打开文件</h3>
-<div class="outline-text-3" id="text-org5c81f66">
+<div id="outline-container-org16b063f" class="outline-3">
+<h3 id="org16b063f">在Finder 中使用iTerm2 中的emacs/emacsclient 打开文件</h3>
+<div class="outline-text-3" id="text-org16b063f">
 <p>
 打开/Applications/Automator.app 文件-&gt;新建-&gt;应用程序<br />
 然后选择 实现工具-&gt;运行applescript 脚本<br />

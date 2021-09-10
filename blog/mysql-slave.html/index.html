@@ -47,32 +47,32 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org3639507">master 的配置 ip 192.168.1.132</a></li>
-<li><a href="#orge4fcb29">slave 配置 ip 192.168.1.137</a></li>
-<li><a href="#org74b5638">配置完 之后</a>
+<li><a href="#org3ef5d86">master 的配置 ip 192.168.1.132</a></li>
+<li><a href="#org4fe7191">slave 配置 ip 192.168.1.137</a></li>
+<li><a href="#orgd862b19">配置完 之后</a>
 <ul>
-<li><a href="#org7b19954">master 上的操作</a></li>
-<li><a href="#org7c6c725">slave 上的操作</a></li>
-<li><a href="#org542aa94">当出现主从不一致的时候的做法，</a></li>
+<li><a href="#org9be00c4">master 上的操作</a></li>
+<li><a href="#org1107f5f">slave 上的操作</a></li>
+<li><a href="#orgcc6f488">当出现主从不一致的时候的做法，</a></li>
 </ul>
 </li>
-<li><a href="#org965d2f0">mysql热备做DR</a>
+<li><a href="#orgba920ac">mysql热备做DR</a>
 <ul>
-<li><a href="#org848c347">在master db上使用mysqldump构建基于时间点的一致性全备</a></li>
-<li><a href="#org1053919">scp该sql文件到slave dr上面</a></li>
-<li><a href="#orgcafe49a">在slave dr上把全备的数据入库</a></li>
-<li><a href="#org8832b37">在master db上执行授权语句</a></li>
-<li><a href="#org8c8e2b4">在slave dr上设置热备关系</a></li>
-<li><a href="#org49a0310">注：其中pos和file参数可以从mysqldump出来的sql文件前25行了解到</a></li>
-<li><a href="#org148c2b0">使用show slave status\G 查看slave的情况</a></li>
+<li><a href="#org4265170">在master db上使用mysqldump构建基于时间点的一致性全备</a></li>
+<li><a href="#org539c150">scp该sql文件到slave dr上面</a></li>
+<li><a href="#org263caba">在slave dr上把全备的数据入库</a></li>
+<li><a href="#orgf9466c8">在master db上执行授权语句</a></li>
+<li><a href="#orgeb9593f">在slave dr上设置热备关系</a></li>
+<li><a href="#orgff3b962">注：其中pos和file参数可以从mysqldump出来的sql文件前25行了解到</a></li>
+<li><a href="#org18fce64">使用show slave status\G 查看slave的情况</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org3639507" class="outline-2">
-<h2 id="org3639507">master 的配置 ip 192.168.1.132</h2>
-<div class="outline-text-2" id="text-org3639507">
+<div id="outline-container-org3ef5d86" class="outline-2">
+<h2 id="org3ef5d86">master 的配置 ip 192.168.1.132</h2>
+<div class="outline-text-2" id="text-org3ef5d86">
 <p>
 [mysqld]<br />
 server-id = 1  #这里的数字不能和从库一样<br />
@@ -89,9 +89,9 @@ binlog_format=MIXED   #混合格式<br />
 </p>
 </div>
 </div>
-<div id="outline-container-orge4fcb29" class="outline-2">
-<h2 id="orge4fcb29">slave 配置 ip 192.168.1.137</h2>
-<div class="outline-text-2" id="text-orge4fcb29">
+<div id="outline-container-org4fe7191" class="outline-2">
+<h2 id="org4fe7191">slave 配置 ip 192.168.1.137</h2>
+<div class="outline-text-2" id="text-org4fe7191">
 <p>
 [mysqld]<br />
 server-id = 2<br />
@@ -105,13 +105,13 @@ slave-skip-errors=true<br />
 </div>
 </div>
 
-<div id="outline-container-org74b5638" class="outline-2">
-<h2 id="org74b5638">配置完 之后</h2>
-<div class="outline-text-2" id="text-org74b5638">
+<div id="outline-container-orgd862b19" class="outline-2">
+<h2 id="orgd862b19">配置完 之后</h2>
+<div class="outline-text-2" id="text-orgd862b19">
 </div>
-<div id="outline-container-org7b19954" class="outline-3">
-<h3 id="org7b19954">master 上的操作</h3>
-<div class="outline-text-3" id="text-org7b19954">
+<div id="outline-container-org9be00c4" class="outline-3">
+<h3 id="org9be00c4">master 上的操作</h3>
+<div class="outline-text-3" id="text-org9be00c4">
 <div class="org-src-container">
 <pre class="src src-sh"><span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">master &#19978;&#21019;&#24314;&#29992;&#20110;&#21516;&#27493;&#25968;&#25454;&#30340;&#36134;&#25143;</span>
 grant replication slave on *.* to slave@<span style="color: #ffa07a;">'192.168.1.137'</span> identified by <span style="color: #ffa07a;">'slave'</span>;
@@ -179,9 +179,9 @@ unlock tables;
 </div>
 </div>
 </div>
-<div id="outline-container-org7c6c725" class="outline-3">
-<h3 id="org7c6c725">slave 上的操作</h3>
-<div class="outline-text-3" id="text-org7c6c725">
+<div id="outline-container-org1107f5f" class="outline-3">
+<h3 id="org1107f5f">slave 上的操作</h3>
+<div class="outline-text-3" id="text-org1107f5f">
 <p>
 首先完成 t1,t2 两个数据库数据的同步<br />
 </p>
@@ -223,9 +223,9 @@ mysql&gt; show slave status \G;<br />
 </p>
 </div>
 </div>
-<div id="outline-container-org542aa94" class="outline-3">
-<h3 id="org542aa94">当出现主从不一致的时候的做法，</h3>
-<div class="outline-text-3" id="text-org542aa94">
+<div id="outline-container-orgcc6f488" class="outline-3">
+<h3 id="orgcc6f488">当出现主从不一致的时候的做法，</h3>
+<div class="outline-text-3" id="text-orgcc6f488">
 <p>
 stop slave;<br />
 #表示跳过一步错误，后面的数字可变<br />
@@ -235,44 +235,44 @@ start slave;<br />
 </div>
 </div>
 </div>
-<div id="outline-container-org965d2f0" class="outline-2">
-<h2 id="org965d2f0">mysql热备做DR</h2>
-<div class="outline-text-2" id="text-org965d2f0">
+<div id="outline-container-orgba920ac" class="outline-2">
+<h2 id="orgba920ac">mysql热备做DR</h2>
+<div class="outline-text-2" id="text-orgba920ac">
 </div>
-<div id="outline-container-org848c347" class="outline-3">
-<h3 id="org848c347">在master db上使用mysqldump构建基于时间点的一致性全备</h3>
-<div class="outline-text-3" id="text-org848c347">
+<div id="outline-container-org4265170" class="outline-3">
+<h3 id="org4265170">在master db上使用mysqldump构建基于时间点的一致性全备</h3>
+<div class="outline-text-3" id="text-org4265170">
 <p>
 mysqldump -uroot -pPASSWORD &#x2013;single-transaction &#x2013;master-data=2 &#x2013;skip-opt &#x2013;create-option -B item &gt; dump.sql<br />
 </p>
 </div>
 </div>
 
-<div id="outline-container-org1053919" class="outline-3">
-<h3 id="org1053919">scp该sql文件到slave dr上面</h3>
+<div id="outline-container-org539c150" class="outline-3">
+<h3 id="org539c150">scp该sql文件到slave dr上面</h3>
 </div>
 
-<div id="outline-container-orgcafe49a" class="outline-3">
-<h3 id="orgcafe49a">在slave dr上把全备的数据入库</h3>
-<div class="outline-text-3" id="text-orgcafe49a">
+<div id="outline-container-org263caba" class="outline-3">
+<h3 id="org263caba">在slave dr上把全备的数据入库</h3>
+<div class="outline-text-3" id="text-org263caba">
 <p>
 mysql -uroot -pPASSWORD &#x2013;default-character-set=latin1 &lt; dump.sql<br />
 </p>
 </div>
 </div>
 
-<div id="outline-container-org8832b37" class="outline-3">
-<h3 id="org8832b37">在master db上执行授权语句</h3>
-<div class="outline-text-3" id="text-org8832b37">
+<div id="outline-container-orgf9466c8" class="outline-3">
+<h3 id="orgf9466c8">在master db上执行授权语句</h3>
+<div class="outline-text-3" id="text-orgf9466c8">
 <p>
 GRANT REPLICATION SLAVE, REPLICATION CLIENT ON <b>.</b> TO 'repl'@'slave1ip' IDENTIFIED BY 'pass'<br />
 </p>
 </div>
 </div>
 
-<div id="outline-container-org8c8e2b4" class="outline-3">
-<h3 id="org8c8e2b4">在slave dr上设置热备关系</h3>
-<div class="outline-text-3" id="text-org8c8e2b4">
+<div id="outline-container-orgeb9593f" class="outline-3">
+<h3 id="orgeb9593f">在slave dr上设置热备关系</h3>
+<div class="outline-text-3" id="text-orgeb9593f">
 <p>
 CHANGE MASTER TO<br />
   MASTER_HOST='masterIP',<br />
@@ -285,18 +285,18 @@ start slave;<br />
 </div>
 </div>
 
-<div id="outline-container-org49a0310" class="outline-3">
-<h3 id="org49a0310">注：其中pos和file参数可以从mysqldump出来的sql文件前25行了解到</h3>
-<div class="outline-text-3" id="text-org49a0310">
+<div id="outline-container-orgff3b962" class="outline-3">
+<h3 id="orgff3b962">注：其中pos和file参数可以从mysqldump出来的sql文件前25行了解到</h3>
+<div class="outline-text-3" id="text-orgff3b962">
 <p>
 head -25<br />
 </p>
 </div>
 </div>
 
-<div id="outline-container-org148c2b0" class="outline-3">
-<h3 id="org148c2b0">使用show slave status\G 查看slave的情况</h3>
-<div class="outline-text-3" id="text-org148c2b0">
+<div id="outline-container-org18fce64" class="outline-3">
+<h3 id="org18fce64">使用show slave status\G 查看slave的情况</h3>
+<div class="outline-text-3" id="text-org18fce64">
 <p>
 说明：上述的步骤是简单的热备做dr的步骤，有常见需要注意的问题<br />
 1）mysqldump生成全备sql时需要注意&#x2013;single-transaction &#x2013;master-data等参数，详细可以参见mysqldump &#x2013;help<br />

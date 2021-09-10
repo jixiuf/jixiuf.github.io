@@ -47,13 +47,13 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org0ba3e35">复制当前文件的路径</a></li>
-<li><a href="#org1db0676">Alt+h 一键显隐扩展名</a></li>
-<li><a href="#orgd526302">Ctl+Alt+c 在当前路径下打开Cmd.exe 窗口。</a></li>
-<li><a href="#orgff5510c">Alt+n 新建文本文件 Shift+= 新建文件夹</a></li>
-<li><a href="#org77d031f">焦点的移动</a></li>
-<li><a href="#org7a142e0">用键盘进行管理</a></li>
-<li><a href="#org7959315">Ctrl+e 用Emacs编辑器打开选中的文件</a></li>
+<li><a href="#orgbe9de77">复制当前文件的路径</a></li>
+<li><a href="#org0a9418d">Alt+h 一键显隐扩展名</a></li>
+<li><a href="#org5a03bcb">Ctl+Alt+c 在当前路径下打开Cmd.exe 窗口。</a></li>
+<li><a href="#orgfeea476">Alt+n 新建文本文件 Shift+= 新建文件夹</a></li>
+<li><a href="#org4a4e117">焦点的移动</a></li>
+<li><a href="#orgb21dca0">用键盘进行管理</a></li>
+<li><a href="#org3fa99a2">Ctrl+e 用Emacs编辑器打开选中的文件</a></li>
 </ul>
 </div>
 </div>
@@ -62,9 +62,9 @@
 AutoHotKey几个简单的小例子</a> 中已经有一个关于对资源管理器中实现Ctl+alt+h<br />
 <a href="/blog/AutoHotKey_1.html#sec-2_3">一键显隐 隐藏文件</a>的功能，这里再给出其他几个与资源管理器有关的功能增强。<br />
 </p>
-<div id="outline-container-org0ba3e35" class="outline-2">
-<h2 id="org0ba3e35">复制当前文件的路径</h2>
-<div class="outline-text-2" id="text-org0ba3e35">
+<div id="outline-container-orgbe9de77" class="outline-2">
+<h2 id="orgbe9de77">复制当前文件的路径</h2>
+<div class="outline-text-2" id="text-orgbe9de77">
 <p>
 这段代码实现<br />
 </p>
@@ -105,9 +105,9 @@ AutoHotKey几个简单的小例子</a> 中已经有一个关于对资源管理�
 </div>
 </div>
 
-<div id="outline-container-org1db0676" class="outline-2">
-<h2 id="org1db0676">Alt+h 一键显隐扩展名</h2>
-<div class="outline-text-2" id="text-org1db0676">
+<div id="outline-container-org0a9418d" class="outline-2">
+<h2 id="org0a9418d">Alt+h 一键显隐扩展名</h2>
+<div class="outline-text-2" id="text-org0a9418d">
 <div class="org-src-container">
 <pre class="src src-xahk">SetTitleMatchMode Regex ;可以使用正则表达式对标题进行匹配
 #IfWinActive ahk_class CabinetWClass|ExploreWClass
@@ -129,9 +129,9 @@ Return
 </div>
 </div>
 
-<div id="outline-container-orgd526302" class="outline-2">
-<h2 id="orgd526302">Ctl+Alt+c 在当前路径下打开Cmd.exe 窗口。</h2>
-<div class="outline-text-2" id="text-orgd526302">
+<div id="outline-container-org5a03bcb" class="outline-2">
+<h2 id="org5a03bcb">Ctl+Alt+c 在当前路径下打开Cmd.exe 窗口。</h2>
+<div class="outline-text-2" id="text-org5a03bcb">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #8DA6CE;">SetTitleMatchMode</span> <span style="color: #40E0D0;">Regex</span> ;&#21487;&#20197;&#20351;&#29992;&#27491;&#21017;&#34920;&#36798;&#24335;&#23545;&#26631;&#39064;&#36827;&#34892;&#21305;&#37197;
 <span style="color: #7fffd4;">#IfWinActive</span> ahk_class CabinetWClass|ExploreWClass
@@ -159,9 +159,9 @@ Return
 </div>
 </div>
 
-<div id="outline-container-orgff5510c" class="outline-2">
-<h2 id="orgff5510c">Alt+n 新建文本文件 Shift+= 新建文件夹</h2>
-<div class="outline-text-2" id="text-orgff5510c">
+<div id="outline-container-orgfeea476" class="outline-2">
+<h2 id="orgfeea476">Alt+n 新建文本文件 Shift+= 新建文件夹</h2>
+<div class="outline-text-2" id="text-orgfeea476">
 <div class="org-src-container">
 <pre class="src src-c">; create new text file
 <span style="color: #8DA6CE;">SetTitleMatchMode</span> <span style="color: #40E0D0;">Regex</span> ;&#21487;&#20197;&#20351;&#29992;&#27491;&#21017;&#34920;&#36798;&#24335;&#23545;&#26631;&#39064;&#36827;&#34892;&#21305;&#37197;
@@ -198,9 +198,9 @@ SendInput {F5}%UserInput%
 </div>
 </div>
 </div>
-<div id="outline-container-org77d031f" class="outline-2">
-<h2 id="org77d031f">焦点的移动</h2>
-<div class="outline-text-2" id="text-org77d031f">
+<div id="outline-container-org4a4e117" class="outline-2">
+<h2 id="org4a4e117">焦点的移动</h2>
+<div class="outline-text-2" id="text-org4a4e117">
 <ul class="org-ul">
 <li>Ctrl+, 选中第一个文件<br /></li>
 <li>Ctrl+. 选中最后一个文件<br /></li>
@@ -232,9 +232,9 @@ SendInput {F5}%UserInput%
 </div>
 </div>
 </div>
-<div id="outline-container-org7a142e0" class="outline-2">
-<h2 id="org7a142e0">用键盘进行管理</h2>
-<div class="outline-text-2" id="text-org7a142e0">
+<div id="outline-container-orgb21dca0" class="outline-2">
+<h2 id="orgb21dca0">用键盘进行管理</h2>
+<div class="outline-text-2" id="text-orgb21dca0">
 <p>
 一些绑定模拟Emacs 中Dired（Emacs中目录管理工具） 的操作。<br />
 </p>
@@ -292,9 +292,9 @@ SendInput {F5}%UserInput%
 </div>
 </div>
 </div>
-<div id="outline-container-org7959315" class="outline-2">
-<h2 id="org7959315">Ctrl+e 用Emacs编辑器打开选中的文件</h2>
-<div class="outline-text-2" id="text-org7959315">
+<div id="outline-container-org3fa99a2" class="outline-2">
+<h2 id="org3fa99a2">Ctrl+e 用Emacs编辑器打开选中的文件</h2>
+<div class="outline-text-2" id="text-org3fa99a2">
 <div class="org-src-container">
 <pre class="src src-c">;;&#38656;&#35201; emacsclientw <span style="color: #8DA6CE;">&#22312;Path&#36335;&#24452;&#19979;</span>
 <span style="color: #FF6400;">openSelectedfileWithEamcs</span>()

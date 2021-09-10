@@ -47,15 +47,15 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orga6666c0">链接</a></li>
-<li><a href="#org1a31d23">简介</a></li>
-<li><a href="#orgfb0965b">如何使用进行mysql 的表名列名补全：</a></li>
+<li><a href="#org0550d82">链接</a></li>
+<li><a href="#org7807f1f">简介</a></li>
+<li><a href="#org0d5f1c2">如何使用进行mysql 的表名列名补全：</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orga6666c0" class="outline-2">
-<h2 id="orga6666c0">链接</h2>
-<div class="outline-text-2" id="text-orga6666c0">
+<div id="outline-container-org0550d82" class="outline-2">
+<h2 id="org0550d82">链接</h2>
+<div class="outline-text-2" id="text-org0550d82">
 <p>
 演示视频screencast <a href="http://screencast-repos.googlecode.com/files/emacs-sqlparse-mysql-complete.mkv.bz2">screencast</a> mkv格式 ，用bzip 进行压缩<br />
 文件上传到了 <a href="http://emacswiki.org/Joseph">http://emacswiki.org/Joseph</a>,<br />
@@ -63,9 +63,9 @@
 </p>
 </div>
 </div>
-<div id="outline-container-org1a31d23" class="outline-2">
-<h2 id="org1a31d23">简介</h2>
-<div class="outline-text-2" id="text-org1a31d23">
+<div id="outline-container-org7807f1f" class="outline-2">
+<h2 id="org7807f1f">简介</h2>
+<div class="outline-text-2" id="text-org7807f1f">
 <p>
 最近新写了一个以mysql 为后端，当编写sql 脚本时，能适时地从mysql 数据库中查询<br />
 适时插入到当前光标下的表名列名等内容的扩展. 即进行表名列名的补全。(现在也相应<br />
@@ -179,9 +179,9 @@ sqlserver-query.el<br />
 </ul>
 </div>
 </div>
-<div id="outline-container-orgfb0965b" class="outline-2">
-<h2 id="orgfb0965b">如何使用进行mysql 的表名列名补全：</h2>
-<div class="outline-text-2" id="text-orgfb0965b">
+<div id="outline-container-org0d5f1c2" class="outline-2">
+<h2 id="org0d5f1c2">如何使用进行mysql 的表名列名补全：</h2>
+<div class="outline-text-2" id="text-org0d5f1c2">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">require</span> '<span style="color: #D8FA3C;">sqlparser-mysql-complete</span>)
 (define-key sql-mode-map (<span style="color: #FBDE2D;">quote</span> [M-return]) 'sqlparser-mysql-complete)

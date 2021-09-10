@@ -47,11 +47,11 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orge931beb">建表语句</a></li>
-<li><a href="#org4e83a4d">mysqlslap 测试</a></li>
-<li><a href="#orgdc91ad0">emysql的压力测试，开一条mysql连接，用存储过程插入10000条数据</a>
+<li><a href="#org4d2aaf9">建表语句</a></li>
+<li><a href="#orge787d24">mysqlslap 测试</a></li>
+<li><a href="#orgd28d60c">emysql的压力测试，开一条mysql连接，用存储过程插入10000条数据</a>
 <ul>
-<li><a href="#orgc883d72">测试用 press.erl</a></li>
+<li><a href="#org692e4d9">测试用 press.erl</a></li>
 </ul>
 </li>
 </ul>
@@ -60,9 +60,9 @@
 <p>
 本站关于mysql的测试在 <a href="/blog/benchmark_demo.html">/blog/benchmark_demo.html</a><br />
 </p>
-<div id="outline-container-orge931beb" class="outline-2">
-<h2 id="orge931beb">建表语句</h2>
-<div class="outline-text-2" id="text-orge931beb">
+<div id="outline-container-org4d2aaf9" class="outline-2">
+<h2 id="org4d2aaf9">建表语句</h2>
+<div class="outline-text-2" id="text-org4d2aaf9">
 <div class="org-src-container">
 <pre class="src src-sql"> <span style="color: #FBDE2D;">CREATE</span> <span style="color: #FBDE2D;">TABLE</span> `tbl_test` (
   `id` <span style="color: #8DA6CE;">int</span>(11) <span style="color: #FBDE2D;">NOT</span> <span style="color: #FBDE2D;">NULL</span> AUTO_INCREMENT,
@@ -143,9 +143,9 @@ DELIMITER ;
 </div>
 </div>
 </div>
-<div id="outline-container-org4e83a4d" class="outline-2">
-<h2 id="org4e83a4d">mysqlslap 测试</h2>
-<div class="outline-text-2" id="text-org4e83a4d">
+<div id="outline-container-orge787d24" class="outline-2">
+<h2 id="orge787d24">mysqlslap 测试</h2>
+<div class="outline-text-2" id="text-orge787d24">
 <div class="org-src-container">
 <pre class="src src-sh">&#20854;&#20013;&#20851;&#20110;&#24320;&#19968;&#20010;mysql&#36830;&#25509;&#25191;&#34892;10000&#27425;&#23384;&#20648;&#36807;&#31243;&#25554;&#20837;10000&#26465;&#25968;&#25454;&#30340;&#27979;&#35797;
  mysqlslap --query=<span style="color: #ffa07a;">"call insert_tbl_test(1,1,1,1,1,'name','1989-01-26','ver','t','dd',1,1,'name','localhost',1)"</span> --concurrency=1  --number-of-queries 10000 --iterations=3 --engine=myisam -uroot -proot
@@ -185,9 +185,9 @@ Average number of queries per client: 10000<br />
 </div>
 </div>
 
-<div id="outline-container-orgdc91ad0" class="outline-2">
-<h2 id="orgdc91ad0">emysql的压力测试，开一条mysql连接，用存储过程插入10000条数据</h2>
-<div class="outline-text-2" id="text-orgdc91ad0">
+<div id="outline-container-orgd28d60c" class="outline-2">
+<h2 id="orgd28d60c">emysql的压力测试，开一条mysql连接，用存储过程插入10000条数据</h2>
+<div class="outline-text-2" id="text-orgd28d60c">
 <ol class="org-ol">
 <li><p>
 首先修改emysql的 emysql.app.src,添加env的值{lock_timeout,infinity}<br />
@@ -219,9 +219,9 @@ Average number of queries per client: 10000<br />
 </ol>
 </div>
 
-<div id="outline-container-orgc883d72" class="outline-3">
-<h3 id="orgc883d72">测试用 press.erl</h3>
-<div class="outline-text-3" id="text-orgc883d72">
+<div id="outline-container-org692e4d9" class="outline-3">
+<h3 id="org692e4d9">测试用 press.erl</h3>
+<div class="outline-text-3" id="text-org692e4d9">
 <div class="org-src-container">
 <pre class="src src-erlang">-module(press).
 -export([get_timestamp/0,start/3,run/3]).

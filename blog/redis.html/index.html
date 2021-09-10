@@ -47,15 +47,15 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org1461de7">参考资料：</a></li>
-<li><a href="#org3bef39b">实用工具：</a></li>
-<li><a href="#orgf2a0bc8">优化点</a></li>
+<li><a href="#orgac1c15b">参考资料：</a></li>
+<li><a href="#org41a071a">实用工具：</a></li>
+<li><a href="#org70d1aca">优化点</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org1461de7" class="outline-2">
-<h2 id="org1461de7">参考资料：</h2>
-<div class="outline-text-2" id="text-org1461de7">
+<div id="outline-container-orgac1c15b" class="outline-2">
+<h2 id="orgac1c15b">参考资料：</h2>
+<div class="outline-text-2" id="text-orgac1c15b">
 <ol class="org-ol">
 <li>redis内存优化：<a href="https://cachecloud.github.io/2017/02/16/Redis%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/">https://cachecloud.github.io/2017/02/16/Redis%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/</a><br /></li>
 <li>Instagram的Redis实践 <a href="http://www.cnblogs.com/Laymen/articles/6803485.html">http://www.cnblogs.com/Laymen/articles/6803485.html</a><br /></li>
@@ -66,9 +66,9 @@
 </div>
 
 
-<div id="outline-container-org3bef39b" class="outline-2">
-<h2 id="org3bef39b">实用工具：</h2>
-<div class="outline-text-2" id="text-org3bef39b">
+<div id="outline-container-org41a071a" class="outline-2">
+<h2 id="org41a071a">实用工具：</h2>
+<div class="outline-text-2" id="text-org41a071a">
 <ol class="org-ol">
 <li>rdb ：分析redis内存占用情况<br />
 rdb -c memory ./hins3544773_data_20180130032206.rdb &#x2013;bytes 128 -f ~/work/temp/memory0130.csv<br />
@@ -82,9 +82,9 @@ redis-profiler -k "user.*" -k "friends.*" -f memoryreport.html /var/redis/6379/d
 </div>
 </div>
 
-<div id="outline-container-orgf2a0bc8" class="outline-2">
-<h2 id="orgf2a0bc8">优化点</h2>
-<div class="outline-text-2" id="text-orgf2a0bc8">
+<div id="outline-container-org70d1aca" class="outline-2">
+<h2 id="org70d1aca">优化点</h2>
+<div class="outline-text-2" id="text-org70d1aca">
 <p>
         根据调研，目前redis内存优化，大的方面尽可能的让redis采用压缩方<br />
 式存储，比如ziplist/zipmap编码。(ziplist编码需要设置<br />

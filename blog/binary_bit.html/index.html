@@ -47,20 +47,20 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org51fb475">首先补充点基础知识，免得一会混乱了。</a></li>
-<li><a href="#orgf463b94">二进制，八进制，十六进制数的表示方法举例</a></li>
-<li><a href="#org49d24e8">erlang 几个取size 的BIF(build in functions)</a></li>
-<li><a href="#orgb2613cb">bit syntax 重头戏</a>
+<li><a href="#org1925a40">首先补充点基础知识，免得一会混乱了。</a></li>
+<li><a href="#orgc99934b">二进制，八进制，十六进制数的表示方法举例</a></li>
+<li><a href="#org8fd7590">erlang 几个取size 的BIF(build in functions)</a></li>
+<li><a href="#orgde2b3f5">bit syntax 重头戏</a>
 <ul>
-<li><a href="#orge98d6b3">整数，</a></li>
-<li><a href="#org71ebf08">字符,每个字符以其ascii 值来处理</a></li>
-<li><a href="#orgbb34628">其他示例</a></li>
-<li><a href="#orgc008df4">二进制的表示方法，完全语法</a></li>
+<li><a href="#orgd02aa53">整数，</a></li>
+<li><a href="#org9905218">字符,每个字符以其ascii 值来处理</a></li>
+<li><a href="#org5ac74c2">其他示例</a></li>
+<li><a href="#org9225a1e">二进制的表示方法，完全语法</a></li>
 </ul>
 </li>
-<li><a href="#org0a6ad83">移位 and or 等传统操作</a></li>
-<li><a href="#org6e35f36">示例 int32&#x2013;&gt;binary binary&#x2013;&gt;int32</a></li>
-<li><a href="#orgedd55ef">参考链接</a></li>
+<li><a href="#org2beb53b">移位 and or 等传统操作</a></li>
+<li><a href="#org299b98d">示例 int32&#x2013;&gt;binary binary&#x2013;&gt;int32</a></li>
+<li><a href="#org0b81c22">参考链接</a></li>
 </ul>
 </div>
 </div>
@@ -68,9 +68,9 @@
 erlang 对于二进制的数据处理提供了非常强大的语法，而一般语言对于二进制数据的处<br />
 理多用移位操作来完成。<br />
 </p>
-<div id="outline-container-org51fb475" class="outline-2">
-<h2 id="org51fb475">首先补充点基础知识，免得一会混乱了。</h2>
-<div class="outline-text-2" id="text-org51fb475">
+<div id="outline-container-org1925a40" class="outline-2">
+<h2 id="org1925a40">首先补充点基础知识，免得一会混乱了。</h2>
+<div class="outline-text-2" id="text-org1925a40">
 <div class="org-src-container">
 <pre class="src src-sh">1 byte = 8 bit (1&#23383;&#33410; === 8&#20301;)
 1 int =4 byte = 32 bit(&#20854;&#20182;&#35821;&#35328;&#20013; &#19968;&#33324;&#24773;&#20917;&#19979;int &#31867;&#22411;&#20026;4&#23383;&#33410;&#65292;32&#20301;)
@@ -166,9 +166,9 @@ erlang 对于二进制的数据处理提供了非常强大的语法，而一般�
 </p>
 </div>
 </div>
-<div id="outline-container-orgf463b94" class="outline-2">
-<h2 id="orgf463b94">二进制，八进制，十六进制数的表示方法举例</h2>
-<div class="outline-text-2" id="text-orgf463b94">
+<div id="outline-container-orgc99934b" class="outline-2">
+<h2 id="orgc99934b">二进制，八进制，十六进制数的表示方法举例</h2>
+<div class="outline-text-2" id="text-orgc99934b">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -207,22 +207,22 @@ erlang 对于二进制的数据处理提供了非常强大的语法，而一般�
 </table>
 </div>
 </div>
-<div id="outline-container-org49d24e8" class="outline-2">
-<h2 id="org49d24e8">erlang 几个取size 的BIF(build in functions)</h2>
-<div class="outline-text-2" id="text-org49d24e8">
+<div id="outline-container-org8fd7590" class="outline-2">
+<h2 id="org8fd7590">erlang 几个取size 的BIF(build in functions)</h2>
+<div class="outline-text-2" id="text-org8fd7590">
 <ul class="org-ul">
 <li>size/1 返回字节数(byte为单位)<br /></li>
 <li>bit_size/1 (返回位数,bit为单位)<br /></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgb2613cb" class="outline-2">
-<h2 id="orgb2613cb">bit syntax 重头戏</h2>
-<div class="outline-text-2" id="text-orgb2613cb">
+<div id="outline-container-orgde2b3f5" class="outline-2">
+<h2 id="orgde2b3f5">bit syntax 重头戏</h2>
+<div class="outline-text-2" id="text-orgde2b3f5">
 </div>
-<div id="outline-container-orge98d6b3" class="outline-3">
-<h3 id="orge98d6b3">整数，</h3>
-<div class="outline-text-3" id="text-orge98d6b3">
+<div id="outline-container-orgd02aa53" class="outline-3">
+<h3 id="orgd02aa53">整数，</h3>
+<div class="outline-text-3" id="text-orgd02aa53">
 <p>
 对于字母，数字转化成binary,可以进行这样的操作<br />
 </p>
@@ -332,9 +332,9 @@ erlang 对于二进制的数据处理提供了非常强大的语法，而一般�
 </div>
 </div>
 
-<div id="outline-container-org71ebf08" class="outline-3">
-<h3 id="org71ebf08">字符,每个字符以其ascii 值来处理</h3>
-<div class="outline-text-3" id="text-org71ebf08">
+<div id="outline-container-org9905218" class="outline-3">
+<h3 id="org9905218">字符,每个字符以其ascii 值来处理</h3>
+<div class="outline-text-3" id="text-org9905218">
 <div class="org-src-container">
 <pre class="src src-erlang">(emacs@jf.org)110&gt; A = &lt;&lt;"a"&gt;&gt;. % 等效于 A = &lt;&lt;97&gt;&gt;.
 &lt;&lt;"a"&gt;&gt;
@@ -357,9 +357,9 @@ erlang 对于二进制的数据处理提供了非常强大的语法，而一般�
 </div>
 </div>
 </div>
-<div id="outline-container-orgbb34628" class="outline-3">
-<h3 id="orgbb34628">其他示例</h3>
-<div class="outline-text-3" id="text-orgbb34628">
+<div id="outline-container-org5ac74c2" class="outline-3">
+<h3 id="org5ac74c2">其他示例</h3>
+<div class="outline-text-3" id="text-org5ac74c2">
 <div class="org-src-container">
 <pre class="src src-erlang">(emacs@jf.org)127&gt; A = &lt;&lt;1,2,3&gt;&gt;.
 &lt;&lt;1,2,3&gt;&gt;
@@ -401,9 +401,9 @@ erlang 对于二进制的数据处理提供了非常强大的语法，而一般�
 </table>
 </div>
 </div>
-<div id="outline-container-orgc008df4" class="outline-3">
-<h3 id="orgc008df4">二进制的表示方法，完全语法</h3>
-<div class="outline-text-3" id="text-orgc008df4">
+<div id="outline-container-org9225a1e" class="outline-3">
+<h3 id="org9225a1e">二进制的表示方法，完全语法</h3>
+<div class="outline-text-3" id="text-org9225a1e">
 <ul class="org-ul">
 <li>Value<br />
 <ul class="org-ul">
@@ -414,10 +414,10 @@ erlang 对于二进制的数据处理提供了非常强大的语法，而一般�
 </ul>
 </div>
 <ul class="org-ul">
-<li><a id="org78a7de3"></a>其中TypeSpecifierList可以是以下几种类型及其组合，组合以 - 相连<br />
+<li><a id="org28d8002"></a>其中TypeSpecifierList可以是以下几种类型及其组合，组合以 - 相连<br />
 <ul class="org-ul">
-<li><a id="org47a4983"></a>Type(类型)<br />
-<div class="outline-text-5" id="text-org47a4983">
+<li><a id="org98fd296"></a>Type(类型)<br />
+<div class="outline-text-5" id="text-org98fd296">
 <p>
 integer | float | binary | bytes | bitstring | bits | utf8 | utf16 | utf32<br />
 bytes <code>= binary
@@ -425,8 +425,8 @@ bytes <code>= binary
 </p>
 </div>
 </li>
-<li><a id="org607b8e2"></a>Signedness (是否为有符号整数 + /-)<br />
-<div class="outline-text-5" id="text-org607b8e2">
+<li><a id="orgce969c6"></a>Signedness (是否为有符号整数 + /-)<br />
+<div class="outline-text-5" id="text-orgce969c6">
 <p>
 signed  | unsigned<br />
 只有当Type 为integer 时有效，默认为unsigned<br />
@@ -434,8 +434,8 @@ signed  | unsigned<br />
 </div>
 </li>
 
-<li><a id="org3159711"></a>Endianness(字节序) (default big)<br />
-<div class="outline-text-5" id="text-org3159711">
+<li><a id="orge0e7f08"></a>Endianness(字节序) (default big)<br />
+<div class="outline-text-5" id="text-orge0e7f08">
 <p>
        big | little | native<br />
        哪个字节存储在低地址(内存地址)<br />
@@ -461,8 +461,8 @@ signed  | unsigned<br />
 
 <tr>
 <td class="org-right">72</td>
-<td class="org-left"><a id="orgec1f0d0"></a></td>
-<td class="org-left"><a id="org92c0a9e"></a></td>
+<td class="org-left"><a id="orga748e83"></a></td>
+<td class="org-left"><a id="orge4a16f0"></a></td>
 </tr>
 
 <tr>
@@ -479,8 +479,8 @@ signed  | unsigned<br />
 </div>
 </div>
 </li>
-<li><a id="orgdc7fbda"></a>Unit<br />
-<div class="outline-text-5" id="text-orgdc7fbda">
+<li><a id="org0c32aef"></a>Unit<br />
+<div class="outline-text-5" id="text-org0c32aef">
 <p>
 语法 unit:Integer ,如unit:1<br />
 取值范围1..257<br />
@@ -542,9 +542,9 @@ signed  | unsigned<br />
 </ul>
 </div>
 </div>
-<div id="outline-container-org0a6ad83" class="outline-2">
-<h2 id="org0a6ad83">移位 and or 等传统操作</h2>
-<div class="outline-text-2" id="text-org0a6ad83">
+<div id="outline-container-org2beb53b" class="outline-2">
+<h2 id="org2beb53b">移位 and or 等传统操作</h2>
+<div class="outline-text-2" id="text-org2beb53b">
 <ul class="org-ul">
 <li>bsl (Bit Shift Left),<br /></li>
 <li>bsr (Bit Shift Right),<br /></li>
@@ -555,9 +555,9 @@ signed  | unsigned<br />
 </ul>
 </div>
 </div>
-<div id="outline-container-org6e35f36" class="outline-2">
-<h2 id="org6e35f36">示例 int32&#x2013;&gt;binary binary&#x2013;&gt;int32</h2>
-<div class="outline-text-2" id="text-org6e35f36">
+<div id="outline-container-org299b98d" class="outline-2">
+<h2 id="org299b98d">示例 int32&#x2013;&gt;binary binary&#x2013;&gt;int32</h2>
+<div class="outline-text-2" id="text-org299b98d">
 <p>
 将int32转换成binary ,从binary 头部读取32位，转成int32<br />
 </p>
@@ -590,9 +590,9 @@ read_int32_from_binary(Int) when is_integer(Int) -&gt;
 </div>
 </div>
 </div>
-<div id="outline-container-orgedd55ef" class="outline-2">
-<h2 id="orgedd55ef">参考链接</h2>
-<div class="outline-text-2" id="text-orgedd55ef">
+<div id="outline-container-org0b81c22" class="outline-2">
+<h2 id="org0b81c22">参考链接</h2>
+<div class="outline-text-2" id="text-org0b81c22">
 <ul class="org-ul">
 <li><a href="http://learnyousomeerlang.com/starting-out-for-real#bit-syntax">learnyousomeerlang.com/bit syntax</a><br /></li>
 <li><a href="http://www.erlang.org/euc/00/bit_syntax.html">http://www.erlang.org/euc/00/bit_syntax.html</a><br /></li>

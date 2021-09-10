@@ -47,10 +47,10 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org8d27a21">1. c模版代码1</a></li>
-<li><a href="#org4ef2e14">2. 启用Auto Insert 的配置代码</a></li>
-<li><a href="#org3f4c648">3. 将auto-insert-mode与yasnippet 进行整合的代码</a></li>
-<li><a href="#orga530d3e">4. Yasnippet 格式的模版</a></li>
+<li><a href="#org4a15983">1. c模版代码1</a></li>
+<li><a href="#org153e5a8">2. 启用Auto Insert 的配置代码</a></li>
+<li><a href="#org3205d3c">3. 将auto-insert-mode与yasnippet 进行整合的代码</a></li>
+<li><a href="#orgd3d6d7c">4. Yasnippet 格式的模版</a></li>
 </ul>
 </div>
 </div>
@@ -59,8 +59,8 @@ auto-insert 是GNU/Emacs自带的一个功能，它可以实现当你新建一�
 在这个新建的文件里插入相应的内容，比如你新建一个c源文件的时候它自动加入这样一
 段代码：
 </p>
-<div id="outline-container-org8d27a21" class="outline-2">
-<h2 id="org8d27a21"><span class="section-number-2">1</span> c模版代码1</h2>
+<div id="outline-container-org4a15983" class="outline-2">
+<h2 id="org4a15983"><span class="section-number-2">1</span> c模版代码1</h2>
 <div class="outline-text-2" id="text-1">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #7fffd4;">#include</span> <span style="color: #ffa07a;">&lt;stdio.h&gt;</span>
@@ -76,8 +76,8 @@ auto-insert 会根据你所新建文件的后缀名或major mode种类决定插�
 </p>
 </div>
 </div>
-<div id="outline-container-org4ef2e14" class="outline-2">
-<h2 id="org4ef2e14"><span class="section-number-2">2</span> 启用Auto Insert 的配置代码</h2>
+<div id="outline-container-org153e5a8" class="outline-2">
+<h2 id="org153e5a8"><span class="section-number-2">2</span> 启用Auto Insert 的配置代码</h2>
 <div class="outline-text-2" id="text-2">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">&#39318;&#20808;&#36825;&#21477;&#35805;&#35774;&#32622;&#19968;&#20010;&#30446;&#24405;&#65292;&#20320;&#30340;auto-insert &#30340;&#27169;&#29256;&#25991;&#20214;&#20250;&#23384;&#25918;&#22312;&#36825;&#20010;&#30446;&#24405;&#20013;&#65292;</span>
@@ -92,7 +92,7 @@ auto-insert 会根据你所新建文件的后缀名或major mode种类决定插�
 </pre>
 </div>
 <p>
-下面要做在只需要在~/.emacs.d/auto-insert/c-auto-insert 文件中插入上面提到的<a href="#org8d27a21">c模
+下面要做在只需要在~/.emacs.d/auto-insert/c-auto-insert 文件中插入上面提到的<a href="#org4a15983">c模
 版代码1</a>建好~/.emacs.d/auto-insert/c-auto-insert 文件后，用Emacs新建 一个c文
 件，你就会发现你新建的文件中已经包含上面那段c代码片段了。故事并没有到此结束 ，
 写到这里，还一直没yasnippet什么事呢.假如我想在创建这个c文件的时候，在文件开头
@@ -121,8 +121,8 @@ auto-insert 会根据你所新建文件的后缀名或major mode种类决定插�
 </p>
 </div>
 </div>
-<div id="outline-container-org3f4c648" class="outline-2">
-<h2 id="org3f4c648"><span class="section-number-2">3</span> 将auto-insert-mode与yasnippet 进行整合的代码</h2>
+<div id="outline-container-org3205d3c" class="outline-2">
+<h2 id="org3205d3c"><span class="section-number-2">3</span> 将auto-insert-mode与yasnippet 进行整合的代码</h2>
 <div class="outline-text-2" id="text-3">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">defadvice</span> <span style="color: #FF6400;">auto-insert</span>  (around yasnippet-expand-after-auto-insert activate)
@@ -144,14 +144,14 @@ auto-insert 会根据你所新建文件的后缀名或major mode种类决定插�
 </pre>
 </div>
 <p>
-将这段代码放到<a href="#org4ef2e14">2</a> 的后面，即可。然后c-auto-insert 这个
+将这段代码放到<a href="#org153e5a8">2</a> 的后面，即可。然后c-auto-insert 这个
 文件里的代码 就可以是yasnippet 支持的模版文件的代码了,上面提到的功能，
 可以这样实现
 </p>
 </div>
 </div>
-<div id="outline-container-orga530d3e" class="outline-2">
-<h2 id="orga530d3e"><span class="section-number-2">4</span> Yasnippet 格式的模版</h2>
+<div id="outline-container-orgd3d6d7c" class="outline-2">
+<h2 id="orgd3d6d7c"><span class="section-number-2">4</span> Yasnippet 格式的模版</h2>
 <div class="outline-text-2" id="text-4">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #AEAEAE;">//</span><span style="color: #AEAEAE;">file name : `(buffer-name)`</span>

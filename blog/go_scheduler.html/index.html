@@ -47,24 +47,24 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org93aa086">参考链接</a></li>
-<li><a href="#org16c24f3">拾遗</a></li>
-<li><a href="#org8a933ab">系统调用阻塞时(同步系统调用)</a></li>
-<li><a href="#org244a032">net poller</a></li>
-<li><a href="#orgda05f1d">用户态阻塞/唤醒</a>
+<li><a href="#orgc314678">参考链接</a></li>
+<li><a href="#org0278006">拾遗</a></li>
+<li><a href="#org7b2829d">系统调用阻塞时(同步系统调用)</a></li>
+<li><a href="#orgbc946aa">net poller</a></li>
+<li><a href="#org8f39693">用户态阻塞/唤醒</a>
 <ul>
-<li><a href="#orgadd0e9f">channel操作</a></li>
-<li><a href="#orgd0fec21">network I/O</a></li>
+<li><a href="#org446206a">channel操作</a></li>
+<li><a href="#orgab22b20">network I/O</a></li>
 </ul>
 </li>
-<li><a href="#org0783bd8">调度器跟踪调试</a></li>
-<li><a href="#orga5b99e6">goroutine的创建</a></li>
+<li><a href="#org74e6235">调度器跟踪调试</a></li>
+<li><a href="#orge6d1140">goroutine的创建</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org93aa086" class="outline-2">
-<h2 id="org93aa086">参考链接</h2>
-<div class="outline-text-2" id="text-org93aa086">
+<div id="outline-container-orgc314678" class="outline-2">
+<h2 id="orgc314678">参考链接</h2>
+<div class="outline-text-2" id="text-orgc314678">
 <p>
 <a href="https://segmentfault.com/a/1190000015464889">https://segmentfault.com/a/1190000015464889</a><br />
 </p>
@@ -76,9 +76,9 @@
 </div>
 </div>
 
-<div id="outline-container-org16c24f3" class="outline-2">
-<h2 id="org16c24f3">拾遗</h2>
-<div class="outline-text-2" id="text-org16c24f3">
+<div id="outline-container-org0278006" class="outline-2">
+<h2 id="org0278006">拾遗</h2>
+<div class="outline-text-2" id="text-org0278006">
 <p>
   go的调度本质上是一个协作式调度器,后来加入了些抢占机制，但并不能<br />
 保障一定能抢占的到sysmon 线程会定期扫goroutine ,如果running&gt;10ms则将其<br />
@@ -90,9 +90,9 @@ cpu密集型计算，则并不会把执行权让出去。<br />
 </div>
 
 
-<div id="outline-container-org8a933ab" class="outline-2">
-<h2 id="org8a933ab">系统调用阻塞时(同步系统调用)</h2>
-<div class="outline-text-2" id="text-org8a933ab">
+<div id="outline-container-org7b2829d" class="outline-2">
+<h2 id="org7b2829d">系统调用阻塞时(同步系统调用)</h2>
+<div class="outline-text-2" id="text-org7b2829d">
 <p>
     当G被阻塞在某个系统调用上时(并不是所有的系统调用都是阻塞的)，此时G<br />
 会阻塞在_Gsyscall状态，M也处于 block on syscall 状态，此时的M可被操作<br />
@@ -108,9 +108,9 @@ cpu密集型计算，则并不会把执行权让出去。<br />
 </p>
 </div>
 </div>
-<div id="outline-container-org244a032" class="outline-2">
-<h2 id="org244a032">net poller</h2>
-<div class="outline-text-2" id="text-org244a032">
+<div id="outline-container-orgbc946aa" class="outline-2">
+<h2 id="orgbc946aa">net poller</h2>
+<div class="outline-text-2" id="text-orgbc946aa">
 <p>
     除了G P M 角色golang 专门有个net poller 用来处理网络IO，即如果某<br />
 G1想要进行网络系统调用，则它会从P的队列中移除，并被移动到网络轮询器的队列中<br />
@@ -123,16 +123,16 @@ G1想要进行网络系统调用，则它会从P的队列中移除，并被移�
 </div>
 </div>
 
-<div id="outline-container-orgda05f1d" class="outline-2">
-<h2 id="orgda05f1d">用户态阻塞/唤醒</h2>
-<div class="outline-text-2" id="text-orgda05f1d">
+<div id="outline-container-org8f39693" class="outline-2">
+<h2 id="org8f39693">用户态阻塞/唤醒</h2>
+<div class="outline-text-2" id="text-org8f39693">
 </div>
-<div id="outline-container-orgadd0e9f" class="outline-3">
-<h3 id="orgadd0e9f">channel操作</h3>
+<div id="outline-container-org446206a" class="outline-3">
+<h3 id="org446206a">channel操作</h3>
 </div>
-<div id="outline-container-orgd0fec21" class="outline-3">
-<h3 id="orgd0fec21">network I/O</h3>
-<div class="outline-text-3" id="text-orgd0fec21">
+<div id="outline-container-orgab22b20" class="outline-3">
+<h3 id="orgab22b20">network I/O</h3>
+<div class="outline-text-3" id="text-orgab22b20">
 <p>
 golang已经用netpoller实现了goroutine网络I/O阻塞不会导致M被阻塞，仅阻塞G，<br />
 对应的G会被放置到某个wait队列(如channel的waitq)<br />
@@ -141,9 +141,9 @@ golang已经用netpoller实现了goroutine网络I/O阻塞不会导致M被阻塞�
 </div>
 </div>
 
-<div id="outline-container-org0783bd8" class="outline-2">
-<h2 id="org0783bd8">调度器跟踪调试</h2>
-<div class="outline-text-2" id="text-org0783bd8">
+<div id="outline-container-org74e6235" class="outline-2">
+<h2 id="org74e6235">调度器跟踪调试</h2>
+<div class="outline-text-2" id="text-org74e6235">
 <p>
 G ODEBUG=scheddetail=1,schedtrace=1000 ./program<br />
 </p>
@@ -166,9 +166,9 @@ G1: status=8() m=0 lockedm=0
 </div>
 </div>
 
-<div id="outline-container-orga5b99e6" class="outline-2">
-<h2 id="orga5b99e6">goroutine的创建</h2>
-<div class="outline-text-2" id="text-orga5b99e6">
+<div id="outline-container-orge6d1140" class="outline-2">
+<h2 id="orge6d1140">goroutine的创建</h2>
+<div class="outline-text-2" id="text-orge6d1140">
 <p>
 proc.go newproc<br />
 </p>

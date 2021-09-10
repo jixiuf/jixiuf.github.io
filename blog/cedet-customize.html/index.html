@@ -47,25 +47,25 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgbc409ac">1. Customization</a></li>
-<li><a href="#orga8e4b62">2. Semantic's customization</a></li>
-<li><a href="#org7ea7f58">3. Optimization of Semantic's work</a></li>
-<li><a href="#org3de6c95">4. Customization of Semanticdb</a></li>
-<li><a href="#org130d5bc">5. How to customize Semantic to work with C &amp; C++ projects</a></li>
-<li><a href="#orgedbf226">6. Preprocessing of source code</a></li>
-<li><a href="#org90f1bd5">7. Work with Semantic</a></li>
-<li><a href="#orgb76f616">8. Names completion</a></li>
-<li><a href="#orgf89bedb">9. Getting information about tags</a></li>
-<li><a href="#orgf9c8a8a">10. Search for places where function is called</a></li>
-<li><a href="#org6c707e8">11. Source code folding</a></li>
-<li><a href="#org3e364b4">12. Work with Srecode</a></li>
-<li><a href="#org1cf2df5">13. Additional packages</a></li>
+<li><a href="#org7542dc6">1. Customization</a></li>
+<li><a href="#org9c1a0ea">2. Semantic's customization</a></li>
+<li><a href="#orgf5c31bc">3. Optimization of Semantic's work</a></li>
+<li><a href="#org4f275bf">4. Customization of Semanticdb</a></li>
+<li><a href="#org5fdef3c">5. How to customize Semantic to work with C &amp; C++ projects</a></li>
+<li><a href="#org4d36e6c">6. Preprocessing of source code</a></li>
+<li><a href="#orged151f1">7. Work with Semantic</a></li>
+<li><a href="#orgc71fcf3">8. Names completion</a></li>
+<li><a href="#org2182b05">9. Getting information about tags</a></li>
+<li><a href="#orgb9cedb5">10. Search for places where function is called</a></li>
+<li><a href="#org6ef7a31">11. Source code folding</a></li>
+<li><a href="#orgcc66a45">12. Work with Srecode</a></li>
+<li><a href="#org1fd90f7">13. Additional packages</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgbc409ac" class="outline-2">
-<h2 id="orgbc409ac"><span class="section-number-2">1</span> Customization</h2>
+<div id="outline-container-org7542dc6" class="outline-2">
+<h2 id="org7542dc6"><span class="section-number-2">1</span> Customization</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Cedet最简单的配置就是加载cedet.el
@@ -85,8 +85,8 @@ Cedet最简单的配置就是加载cedet.el
 </div>
 </div>
 
-<div id="outline-container-orga8e4b62" class="outline-2">
-<h2 id="orga8e4b62"><span class="section-number-2">2</span> Semantic's customization</h2>
+<div id="outline-container-org9c1a0ea" class="outline-2">
+<h2 id="org9c1a0ea"><span class="section-number-2">2</span> Semantic's customization</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 这个需要根据你的需求来进行配置
@@ -170,8 +170,8 @@ semantic-add-system-include函数可以实现这个功能
 </div>
 </div>
 
-<div id="outline-container-org7ea7f58" class="outline-2">
-<h2 id="org7ea7f58"><span class="section-number-2">3</span> Optimization of Semantic's work</h2>
+<div id="outline-container-orgf5c31bc" class="outline-2">
+<h2 id="orgf5c31bc"><span class="section-number-2">3</span> Optimization of Semantic's work</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 为了优化tags ,有以下几个技巧
@@ -210,8 +210,8 @@ Integration with imenu
 </div>
 </div>
 
-<div id="outline-container-org3de6c95" class="outline-2">
-<h2 id="org3de6c95"><span class="section-number-2">4</span> Customization of Semanticdb</h2>
+<div id="outline-container-org4f275bf" class="outline-2">
+<h2 id="org4f275bf"><span class="section-number-2">4</span> Customization of Semanticdb</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 如果你使用默认的加载cedet.el的方式 ,那么Semanticdb已经自动加载了
@@ -248,8 +248,8 @@ ctags支持
 </div>
 </div>
 </div>
-<div id="outline-container-org130d5bc" class="outline-2">
-<h2 id="org130d5bc"><span class="section-number-2">5</span> How to customize Semantic to work with C &amp; C++ projects</h2>
+<div id="outline-container-org5fdef3c" class="outline-2">
+<h2 id="org5fdef3c"><span class="section-number-2">5</span> How to customize Semantic to work with C &amp; C++ projects</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 为了让Semantic更好的为C/C++工作,推荐使用EDE 对其进行项目的管理.
@@ -282,8 +282,8 @@ BOOST<sub>TEST</sub><sub>DYN</sub><sub>LINK,它们会被传递给preprocessor,�
 </div>
 </div>
 
-<div id="outline-container-orgedbf226" class="outline-2">
-<h2 id="orgedbf226"><span class="section-number-2">6</span> Preprocessing of source code</h2>
+<div id="outline-container-org4d36e6c" class="outline-2">
+<h2 id="org4d36e6c"><span class="section-number-2">6</span> Preprocessing of source code</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 更详细的关于 preprocessor的内容见
@@ -316,8 +316,8 @@ semantic-lex-c-preprocessor-symbol-map变量.
 </div>
 </div>
 
-<div id="outline-container-org90f1bd5" class="outline-2">
-<h2 id="org90f1bd5"><span class="section-number-2">7</span> Work with Semantic</h2>
+<div id="outline-container-orged151f1" class="outline-2">
+<h2 id="orged151f1"><span class="section-number-2">7</span> Work with Semantic</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 Semantic提供了几种补全方式,收集tags信息(变量,函数等),及在代码间导航.
@@ -345,8 +345,8 @@ Semantic内核实现的了.
 </div>
 </div>
 
-<div id="outline-container-orgb76f616" class="outline-2">
-<h2 id="orgb76f616"><span class="section-number-2">8</span> Names completion</h2>
+<div id="outline-container-orgc71fcf3" class="outline-2">
+<h2 id="orgc71fcf3"><span class="section-number-2">8</span> Names completion</h2>
 <div class="outline-text-2" id="text-8">
 <p>
 对函数 变量 类名进行名称的补全 Semantic内部有两个package实现了这个功能
@@ -389,8 +389,8 @@ semantic-idle-completions-mode,
 </div>
 </div>
 
-<div id="outline-container-orgf89bedb" class="outline-2">
-<h2 id="orgf89bedb"><span class="section-number-2">9</span> Getting information about tags</h2>
+<div id="outline-container-org2182b05" class="outline-2">
+<h2 id="org2182b05"><span class="section-number-2">9</span> Getting information about tags</h2>
 <div class="outline-text-2" id="text-9">
 <p>
 semantic-ia包提供了几个收集变量函数类名信息的命令.
@@ -434,8 +434,8 @@ semantic-decoration-include-visit 可以在光标下name 的include 文件间跳
 </div>
 </div>
 
-<div id="outline-container-orgf9c8a8a" class="outline-2">
-<h2 id="orgf9c8a8a"><span class="section-number-2">10</span> Search for places where function is called</h2>
+<div id="outline-container-orgb9cedb5" class="outline-2">
+<h2 id="orgb9cedb5"><span class="section-number-2">10</span> Search for places where function is called</h2>
 <div class="outline-text-2" id="text-10">
 <p>
 semantic-symref命令
@@ -450,8 +450,8 @@ find-grep命令尝试搜索.可以在打开的新buffer中找到你要找的变�
 </div>
 </div>
 
-<div id="outline-container-org6c707e8" class="outline-2">
-<h2 id="org6c707e8"><span class="section-number-2">11</span> Source code folding</h2>
+<div id="outline-container-org6ef7a31" class="outline-2">
+<h2 id="org6ef7a31"><span class="section-number-2">11</span> Source code folding</h2>
 <div class="outline-text-2" id="text-11">
 <p>
 Semantic可以实现代码折叠.跟hideshow.el提供的功能类似
@@ -491,8 +491,8 @@ senator-search-forward  senator-search-backward
 </div>
 </div>
 
-<div id="outline-container-org3e364b4" class="outline-2">
-<h2 id="org3e364b4"><span class="section-number-2">12</span> Work with Srecode</h2>
+<div id="outline-container-orgcc66a45" class="outline-2">
+<h2 id="orgcc66a45"><span class="section-number-2">12</span> Work with Srecode</h2>
 <div class="outline-text-2" id="text-12">
 <p>
 可用于定义及插入代码模版.它是contextable的,
@@ -516,8 +516,8 @@ C-c / E  (srecode-edit) 编辑模版
 </div>
 </div>
 
-<div id="outline-container-org1cf2df5" class="outline-2">
-<h2 id="org1cf2df5"><span class="section-number-2">13</span> Additional packages</h2>
+<div id="outline-container-org1fd90f7" class="outline-2">
+<h2 id="org1fd90f7"><span class="section-number-2">13</span> Additional packages</h2>
 <div class="outline-text-2" id="text-13">
 <p>
 eassist-list-methods 列出当前buffer中定义的函数,并可以进行跳转

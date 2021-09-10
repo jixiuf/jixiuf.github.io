@@ -47,19 +47,19 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgcb2adab">无聊的开场白</a></li>
-<li><a href="#org95ecd1e">buffer（缓冲区）</a></li>
-<li><a href="#orga729f94">window（窗口）与frame</a></li>
-<li><a href="#org7da9c23">Emacs的mode</a></li>
-<li><a href="#org59c6ffb">Emacs Lisp</a></li>
-<li><a href="#org58a7275">函数function、命令command、键绑定keybinding</a></li>
-<li><a href="#org7027d2b">kill  delete kill-save  yank  king-ring</a></li>
+<li><a href="#org9405dc4">无聊的开场白</a></li>
+<li><a href="#org8239b64">buffer（缓冲区）</a></li>
+<li><a href="#org09f88c0">window（窗口）与frame</a></li>
+<li><a href="#org84ce80b">Emacs的mode</a></li>
+<li><a href="#org603877f">Emacs Lisp</a></li>
+<li><a href="#orgd12802e">函数function、命令command、键绑定keybinding</a></li>
+<li><a href="#orgc0f3815">kill  delete kill-save  yank  king-ring</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgcb2adab" class="outline-2">
-<h2 id="orgcb2adab">无聊的开场白</h2>
-<div class="outline-text-2" id="text-orgcb2adab">
+<div id="outline-container-org9405dc4" class="outline-2">
+<h2 id="org9405dc4">无聊的开场白</h2>
+<div class="outline-text-2" id="text-org9405dc4">
 <p>
 所谓“名不正则言不顺,言不顺则事不成，事不成则礼乐不兴，礼乐不兴则刑<br />
 罚不中，刑罚不中则民无所措手足”又所谓“瞽不知黑白者，非以其名也，以<br />
@@ -70,9 +70,9 @@
 </div>
 </div>
 
-<div id="outline-container-org95ecd1e" class="outline-2">
-<h2 id="org95ecd1e">buffer（缓冲区）</h2>
-<div class="outline-text-2" id="text-org95ecd1e">
+<div id="outline-container-org8239b64" class="outline-2">
+<h2 id="org8239b64">buffer（缓冲区）</h2>
+<div class="outline-text-2" id="text-org8239b64">
 <p>
 Emacs并不直接对文件进行操作, 它是把文件加载进buffer, 用户直接操作<br />
 buffer, 只有当用户确定把buffer中所做的修改写入文件时, Emacs才把<br />
@@ -101,9 +101,9 @@ buffer 来进行相应的操作，Emacs自已使用的buffer 一般用"<b>" 引�
 </div>
 
 
-<div id="outline-container-orga729f94" class="outline-2">
-<h2 id="orga729f94">window（窗口）与frame</h2>
-<div class="outline-text-2" id="text-orga729f94">
+<div id="outline-container-org09f88c0" class="outline-2">
+<h2 id="org09f88c0">window（窗口）与frame</h2>
+<div class="outline-text-2" id="text-org09f88c0">
 <p>
 这两个概念与浏览器里的window ,frame 概念正好颠倒。由于Emacs很早就<br />
 诞生了（1984年由Richard Stallman发起）,它诞生的时候，Windows还在娘<br />
@@ -124,9 +124,9 @@ frame)注意他们是同一个进程里的两个Windows窗口，所以他们之�
 </div>
 </div>
 
-<div id="outline-container-org7da9c23" class="outline-2">
-<h2 id="org7da9c23">Emacs的mode</h2>
-<div class="outline-text-2" id="text-org7da9c23">
+<div id="outline-container-org84ce80b" class="outline-2">
+<h2 id="org84ce80b">Emacs的mode</h2>
+<div class="outline-text-2" id="text-org84ce80b">
 <p>
 建立一个微小的基本功能的集合，然后把所有复杂功能作为这些基本功能的组合。<br />
 这体现了一种程序设计的哲学。不同于 Windows, 也不同于 UNIX，它更好的协<br />
@@ -146,9 +146,9 @@ Column-Number , 高亮显示匹配的括号的Show-Paren mode ,mode-line 上显�
 </div>
 
 
-<div id="outline-container-org59c6ffb" class="outline-2">
-<h2 id="org59c6ffb">Emacs Lisp</h2>
-<div class="outline-text-2" id="text-org59c6ffb">
+<div id="outline-container-org603877f" class="outline-2">
+<h2 id="org603877f">Emacs Lisp</h2>
+<div class="outline-text-2" id="text-org603877f">
 <p>
 Emacs最基础的部分是用c写的，其他部分都是用Emacs Lisp语言写的（Emacs<br />
 Lisp占大约2/3），也就是说 ,Emacs 用c语言写了一个lisp 语言的解释器，而<br />
@@ -183,9 +183,9 @@ lisp 的语法初看上去很吓人，但是想一想小学学的加减乘除优
 
 
 
-<div id="outline-container-org58a7275" class="outline-2">
-<h2 id="org58a7275">函数function、命令command、键绑定keybinding</h2>
-<div class="outline-text-2" id="text-org58a7275">
+<div id="outline-container-orgd12802e" class="outline-2">
+<h2 id="orgd12802e">函数function、命令command、键绑定keybinding</h2>
+<div class="outline-text-2" id="text-orgd12802e">
 <p>
  函数不用多解释，命令是一种特殊的函数，在这种函数内部通常第一个调用<br />
 的函数是(interactive) ，表示这是一个可交互的函数，即命令，命令可以<br />
@@ -229,9 +229,9 @@ major mode的keymap. 另外在Emacs中的每个操作都对应一个命令，包
 </p>
 </div>
 </div>
-<div id="outline-container-org7027d2b" class="outline-2">
-<h2 id="org7027d2b">kill  delete kill-save  yank  king-ring</h2>
-<div class="outline-text-2" id="text-org7027d2b">
+<div id="outline-container-orgc0f3815" class="outline-2">
+<h2 id="orgc0f3815">kill  delete kill-save  yank  king-ring</h2>
+<div class="outline-text-2" id="text-orgc0f3815">
 <p>
 kill等同于剪切，delete 就是删除的意思，kill 与delete 的不同是 kill<br />
 掉的内容会放到kill-ring（剪切环）里，你可以重新取回你kill的内容,而<br />
@@ -246,10 +246,10 @@ paste 的相应操作是<br />
 </p>
 </div>
 <ul class="org-ul">
-<li><a id="orge152f57"></a>C-w ,kill-regin           cut<br /></li>
-<li><a id="org320c58c"></a>M-w ,kill-ring-save       copy<br /></li>
-<li><a id="orgf3e8581"></a>C-y, yank                 paste<br /></li>
-<li><a id="org22e8f37"></a>M-y   yank-pop           从kill-ring 里取出以前的内容，按时间顺序，（前提是你按下一次C-y）<br /></li>
+<li><a id="orgcc96a76"></a>C-w ,kill-regin           cut<br /></li>
+<li><a id="orgba3e7f2"></a>M-w ,kill-ring-save       copy<br /></li>
+<li><a id="org9bdbd9f"></a>C-y, yank                 paste<br /></li>
+<li><a id="orgb4f00dd"></a>M-y   yank-pop           从kill-ring 里取出以前的内容，按时间顺序，（前提是你按下一次C-y）<br /></li>
 </ul>
 </div>
 

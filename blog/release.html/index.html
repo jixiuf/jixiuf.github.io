@@ -47,19 +47,19 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgb2810c7">用systool发布</a></li>
-<li><a href="#org3ca7544">用reltool发布</a>
+<li><a href="#org4537be9">用systool发布</a></li>
+<li><a href="#orgda5d1e2">用reltool发布</a>
 <ul>
-<li><a href="#orgc2f38de">如何发布</a></li>
-<li><a href="#orgafa98f7">reltool 使用的配置文件的格式</a></li>
+<li><a href="#org8320f74">如何发布</a></li>
+<li><a href="#orgf32827b">reltool 使用的配置文件的格式</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgb2810c7" class="outline-2">
-<h2 id="orgb2810c7">用systool发布</h2>
-<div class="outline-text-2" id="text-orgb2810c7">
+<div id="outline-container-org4537be9" class="outline-2">
+<h2 id="org4537be9">用systool发布</h2>
+<div class="outline-text-2" id="text-org4537be9">
 <div class="org-src-container">
 <pre class="src src-sh"><span style="color: #F8F8F8;">cd</span> erlcount_release/
 erl -env ERL_LIBS  .
@@ -124,13 +124,13 @@ systools:make_tar("erlcount-1.0" ,[{erts, "d:/usr/erl5.8.5/"}]).<br />
 </div>
 </div>
 
-<div id="outline-container-org3ca7544" class="outline-2">
-<h2 id="org3ca7544">用reltool发布</h2>
-<div class="outline-text-2" id="text-org3ca7544">
+<div id="outline-container-orgda5d1e2" class="outline-2">
+<h2 id="orgda5d1e2">用reltool发布</h2>
+<div class="outline-text-2" id="text-orgda5d1e2">
 </div>
-<div id="outline-container-orgc2f38de" class="outline-3">
-<h3 id="orgc2f38de">如何发布</h3>
-<div class="outline-text-3" id="text-orgc2f38de">
+<div id="outline-container-org8320f74" class="outline-3">
+<h3 id="org8320f74">如何发布</h3>
+<div class="outline-text-3" id="text-org8320f74">
 <div class="org-src-container">
 <pre class="src src-sh"><span style="color: #F8F8F8;">cd</span> release
 mkdir rel
@@ -156,9 +156,9 @@ reltool:eval_target_spec(Spec, code:root_dir(), "rel"). % 在rel 目录内生成
 </div>
 </div>
 
-<div id="outline-container-orgafa98f7" class="outline-3">
-<h3 id="orgafa98f7">reltool 使用的配置文件的格式</h3>
-<div class="outline-text-3" id="text-orgafa98f7">
+<div id="outline-container-orgf32827b" class="outline-3">
+<h3 id="orgf32827b">reltool 使用的配置文件的格式</h3>
+<div class="outline-text-3" id="text-orgf32827b">
 <p>
 其可配置的Options 是分层的，分别是release 层,app层， 及module层<br />
 分别对应 sys ,app ,mode 三个key  ,sys 配置全局属性，app可以覆盖sys 中配置的<br />
@@ -170,24 +170,24 @@ reltool:eval_target_spec(Spec, code:root_dir(), "rel"). % 在rel 目录内生成
 </div>
 
 <ul class="org-ul">
-<li><a id="org23f6d32"></a>{sys,[Options]}<br />
+<li><a id="org7fac66c"></a>{sys,[Options]}<br />
 <ul class="org-ul">
-<li><a id="org07c5c2f"></a>erts<br />
-<div class="outline-text-5" id="text-org07c5c2f">
+<li><a id="org33368a4"></a>erts<br />
+<div class="outline-text-5" id="text-org33368a4">
 <p>
 指定 erts application 信息, 具体的字段参考后面介绍的 app 配置.<br />
 </p>
 </div>
 </li>
-<li><a id="org7a61fc4"></a>escript<br />
-<div class="outline-text-5" id="text-org7a61fc4">
+<li><a id="orgac6d285"></a>escript<br />
+<div class="outline-text-5" id="text-orgac6d285">
 <p>
 escript 脚本配置信息, 包含 escript 文件,以及对应的配置信息<br />
 </p>
 </div>
 </li>
-<li><a id="org5a45c27"></a>app<br />
-<div class="outline-text-5" id="text-org5a45c27">
+<li><a id="org5c7d79d"></a>app<br />
+<div class="outline-text-5" id="text-org5c7d79d">
 <p>
      target system 中包含的 app 信息. 比如所有的 release 都要包含 kernel,<br />
 stdlib, 具体的app的相关配置,轻参考后面介绍的 app level 配置<br />
@@ -195,8 +195,8 @@ stdlib, 具体的app的相关配置,轻参考后面介绍的 app level 配置<br
 </div>
 </li>
 
-<li><a id="org8e69977"></a>mod_cond<br />
-<div class="outline-text-5" id="text-org8e69977">
+<li><a id="orge8cac41"></a>mod_cond<br />
+<div class="outline-text-5" id="text-orge8cac41">
 <p>
 设置 module 的包含策略. 此处配置的 mod_cond 是 sys level 的配置, 控制所有的<br />
 app 中的 module 包含策略. 当然我们可以对这个信息, 在 app level 进行覆盖. 其包含<br />
@@ -271,24 +271,24 @@ application 均被包含, 不会出现 target system 中,某个模块没有定�
 </div>
 </li>
 
-<li><a id="org411a99b"></a>boot_rel<br />
-<div class="outline-text-5" id="text-org411a99b">
+<li><a id="org3ec9660"></a>boot_rel<br />
+<div class="outline-text-5" id="text-org3ec9660">
 <p>
 指定 target system 中默认启动项 (rel), 一个target system 中可能包含很多的<br />
 release(通过 rel 来指定)<br />
 </p>
 </div>
 </li>
-<li><a id="org6811267"></a>rel<br />
-<div class="outline-text-5" id="text-org6811267">
+<li><a id="org1cc1735"></a>rel<br />
+<div class="outline-text-5" id="text-org1cc1735">
 <p>
 指定 rel 内容 <a href="http://www.erlang.org/doc/design_principles/release_structure.html#10">(Release specific configuration)</a> , 每个 rel 定义会被映射成 rel,<br />
 script 和 boot 文件,请参考 Erlang/OTP Design Principles Release<br />
 </p>
 </div>
 </li>
-<li><a id="orgd71f56c"></a>relocable<br />
-<div class="outline-text-5" id="text-orgd71f56c">
+<li><a id="orgb68aa9e"></a>relocable<br />
+<div class="outline-text-5" id="text-orgb68aa9e">
 <p>
 指定 target system 中erl 执行时自动检测路径相关信息({relocable, true}), 还是硬<br />
 编码指定路径启动({relocable, false}). 如果 relocable 为 false, 那么 target<br />
@@ -297,8 +297,8 @@ system 移动到其他目录时,仍然可以方便的运行. {relocable, true} (
 </p>
 </div>
 </li>
-<li><a id="org19ff05c"></a>profile<br />
-<div class="outline-text-5" id="text-org19ff05c">
+<li><a id="org0ca40c6"></a>profile<br />
+<div class="outline-text-5" id="text-org0ca40c6">
 <p>
 指定 tareget system 的类型, 此选项主要影响:incl_sys_filters,<br />
 excl_sys_filters, incl_app_filters 和 excl_app_filters. 不同的 profile 类<br />
@@ -341,8 +341,8 @@ excl_sys_filters, incl_app_filters 和 excl_app_filters. 不同的 profile 类<b
 </div>
 </li>
 
-<li><a id="orgd10e5f2"></a>app_file<br />
-<div class="outline-text-5" id="text-orgd10e5f2">
+<li><a id="orge5e4576"></a>app_file<br />
+<div class="outline-text-5" id="text-orge5e4576">
 <p>
 控制 app 的内容, 因为有各种各样的 filter, 因此最终的 target system 中包含<br />
 的模块,可能与 app 文件定义的模块列表不一致, 本选项控制 app 的内容. 主要包<br />
@@ -377,15 +377,15 @@ excl_sys_filters, incl_app_filters 和 excl_app_filters. 不同的 profile 类<b
 </li>
 
 
-<li><a id="org1c1f99c"></a>debug_info<br />
-<div class="outline-text-5" id="text-org1c1f99c">
+<li><a id="orge63bc39"></a>debug_info<br />
+<div class="outline-text-5" id="text-orge63bc39">
 <p>
 是否去除 beam 文件中的调试信息: keep 表示保持; strip 表示去除<br />
 </p>
 </div>
 </li>
-<li><a id="org1653d5d"></a>incl_sys_filters<br />
-<div class="outline-text-5" id="text-org1653d5d">
+<li><a id="org405187d"></a>incl_sys_filters<br />
+<div class="outline-text-5" id="text-org405187d">
 <p>
 指定一个正则表达式列表,用来表示哪些系统文件可以出现在 target system 中. 如果某<br />
 个系统文件想被包括, 那么其必须满足 incl_sys_filters 中的某个正则表达式, 同时不<br />
@@ -397,16 +397,16 @@ incl_app_filters, excl_app_filters 同 sys 相关的 filters 含义大致相同,
 </p>
 </div>
 </li>
-<li><a id="orgcbd37c8"></a>excl_sys_filters<br />
-<div class="outline-text-5" id="text-orgcbd37c8">
+<li><a id="org44a62c2"></a>excl_sys_filters<br />
+<div class="outline-text-5" id="text-org44a62c2">
 <p>
 指定一个正则表达式列表,表示哪些系统文件不可以出现在 target system 中. 默认 为<br />
 [].<br />
 </p>
 </div>
 </li>
-<li><a id="org772d2ef"></a>incl_app_filters<br />
-<div class="outline-text-5" id="text-org772d2ef">
+<li><a id="org88a052e"></a>incl_app_filters<br />
+<div class="outline-text-5" id="text-org88a052e">
 <p>
 指定一个正则表达式列表,表示 application 中的哪些文件可以被包含. 如果某个文件想<br />
 被包含,至少要满足正则表达式列表中的一个表达式. 默认为 [".*"], 如果设置为 [], 那<br />
@@ -414,24 +414,24 @@ incl_app_filters, excl_app_filters 同 sys 相关的 filters 含义大致相同,
 </p>
 </div>
 </li>
-<li><a id="org8a67600"></a>excl_app_filters<br />
-<div class="outline-text-5" id="text-org8a67600">
+<li><a id="orgf5841a1"></a>excl_app_filters<br />
+<div class="outline-text-5" id="text-orgf5841a1">
 <p>
 指定一个正则表达式列表,表示 application 的哪些文件不可以出现在 target system 中. 默认 为 [].<br />
 </p>
 </div>
 </li>
 
-<li><a id="org26157da"></a>incl_archive_filters<br />
-<div class="outline-text-5" id="text-org26157da">
+<li><a id="orgb1c001e"></a>incl_archive_filters<br />
+<div class="outline-text-5" id="text-orgb1c001e">
 <p>
 指定 application 中哪些一级子目录包含在压缩包中(与包含正常的目录对应), 通<br />
 过一个正则表达式列表指定要包含在压缩包中的一级子目录. 默认为 [".*"]<br />
 </p>
 </div>
 </li>
-<li><a id="org68c6914"></a>excl_archive_filters<br />
-<div class="outline-text-5" id="text-org68c6914">
+<li><a id="org030b68f"></a>excl_archive_filters<br />
+<div class="outline-text-5" id="text-org030b68f">
 <p>
 指定一个正则表达式列表,指定 application 的哪些一级目录不包含在压缩包中. 如<br />
 果某个目录,匹配任何一个正则表达式,则不会包含在压缩包中. 默认为<br />
@@ -439,8 +439,8 @@ incl_app_filters, excl_app_filters 同 sys 相关的 filters 含义大致相同,
 </p>
 </div>
 </li>
-<li><a id="org247f029"></a>archive_opts<br />
-<div class="outline-text-5" id="text-org247f029">
+<li><a id="orgcceff04"></a>archive_opts<br />
+<div class="outline-text-5" id="text-orgcceff04">
 <p>
 创建压缩包对应的参数,在 zip:create/3 中使用, 请参考 <a href="http://erlang.org/doc/man/zip.html">zip module</a>, 默认 为 [].<br />
 </p>
@@ -449,36 +449,36 @@ incl_app_filters, excl_app_filters 同 sys 相关的 filters 含义大致相同,
 </ul>
 </li>
 
-<li><a id="org6f765bd"></a>{app,AppName,[Options]}<br />
+<li><a id="orgee5d292"></a>{app,AppName,[Options]}<br />
 <ul class="org-ul">
-<li><a id="org602694d"></a>vsn<br />
-<div class="outline-text-5" id="text-org602694d">
+<li><a id="org28783b6"></a>vsn<br />
+<div class="outline-text-5" id="text-org28783b6">
 <p>
 指定要包含的 application 的版本, 因为在系统中,可能存在同一应用的多个版本. 如果忽略,则使用最新版本.<br />
 </p>
 </div>
 </li>
-<li><a id="orgd8d38aa"></a>mod<br />
-<div class="outline-text-5" id="text-orgd8d38aa">
+<li><a id="org9dfa826"></a>mod<br />
+<div class="outline-text-5" id="text-org9dfa826">
 <p>
 模块相关的配置信息. 必须包含一个模块名称,以及其他可选的模块配置(参照后面 mod 配置)<br />
 </p>
 </div>
 </li>
-<li><a id="org8bff993"></a>mod_cond - 同 sys level 的同名配置含义相同<br /></li>
-<li><a id="org9c7d9ff"></a>incl_cond - 同上<br /></li>
-<li><a id="orgfe8ed50"></a>debug_info - 同上<br /></li>
-<li><a id="org752554b"></a>incl_app_filters - 同上<br /></li>
-<li><a id="org5fabc6a"></a>excl_app_filters - 同上<br /></li>
-<li><a id="org1d35944"></a>incl_archive_filters - 同上<br /></li>
-<li><a id="org3296e03"></a>excl_archive_filters - 同上<br /></li>
-<li><a id="orge38bb44"></a>archive_opts - 同上<br /></li>
+<li><a id="orga57962e"></a>mod_cond - 同 sys level 的同名配置含义相同<br /></li>
+<li><a id="org9ffcb06"></a>incl_cond - 同上<br /></li>
+<li><a id="org71fe79f"></a>debug_info - 同上<br /></li>
+<li><a id="orgf97a329"></a>incl_app_filters - 同上<br /></li>
+<li><a id="org9cdaa0d"></a>excl_app_filters - 同上<br /></li>
+<li><a id="org3124802"></a>incl_archive_filters - 同上<br /></li>
+<li><a id="org0b440c9"></a>excl_archive_filters - 同上<br /></li>
+<li><a id="orgbd8a690"></a>archive_opts - 同上<br /></li>
 </ul>
 </li>
-<li><a id="orgafdfce6"></a>mod 配置<br />
+<li><a id="org71d2e4c"></a>mod 配置<br />
 <ul class="org-ul">
-<li><a id="orgd3203b7"></a>incl_cond<br />
-<div class="outline-text-5" id="text-orgd3203b7">
+<li><a id="org5fbaf72"></a>incl_cond<br />
+<div class="outline-text-5" id="text-org5fbaf72">
 <p>
 指示模块是否被包含,其覆盖 application 及 system 配置中的 incl_cond 信息.<br />
 其包含3个值:<br />
@@ -489,8 +489,8 @@ derived - 表示如果其他被包含的模块引用本模块,则本模块被也
 </div>
 </li>
 
-<li><a id="orgeea9960"></a>debug_info<br />
-<div class="outline-text-5" id="text-orgeea9960">
+<li><a id="orgd4f13d1"></a>debug_info<br />
+<div class="outline-text-5" id="text-orgd4f13d1">
 <p>
 同 app 配置中 debug_info 描述.<br />
 </p>
@@ -501,8 +501,8 @@ derived - 表示如果其他被包含的模块引用本模块,则本模块被也
 
 
 
-<li><a id="org7e478a4"></a>demo config<br />
-<div class="outline-text-4" id="text-org7e478a4">
+<li><a id="org1721f21"></a>demo config<br />
+<div class="outline-text-4" id="text-org1721f21">
 <div class="org-src-container">
 <pre class="src src-erlang">{sys,
    [

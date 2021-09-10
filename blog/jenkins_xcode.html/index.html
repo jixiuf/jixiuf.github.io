@@ -47,24 +47,24 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orga530cc8">jenkins 运行</a></li>
-<li><a href="#orgc287626">配置一个项目</a>
+<li><a href="#orgda2d224">jenkins 运行</a></li>
+<li><a href="#orgbf3f1fe">配置一个项目</a>
 <ul>
-<li><a href="#orgbcc1e32">丢弃旧的构建</a></li>
-<li><a href="#org908d1a0">选择使用源码管理，或者手动管理代码</a></li>
-<li><a href="#orge658570">构建触发器</a></li>
-<li><a href="#orgc5a7a45">xcode 相关配置</a></li>
-<li><a href="#orgfd4860d">上专到fir.im</a></li>
-<li><a href="#org45542b0">构建后的操作</a></li>
+<li><a href="#org8152cf5">丢弃旧的构建</a></li>
+<li><a href="#orgc36b673">选择使用源码管理，或者手动管理代码</a></li>
+<li><a href="#orgcd58168">构建触发器</a></li>
+<li><a href="#org6be292c">xcode 相关配置</a></li>
+<li><a href="#org72ea2a8">上专到fir.im</a></li>
+<li><a href="#org96e3fdb">构建后的操作</a></li>
 </ul>
 </li>
-<li><a href="#orgcb9f5f5">xcodebuild 命令行下生成ipa文件</a></li>
+<li><a href="#org36c88e7">xcodebuild 命令行下生成ipa文件</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orga530cc8" class="outline-2">
-<h2 id="orga530cc8">jenkins 运行</h2>
-<div class="outline-text-2" id="text-orga530cc8">
+<div id="outline-container-orgda2d224" class="outline-2">
+<h2 id="orgda2d224">jenkins 运行</h2>
+<div class="outline-text-2" id="text-orgda2d224">
 <div class="org-src-container">
 <pre class="src src-sh">java -jar jenkins.war
 </pre>
@@ -74,13 +74,13 @@
 </p>
 </div>
 </div>
-<div id="outline-container-orgc287626" class="outline-2">
-<h2 id="orgc287626">配置一个项目</h2>
-<div class="outline-text-2" id="text-orgc287626">
+<div id="outline-container-orgbf3f1fe" class="outline-2">
+<h2 id="orgbf3f1fe">配置一个项目</h2>
+<div class="outline-text-2" id="text-orgbf3f1fe">
 </div>
-<div id="outline-container-orgbcc1e32" class="outline-3">
-<h3 id="orgbcc1e32">丢弃旧的构建</h3>
-<div class="outline-text-3" id="text-orgbcc1e32">
+<div id="outline-container-org8152cf5" class="outline-3">
+<h3 id="org8152cf5">丢弃旧的构建</h3>
+<div class="outline-text-3" id="text-org8152cf5">
 <p>
 策略：Log Rotation<br />
 </p>
@@ -106,9 +106,9 @@
 </table>
 </div>
 </div>
-<div id="outline-container-org908d1a0" class="outline-3">
-<h3 id="org908d1a0">选择使用源码管理，或者手动管理代码</h3>
-<div class="outline-text-3" id="text-org908d1a0">
+<div id="outline-container-orgc36b673" class="outline-3">
+<h3 id="orgc36b673">选择使用源码管理，或者手动管理代码</h3>
+<div class="outline-text-3" id="text-orgc36b673">
 <p>
 我机器上已经用svn 下载了源码，我选择手动管理<br />
 </p>
@@ -128,9 +128,9 @@ svn up ./dev
 </div>
 </div>
 </div>
-<div id="outline-container-orge658570" class="outline-3">
-<h3 id="orge658570">构建触发器</h3>
-<div class="outline-text-3" id="text-orge658570">
+<div id="outline-container-orgcd58168" class="outline-3">
+<h3 id="orgcd58168">构建触发器</h3>
+<div class="outline-text-3" id="text-orgcd58168">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -173,9 +173,9 @@ H H 1,15 1-11 *<br />
 </div>
 </div>
 
-<div id="outline-container-orgc5a7a45" class="outline-3">
-<h3 id="orgc5a7a45">xcode 相关配置</h3>
-<div class="outline-text-3" id="text-orgc5a7a45">
+<div id="outline-container-org6be292c" class="outline-3">
+<h3 id="org6be292c">xcode 相关配置</h3>
+<div class="outline-text-3" id="text-org6be292c">
 <ol class="org-ol">
 <li><p>
 配置Target:即xcode的target<br />
@@ -249,9 +249,9 @@ cp zombiecave.ipa ~/site/zombiecave/${<span style="color: #40E0D0;">BUILD_ID</sp
 </div>
 </div>
 </div>
-<div id="outline-container-orgfd4860d" class="outline-3">
-<h3 id="orgfd4860d">上专到fir.im</h3>
-<div class="outline-text-3" id="text-orgfd4860d">
+<div id="outline-container-org72ea2a8" class="outline-3">
+<h3 id="org72ea2a8">上专到fir.im</h3>
+<div class="outline-text-3" id="text-org72ea2a8">
 <ol class="org-ol">
 <li><p>
 fir.im Token 从fir.im上取<br />
@@ -279,18 +279,18 @@ fir.im Token 从fir.im上取<br />
 </ol>
 </div>
 </div>
-<div id="outline-container-org45542b0" class="outline-3">
-<h3 id="org45542b0">构建后的操作</h3>
-<div class="outline-text-3" id="text-org45542b0">
+<div id="outline-container-org96e3fdb" class="outline-3">
+<h3 id="org96e3fdb">构建后的操作</h3>
+<div class="outline-text-3" id="text-org96e3fdb">
 <p>
 可以选择执行另一个job的构建<br />
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgcb9f5f5" class="outline-2">
-<h2 id="orgcb9f5f5">xcodebuild 命令行下生成ipa文件</h2>
-<div class="outline-text-2" id="text-orgcb9f5f5">
+<div id="outline-container-org36c88e7" class="outline-2">
+<h2 id="org36c88e7">xcodebuild 命令行下生成ipa文件</h2>
+<div class="outline-text-2" id="text-org36c88e7">
 <p>
 <a href="http://www.jianshu.com/p/3f43370437d2">http://www.jianshu.com/p/3f43370437d2</a><br />
 </p>

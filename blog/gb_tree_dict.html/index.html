@@ -47,19 +47,19 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgdd6474b">and or andalso orelse</a></li>
-<li><a href="#org0741850">Key-Value 存储</a>
+<li><a href="#orgaaa9572">and or andalso orelse</a></li>
+<li><a href="#org03a90c7">Key-Value 存储</a>
 <ul>
-<li><a href="#org9f17408">对于小数据量，  有proplist 和 orddict</a></li>
-<li><a href="#orgbddf329">对于大数据量 有dicts gb_trees</a></li>
+<li><a href="#org163d3b0">对于小数据量，  有proplist 和 orddict</a></li>
+<li><a href="#org90f7a73">对于大数据量 有dicts gb_trees</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgdd6474b" class="outline-2">
-<h2 id="orgdd6474b">and or andalso orelse</h2>
-<div class="outline-text-2" id="text-orgdd6474b">
+<div id="outline-container-orgaaa9572" class="outline-2">
+<h2 id="orgaaa9572">and or andalso orelse</h2>
+<div class="outline-text-2" id="text-orgaaa9572">
 <p>
 Expr1 orelse Expr2 Expr2可能被短路， 不运算<br />
 Expr1 or Expr2 Expr2一定会被运算<br />
@@ -69,17 +69,17 @@ Expr1 and Expr2 Expr2可能被短路， 不运算<br />
 </div>
 </div>
 
-<div id="outline-container-org0741850" class="outline-2">
-<h2 id="org0741850">Key-Value 存储</h2>
-<div class="outline-text-2" id="text-org0741850">
+<div id="outline-container-org03a90c7" class="outline-2">
+<h2 id="org03a90c7">Key-Value 存储</h2>
+<div class="outline-text-2" id="text-org03a90c7">
 </div>
-<div id="outline-container-org9f17408" class="outline-3">
-<h3 id="org9f17408">对于小数据量，  有proplist 和 orddict</h3>
-<div class="outline-text-3" id="text-org9f17408">
+<div id="outline-container-org163d3b0" class="outline-3">
+<h3 id="org163d3b0">对于小数据量，  有proplist 和 orddict</h3>
+<div class="outline-text-3" id="text-org163d3b0">
 </div>
 <ul class="org-ul">
-<li><a id="org79a4610"></a>proplist<br />
-<div class="outline-text-4" id="text-org79a4610">
+<li><a id="org9bd0d46"></a>proplist<br />
+<div class="outline-text-4" id="text-org9bd0d46">
 <p>
 提供了，<br />
 proplists:delete/2, proplists:get_value/2, proplists:get_all_values/2, proplists:lookup/2 and<br />
@@ -89,8 +89,8 @@ proplists:lookup_all/2.<br />
 </p>
 </div>
 </li>
-<li><a id="org486584b"></a>orddict<br />
-<div class="outline-text-4" id="text-org486584b">
+<li><a id="org3fcae87"></a>orddict<br />
+<div class="outline-text-4" id="text-org3fcae87">
 <p>
 the whole list is sorted for faster average lookup,<br />
 75左右个元素时效率最高<br />
@@ -99,20 +99,20 @@ the whole list is sorted for faster average lookup,<br />
 </li>
 </ul>
 </div>
-<div id="outline-container-orgbddf329" class="outline-3">
-<h3 id="orgbddf329">对于大数据量 有dicts gb_trees</h3>
-<div class="outline-text-3" id="text-orgbddf329">
+<div id="outline-container-org90f7a73" class="outline-3">
+<h3 id="org90f7a73">对于大数据量 有dicts gb_trees</h3>
+<div class="outline-text-3" id="text-org90f7a73">
 </div>
 <ul class="org-ul">
-<li><a id="org23d3ede"></a>dicts 适于读多于写的<br />
-<div class="outline-text-4" id="text-org23d3ede">
+<li><a id="org9a86171"></a>dicts 适于读多于写的<br />
+<div class="outline-text-4" id="text-org9a86171">
 <p>
 Dicts are thus very good choices to scale orddicts up whenever it is needed.<br />
 </p>
 </div>
 </li>
-<li><a id="org636a2f0"></a>gb_trees适于写多于读的<br />
-<div class="outline-text-4" id="text-org636a2f0">
+<li><a id="org0949317"></a>gb_trees适于写多于读的<br />
+<div class="outline-text-4" id="text-org0949317">
 <p>
 正常的gb_trees:enter/2, gb_trees:lookup/2 and gb_trees:delete_any/2<br />
 smart 的：gb_trees:insert/3, gb_trees:get/2, gb_trees:update/3 and gb_trees:delete/2.<br />

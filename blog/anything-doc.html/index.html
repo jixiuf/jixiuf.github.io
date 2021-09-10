@@ -46,48 +46,48 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc073988">Introduction</a></li>
-<li><a href="#org853dede">Active &lt;Anything&gt;</a></li>
-<li><a href="#orgf725baa">keybindings when &lt;Anything&gt; is activated</a>
+<li><a href="#org5e589cd">Introduction</a></li>
+<li><a href="#org7e480f6">Active &lt;Anything&gt;</a></li>
+<li><a href="#orgacdfe36">keybindings when &lt;Anything&gt; is activated</a>
 <ul>
-<li><a href="#orgaf8c365">keybindings for select candiates</a></li>
-<li><a href="#org2266011">keybindings for execute actions</a></li>
-<li><a href="#org395ce45">keybindings for edit</a></li>
+<li><a href="#org49edfd6">keybindings for select candiates</a></li>
+<li><a href="#org84e22b4">keybindings for execute actions</a></li>
+<li><a href="#orge6eec7a">keybindings for edit</a></li>
 </ul>
 </li>
-<li><a href="#org057e35c">anything-source I have written</a>
+<li><a href="#org01eb94b">anything-source I have written</a>
 <ul>
-<li><a href="#org26c8de5">anything-explorer-history.ahk</a></li>
-<li><a href="#orgea2ded4">anything-favorite-directories.ahk (with with   anything-explorer-history.ahk )</a></li>
-<li><a href="#org25d4cc6">anything-run.ahk is a replacement of &lt;Win-r&gt;</a></li>
-<li><a href="#org44e0be6">anything-window-switch.ahk is a replacement of Alt-Tab</a></li>
-<li><a href="#org63870d0">anything-process-manager.ahk</a></li>
-<li><a href="#org12d656f">anything-services.ahk</a></li>
+<li><a href="#org6ac6288">anything-explorer-history.ahk</a></li>
+<li><a href="#orge023e26">anything-favorite-directories.ahk (with with   anything-explorer-history.ahk )</a></li>
+<li><a href="#org2fac4a2">anything-run.ahk is a replacement of &lt;Win-r&gt;</a></li>
+<li><a href="#org36e6c35">anything-window-switch.ahk is a replacement of Alt-Tab</a></li>
+<li><a href="#orgc655173">anything-process-manager.ahk</a></li>
+<li><a href="#orgbae482b">anything-services.ahk</a></li>
 </ul>
 </li>
-<li><a href="#orgf6c743e">how to  write an anything-source</a>
+<li><a href="#org1e1980c">how to  write an anything-source</a>
 <ul>
-<li><a href="#orgd7599fd">&lt;name&gt;  (required)</a></li>
-<li><a href="#orgb3e114b">&lt;candidate&gt;  (required)</a></li>
-<li><a href="#org1c4a830">&lt;action&gt;  (required)</a></li>
-<li><a href="#orgc5d432f">&lt;icon&gt; (optional)</a></li>
-<li><a href="#org3f34959">&lt;match&gt; (optional) default: "anything_match"</a></li>
-<li><a href="#orgcb0d35b">&lt;anything-execute-action-at-once-if-one&gt; (optional)</a></li>
-<li><a href="#org71b54e7">&lt; anything-execute-action-at-once-if-one-even-no-keyword &gt; (optional)</a></li>
-<li><a href="#org619b61c">&lt;anything-action-when-2-candidates-even-no-keyword&gt; (optional)</a></li>
-<li><a href="#orga63e0cc">call anything</a></li>
+<li><a href="#org0e71ea1">&lt;name&gt;  (required)</a></li>
+<li><a href="#orga0c5da7">&lt;candidate&gt;  (required)</a></li>
+<li><a href="#org5eb536c">&lt;action&gt;  (required)</a></li>
+<li><a href="#org4fe796f">&lt;icon&gt; (optional)</a></li>
+<li><a href="#org568a594">&lt;match&gt; (optional) default: "anything_match"</a></li>
+<li><a href="#orgd6590b9">&lt;anything-execute-action-at-once-if-one&gt; (optional)</a></li>
+<li><a href="#org2387ada">&lt; anything-execute-action-at-once-if-one-even-no-keyword &gt; (optional)</a></li>
+<li><a href="#org9dfed86">&lt;anything-action-when-2-candidates-even-no-keyword&gt; (optional)</a></li>
+<li><a href="#org3b41909">call anything</a></li>
 </ul>
 </li>
-<li><a href="#orga78c159">anything-properties</a></li>
-<li><a href="#org0e21c48">global variable</a></li>
-<li><a href="#org3db79ff">Known Bugs</a></li>
+<li><a href="#orgb9ab536">anything-properties</a></li>
+<li><a href="#orgded7e8a">global variable</a></li>
+<li><a href="#org2ee606f">Known Bugs</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgc073988" class="outline-2">
-<h2 id="orgc073988">Introduction</h2>
-<div class="outline-text-2" id="text-orgc073988">
+<div id="outline-container-org5e589cd" class="outline-2">
+<h2 id="org5e589cd">Introduction</h2>
+<div class="outline-text-2" id="text-org5e589cd">
 <p>
 If you use GNU/Emacs  maybe you have known "Anything"<br />
 maybe not ,<br />
@@ -139,25 +139,25 @@ you can follow these links ,and save them on you disk .<br />
 </div>
 </div>
 
-<div id="outline-container-org853dede" class="outline-2">
-<h2 id="org853dede">Active &lt;Anything&gt;</h2>
-<div class="outline-text-2" id="text-org853dede">
+<div id="outline-container-org7e480f6" class="outline-2">
+<h2 id="org7e480f6">Active &lt;Anything&gt;</h2>
+<div class="outline-text-2" id="text-org7e480f6">
 <p>
 to active anything.ahk , press F3 , or Windows+r , or Alt+TAB<br />
 see  <a href="https://github.com/jixiuf/my_autohotkey_scripts/raw/master/ahk_scripts/anything-config.ahk">anything-config.ahk</a>  for detail<br />
 </p>
 </div>
 </div>
-<div id="outline-container-orgf725baa" class="outline-2">
-<h2 id="orgf725baa">keybindings when &lt;Anything&gt; is activated</h2>
-<div class="outline-text-2" id="text-orgf725baa">
+<div id="outline-container-orgacdfe36" class="outline-2">
+<h2 id="orgacdfe36">keybindings when &lt;Anything&gt; is activated</h2>
+<div class="outline-text-2" id="text-orgacdfe36">
 <p>
 you can input search string just like google to narrow the candidates<br />
 </p>
 </div>
-<div id="outline-container-orgaf8c365" class="outline-3">
-<h3 id="orgaf8c365">keybindings for select candiates</h3>
-<div class="outline-text-3" id="text-orgaf8c365">
+<div id="outline-container-org49edfd6" class="outline-3">
+<h3 id="org49edfd6">keybindings for select candiates</h3>
+<div class="outline-text-3" id="text-org49edfd6">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -206,9 +206,9 @@ you can input search string just like google to narrow the candidates<br />
 </div>
 </div>
 
-<div id="outline-container-org2266011" class="outline-3">
-<h3 id="org2266011">keybindings for execute actions</h3>
-<div class="outline-text-3" id="text-org2266011">
+<div id="outline-container-org84e22b4" class="outline-3">
+<h3 id="org84e22b4">keybindings for execute actions</h3>
+<div class="outline-text-3" id="text-org84e22b4">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -332,9 +332,9 @@ you can input search string just like google to narrow the candidates<br />
 </div>
 </div>
 
-<div id="outline-container-org395ce45" class="outline-3">
-<h3 id="org395ce45">keybindings for edit</h3>
-<div class="outline-text-3" id="text-org395ce45">
+<div id="outline-container-orge6eec7a" class="outline-3">
+<h3 id="orge6eec7a">keybindings for edit</h3>
+<div class="outline-text-3" id="text-orge6eec7a">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -378,9 +378,9 @@ you can input search string just like google to narrow the candidates<br />
 </div>
 </div>
 
-<div id="outline-container-org057e35c" class="outline-2">
-<h2 id="org057e35c">anything-source I have written</h2>
-<div class="outline-text-2" id="text-org057e35c">
+<div id="outline-container-org01eb94b" class="outline-2">
+<h2 id="org01eb94b">anything-source I have written</h2>
+<div class="outline-text-2" id="text-org01eb94b">
 <p>
 Now I have wrote 6 &lt;anything-source&gt; for anything.ahk<br />
 </p>
@@ -402,9 +402,9 @@ anything-source: &lt;anything_services_source&gt; defined here.<br /></li>
 </ul>
 </div>
 
-<div id="outline-container-org26c8de5" class="outline-3">
-<h3 id="org26c8de5">anything-explorer-history.ahk</h3>
-<div class="outline-text-3" id="text-org26c8de5">
+<div id="outline-container-org6ac6288" class="outline-3">
+<h3 id="org6ac6288">anything-explorer-history.ahk</h3>
+<div class="outline-text-3" id="text-org6ac6288">
 <p>
 when you visit directory (double click on a directory,up or back ) in<br />
 explorer.exe ,it can remember directories you have visited ,then you can<br />
@@ -421,8 +421,8 @@ how to configure anything-explorer-history.ahk<br />
 </div>
 
 <ul class="org-ul">
-<li><a id="org9106f7f"></a>if you only have one anything-source :<br />
-<div class="outline-text-4" id="text-org9106f7f">
+<li><a id="org1bf073b"></a>if you only have one anything-source :<br />
+<div class="outline-text-4" id="text-org1bf073b">
 <p>
 anything_explorer_history_source  (defined in  anything-explorer-history.ahk)<br />
 you can use it like this :<br />
@@ -436,8 +436,8 @@ f3::anything(anything_explorer_history_source)
 </div>
 </li>
 
-<li><a id="orgf7570e7"></a>if you also have other anything-sources ,<br />
-<div class="outline-text-4" id="text-orgf7570e7">
+<li><a id="org45a2f19"></a>if you also have other anything-sources ,<br />
+<div class="outline-text-4" id="text-org45a2f19">
 <p>
  default  : it is included in anything-config.ahk<br />
  you just need add<br />
@@ -461,8 +461,8 @@ for example :<br />
 </div>
 </div>
 </li>
-<li><a id="org0f7d24d"></a>actions for anything-explorer-history.ahk<br />
-<div class="outline-text-4" id="text-org0f7d24d">
+<li><a id="orgaea750a"></a>actions for anything-explorer-history.ahk<br />
+<div class="outline-text-4" id="text-orgaea750a">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #8DA6CE;">anything_explorer_history_source</span>[<span style="color: #ffa07a;">"action"</span>]:=Array(<span style="color: #ffa07a;">"visit_directory"</span>,<span style="color: #ffa07a;">"delete_from_directory_history"</span> ,<span style="color: #ffa07a;">"delete_all_directory_history"</span>)
 </pre>
@@ -530,9 +530,9 @@ for example :<br />
 </ul>
 </div>
 
-<div id="outline-container-orgea2ded4" class="outline-3">
-<h3 id="orgea2ded4">anything-favorite-directories.ahk (with with   anything-explorer-history.ahk )</h3>
-<div class="outline-text-3" id="text-orgea2ded4">
+<div id="outline-container-orge023e26" class="outline-3">
+<h3 id="orge023e26">anything-favorite-directories.ahk (with with   anything-explorer-history.ahk )</h3>
+<div class="outline-text-3" id="text-orge023e26">
 <p>
  anything-favorite-directories.ahk  do something similiar to <a href="https://github.com/jixiuf/my_autohotkey_scripts/raw/master/ahk_scripts/anything-explorer-history.ahk">anything-explorer-history.ahk</a> <br />
  add your favorite directories ,and visit it using "Anything".<br />
@@ -545,8 +545,8 @@ for example :<br />
 
 
 <ul class="org-ul">
-<li><a id="org2e458d3"></a>how to configure it .<br />
-<div class="outline-text-4" id="text-org2e458d3">
+<li><a id="org27636f0"></a>how to configure it .<br />
+<div class="outline-text-4" id="text-org27636f0">
 <p>
 if you use anything-favorites-directory as the only source for anything.ahk<br />
 you just need to bind it to a key like this :<br />
@@ -581,8 +581,8 @@ default have added to  anything-config.ahk<br />
 </div>
 </li>
 
-<li><a id="orgd9a5bdc"></a>how to add a new Folder to your favorite-directories<br />
-<div class="outline-text-4" id="text-orgd9a5bdc">
+<li><a id="org7af410f"></a>how to add a new Folder to your favorite-directories<br />
+<div class="outline-text-4" id="text-org7af410f">
 <p>
 for this anything-source , your favorite directories<br />
 are the candidates ,so before you can use it ,you should<br />
@@ -604,8 +604,8 @@ anything_favorite_directories_source have three actions<br />
 </div>
 </div>
 </li>
-<li><a id="org0b237ff"></a>actions for anything-favorite-directories.ahk<br />
-<div class="outline-text-4" id="text-org0b237ff">
+<li><a id="orgcb8170c"></a>actions for anything-favorite-directories.ahk<br />
+<div class="outline-text-4" id="text-orgcb8170c">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -662,8 +662,8 @@ anything_favorite_directories_source have three actions<br />
 </div>
 </li>
 
-<li><a id="orgb278fe1"></a>then you can use "Anything" selected one of your favorite directory<br />
-<div class="outline-text-4" id="text-orgb278fe1">
+<li><a id="orgac646c5"></a>then you can use "Anything" selected one of your favorite directory<br />
+<div class="outline-text-4" id="text-orgac646c5">
 <ul class="org-ul">
 <li>it will visit your selected directory in current Explorer.exe (if current activated window is Explorer.exe)<br /></li>
 <li>it will visit your selected directory in current cmd.exe (if current activated window is cmd.exe)<br /></li>
@@ -674,9 +674,9 @@ anything_favorite_directories_source have three actions<br />
 </ul>
 </div>
 
-<div id="outline-container-org25d4cc6" class="outline-3">
-<h3 id="org25d4cc6">anything-run.ahk is a replacement of &lt;Win-r&gt;</h3>
-<div class="outline-text-3" id="text-org25d4cc6">
+<div id="outline-container-org2fac4a2" class="outline-3">
+<h3 id="org2fac4a2">anything-run.ahk is a replacement of &lt;Win-r&gt;</h3>
+<div class="outline-text-3" id="text-org2fac4a2">
 <p>
 it could remember old command too. when you press &lt;Windows+r&gt;<br />
 about how to use it .see comments in anything-run.ahk<br />
@@ -720,11 +720,11 @@ sources.insert(anything_favorite_directories_source)
 </div>
 </div>
 
-<div id="outline-container-org44e0be6" class="outline-3">
-<h3 id="org44e0be6">anything-window-switch.ahk is a replacement of Alt-Tab</h3>
-<div class="outline-text-3" id="text-org44e0be6">
+<div id="outline-container-org36e6c35" class="outline-3">
+<h3 id="org36e6c35">anything-window-switch.ahk is a replacement of Alt-Tab</h3>
+<div class="outline-text-3" id="text-org36e6c35">
 
-<div id="org20c266e" class="figure">
+<div id="orgabcb229" class="figure">
 <p><img src="/assets/blog/anything-doc.html/anything-ws.JPG" alt="anything-ws.JPG" /><br />
 </p>
 </div>
@@ -822,9 +822,9 @@ next time you press Alt-TAB ,and type "www" Firefox is activated<br />
 </p>
 </div>
 </div>
-<div id="outline-container-org63870d0" class="outline-3">
-<h3 id="org63870d0">anything-process-manager.ahk</h3>
-<div class="outline-text-3" id="text-org63870d0">
+<div id="outline-container-orgc655173" class="outline-3">
+<h3 id="orgc655173">anything-process-manager.ahk</h3>
+<div class="outline-text-3" id="text-orgc655173">
 <p>
 is a process manager , you can use it kill a selected process<br />
 or change the priority of the process<br />
@@ -863,9 +863,9 @@ anything(anything_process_manager_source)
 </div>
 
 
-<div id="outline-container-org12d656f" class="outline-3">
-<h3 id="org12d656f">anything-services.ahk</h3>
-<div class="outline-text-3" id="text-org12d656f">
+<div id="outline-container-orgbae482b" class="outline-3">
+<h3 id="orgbae482b">anything-services.ahk</h3>
+<div class="outline-text-3" id="text-orgbae482b">
 <p>
 is a Windows Services Manager ,just like services.msc<br />
 it can start a stopped service ,or stop a running service<br />
@@ -906,9 +906,9 @@ anything(anything_services_source)
 </div>
 
 
-<div id="outline-container-orgf6c743e" class="outline-2">
-<h2 id="orgf6c743e">how to  write an anything-source</h2>
-<div class="outline-text-2" id="text-orgf6c743e">
+<div id="outline-container-org1e1980c" class="outline-2">
+<h2 id="org1e1980c">how to  write an anything-source</h2>
+<div class="outline-text-2" id="text-org1e1980c">
 <p>
 an anything-source is an Object with some pre-defined properties<br />
 now it support 8 anything-source-properties :<br />
@@ -931,9 +931,9 @@ for example:<br />
 </pre>
 </div>
 </div>
-<div id="outline-container-orgd7599fd" class="outline-3">
-<h3 id="orgd7599fd">&lt;name&gt;  (required)</h3>
-<div class="outline-text-3" id="text-orgd7599fd">
+<div id="outline-container-org0e71ea1" class="outline-3">
+<h3 id="org0e71ea1">&lt;name&gt;  (required)</h3>
+<div class="outline-text-3" id="text-org0e71ea1">
 <p>
 &lt;name&gt; is a string ,it is just a name of this anything-source<br />
 </p>
@@ -943,9 +943,9 @@ for example:<br />
 </div>
 </div>
 </div>
-<div id="outline-container-orgb3e114b" class="outline-3">
-<h3 id="orgb3e114b">&lt;candidate&gt;  (required)</h3>
-<div class="outline-text-3" id="text-orgb3e114b">
+<div id="outline-container-orga0c5da7" class="outline-3">
+<h3 id="orga0c5da7">&lt;candidate&gt;  (required)</h3>
+<div class="outline-text-3" id="text-orga0c5da7">
 <p>
 &lt;candidate&gt; is an array of all candidates ,or a function name(string)<br />
 without parameter which return an array .<br />
@@ -953,8 +953,8 @@ each element of the array can be :<br />
 </p>
 </div>
 <ul class="org-ul">
-<li><a id="orgb9ea7d0"></a>a string<br />
-<div class="outline-text-4" id="text-orgb9ea7d0">
+<li><a id="orgfc47f62"></a>a string<br />
+<div class="outline-text-4" id="text-orgfc47f62">
 <p>
  this string will be displayed on listview , so that you can select one<br />
  of the candidates ,and execute action on your selected candidate.<br />
@@ -977,8 +977,8 @@ or<br />
 </div>
 </div>
 </li>
-<li><a id="org02abd83"></a>an array<br />
-<div class="outline-text-4" id="text-org02abd83">
+<li><a id="orgb356adc"></a>an array<br />
+<div class="outline-text-4" id="text-orgb356adc">
 <p>
 the first element of this array must be a string ,the string will be<br />
 displayed on listview ,and you can selected one of the candidates ,and<br />
@@ -1001,9 +1001,9 @@ see &lt;action&gt;<br />
 </ul>
 </div>
 
-<div id="outline-container-org1c4a830" class="outline-3">
-<h3 id="org1c4a830">&lt;action&gt;  (required)</h3>
-<div class="outline-text-3" id="text-org1c4a830">
+<div id="outline-container-org5eb536c" class="outline-3">
+<h3 id="org5eb536c">&lt;action&gt;  (required)</h3>
+<div class="outline-text-3" id="text-org5eb536c">
 <p>
 &lt;action&gt; is a function name(string) or a list of function name (array).<br />
 and those functions must have one parameter. actually the parameter is<br />
@@ -1052,9 +1052,9 @@ or<br />
 </div>
 </div>
 </div>
-<div id="outline-container-orgc5d432f" class="outline-3">
-<h3 id="orgc5d432f">&lt;icon&gt; (optional)</h3>
-<div class="outline-text-3" id="text-orgc5d432f">
+<div id="outline-container-org4fe796f" class="outline-3">
+<h3 id="org4fe796f">&lt;icon&gt; (optional)</h3>
+<div class="outline-text-3" id="text-org4fe796f">
 <p>
 &lt;icon&gt; is a function(string) which return an ImageList.<br />
 this property is optional .if this property isn't empty<br />
@@ -1075,9 +1075,9 @@ my_source[<span style="color: #ffa07a;">"icon"</span>]:=my_icon
 </div>
 </div>
 
-<div id="outline-container-org3f34959" class="outline-3">
-<h3 id="org3f34959">&lt;match&gt; (optional) default: "anything_match"</h3>
-<div class="outline-text-3" id="text-org3f34959">
+<div id="outline-container-org568a594" class="outline-3">
+<h3 id="org568a594">&lt;match&gt; (optional) default: "anything_match"</h3>
+<div class="outline-text-3" id="text-org568a594">
 <p>
 if it has value for example:<br />
 </p>
@@ -1111,9 +1111,9 @@ and these tow function is defined in anything.ahk<br />
 </div>
 </div>
 
-<div id="outline-container-orgcb0d35b" class="outline-3">
-<h3 id="orgcb0d35b">&lt;anything-execute-action-at-once-if-one&gt; (optional)</h3>
-<div class="outline-text-3" id="text-orgcb0d35b">
+<div id="outline-container-orgd6590b9" class="outline-3">
+<h3 id="orgd6590b9">&lt;anything-execute-action-at-once-if-one&gt; (optional)</h3>
+<div class="outline-text-3" id="text-orgd6590b9">
 <p>
 if it has value  for example:<br />
 </p>
@@ -1128,9 +1128,9 @@ then if only one candidate left on the listview it will execute the<br />
 </p>
 </div>
 </div>
-<div id="outline-container-org71b54e7" class="outline-3">
-<h3 id="org71b54e7">&lt; anything-execute-action-at-once-if-one-even-no-keyword &gt; (optional)</h3>
-<div class="outline-text-3" id="text-org71b54e7">
+<div id="outline-container-org2387ada" class="outline-3">
+<h3 id="org2387ada">&lt; anything-execute-action-at-once-if-one-even-no-keyword &gt; (optional)</h3>
+<div class="outline-text-3" id="text-org2387ada">
 <p>
   if it has value<br />
 for example<br />
@@ -1147,9 +1147,9 @@ as parameter auto. you needn't press &lt;Enter&gt; here.<br />
 </div>
 </div>
 
-<div id="outline-container-org619b61c" class="outline-3">
-<h3 id="org619b61c">&lt;anything-action-when-2-candidates-even-no-keyword&gt; (optional)</h3>
-<div class="outline-text-3" id="text-org619b61c">
+<div id="outline-container-org9dfed86" class="outline-3">
+<h3 id="org9dfed86">&lt;anything-action-when-2-candidates-even-no-keyword&gt; (optional)</h3>
+<div class="outline-text-3" id="text-org9dfed86">
 <p>
 the value of it is a function accept two parameters<br />
 </p>
@@ -1168,9 +1168,9 @@ without press RETURN by youself.<br />
 </p>
 </div>
 </div>
-<div id="outline-container-orga63e0cc" class="outline-3">
-<h3 id="orga63e0cc">call anything</h3>
-<div class="outline-text-3" id="text-orga63e0cc">
+<div id="outline-container-org3b41909" class="outline-3">
+<h3 id="org3b41909">call anything</h3>
+<div class="outline-text-3" id="text-org3b41909">
 <ol class="org-ol">
 <li><p>
 anything(source)<br />
@@ -1219,9 +1219,9 @@ sources.insert(other_source)
 </div>
 </div>
 </div>
-<div id="outline-container-orga78c159" class="outline-2">
-<h2 id="orga78c159">anything-properties</h2>
-<div class="outline-text-2" id="text-orga78c159">
+<div id="outline-container-orgb9ab536" class="outline-2">
+<h2 id="orgb9ab536">anything-properties</h2>
+<div class="outline-text-2" id="text-orgb9ab536">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -1319,9 +1319,9 @@ see " how to  write an anything-source"/"call anything" section about how to use
 </p>
 </div>
 </div>
-<div id="outline-container-org0e21c48" class="outline-2">
-<h2 id="org0e21c48">global variable</h2>
-<div class="outline-text-2" id="text-org0e21c48">
+<div id="outline-container-orgded7e8a" class="outline-2">
+<h2 id="orgded7e8a">global variable</h2>
+<div class="outline-text-2" id="text-orgded7e8a">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -1381,9 +1381,9 @@ you can do it like this:<br />
 </div>
 </div>
 
-<div id="outline-container-org3db79ff" class="outline-2">
-<h2 id="org3db79ff">Known Bugs</h2>
-<div class="outline-text-2" id="text-org3db79ff">
+<div id="outline-container-org2ee606f" class="outline-2">
+<h2 id="org2ee606f">Known Bugs</h2>
+<div class="outline-text-2" id="text-org2ee606f">
 <ul class="org-ul">
 <li><p>
 when sometimes you type too quickly , letters get dropped from<br />

@@ -47,36 +47,36 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org5f15491">链接</a></li>
-<li><a href="#org876aa62">ext2</a>
+<li><a href="#org38797e5">链接</a></li>
+<li><a href="#orgba6796e">ext2</a>
 <ul>
-<li><a href="#org1ec214f">超级块（Super Block）</a></li>
-<li><a href="#org04f977a">块组描述符表（GDT，Group Descriptor Table）</a></li>
-<li><a href="#orged02dbb">块位图（Block Bitmap）</a></li>
-<li><a href="#org14fb049">inode位图（inode Bitmap）</a></li>
-<li><a href="#org4716123">inode表（inode Table）</a></li>
-<li><a href="#orgc391507">数据块（Data Block）</a></li>
+<li><a href="#orgb576234">超级块（Super Block）</a></li>
+<li><a href="#org6bf9b02">块组描述符表（GDT，Group Descriptor Table）</a></li>
+<li><a href="#org3987a62">块位图（Block Bitmap）</a></li>
+<li><a href="#orga84981c">inode位图（inode Bitmap）</a></li>
+<li><a href="#orgd816d37">inode表（inode Table）</a></li>
+<li><a href="#orgfd6610b">数据块（Data Block）</a></li>
 </ul>
 </li>
-<li><a href="#org6b45a1d">可用的命令</a></li>
-<li><a href="#orgc2777fd">系统函数</a></li>
+<li><a href="#orgbcdf09c">可用的命令</a></li>
+<li><a href="#org36f7ebe">系统函数</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org5f15491" class="outline-2">
-<h2 id="org5f15491">链接</h2>
-<div class="outline-text-2" id="text-org5f15491">
+<div id="outline-container-org38797e5" class="outline-2">
+<h2 id="org38797e5">链接</h2>
+<div class="outline-text-2" id="text-org38797e5">
 <p>
 <a href="http://learn.akae.cn/media/ch29s02.html">http://learn.akae.cn/media/ch29s02.html</a><br />
 </p>
 </div>
 </div>
-<div id="outline-container-org876aa62" class="outline-2">
-<h2 id="org876aa62">ext2</h2>
-<div class="outline-text-2" id="text-org876aa62">
+<div id="outline-container-orgba6796e" class="outline-2">
+<h2 id="orgba6796e">ext2</h2>
+<div class="outline-text-2" id="text-orgba6796e">
 
-<div id="org54f2391" class="figure">
+<div id="orgd5d6a78" class="figure">
 <p><img src="/assets/blog/ext2.html/ext2.png" alt="ext2.png" /><br />
 </p>
 </div>
@@ -89,9 +89,9 @@ mke2fs的-b选项可以设定块大小为1024、2048或4096字节,默认是1024b
 ext2文件系统将整个分区划成若干个同样大小的块组（Block Group）<br />
 </p>
 </div>
-<div id="outline-container-org1ec214f" class="outline-3">
-<h3 id="org1ec214f">超级块（Super Block）</h3>
-<div class="outline-text-3" id="text-org1ec214f">
+<div id="outline-container-orgb576234" class="outline-3">
+<h3 id="orgb576234">超级块（Super Block）</h3>
+<div class="outline-text-3" id="text-orgb576234">
 <p>
 描述 <i>整个分区</i> 的文件系统信息，例如块大小、文件系统版本号、上次mount的时间等<br />
 等。超级块在每个块组的开头都有一份拷贝。(占用一个block块大小).<br />
@@ -100,9 +100,9 @@ ext2文件系统将整个分区划成若干个同样大小的块组（Block Grou
 </div>
 </div>
 
-<div id="outline-container-org04f977a" class="outline-3">
-<h3 id="org04f977a">块组描述符表（GDT，Group Descriptor Table）</h3>
-<div class="outline-text-3" id="text-org04f977a">
+<div id="outline-container-org6bf9b02" class="outline-3">
+<h3 id="org6bf9b02">块组描述符表（GDT，Group Descriptor Table）</h3>
+<div class="outline-text-3" id="text-org6bf9b02">
 <p>
 由很多块组描述符组成，整个分区分成多少个块组就对应有多少个块组描述符。每个<br />
 块组描述符（Group Descriptor）存储一个块组的描述信息，例如在这个块组中从哪<br />
@@ -116,9 +116,9 @@ ext2文件系统将整个分区划成若干个同样大小的块组（Block Grou
 </p>
 </div>
 </div>
-<div id="outline-container-orged02dbb" class="outline-3">
-<h3 id="orged02dbb">块位图（Block Bitmap）</h3>
-<div class="outline-text-3" id="text-orged02dbb">
+<div id="outline-container-org3987a62" class="outline-3">
+<h3 id="org3987a62">块位图（Block Bitmap）</h3>
+<div class="outline-text-3" id="text-org3987a62">
 <p>
 一个块组中的块是这样利用的：数据块存储所有文件的数据，比如某个分区的块大小<br />
 是1024字节，某个文件是2049字节，那么就需要三个数据块来存，即使第三个块只存<br />
@@ -140,17 +140,17 @@ inode表这几部分存储该块组的描述信息。那么如何知道哪些块
 </div>
 </div>
 
-<div id="outline-container-org14fb049" class="outline-3">
-<h3 id="org14fb049">inode位图（inode Bitmap）</h3>
-<div class="outline-text-3" id="text-org14fb049">
+<div id="outline-container-orga84981c" class="outline-3">
+<h3 id="orga84981c">inode位图（inode Bitmap）</h3>
+<div class="outline-text-3" id="text-orga84981c">
 <p>
 和块位图类似，本身占一个块，其中每个bit表示一个inode是否空闲可用。<br />
 </p>
 </div>
 </div>
-<div id="outline-container-org4716123" class="outline-3">
-<h3 id="org4716123">inode表（inode Table）</h3>
-<div class="outline-text-3" id="text-org4716123">
+<div id="outline-container-orgd816d37" class="outline-3">
+<h3 id="orgd816d37">inode表（inode Table）</h3>
+<div class="outline-text-3" id="text-orgd816d37">
 <p>
 我们知道，一个文件除了数据需要存储之外，一些描述信息也需要存储，例如文件类<br />
 型（常规、目录、符号链接等），权限，文件大小，创建/修改/访问时间等，也就是<br />
@@ -172,9 +172,9 @@ inode表占多少个块在格式化时就要决定并写入块组描述符中，
 </div>
 </div>
 
-<div id="outline-container-orgc391507" class="outline-3">
-<h3 id="orgc391507">数据块（Data Block）</h3>
-<div class="outline-text-3" id="text-orgc391507">
+<div id="outline-container-orgfd6610b" class="outline-3">
+<h3 id="orgfd6610b">数据块（Data Block）</h3>
+<div class="outline-text-3" id="text-orgfd6610b">
 <p>
 根据不同的文件类型有以下几种情况<br />
 </p>
@@ -317,18 +317,18 @@ inode号（4bytes）|记录长度   (2bytes)|filename length(1byte)|filetype(1by
 </div>
 </div>
 
-<div id="outline-container-org6b45a1d" class="outline-2">
-<h2 id="org6b45a1d">可用的命令</h2>
-<div class="outline-text-2" id="text-org6b45a1d">
+<div id="outline-container-orgbcdf09c" class="outline-2">
+<h2 id="orgbcdf09c">可用的命令</h2>
+<div class="outline-text-2" id="text-orgbcdf09c">
 <p>
 dumpe2fs<br />
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgc2777fd" class="outline-2">
-<h2 id="orgc2777fd">系统函数</h2>
-<div class="outline-text-2" id="text-orgc2777fd">
+<div id="outline-container-org36f7ebe" class="outline-2">
+<h2 id="org36f7ebe">系统函数</h2>
+<div class="outline-text-2" id="text-org36f7ebe">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #7fffd4;">#include</span> <span style="color: #ffa07a;">&lt;stdio.h&gt;</span>
 <span style="color: #7fffd4;">#include</span> <span style="color: #ffa07a;">&lt;dirent.h&gt;</span>

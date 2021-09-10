@@ -47,14 +47,14 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org88b005b">MyISAM</a></li>
-<li><a href="#orgdc81702">Archive</a></li>
+<li><a href="#orge47049d">MyISAM</a></li>
+<li><a href="#org9741409">Archive</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org88b005b" class="outline-2">
-<h2 id="org88b005b">MyISAM</h2>
-<div class="outline-text-2" id="text-org88b005b">
+<div id="outline-container-orge47049d" class="outline-2">
+<h2 id="orge47049d">MyISAM</h2>
+<div class="outline-text-2" id="text-orge47049d">
 <p>
 MyISAM表如果在创建选项里指定为DELAY_KEY_WRITE的话，它不会立即将改变的索引数据写<br />
 到硬盘，而是将这个改变缓存到内存中。当表被关闭或者缓冲区需要修整时，它会将索引<br />
@@ -67,9 +67,9 @@ MyISAM表如果在创建选项里指定为DELAY_KEY_WRITE的话，它不会立�
 </div>
 </div>
 
-<div id="outline-container-orgdc81702" class="outline-2">
-<h2 id="orgdc81702">Archive</h2>
-<div class="outline-text-2" id="text-orgdc81702">
+<div id="outline-container-org9741409" class="outline-2">
+<h2 id="org9741409">Archive</h2>
+<div class="outline-text-2" id="text-org9741409">
 <p>
 Archive引擎只支持INSERT和SELECT语句，并且它不支持索引。它比MyISAM使用更少的磁<br />
 盘IO，因此它会在写操作之前将数据缓存并利用zlib来压缩。而SELECT查询操作则需要一<br />

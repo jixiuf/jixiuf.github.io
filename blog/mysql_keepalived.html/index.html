@@ -47,32 +47,32 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org1f6d1ec">参考</a></li>
-<li><a href="#org20655be">目标 实现mysql 高可用性，避免mysql单点故障</a></li>
-<li><a href="#orgfc3c2bb">mysql 双机热备</a></li>
-<li><a href="#org405a316">配置 keepalived</a>
+<li><a href="#org42eece1">参考</a></li>
+<li><a href="#orgbd2c2fe">目标 实现mysql 高可用性，避免mysql单点故障</a></li>
+<li><a href="#orgd03948f">mysql 双机热备</a></li>
+<li><a href="#orgb5cf8dd">配置 keepalived</a>
 <ul>
-<li><a href="#org339fdbb">MySQL-master1</a></li>
-<li><a href="#org8e62429">MySQL-master2</a></li>
-<li><a href="#orgf69da19">/etc/keepalived/check_mysql.sh</a></li>
+<li><a href="#org6d73dd6">MySQL-master1</a></li>
+<li><a href="#orgbb140f9">MySQL-master2</a></li>
+<li><a href="#orge953166">/etc/keepalived/check_mysql.sh</a></li>
 </ul>
 </li>
-<li><a href="#orgc9861d4">启动keepalived</a></li>
+<li><a href="#orgbecad1b">启动keepalived</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org1f6d1ec" class="outline-2">
-<h2 id="org1f6d1ec">参考</h2>
-<div class="outline-text-2" id="text-org1f6d1ec">
+<div id="outline-container-org42eece1" class="outline-2">
+<h2 id="org42eece1">参考</h2>
+<div class="outline-text-2" id="text-org42eece1">
 <p>
 <a href="https://github.com/chenzhiwei/linux/tree/master/keepalived">https://github.com/chenzhiwei/linux/tree/master/keepalived</a><br />
 <a href="http://allenlyu.com/2016/05/23/mysql-keepalived-hot-standby/">http://allenlyu.com/2016/05/23/mysql-keepalived-hot-standby/</a><br />
 </p>
 </div>
 </div>
-<div id="outline-container-org20655be" class="outline-2">
-<h2 id="org20655be">目标 实现mysql 高可用性，避免mysql单点故障</h2>
-<div class="outline-text-2" id="text-org20655be">
+<div id="outline-container-orgbd2c2fe" class="outline-2">
+<h2 id="orgbd2c2fe">目标 实现mysql 高可用性，避免mysql单点故障</h2>
+<div class="outline-text-2" id="text-orgbd2c2fe">
 <p>
 Keepalived是一个基于VRRP协议来实现的WEB服务高可用方案，可以利用其来<br />
 避免单点故障。一个WEB服务至少会有2台服务器运行 Keepalived，一台为主服<br />
@@ -102,9 +102,9 @@ VRRP路由器是指运行VRRP的路由器，是物理实体，虚拟路由器是
 </div>
 </div>
 
-<div id="outline-container-orgfc3c2bb" class="outline-2">
-<h2 id="orgfc3c2bb">mysql 双机热备</h2>
-<div class="outline-text-2" id="text-orgfc3c2bb">
+<div id="outline-container-orgd03948f" class="outline-2">
+<h2 id="orgd03948f">mysql 双机热备</h2>
+<div class="outline-text-2" id="text-orgd03948f">
 <p>
 主从配置见 <a href="/blog/mysql-slave.html">mysql-slave配置</a><br />
 mysql 的双机热备 基本可以认为是 将主从模式 变成互为主从<br />
@@ -129,13 +129,13 @@ auto-increment-offset = 2<br />
 </div>
 </div>
 
-<div id="outline-container-org405a316" class="outline-2">
-<h2 id="org405a316">配置 keepalived</h2>
-<div class="outline-text-2" id="text-org405a316">
+<div id="outline-container-orgb5cf8dd" class="outline-2">
+<h2 id="orgb5cf8dd">配置 keepalived</h2>
+<div class="outline-text-2" id="text-orgb5cf8dd">
 </div>
-<div id="outline-container-org339fdbb" class="outline-3">
-<h3 id="org339fdbb">MySQL-master1</h3>
-<div class="outline-text-3" id="text-org339fdbb">
+<div id="outline-container-org6d73dd6" class="outline-3">
+<h3 id="org6d73dd6">MySQL-master1</h3>
+<div class="outline-text-3" id="text-org6d73dd6">
 <p>
 vi /etc/keepalived/keepalived.conf<br />
 ! 开头的为注释<br />
@@ -196,9 +196,9 @@ virtual_server 192.168.1.200 3306 {   #VIP虚拟 IP<br />
 </div>
 
 
-<div id="outline-container-org8e62429" class="outline-3">
-<h3 id="org8e62429">MySQL-master2</h3>
-<div class="outline-text-3" id="text-org8e62429">
+<div id="outline-container-orgbb140f9" class="outline-3">
+<h3 id="orgbb140f9">MySQL-master2</h3>
+<div class="outline-text-3" id="text-orgbb140f9">
 <blockquote>
 <p>
 <br />
@@ -256,9 +256,9 @@ virtual_server 192.168.1.200 3306 {<br />
 </blockquote>
 </div>
 </div>
-<div id="outline-container-orgf69da19" class="outline-3">
-<h3 id="orgf69da19">/etc/keepalived/check_mysql.sh</h3>
-<div class="outline-text-3" id="text-orgf69da19">
+<div id="outline-container-orge953166" class="outline-3">
+<h3 id="orge953166">/etc/keepalived/check_mysql.sh</h3>
+<div class="outline-text-3" id="text-orge953166">
 <div class="org-src-container">
 <pre class="src src-sh">!/bin/sh
 pkill keepalived
@@ -270,9 +270,9 @@ pkill keepalived
 </div>
 </div>
 </div>
-<div id="outline-container-orgc9861d4" class="outline-2">
-<h2 id="orgc9861d4">启动keepalived</h2>
-<div class="outline-text-2" id="text-orgc9861d4">
+<div id="outline-container-orgbecad1b" class="outline-2">
+<h2 id="orgbecad1b">启动keepalived</h2>
+<div class="outline-text-2" id="text-orgbecad1b">
 <div class="org-src-container">
 <pre class="src src-sh">/etc/init.d/keepalived start | restart | stop
 </pre>

@@ -47,25 +47,25 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org57c29b9">etc 简介</a></li>
-<li><a href="#orgc3df030">etcd 单实例</a>
+<li><a href="#org2b3f499">etc 简介</a></li>
+<li><a href="#org45d4e05">etcd 单实例</a>
 <ul>
-<li><a href="#org8b9353c">测试效果</a></li>
+<li><a href="#orgb6a4b2a">测试效果</a></li>
 </ul>
 </li>
-<li><a href="#org6221566">etcd 集群</a>
+<li><a href="#org37801be">etcd 集群</a>
 <ul>
-<li><a href="#org8b05fbc">静态服务发现</a></li>
-<li><a href="#orgdddecc2">etcd服务发现</a></li>
+<li><a href="#org2c8e7c6">静态服务发现</a></li>
+<li><a href="#org08535e4">etcd服务发现</a></li>
 </ul>
 </li>
-<li><a href="#org02dfcb7">link</a></li>
+<li><a href="#org995543e">link</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org57c29b9" class="outline-2">
-<h2 id="org57c29b9">etc 简介</h2>
-<div class="outline-text-2" id="text-org57c29b9">
+<div id="outline-container-org2b3f499" class="outline-2">
+<h2 id="org2b3f499">etc 简介</h2>
+<div class="outline-text-2" id="text-org2b3f499">
 <p>
 <a href="https://github.com/coreos/etcd">etcd</a> = etc  distributed<br />
 /etc 是unix 系 下的一个目录， 这个目录的作用是  放一些基本的配置文件<br />
@@ -97,9 +97,9 @@
 </div>
 </div>
 
-<div id="outline-container-orgc3df030" class="outline-2">
-<h2 id="orgc3df030">etcd 单实例</h2>
-<div class="outline-text-2" id="text-orgc3df030">
+<div id="outline-container-org45d4e05" class="outline-2">
+<h2 id="org45d4e05">etcd 单实例</h2>
+<div class="outline-text-2" id="text-org45d4e05">
 <div class="org-src-container">
 <pre class="src src-sh">jixiuf@jfmac ~ $ etcd
 </pre>
@@ -137,9 +137,9 @@
 </p>
 </blockquote>
 </div>
-<div id="outline-container-org8b9353c" class="outline-3">
-<h3 id="org8b9353c">测试效果</h3>
-<div class="outline-text-3" id="text-org8b9353c">
+<div id="outline-container-orgb6a4b2a" class="outline-3">
+<h3 id="orgb6a4b2a">测试效果</h3>
+<div class="outline-text-3" id="text-orgb6a4b2a">
 <div class="org-src-container">
 <pre class="src src-sh">&#40664;&#35748; 2379 &#31471;&#21475;&#26159;&#32473;client &#36830;&#25509;&#29992;&#30340;
 &#32780; 2380  &#21017;&#22312;etcd &#38598;&#32676; &#21508;&#20010;&#33410;&#28857;&#20043;&#38388;&#20132;&#20114;&#29992;&#30340;
@@ -157,16 +157,16 @@ curl -L http://127.0.0.1:4001/v2/keys/mykey2
 </div>
 </div>
 </div>
-<div id="outline-container-org6221566" class="outline-2">
-<h2 id="org6221566">etcd 集群</h2>
-<div class="outline-text-2" id="text-org6221566">
+<div id="outline-container-org37801be" class="outline-2">
+<h2 id="org37801be">etcd 集群</h2>
+<div class="outline-text-2" id="text-org37801be">
 <p>
 官网文档 <a href="https://github.com/coreos/etcd/blob/master/Documentation/clustering.md">https://github.com/coreos/etcd/blob/master/Documentation/clustering.md</a><br />
 </p>
 </div>
-<div id="outline-container-org8b05fbc" class="outline-3">
-<h3 id="org8b05fbc">静态服务发现</h3>
-<div class="outline-text-3" id="text-org8b05fbc">
+<div id="outline-container-org2c8e7c6" class="outline-3">
+<h3 id="org2c8e7c6">静态服务发现</h3>
+<div class="outline-text-3" id="text-org2c8e7c6">
 <p>
 这种方式需要在启动etcd的时候，确定etcd node的ip，使用-peers | &#x2013;initial-cluster来指定集群成员<br />
 这种方式 需要事先知道要启动几个节点， 及各节点的ip:port 等<br />
@@ -266,13 +266,13 @@ curl -L http://127.0.0.1:4379/v2/keys/mykey
 </div>
 </div>
 
-<div id="outline-container-orgdddecc2" class="outline-3">
-<h3 id="orgdddecc2">etcd服务发现</h3>
-<div class="outline-text-3" id="text-orgdddecc2">
+<div id="outline-container-org08535e4" class="outline-3">
+<h3 id="org08535e4">etcd服务发现</h3>
+<div class="outline-text-3" id="text-org08535e4">
 </div>
 <ul class="org-ul">
-<li><a id="org8f218bd"></a>使用公有 etcd 发现服务（Public etcd Discovery Service）<br />
-<div class="outline-text-4" id="text-org8f218bd">
+<li><a id="orgde73ae4"></a>使用公有 etcd 发现服务（Public etcd Discovery Service）<br />
+<div class="outline-text-4" id="text-orgde73ae4">
 <p>
 从 <a href="https://discovery.etcd.io/new">https://discovery.etcd.io/new</a> 申请size=3 的一个token<br />
 然后用这个token 启动3个节点<br />
@@ -321,8 +321,8 @@ node3<br />
 </div>
 </div>
 </li>
-<li><a id="orgcbbe594"></a>构建自己的 etcd discovery service<br />
-<div class="outline-text-4" id="text-orgcbbe594">
+<li><a id="orgf7897b1"></a>构建自己的 etcd discovery service<br />
+<div class="outline-text-4" id="text-orgf7897b1">
 <p>
 首先要起动一个etcd 或集群用来做discovery service(即有一个已经起动的etcd)<br />
 比如我打算建一个size=3的etcd 集群<br />
@@ -376,9 +376,9 @@ node3<br />
 </ul>
 </div>
 </div>
-<div id="outline-container-org02dfcb7" class="outline-2">
-<h2 id="org02dfcb7">link</h2>
-<div class="outline-text-2" id="text-org02dfcb7">
+<div id="outline-container-org995543e" class="outline-2">
+<h2 id="org995543e">link</h2>
+<div class="outline-text-2" id="text-org995543e">
 <p>
 <a href="http://www.sel.zju.edu.cn/?p=523">http://www.sel.zju.edu.cn/?p=523</a><br />
 </p>

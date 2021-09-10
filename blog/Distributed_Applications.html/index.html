@@ -47,13 +47,13 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org12e8299">distributed application 某节点挂了后，此种application 会在另外一个节点上启动</a></li>
+<li><a href="#orge806c9f">distributed application 某节点挂了后，此种application 会在另外一个节点上启动</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org12e8299" class="outline-2">
-<h2 id="org12e8299">distributed application 某节点挂了后，此种application 会在另外一个节点上启动</h2>
-<div class="outline-text-2" id="text-org12e8299">
+<div id="outline-container-orge806c9f" class="outline-2">
+<h2 id="orge806c9f">distributed application 某节点挂了后，此种application 会在另外一个节点上启动</h2>
+<div class="outline-text-2" id="text-orge806c9f">
 <p>
 <a href="http://www.erlang.org/doc/design_principles/distributed_applications.html">http://www.erlang.org/doc/design_principles/distributed_applications.html</a><br />
 erl -name c@l92.168.0.44 -config c.config<br />
@@ -116,8 +116,8 @@ Module:start({takeover, Node}, StartArgs)<br />
 </p>
 </div>
 <ul class="org-ul">
-<li><a id="org27487bf"></a>master.config<br />
-<div class="outline-text-4" id="text-org27487bf">
+<li><a id="org393c8ea"></a>master.config<br />
+<div class="outline-text-4" id="text-org393c8ea">
 <div class="org-src-container">
 <pre class="src src-erlang">[{kernel,
   [{distributed, [{game_log_server, 5000, ['emacs@192.168.0.44', {'c@192.168.0.44','c2@192.168.0.44' }]}]},
@@ -130,8 +130,8 @@ Module:start({takeover, Node}, StartArgs)<br />
 </div>
 </div>
 </li>
-<li><a id="orgf6bec1b"></a>c.config<br />
-<div class="outline-text-4" id="text-orgf6bec1b">
+<li><a id="orgf42f0d4"></a>c.config<br />
+<div class="outline-text-4" id="text-orgf42f0d4">
 <div class="org-src-container">
 <pre class="src src-erlang">%% http://www.erlang.org/doc/design_principles/distributed_applications.html
 %% erl -name emacs@l92.168.0.44 -config master.config

@@ -47,29 +47,29 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org511ab0e">1. 首先是关于帮助系统的帮助系统</a></li>
-<li><a href="#org2966f7a">2. 查看变量的值和文档</a></li>
-<li><a href="#org97ffaec">3. 查看函数的文档</a></li>
-<li><a href="#org50a9b64">4. M-x describe-face</a></li>
-<li><a href="#org223aa69">5. C-h m (describe-mode)</a></li>
-<li><a href="#org0ab9b42">6. C-h k (describe-key)</a></li>
-<li><a href="#orgb573df2">7. C-h w (where-is)</a></li>
-<li><a href="#org3b16281">8. C-h b (describe-bindings)</a></li>
-<li><a href="#org115ac9b">9. find-function</a></li>
-<li><a href="#org40a429f">10. find-variable</a></li>
-<li><a href="#org5beb701">11. find-face-definition</a></li>
-<li><a href="#org004c851">12. M-x apropos</a></li>
-<li><a href="#org6342154">13. 会些简单的配置</a></li>
-<li><a href="#orgeddfd38">14. 快捷键定制</a></li>
-<li><a href="#orgd185321">15. 参考文献</a></li>
+<li><a href="#org05f2adf">1. 首先是关于帮助系统的帮助系统</a></li>
+<li><a href="#org153f586">2. 查看变量的值和文档</a></li>
+<li><a href="#org878285a">3. 查看函数的文档</a></li>
+<li><a href="#org8efb895">4. M-x describe-face</a></li>
+<li><a href="#org2490a43">5. C-h m (describe-mode)</a></li>
+<li><a href="#orgd421b42">6. C-h k (describe-key)</a></li>
+<li><a href="#orga5336eb">7. C-h w (where-is)</a></li>
+<li><a href="#org0e007fa">8. C-h b (describe-bindings)</a></li>
+<li><a href="#org284e456">9. find-function</a></li>
+<li><a href="#org9c5aef6">10. find-variable</a></li>
+<li><a href="#orgbd1d10c">11. find-face-definition</a></li>
+<li><a href="#org0e3248d">12. M-x apropos</a></li>
+<li><a href="#org4c29e38">13. 会些简单的配置</a></li>
+<li><a href="#org4cf7ca0">14. 快捷键定制</a></li>
+<li><a href="#orgebae64d">15. 参考文献</a></li>
 </ul>
 </div>
 </div>
 <p>
 Emacs的帮助系统的按键前缀是C-h, 和F1
 </p>
-<div id="outline-container-org511ab0e" class="outline-2">
-<h2 id="org511ab0e"><span class="section-number-2">1</span> 首先是关于帮助系统的帮助系统</h2>
+<div id="outline-container-org05f2adf" class="outline-2">
+<h2 id="org05f2adf"><span class="section-number-2">1</span> 首先是关于帮助系统的帮助系统</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 C-h ?  实际是C-h S-/,它会列出C-h 前缀下可用的命令，如b ,列出当前可用的键绑定，完整的按键
@@ -79,16 +79,16 @@ C-h ?  实际是C-h S-/,它会列出C-h 前缀下可用的命令，如b ,列出�
 </div>
 
 
-<div id="outline-container-org2966f7a" class="outline-2">
-<h2 id="org2966f7a"><span class="section-number-2">2</span> 查看变量的值和文档</h2>
+<div id="outline-container-org153f586" class="outline-2">
+<h2 id="org153f586"><span class="section-number-2">2</span> 查看变量的值和文档</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 C-h v (describe-variable) 
 </p>
 </div>
 </div>
-<div id="outline-container-org97ffaec" class="outline-2">
-<h2 id="org97ffaec"><span class="section-number-2">3</span> 查看函数的文档</h2>
+<div id="outline-container-org878285a" class="outline-2">
+<h2 id="org878285a"><span class="section-number-2">3</span> 查看函数的文档</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 C-h f (describe-function)
@@ -96,16 +96,16 @@ C-h f (describe-function)
 </p>
 </div>
 </div>
-<div id="outline-container-org50a9b64" class="outline-2">
-<h2 id="org50a9b64"><span class="section-number-2">4</span> M-x describe-face</h2>
+<div id="outline-container-org8efb895" class="outline-2">
+<h2 id="org8efb895"><span class="section-number-2">4</span> M-x describe-face</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 查看某个mode的文档
 </p>
 </div>
 </div>
-<div id="outline-container-org223aa69" class="outline-2">
-<h2 id="org223aa69"><span class="section-number-2">5</span> C-h m (describe-mode)</h2>
+<div id="outline-container-org2490a43" class="outline-2">
+<h2 id="org2490a43"><span class="section-number-2">5</span> C-h m (describe-mode)</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 刚开始学习某个mode的时候, 可以用C-h m看看当前buffer对应的主mode和副mode的文档, 这个文档一般都会包括mode中的命令和快捷键列表.
@@ -113,24 +113,24 @@ C-h f (describe-function)
 </p>
 </div>
 </div>
-<div id="outline-container-org0ab9b42" class="outline-2">
-<h2 id="org0ab9b42"><span class="section-number-2">6</span> C-h k (describe-key)</h2>
+<div id="outline-container-orgd421b42" class="outline-2">
+<h2 id="orgd421b42"><span class="section-number-2">6</span> C-h k (describe-key)</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 查看某个命令对应的快捷键
 </p>
 </div>
 </div>
-<div id="outline-container-orgb573df2" class="outline-2">
-<h2 id="orgb573df2"><span class="section-number-2">7</span> C-h w (where-is)</h2>
+<div id="outline-container-orga5336eb" class="outline-2">
+<h2 id="orga5336eb"><span class="section-number-2">7</span> C-h w (where-is)</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 查看当前buffer所有的快捷键列表
 </p>
 </div>
 </div>
-<div id="outline-container-org3b16281" class="outline-2">
-<h2 id="org3b16281"><span class="section-number-2">8</span> C-h b (describe-bindings)</h2>
+<div id="outline-container-org0e007fa" class="outline-2">
+<h2 id="org0e007fa"><span class="section-number-2">8</span> C-h b (describe-bindings)</h2>
 <div class="outline-text-2" id="text-8">
 <p>
 查看当前buffer中以某个快捷键序列开头的快捷键列表
@@ -139,27 +139,27 @@ C-h f (describe-function)
 </p>
 </div>
 </div>
-<div id="outline-container-org115ac9b" class="outline-2">
-<h2 id="org115ac9b"><span class="section-number-2">9</span> find-function</h2>
+<div id="outline-container-org284e456" class="outline-2">
+<h2 id="org284e456"><span class="section-number-2">9</span> find-function</h2>
 <div class="outline-text-2" id="text-9">
 <p>
 查看变量的代码
 </p>
 </div>
 </div>
-<div id="outline-container-org40a429f" class="outline-2">
-<h2 id="org40a429f"><span class="section-number-2">10</span> find-variable</h2>
+<div id="outline-container-org9c5aef6" class="outline-2">
+<h2 id="org9c5aef6"><span class="section-number-2">10</span> find-variable</h2>
 <div class="outline-text-2" id="text-10">
 <p>
 查看face的代码
 </p>
 </div>
 </div>
-<div id="outline-container-org5beb701" class="outline-2">
-<h2 id="org5beb701"><span class="section-number-2">11</span> find-face-definition</h2>
+<div id="outline-container-orgbd1d10c" class="outline-2">
+<h2 id="orgbd1d10c"><span class="section-number-2">11</span> find-face-definition</h2>
 </div>
-<div id="outline-container-org004c851" class="outline-2">
-<h2 id="org004c851"><span class="section-number-2">12</span> M-x apropos</h2>
+<div id="outline-container-org0e3248d" class="outline-2">
+<h2 id="org0e3248d"><span class="section-number-2">12</span> M-x apropos</h2>
 <div class="outline-text-2" id="text-12">
 <p>
 查看包含某个关键词的函数,变量,face
@@ -167,8 +167,8 @@ C-h f (describe-function)
 </div>
 </div>
 
-<div id="outline-container-org6342154" class="outline-2">
-<h2 id="org6342154"><span class="section-number-2">13</span> 会些简单的配置</h2>
+<div id="outline-container-org4c29e38" class="outline-2">
+<h2 id="org4c29e38"><span class="section-number-2">13</span> 会些简单的配置</h2>
 <div class="outline-text-2" id="text-13">
 <p>
 执行Elisp代码
@@ -184,16 +184,16 @@ Emacs的插件一般都是一个以el为后缀名的文件, 把这个文件下�
 </div>
 </div>
 </div>
-<div id="outline-container-orgeddfd38" class="outline-2">
-<h2 id="orgeddfd38"><span class="section-number-2">14</span> 快捷键定制</h2>
+<div id="outline-container-org4cf7ca0" class="outline-2">
+<h2 id="org4cf7ca0"><span class="section-number-2">14</span> 快捷键定制</h2>
 <div class="outline-text-2" id="text-14">
 <p>
 建议看<a href="http://docs.huihoo.com/homepage/shredderyin/wiki/KeyBinding.html">王垠的键盘绑定技巧</a>
 </p>
 </div>
 </div>
-<div id="outline-container-orgd185321" class="outline-2">
-<h2 id="orgd185321"><span class="section-number-2">15</span> 参考文献</h2>
+<div id="outline-container-orgebae64d" class="outline-2">
+<h2 id="orgebae64d"><span class="section-number-2">15</span> 参考文献</h2>
 <div class="outline-text-2" id="text-15">
 <p>
 <a href="http://emacser.com/emacs-beginner-must-know.htm">emacser中文网ahei Emacs初学者必会</a>

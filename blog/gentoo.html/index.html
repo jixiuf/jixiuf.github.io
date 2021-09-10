@@ -47,9 +47,9 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org2f73723">内核配置</a></li>
-<li><a href="#org3eaf8d0">make.conf 示例</a></li>
-<li><a href="#org18473a3">link</a></li>
+<li><a href="#orga31261e">内核配置</a></li>
+<li><a href="#orgdb1839b">make.conf 示例</a></li>
+<li><a href="#org099cff8">link</a></li>
 </ul>
 </div>
 </div>
@@ -63,9 +63,9 @@ python-updater<br />
 sys-apps/busybox-1.17.4 编译 :清缓存,删/var/tmp/portage/  export LC_ALL=en_US.UTF-8<br />
 </p>
 
-<div id="outline-container-org2f73723" class="outline-2">
-<h2 id="org2f73723">内核配置</h2>
-<div class="outline-text-2" id="text-org2f73723">
+<div id="outline-container-orga31261e" class="outline-2">
+<h2 id="orga31261e">内核配置</h2>
+<div class="outline-text-2" id="text-orga31261e">
 <ol class="org-ol">
 <li>filesystem 的语言设置<br />
 ntfs  936 utf8<br />
@@ -78,11 +78,11 @@ file system&#x2013;network file system &#x2013;CIFS support() 其他的不用变
 </ol>
 </div>
 </div>
-<div id="outline-container-org3eaf8d0" class="outline-2">
-<h2 id="org3eaf8d0">make.conf 示例</h2>
-<div class="outline-text-2" id="text-org3eaf8d0">
+<div id="outline-container-orgdb1839b" class="outline-2">
+<h2 id="orgdb1839b">make.conf 示例</h2>
+<div class="outline-text-2" id="text-orgdb1839b">
 <div class="org-src-container">
-<pre class="src src-sh" id="orga8307e3">  <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">for debug glibc</span>
+<pre class="src src-sh" id="orga719bd3">  <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">for debug glibc</span>
 <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">FEATURES="splitdebug nostrip"</span>
 <span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">CFLAGS="-march=native -O2 -pipe -mfpmath=sse -ggdb"</span>
 <span style="color: #40E0D0;">CFLAGS</span>=<span style="color: #ffa07a;">"-march=native -O2 -pipe -fomit-frame-pointer -mfpmath=sse -DSYSTEM_PURESIZE_EXTRA=600000 "</span>
@@ -161,9 +161,9 @@ source /resource/gentoo/layman/make.conf
 </div>
 </div>
 
-<div id="outline-container-org18473a3" class="outline-2">
-<h2 id="org18473a3">link</h2>
-<div class="outline-text-2" id="text-org18473a3">
+<div id="outline-container-org099cff8" class="outline-2">
+<h2 id="org099cff8">link</h2>
+<div class="outline-text-2" id="text-org099cff8">
 <p>
 <a href="http://mirrors.sohu.com/gentoo/releases/x86/autobuilds/current-iso/stage3-i686-20121213.tar.bz2">http://mirrors.sohu.com/gentoo/releases/x86/autobuilds/current-iso/stage3-i686-20121213.tar.bz2</a><br />
 <a href="http://mirrors.sohu.com/gentoo/releases/snapshots/current/portage-latest.tar.xz">http://mirrors.sohu.com/gentoo/releases/snapshots/current/portage-latest.tar.xz</a><br />

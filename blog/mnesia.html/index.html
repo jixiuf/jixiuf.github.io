@@ -47,21 +47,21 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org625b3dd">Mnesia 的几个参数</a>
+<li><a href="#org3f6c194">Mnesia 的几个参数</a>
 <ul>
-<li><a href="#org952e07c">dc_dump_limit</a></li>
-<li><a href="#org4927a1e">dump_log_write_threshold</a></li>
-<li><a href="#orgaf35a45">dump_log_time_threshold 默认3min</a></li>
-<li><a href="#orgddce340">WARNING ** Mnesia is overloaded: {dump_log,time_threshold}</a></li>
+<li><a href="#orgcf1b59a">dc_dump_limit</a></li>
+<li><a href="#org563b406">dump_log_write_threshold</a></li>
+<li><a href="#orgfc601d8">dump_log_time_threshold 默认3min</a></li>
+<li><a href="#orge7ffb6d">WARNING ** Mnesia is overloaded: {dump_log,time_threshold}</a></li>
 </ul>
 </li>
-<li><a href="#orgabb7e17">Link</a></li>
+<li><a href="#org5a74978">Link</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org625b3dd" class="outline-2">
-<h2 id="org625b3dd">Mnesia 的几个参数</h2>
-<div class="outline-text-2" id="text-org625b3dd">
+<div id="outline-container-org3f6c194" class="outline-2">
+<h2 id="org3f6c194">Mnesia 的几个参数</h2>
+<div class="outline-text-2" id="text-org3f6c194">
 <p>
 mnesia有 LATEST.LOG 日志文件 及 *.DAT, *.DCD *.DCL 等数据文件<br />
 mnesia是先向 LATEST.LOG写日志，当日志达到dump_log_write_threshold参数(默认<br />
@@ -69,9 +69,9 @@ mnesia是先向 LATEST.LOG写日志，当日志达到dump_log_write_threshold参
 dump操作应该就是 LOG-&gt;DAT转移的过程<br />
 </p>
 </div>
-<div id="outline-container-org952e07c" class="outline-3">
-<h3 id="org952e07c">dc_dump_limit</h3>
-<div class="outline-text-3" id="text-org952e07c">
+<div id="outline-container-orgcf1b59a" class="outline-3">
+<h3 id="orgcf1b59a">dc_dump_limit</h3>
+<div class="outline-text-3" id="text-orgcf1b59a">
 <p>
 This variable controls how often disc_copies tables are dumped from memory.<br />
 The default value is 4, which means if the size of the log is greater than<br />
@@ -81,9 +81,9 @@ purposes.<br />
 </p>
 </div>
 </div>
-<div id="outline-container-org4927a1e" class="outline-3">
-<h3 id="org4927a1e">dump_log_write_threshold</h3>
-<div class="outline-text-3" id="text-org4927a1e">
+<div id="outline-container-org563b406" class="outline-3">
+<h3 id="org563b406">dump_log_write_threshold</h3>
+<div class="outline-text-3" id="text-org563b406">
 <p>
 默认每执行100次write ,才会dump 到硬盘一次,<br />
 调大这个值,即增大dump的间隔,即，如果你write很频繁，可以试着调大此值，<br />
@@ -100,9 +100,9 @@ configuration variable, which by default dumps the log every 3 minutes.<br />
 </p>
 </div>
 </div>
-<div id="outline-container-orgaf35a45" class="outline-3">
-<h3 id="orgaf35a45">dump_log_time_threshold 默认3min</h3>
-<div class="outline-text-3" id="text-orgaf35a45">
+<div id="outline-container-orgfc601d8" class="outline-3">
+<h3 id="orgfc601d8">dump_log_time_threshold 默认3min</h3>
+<div class="outline-text-3" id="text-orgfc601d8">
 <p>
 跟dump_log_write_threshold配合的一个参数，<br />
 每3min执行一次dump操作,主要是当write数据很不频繁，达不到<br />
@@ -110,9 +110,9 @@ dump_log_write_threshold的值，到了时间仍然进行dump操作，<br />
 </p>
 </div>
 </div>
-<div id="outline-container-orgddce340" class="outline-3">
-<h3 id="orgddce340">WARNING ** Mnesia is overloaded: {dump_log,time_threshold}</h3>
-<div class="outline-text-3" id="text-orgddce340">
+<div id="outline-container-orge7ffb6d" class="outline-3">
+<h3 id="orge7ffb6d">WARNING ** Mnesia is overloaded: {dump_log,time_threshold}</h3>
+<div class="outline-text-3" id="text-orge7ffb6d">
 <p>
 连续多次收到这样一条消息的原因，这里有说明<br />
 <a href="http://erlang.2086793.n4.nabble.com/my-mnesia-is-lazy-td2114608.html">http://erlang.2086793.n4.nabble.com/my-mnesia-is-lazy-td2114608.html</a><br />
@@ -136,9 +136,9 @@ differentiate this case.<br />
 </div>
 </div>
 
-<div id="outline-container-orgabb7e17" class="outline-2">
-<h2 id="orgabb7e17">Link</h2>
-<div class="outline-text-2" id="text-orgabb7e17">
+<div id="outline-container-org5a74978" class="outline-2">
+<h2 id="org5a74978">Link</h2>
+<div class="outline-text-2" id="text-org5a74978">
 <p>
 <a href="http://streamhacker.com/2008/12/10/how-to-eliminate-mnesia-overload-events/">http://streamhacker.com/2008/12/10/how-to-eliminate-mnesia-overload-events/</a><br />
 <a href="http://www.erlang.org/doc/apps/mnesia/Mnesia_chap7.html">http://www.erlang.org/doc/apps/mnesia/Mnesia_chap7.html</a><br />

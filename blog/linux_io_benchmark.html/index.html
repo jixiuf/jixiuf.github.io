@@ -47,27 +47,27 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org7297fd9">1. 使用fio进行I/O性能测试</a>
+<li><a href="#orgf9a3020">1. 使用fio进行I/O性能测试</a>
 <ul>
-<li><a href="#org099252b">1.1. fio的命令行参数</a>
+<li><a href="#org2fbeac8">1.1. fio的命令行参数</a>
 <ul>
-<li><a href="#org6608d14">1.1.1. 和异步I/O相关的几个参数：</a></li>
+<li><a href="#org0ee6054">1.1.1. 和异步I/O相关的几个参数：</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org0e494d5">2. 描述IO性能的几个参数</a>
+<li><a href="#org62d5b0d">2. 描述IO性能的几个参数</a>
 <ul>
-<li><a href="#org5866136">2.1. fio 测试例子</a></li>
+<li><a href="#org8824038">2.1. fio 测试例子</a></li>
 </ul>
 </li>
-<li><a href="#org012168c">3. link</a></li>
+<li><a href="#org835940f">3. link</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org7297fd9" class="outline-2">
-<h2 id="org7297fd9"><span class="section-number-2">1</span> 使用fio进行I/O性能测试</h2>
+<div id="outline-container-orgf9a3020" class="outline-2">
+<h2 id="orgf9a3020"><span class="section-number-2">1</span> 使用fio进行I/O性能测试</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 yum install libaio libaio-devel fio
@@ -87,8 +87,8 @@ fio是一个非常灵活的I/O测试工具,支持多线程或进程模拟等I/O�
 </p>
 </div>
 
-<div id="outline-container-org099252b" class="outline-3">
-<h3 id="org099252b"><span class="section-number-3">1.1</span> fio的命令行参数</h3>
+<div id="outline-container-org2fbeac8" class="outline-3">
+<h3 id="org2fbeac8"><span class="section-number-3">1.1</span> fio的命令行参数</h3>
 <div class="outline-text-3" id="text-1-1">
 <ol class="org-ol">
 <li>-name=hello
@@ -137,8 +137,8 @@ splice, null, network, syslet, guasi, solarisaio 等等。
 <li>lockmem=4g 限定使用4g的内存进行测试</li>
 </ol>
 </div>
-<div id="outline-container-org6608d14" class="outline-4">
-<h4 id="org6608d14"><span class="section-number-4">1.1.1</span> 和异步I/O相关的几个参数：</h4>
+<div id="outline-container-org0ee6054" class="outline-4">
+<h4 id="org0ee6054"><span class="section-number-4">1.1.1</span> 和异步I/O相关的几个参数：</h4>
 <div class="outline-text-4" id="text-1-1-1">
 <ol class="org-ol">
 <li>iodepth<sub>batch</sub>=4
@@ -169,8 +169,8 @@ iodepth<sub>batch</sub><sub>complete值个</sub>。随着收割，IO队列里面
 </div>
 </div>
 </div>
-<div id="outline-container-org0e494d5" class="outline-2">
-<h2 id="org0e494d5"><span class="section-number-2">2</span> 描述IO性能的几个参数</h2>
+<div id="outline-container-org62d5b0d" class="outline-2">
+<h2 id="org62d5b0d"><span class="section-number-2">2</span> 描述IO性能的几个参数</h2>
 <div class="outline-text-2" id="text-2">
 <ol class="org-ol">
 <li>IOPS (Input/Output Operations Per Second)，
@@ -181,8 +181,8 @@ IOPS是指存储每秒可接受多少次主机发出的访问，主机的一次I
 </div>
 
 
-<div id="outline-container-org5866136" class="outline-3">
-<h3 id="org5866136"><span class="section-number-3">2.1</span> fio 测试例子</h3>
+<div id="outline-container-org8824038" class="outline-3">
+<h3 id="org8824038"><span class="section-number-3">2.1</span> fio 测试例子</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 测试序列读， 每次读取大小4k的块，默认的ioengine=sync,运行60s(runtime),-direct=1,跳过buffer
@@ -356,8 +356,8 @@ Disk stats (read/write):
 </div>
 </div>
 </div>
-<div id="outline-container-org012168c" class="outline-2">
-<h2 id="org012168c"><span class="section-number-2">3</span> link</h2>
+<div id="outline-container-org835940f" class="outline-2">
+<h2 id="org835940f"><span class="section-number-2">3</span> link</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 <a href="http://debugo.com/fio-test">http://debugo.com/fio-test</a>

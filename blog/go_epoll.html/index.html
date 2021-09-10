@@ -47,29 +47,29 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orga3c9b71">epoll_create 的跟踪</a>
+<li><a href="#orgb74ac4a">epoll_create 的跟踪</a>
 <ul>
-<li><a href="#org5b9b5cb">流程之 设置IO非阻塞 syscall.SetNonblock(s, true)设置NonBlock 为true,</a></li>
-<li><a href="#orgcb2030d">epoll_create的流程 即epoll的初始化</a></li>
-<li><a href="#orgcb00250">runtime_pollServerInit跟踪 这个过程会跟踪到epollcreate的调用</a></li>
+<li><a href="#org7b4add1">流程之 设置IO非阻塞 syscall.SetNonblock(s, true)设置NonBlock 为true,</a></li>
+<li><a href="#org513151c">epoll_create的流程 即epoll的初始化</a></li>
+<li><a href="#org8446667">runtime_pollServerInit跟踪 这个过程会跟踪到epollcreate的调用</a></li>
 </ul>
 </li>
-<li><a href="#orga4cd9bd">epoll_ctrl的跟踪</a></li>
-<li><a href="#org1792eb2">epoll_wait 与golang 的异步IO</a></li>
-<li><a href="#org85f7c72">sysmon  goroutine调度 与epoll_wait 相关代码分析</a></li>
+<li><a href="#org7d851d8">epoll_ctrl的跟踪</a></li>
+<li><a href="#org9542d1a">epoll_wait 与golang 的异步IO</a></li>
+<li><a href="#org8173c0d">sysmon  goroutine调度 与epoll_wait 相关代码分析</a></li>
 </ul>
 </div>
 </div>
 <p>
 以DialTCP为例 分析初始化 epoll_create的流程分析过程中只保留关键代码<br />
 </p>
-<div id="outline-container-orga3c9b71" class="outline-2">
-<h2 id="orga3c9b71">epoll_create 的跟踪</h2>
-<div class="outline-text-2" id="text-orga3c9b71">
+<div id="outline-container-orgb74ac4a" class="outline-2">
+<h2 id="orgb74ac4a">epoll_create 的跟踪</h2>
+<div class="outline-text-2" id="text-orgb74ac4a">
 </div>
-<div id="outline-container-org5b9b5cb" class="outline-3">
-<h3 id="org5b9b5cb">流程之 设置IO非阻塞 syscall.SetNonblock(s, true)设置NonBlock 为true,</h3>
-<div class="outline-text-3" id="text-org5b9b5cb">
+<div id="outline-container-org7b4add1" class="outline-3">
+<h3 id="org7b4add1">流程之 设置IO非阻塞 syscall.SetNonblock(s, true)设置NonBlock 为true,</h3>
+<div class="outline-text-3" id="text-org7b4add1">
 <p>
 DialTCP()-&gt;dialTCP()-&gt;internetSocket()-&gt;socket()<br />
 在socket()函数内首先会走到这个分支 sysSocket()-&gt;syscall.SetNonblock(s, true); 这里设置NonBlock 为true,即IO是非阻塞的<br />
@@ -151,9 +151,9 @@ net/sock_cloexec.go<br />
 </div>
 </div>
 
-<div id="outline-container-orgcb2030d" class="outline-3">
-<h3 id="orgcb2030d">epoll_create的流程 即epoll的初始化</h3>
-<div class="outline-text-3" id="text-orgcb2030d">
+<div id="outline-container-org513151c" class="outline-3">
+<h3 id="org513151c">epoll_create的流程 即epoll的初始化</h3>
+<div class="outline-text-3" id="text-org513151c">
 <p>
 接着上面的socket()函数看<br />
 然后socket()内的流程 -&gt; fd.dial()-&gt;fd.connect()-&gt;fd.init()<br />
@@ -283,9 +283,9 @@ func (pd *pollDesc) init(fd *netFD) error {
 </div>
 
 
-<div id="outline-container-orgcb00250" class="outline-3">
-<h3 id="orgcb00250">runtime_pollServerInit跟踪 这个过程会跟踪到epollcreate的调用</h3>
-<div class="outline-text-3" id="text-orgcb00250">
+<div id="outline-container-org8446667" class="outline-3">
+<h3 id="org8446667">runtime_pollServerInit跟踪 这个过程会跟踪到epollcreate的调用</h3>
+<div class="outline-text-3" id="text-org8446667">
 <p>
 net/fd_poll_runtime.go 文件中声明的 runtime_pollServerInit是个空函数，导致似乎跟踪到此就结束了<br />
 然后似乎没非如此，用grep在整个代码搜索runtime_pollServerInit  会有以下结果<br />
@@ -339,9 +339,9 @@ func netpollinit() {
 </div>
 </div>
 </div>
-<div id="outline-container-orga4cd9bd" class="outline-2">
-<h2 id="orga4cd9bd">epoll_ctrl的跟踪</h2>
-<div class="outline-text-2" id="text-orga4cd9bd">
+<div id="outline-container-org7d851d8" class="outline-2">
+<h2 id="org7d851d8">epoll_ctrl的跟踪</h2>
+<div class="outline-text-2" id="text-org7d851d8">
 <p>
 我们再次回到上文中提到的一块代码pollDesc.init()的过程<br />
 </p>
@@ -414,9 +414,9 @@ runtime/netpoll_epoll.go<br />
 </ol>
 </div>
 </div>
-<div id="outline-container-org1792eb2" class="outline-2">
-<h2 id="org1792eb2">epoll_wait 与golang 的异步IO</h2>
-<div class="outline-text-2" id="text-org1792eb2">
+<div id="outline-container-org9542d1a" class="outline-2">
+<h2 id="org9542d1a">epoll_wait 与golang 的异步IO</h2>
+<div class="outline-text-2" id="text-org9542d1a">
 <p>
 runtime/netpoll_epoll.go文件中 我们找到了 epollwait的身影<br />
 先不管哪些地方会调用到这，先分析下这个函数<br />
@@ -490,9 +490,9 @@ occurs, epoll_wait() returns -1 and errno is set appropriately.<br />
 </p>
 </div>
 </div>
-<div id="outline-container-org85f7c72" class="outline-2">
-<h2 id="org85f7c72">sysmon  goroutine调度 与epoll_wait 相关代码分析</h2>
-<div class="outline-text-2" id="text-org85f7c72">
+<div id="outline-container-org8173c0d" class="outline-2">
+<h2 id="org8173c0d">sysmon  goroutine调度 与epoll_wait 相关代码分析</h2>
+<div class="outline-text-2" id="text-org8173c0d">
 <p>
 从runtime/proc.go 文件中 的入口函数，入手<br />
 可以看到它会走到sysmon函数<br />

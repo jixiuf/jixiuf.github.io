@@ -47,24 +47,24 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org7e8be6e">前言</a></li>
-<li><a href="#orgf1b3bb0">LVS (linux virtual server) 什么是LVS？</a></li>
-<li><a href="#orgafe1cbf">安装</a></li>
-<li><a href="#org0fa1d5c">LVS的组成</a></li>
-<li><a href="#org276a3c0">LVS负载均衡方式</a>
+<li><a href="#orgf6db1f6">前言</a></li>
+<li><a href="#org47c064b">LVS (linux virtual server) 什么是LVS？</a></li>
+<li><a href="#org6488a77">安装</a></li>
+<li><a href="#org07d3067">LVS的组成</a></li>
+<li><a href="#org142cc3e">LVS负载均衡方式</a>
 <ul>
-<li><a href="#orgacb35d3">Virtual Server via Network Address Translation NAT（VS/NAT）</a></li>
-<li><a href="#org621a056">Virtual Server via IP Tunneling(VS/TUN)</a></li>
-<li><a href="#org4eb71b1">Virtual Server via Direct Routing(VS/DR) 推荐使用的</a></li>
+<li><a href="#org5bfbb0c">Virtual Server via Network Address Translation NAT（VS/NAT）</a></li>
+<li><a href="#org5a10217">Virtual Server via IP Tunneling(VS/TUN)</a></li>
+<li><a href="#org40b807e">Virtual Server via Direct Routing(VS/DR) 推荐使用的</a></li>
 </ul>
 </li>
-<li><a href="#org65df543">8种调度算法</a></li>
+<li><a href="#orgd4bdde9">8种调度算法</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org7e8be6e" class="outline-2">
-<h2 id="org7e8be6e">前言</h2>
-<div class="outline-text-2" id="text-org7e8be6e">
+<div id="outline-container-orgf6db1f6" class="outline-2">
+<h2 id="orgf6db1f6">前言</h2>
+<div class="outline-text-2" id="text-orgf6db1f6">
 <p>
 参考<br />
 <a href="https://my.oschina.net/leeypp1/blog/294807">https://my.oschina.net/leeypp1/blog/294807</a><br />
@@ -74,9 +74,9 @@
 </p>
 </div>
 </div>
-<div id="outline-container-orgf1b3bb0" class="outline-2">
-<h2 id="orgf1b3bb0">LVS (linux virtual server) 什么是LVS？</h2>
-<div class="outline-text-2" id="text-orgf1b3bb0">
+<div id="outline-container-org47c064b" class="outline-2">
+<h2 id="org47c064b">LVS (linux virtual server) 什么是LVS？</h2>
+<div class="outline-text-2" id="text-org47c064b">
 <p>
   首先简单介绍一下LVS (Linux Virtual Server)到底是什么东西，其实它是一<br />
 种集群(Cluster)技术，基于IP的负载均衡技术。<br />
@@ -91,18 +91,18 @@
 </p>
 </div>
 </div>
-<div id="outline-container-orgafe1cbf" class="outline-2">
-<h2 id="orgafe1cbf">安装</h2>
-<div class="outline-text-2" id="text-orgafe1cbf">
+<div id="outline-container-org6488a77" class="outline-2">
+<h2 id="org6488a77">安装</h2>
+<div class="outline-text-2" id="text-org6488a77">
 <pre class="example">
 yum install ipvsadm
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org0fa1d5c" class="outline-2">
-<h2 id="org0fa1d5c">LVS的组成</h2>
-<div class="outline-text-2" id="text-org0fa1d5c">
+<div id="outline-container-org07d3067" class="outline-2">
+<h2 id="org07d3067">LVS的组成</h2>
+<div class="outline-text-2" id="text-org07d3067">
 <ol class="org-ol">
 <li><p>
 负载调度器（load balancer/ Director）<br />
@@ -124,13 +124,13 @@ Load balancer 将客户真实的请求通过一定的负载均衡策略从 RealS
 </div>
 </div>
 
-<div id="outline-container-org276a3c0" class="outline-2">
-<h2 id="org276a3c0">LVS负载均衡方式</h2>
-<div class="outline-text-2" id="text-org276a3c0">
+<div id="outline-container-org142cc3e" class="outline-2">
+<h2 id="org142cc3e">LVS负载均衡方式</h2>
+<div class="outline-text-2" id="text-org142cc3e">
 </div>
-<div id="outline-container-orgacb35d3" class="outline-3">
-<h3 id="orgacb35d3">Virtual Server via Network Address Translation NAT（VS/NAT）</h3>
-<div class="outline-text-3" id="text-orgacb35d3">
+<div id="outline-container-org5bfbb0c" class="outline-3">
+<h3 id="org5bfbb0c">Virtual Server via Network Address Translation NAT（VS/NAT）</h3>
+<div class="outline-text-3" id="text-org5bfbb0c">
 <p>
 VS/NAT是一种最简单的方式，所有的RealServer只需要将自己的网关指向<br />
 Director即可。客户端可以是任意操作系统，但此方式下，一个Director<br />
@@ -211,9 +211,9 @@ ipvsadm -e -t 192.168.244.132:80 -r 192.168.27.131 -m -w 1
 </div>
 </div>
 
-<div id="outline-container-org621a056" class="outline-3">
-<h3 id="org621a056">Virtual Server via IP Tunneling(VS/TUN)</h3>
-<div class="outline-text-3" id="text-org621a056">
+<div id="outline-container-org5a10217" class="outline-3">
+<h3 id="org5a10217">Virtual Server via IP Tunneling(VS/TUN)</h3>
+<div class="outline-text-3" id="text-org5a10217">
 <p>
 IP隧道（IP tunneling）是将一个IP报文封装在另一个IP报文的技术，这可以<br />
 使得目标为一个IP地址的数据报文能被封装和转发到另一个IP地址。IP隧道技术<br />
@@ -295,9 +295,9 @@ route add -host 192.168.182.200 dev tunl0
 </div>
 
 
-<div id="outline-container-org4eb71b1" class="outline-3">
-<h3 id="org4eb71b1">Virtual Server via Direct Routing(VS/DR) 推荐使用的</h3>
-<div class="outline-text-3" id="text-org4eb71b1">
+<div id="outline-container-org40b807e" class="outline-3">
+<h3 id="org40b807e">Virtual Server via Direct Routing(VS/DR) 推荐使用的</h3>
+<div class="outline-text-3" id="text-org40b807e">
 <p>
 VS/DR方式是通过改写请求报文中的MAC地址部分来实现的。Director和<br />
 RealServer必需在物理上有一个网卡通过不间断的局域网相连。<br />
@@ -442,9 +442,9 @@ ipvsadm -a -t 192.168.182.200:80 -r 192.168.182.129 -g
 </div>
 
 
-<div id="outline-container-org65df543" class="outline-2">
-<h2 id="org65df543">8种调度算法</h2>
-<div class="outline-text-2" id="text-org65df543">
+<div id="outline-container-orgd4bdde9" class="outline-2">
+<h2 id="orgd4bdde9">8种调度算法</h2>
+<div class="outline-text-2" id="text-orgd4bdde9">
 <ol class="org-ol">
 <li>轮叫调度（Round Robin Scheduling）<br />
 算法就是以轮叫的方式依次将请求调度不同的服务器，即每次调度执行i=(i+1)mod n，并选出第i台服务器。算法的优点是其简洁性，它无需记录当前所有连接的状态，所以它是一种无状态调度。<br /></li>

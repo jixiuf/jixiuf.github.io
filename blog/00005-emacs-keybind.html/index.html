@@ -45,31 +45,31 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org08c81e8">全局按键绑定global-set-key</a></li>
-<li><a href="#orga12f56b">绑定新的前缀键</a></li>
-<li><a href="#org0cb6926">创建新的 prefix command</a></li>
-<li><a href="#org405e011">如何查看 某个快捷键绑定了什么命令</a></li>
-<li><a href="#org3a8259b">如何查看 某个函数或命令的文档</a></li>
-<li><a href="#orgfb96778">为具体的 major mode 绑定按键</a></li>
-<li><a href="#orga6e0cad">常用按键总结</a>
+<li><a href="#orgaeeb670">全局按键绑定global-set-key</a></li>
+<li><a href="#org9130de4">绑定新的前缀键</a></li>
+<li><a href="#orga7cfd2a">创建新的 prefix command</a></li>
+<li><a href="#orgbdb8032">如何查看 某个快捷键绑定了什么命令</a></li>
+<li><a href="#orgaec1647">如何查看 某个函数或命令的文档</a></li>
+<li><a href="#org55842d1">为具体的 major mode 绑定按键</a></li>
+<li><a href="#org7ff0079">常用按键总结</a>
 <ul>
-<li><a href="#org4164282">光标移动/快速定位相关</a></li>
-<li><a href="#org604c0e4">常用操作相关</a></li>
+<li><a href="#org15cdbc0">光标移动/快速定位相关</a></li>
+<li><a href="#org8979897">常用操作相关</a></li>
 </ul>
 </li>
-<li><a href="#org0d21989">一些常用操作的优化</a>
+<li><a href="#org3faacf2">一些常用操作的优化</a>
 <ul>
-<li><a href="#org6b04622">C-a smart-beginning-of-line</a></li>
-<li><a href="#org746a4b9">C-e smart-end-of-line</a></li>
+<li><a href="#org6e8c87c">C-a smart-beginning-of-line</a></li>
+<li><a href="#orga72a29b">C-e smart-end-of-line</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org08c81e8" class="outline-2">
-<h2 id="org08c81e8">全局按键绑定global-set-key</h2>
-<div class="outline-text-2" id="text-org08c81e8">
+<div id="outline-container-orgaeeb670" class="outline-2">
+<h2 id="orgaeeb670">全局按键绑定global-set-key</h2>
+<div class="outline-text-2" id="text-orgaeeb670">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(global-set-key ... 'my-funtion)
 &#27604;&#22914;
@@ -103,9 +103,9 @@ M-x:global-set-key RET 然后 按下 Alt-Return 按键 ，然后输入forward-ch
 </div>
 </div>
 </div>
-<div id="outline-container-orga12f56b" class="outline-2">
-<h2 id="orga12f56b">绑定新的前缀键</h2>
-<div class="outline-text-2" id="text-orga12f56b">
+<div id="outline-container-org9130de4" class="outline-2">
+<h2 id="org9130de4">绑定新的前缀键</h2>
+<div class="outline-text-2" id="text-org9130de4">
 <p>
 其实上面的办法只能让你绑定一个已有的前缀。你有可能想绑定一个<br />
 save-buffer 到 "C-c C-c C-b a"。上面的办法就不灵了。我们必须 使用另外<br />
@@ -123,9 +123,9 @@ save-buffer 到 "C-c C-c C-b a"。上面的办法就不灵了。我们必须 使
 </div>
 </div>
 
-<div id="outline-container-org0cb6926" class="outline-2">
-<h2 id="org0cb6926">创建新的 prefix command</h2>
-<div class="outline-text-2" id="text-org0cb6926">
+<div id="outline-container-orga7cfd2a" class="outline-2">
+<h2 id="orga7cfd2a">创建新的 prefix command</h2>
+<div class="outline-text-2" id="text-orga7cfd2a">
 <p>
 上面这个办法只对开头的键已经是 prefix command 的键序列起作用， 如果<br />
 你的第一个键不是一个 prefix，那么就会出错。你可以试试：<br />
@@ -149,9 +149,9 @@ save-buffer 到 "C-c C-c C-b a"。上面的办法就不灵了。我们必须 使
 </div>
 </div>
 </div>
-<div id="outline-container-org405e011" class="outline-2">
-<h2 id="org405e011">如何查看 某个快捷键绑定了什么命令</h2>
-<div class="outline-text-2" id="text-org405e011">
+<div id="outline-container-orgbdb8032" class="outline-2">
+<h2 id="orgbdb8032">如何查看 某个快捷键绑定了什么命令</h2>
+<div class="outline-text-2" id="text-orgbdb8032">
 <p>
 C-h k 或 F1 k<br />
 比如我想看 C-x C-s 这个快捷键 绑定了什么命令<br />
@@ -161,9 +161,9 @@ F1 k 然后按下C-s C-s按键<br />
 </p>
 </div>
 </div>
-<div id="outline-container-org3a8259b" class="outline-2">
-<h2 id="org3a8259b">如何查看 某个函数或命令的文档</h2>
-<div class="outline-text-2" id="text-org3a8259b">
+<div id="outline-container-orgaec1647" class="outline-2">
+<h2 id="orgaec1647">如何查看 某个函数或命令的文档</h2>
+<div class="outline-text-2" id="text-orgaec1647">
 <p>
 C-h f 或F1 f 然后输入相应函数名<br />
 如查看 forward-char 命令的文档<br />
@@ -172,9 +172,9 @@ F1 f 然后输入forward-char 回车<br />
 </p>
 </div>
 </div>
-<div id="outline-container-orgfb96778" class="outline-2">
-<h2 id="orgfb96778">为具体的 major mode 绑定按键</h2>
-<div class="outline-text-2" id="text-orgfb96778">
+<div id="outline-container-org55842d1" class="outline-2">
+<h2 id="org55842d1">为具体的 major mode 绑定按键</h2>
+<div class="outline-text-2" id="text-org55842d1">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">require</span> '<span style="color: #D8FA3C;">dired</span>)
 <span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">&#27604;&#22914;&#22312;dired mode &#19979;  &#30452;&#25509;&#25353;u  &#23601;&#22238;&#21040;&#19978;&#23618;&#30446;&#24405;dired-up-directory</span>
@@ -188,13 +188,13 @@ F1 f 然后输入forward-char 回车<br />
 </div>
 </div>
 
-<div id="outline-container-orga6e0cad" class="outline-2">
-<h2 id="orga6e0cad">常用按键总结</h2>
-<div class="outline-text-2" id="text-orga6e0cad">
+<div id="outline-container-org7ff0079" class="outline-2">
+<h2 id="org7ff0079">常用按键总结</h2>
+<div class="outline-text-2" id="text-org7ff0079">
 </div>
-<div id="outline-container-org4164282" class="outline-3">
-<h3 id="org4164282">光标移动/快速定位相关</h3>
-<div class="outline-text-3" id="text-org4164282">
+<div id="outline-container-org15cdbc0" class="outline-3">
+<h3 id="org15cdbc0">光标移动/快速定位相关</h3>
+<div class="outline-text-3" id="text-org15cdbc0">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -365,9 +365,9 @@ C-g的详细说明: 比如我想打开一个文件C-x C-f 当我按完C-x 还没
 </p>
 </div>
 </div>
-<div id="outline-container-org604c0e4" class="outline-3">
-<h3 id="org604c0e4">常用操作相关</h3>
-<div class="outline-text-3" id="text-org604c0e4">
+<div id="outline-container-org8979897" class="outline-3">
+<h3 id="org8979897">常用操作相关</h3>
+<div class="outline-text-3" id="text-org8979897">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -505,9 +505,9 @@ point 之间的区域。<br />
 </div>
 </div>
 
-<div id="outline-container-org0d21989" class="outline-2">
-<h2 id="org0d21989">一些常用操作的优化</h2>
-<div class="outline-text-2" id="text-org0d21989">
+<div id="outline-container-org3faacf2" class="outline-2">
+<h2 id="org3faacf2">一些常用操作的优化</h2>
+<div class="outline-text-2" id="text-org3faacf2">
 <p>
 比如 C-x k kill-buffer 默认会提示你输入要kill 的buffer 名 ，如果是当前buffer 则直接回车<br />
 我嫌输入回车麻烦， 我想做到输入C-x k 直接把当前buffer 关闭<br />
@@ -529,9 +529,9 @@ point 之间的区域。<br />
 </pre>
 </div>
 </div>
-<div id="outline-container-org6b04622" class="outline-3">
-<h3 id="org6b04622">C-a smart-beginning-of-line</h3>
-<div class="outline-text-3" id="text-org6b04622">
+<div id="outline-container-org6e8c87c" class="outline-3">
+<h3 id="org6e8c87c">C-a smart-beginning-of-line</h3>
+<div class="outline-text-3" id="text-org6e8c87c">
 <p>
 默认情况下C-a 绑定的的函数move-beginning-of-line 。<br />
 但是我对   move-beginning-of-line这个函数不太满意，我想做到，当我第一次<br />
@@ -554,9 +554,9 @@ point 之间的区域。<br />
 </div>
 </div>
 </div>
-<div id="outline-container-org746a4b9" class="outline-3">
-<h3 id="org746a4b9">C-e smart-end-of-line</h3>
-<div class="outline-text-3" id="text-org746a4b9">
+<div id="outline-container-orga72a29b" class="outline-3">
+<h3 id="orga72a29b">C-e smart-end-of-line</h3>
+<div class="outline-text-3" id="text-orga72a29b">
 <p>
 C-e对于end-of-line ,也想要同样的效果。<br />
 </p>

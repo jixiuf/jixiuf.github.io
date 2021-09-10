@@ -47,48 +47,48 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org32d3e83">git rm</a></li>
-<li><a href="#org247c396">在一个旧库中 建一个新分支（新分支上无任何内容）</a></li>
-<li><a href="#orgeee62db">git submodule 子模块的删除</a></li>
-<li><a href="#org1429389">要查看某个文件的以前的版本,使用 git show 命令</a></li>
-<li><a href="#orgbb122d9">可以checkout 某个文件的以前的版本</a></li>
-<li><a href="#orga1c23a4">git ls-tree 与git show</a></li>
-<li><a href="#org5839afb">git svn</a>
+<li><a href="#org0ae9f6f">git rm</a></li>
+<li><a href="#org5340f73">在一个旧库中 建一个新分支（新分支上无任何内容）</a></li>
+<li><a href="#org2209eea">git submodule 子模块的删除</a></li>
+<li><a href="#orgab98443">要查看某个文件的以前的版本,使用 git show 命令</a></li>
+<li><a href="#org348d1fd">可以checkout 某个文件的以前的版本</a></li>
+<li><a href="#orge6863e3">git ls-tree 与git show</a></li>
+<li><a href="#org8574710">git svn</a>
 <ul>
-<li><a href="#org1fb9a5d">svn 的远程分支叫 remotes/git-svn</a></li>
-<li><a href="#orgf424e49">git reset version</a></li>
+<li><a href="#org57d4882">svn 的远程分支叫 remotes/git-svn</a></li>
+<li><a href="#org828cbd8">git reset version</a></li>
 </ul>
 </li>
-<li><a href="#orgea23bcd">找回丢失的提交</a></li>
-<li><a href="#org68b73a6">找回库中删除的文件</a>
+<li><a href="#orga3ace2d">找回丢失的提交</a></li>
+<li><a href="#orgcbe1e55">找回库中删除的文件</a>
 <ul>
-<li><a href="#org731d9e1">grep 历史提交中的内容</a></li>
+<li><a href="#org67867e3">grep 历史提交中的内容</a></li>
 </ul>
 </li>
-<li><a href="#orgf65e4ab">关于换行符 空格</a>
+<li><a href="#orgeaf4392">关于换行符 空格</a>
 <ul>
-<li><a href="#org7c0f751">git config &#x2013;global core.whitespace cr-at-eol</a></li>
-<li><a href="#org44411b8">如果很多文件包含 ^M 这个字符想把它去掉 (未测试 )</a></li>
+<li><a href="#orgfd46858">git config &#x2013;global core.whitespace cr-at-eol</a></li>
+<li><a href="#orgf761e19">如果很多文件包含 ^M 这个字符想把它去掉 (未测试 )</a></li>
 </ul>
 </li>
-<li><a href="#orga591bc8">总有一些修改的文件你不想提交,比如 连接db的配置文件,你只是想在本机做测试而做的小修改</a></li>
-<li><a href="#org4bdbb2b">关于修改已经提交的信息 git filter-branch</a>
+<li><a href="#orgbcac17a">总有一些修改的文件你不想提交,比如 连接db的配置文件,你只是想在本机做测试而做的小修改</a></li>
+<li><a href="#orgecf6f67">关于修改已经提交的信息 git filter-branch</a>
 <ul>
-<li><a href="#orgb990b4b">查找中文件中包含"密码"二字的文件列出来</a></li>
-<li><a href="#org0cad3d5">修改历史提交信息</a></li>
-<li><a href="#org3c9172f">删除敏感文件</a></li>
-<li><a href="#org8706c1f">修改 commiter 的 name 和 email，</a></li>
-<li><a href="#org42bce6c">把项目中的某个目录当作git 的新的根目录 ,除此目录中的文件都删掉</a></li>
-<li><a href="#orgfb9fc70">删除两次提交之间的提交log,但是提交的内容还在库里并没有丢失</a></li>
+<li><a href="#org54ce1db">查找中文件中包含"密码"二字的文件列出来</a></li>
+<li><a href="#orgc1a6ff4">修改历史提交信息</a></li>
+<li><a href="#orgb428f82">删除敏感文件</a></li>
+<li><a href="#org73ae0b2">修改 commiter 的 name 和 email，</a></li>
+<li><a href="#org43d9218">把项目中的某个目录当作git 的新的根目录 ,除此目录中的文件都删掉</a></li>
+<li><a href="#org0c9a31f">删除两次提交之间的提交log,但是提交的内容还在库里并没有丢失</a></li>
 </ul>
 </li>
-<li><a href="#org84ea72c">Links</a></li>
+<li><a href="#org6153077">Links</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org32d3e83" class="outline-2">
-<h2 id="org32d3e83">git rm</h2>
-<div class="outline-text-2" id="text-org32d3e83">
+<div id="outline-container-org0ae9f6f" class="outline-2">
+<h2 id="org0ae9f6f">git rm</h2>
+<div class="outline-text-2" id="text-org0ae9f6f">
 <div class="org-src-container">
 <pre class="src src-sh">git rm --cache filename
 </pre>
@@ -98,9 +98,9 @@
 </p>
 </div>
 </div>
-<div id="outline-container-org247c396" class="outline-2">
-<h2 id="org247c396">在一个旧库中 建一个新分支（新分支上无任何内容）</h2>
-<div class="outline-text-2" id="text-org247c396">
+<div id="outline-container-org5340f73" class="outline-2">
+<h2 id="org5340f73">在一个旧库中 建一个新分支（新分支上无任何内容）</h2>
+<div class="outline-text-2" id="text-org5340f73">
 <p>
 git checkout &#x2013;orphan gh-pages<br />
 git rm -rf .<br />
@@ -108,9 +108,9 @@ git rm -rf .<br />
 </div>
 </div>
 
-<div id="outline-container-orgeee62db" class="outline-2">
-<h2 id="orgeee62db">git submodule 子模块的删除</h2>
-<div class="outline-text-2" id="text-orgeee62db">
+<div id="outline-container-org2209eea" class="outline-2">
+<h2 id="org2209eea">git submodule 子模块的删除</h2>
+<div class="outline-text-2" id="text-org2209eea">
 <p>
 需要3步<br />
 </p>
@@ -150,9 +150,9 @@ git rm -rf .<br />
 </div>
 </div>
 
-<div id="outline-container-org1429389" class="outline-2">
-<h2 id="org1429389">要查看某个文件的以前的版本,使用 git show 命令</h2>
-<div class="outline-text-2" id="text-org1429389">
+<div id="outline-container-orgab98443" class="outline-2">
+<h2 id="orgab98443">要查看某个文件的以前的版本,使用 git show 命令</h2>
+<div class="outline-text-2" id="text-orgab98443">
 <div class="org-src-container">
 <pre class="src src-sh">git show 0b26bbe907c929ed88f6ba3dfeaaa9a2953b1c56:a.txt
 
@@ -162,9 +162,9 @@ git cat-file blob 0b26bbe907c929ed88f6ba3dfeaaa9a2953b1c56:a.txt
 </div>
 </div>
 
-<div id="outline-container-orgbb122d9" class="outline-2">
-<h2 id="orgbb122d9">可以checkout 某个文件的以前的版本</h2>
-<div class="outline-text-2" id="text-orgbb122d9">
+<div id="outline-container-org348d1fd" class="outline-2">
+<h2 id="org348d1fd">可以checkout 某个文件的以前的版本</h2>
+<div class="outline-text-2" id="text-org348d1fd">
 <div class="org-src-container">
 <pre class="src src-sh">git checkout 0b26bbe907c929ed88f6ba3dfeaaa9a2953b1c56 a.txt
 </pre>
@@ -172,9 +172,9 @@ git cat-file blob 0b26bbe907c929ed88f6ba3dfeaaa9a2953b1c56:a.txt
 </div>
 </div>
 
-<div id="outline-container-orga1c23a4" class="outline-2">
-<h2 id="orga1c23a4">git ls-tree 与git show</h2>
-<div class="outline-text-2" id="text-orga1c23a4">
+<div id="outline-container-orge6863e3" class="outline-2">
+<h2 id="orge6863e3">git ls-tree 与git show</h2>
+<div class="outline-text-2" id="text-orge6863e3">
 <p>
  不仅仅一次提交后会产生一个sha1 的字符串,其实每一个提交对应的文件也后有一个状态,比后我想杳看<br />
 0b26bbe907c929ed88f6ba3dfeaaa9a2953b1c56这次提交后对应的文件所对应的sha1值<br />
@@ -202,9 +202,9 @@ git show f7619cab6a71505b23e172f3146adfa750bab71e:a     &#30340;&#25928;&#26524;
 </div>
 </div>
 
-<div id="outline-container-org5839afb" class="outline-2">
-<h2 id="org5839afb">git svn</h2>
-<div class="outline-text-2" id="text-org5839afb">
+<div id="outline-container-org8574710" class="outline-2">
+<h2 id="org8574710">git svn</h2>
+<div class="outline-text-2" id="text-org8574710">
 <p>
 git svn clone svn-url <code>= git clone git-url
   git svn  fetch =</code> git pull<br />
@@ -223,9 +223,9 @@ git svn dcommit<br />
 git stash pop<br />
 </p>
 </div>
-<div id="outline-container-org1fb9a5d" class="outline-3">
-<h3 id="org1fb9a5d">svn 的远程分支叫 remotes/git-svn</h3>
-<div class="outline-text-3" id="text-org1fb9a5d">
+<div id="outline-container-org57d4882" class="outline-3">
+<h3 id="org57d4882">svn 的远程分支叫 remotes/git-svn</h3>
+<div class="outline-text-3" id="text-org57d4882">
 <p>
 如果在当前分支已经有数次提交 ，但是发现有一个bug需要修复，修复后马上提交 ，而<br />
   当前分支里的commit 并不想push到远程svn上，做法是<br />
@@ -234,9 +234,9 @@ git stash pop<br />
 </p>
 </div>
 </div>
-<div id="outline-container-orgf424e49" class="outline-3">
-<h3 id="orgf424e49">git reset version</h3>
-<div class="outline-text-3" id="text-orgf424e49">
+<div id="outline-container-org828cbd8" class="outline-3">
+<h3 id="org828cbd8">git reset version</h3>
+<div class="outline-text-3" id="text-org828cbd8">
 <p>
 合并commit 。想将最后几次commit 合并成一个commit<br />
 可以用 git reset version<br />
@@ -247,9 +247,9 @@ git reset 回退到某一版本后，<br />
 </div>
 </div>
 </div>
-<div id="outline-container-orgea23bcd" class="outline-2">
-<h2 id="orgea23bcd">找回丢失的提交</h2>
-<div class="outline-text-2" id="text-orgea23bcd">
+<div id="outline-container-orga3ace2d" class="outline-2">
+<h2 id="orga3ace2d">找回丢失的提交</h2>
+<div class="outline-text-2" id="text-orga3ace2d">
 <p>
 在使用Git的过程中，有时可能会有一些误操作<br />
 比如：执行checkout -f 或 reset -hard 或 branch -d删除一个分支<br />
@@ -270,9 +270,9 @@ reflog是git提供的一个内部工具，用于记录对git仓库进行的各�
 </ol>
 </div>
 </div>
-<div id="outline-container-org68b73a6" class="outline-2">
-<h2 id="org68b73a6">找回库中删除的文件</h2>
-<div class="outline-text-2" id="text-org68b73a6">
+<div id="outline-container-orgcbe1e55" class="outline-2">
+<h2 id="orgcbe1e55">找回库中删除的文件</h2>
+<div class="outline-text-2" id="text-orgcbe1e55">
 <ol class="org-ol">
 <li>找回库中不再管理的已删除文件(之前git rm 过且git commit 后的文件)<br />
 git log &#x2013;all &#x2013;pretty=format: &#x2013;name-only &#x2013;diff-filter=D |grep -v "^$"<br />
@@ -283,9 +283,9 @@ git ls-files &#x2013;deleted<br /></li>
 用git status即可<br /></li>
 </ol>
 </div>
-<div id="outline-container-org731d9e1" class="outline-3">
-<h3 id="org731d9e1">grep 历史提交中的内容</h3>
-<div class="outline-text-3" id="text-org731d9e1">
+<div id="outline-container-org67867e3" class="outline-3">
+<h3 id="org67867e3">grep 历史提交中的内容</h3>
+<div class="outline-text-3" id="text-org67867e3">
 <p>
 git grep hello<br />
 但是如果某文件被删了， 不会grep之<br />
@@ -293,9 +293,9 @@ git grep hello<br />
 </div>
 </div>
 </div>
-<div id="outline-container-orgf65e4ab" class="outline-2">
-<h2 id="orgf65e4ab">关于换行符 空格</h2>
-<div class="outline-text-2" id="text-orgf65e4ab">
+<div id="outline-container-orgeaf4392" class="outline-2">
+<h2 id="orgeaf4392">关于换行符 空格</h2>
+<div class="outline-text-2" id="text-orgeaf4392">
 <p>
 Github suggests that you should make sure to only use \n as a newline<br />
 character in git-handled repos. There's an option to auto-convert:<br />
@@ -304,9 +304,9 @@ Of course, this is said to convert crlf to lf.<br />
 </p>
 </div>
 
-<div id="outline-container-org7c0f751" class="outline-3">
-<h3 id="org7c0f751">git config &#x2013;global core.whitespace cr-at-eol</h3>
-<div class="outline-text-3" id="text-org7c0f751">
+<div id="outline-container-orgfd46858" class="outline-3">
+<h3 id="orgfd46858">git config &#x2013;global core.whitespace cr-at-eol</h3>
+<div class="outline-text-3" id="text-orgfd46858">
 <p>
 This basically tells Git that an end-of-line CR is not an error. As a<br />
 result, those annoying ^M characters no longer appear at the end of lines<br />
@@ -315,9 +315,9 @@ in git diff, git show, etc.<br />
 </div>
 </div>
 
-<div id="outline-container-org44411b8" class="outline-3">
-<h3 id="org44411b8">如果很多文件包含 ^M 这个字符想把它去掉 (未测试 )</h3>
-<div class="outline-text-3" id="text-org44411b8">
+<div id="outline-container-orgf761e19" class="outline-3">
+<h3 id="orgf761e19">如果很多文件包含 ^M 这个字符想把它去掉 (未测试 )</h3>
+<div class="outline-text-3" id="text-orgf761e19">
 <div class="org-src-container">
 <pre class="src src-sh">  <span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">Remove everything from the index</span>
 $ git rm --cached -r .
@@ -331,9 +331,9 @@ $ git commit -m <span style="color: #ffa07a;">"Fix CRLF"</span>
 </div>
 </div>
 </div>
-<div id="outline-container-orga591bc8" class="outline-2">
-<h2 id="orga591bc8">总有一些修改的文件你不想提交,比如 连接db的配置文件,你只是想在本机做测试而做的小修改</h2>
-<div class="outline-text-2" id="text-orga591bc8">
+<div id="outline-container-orgbcac17a" class="outline-2">
+<h2 id="orgbcac17a">总有一些修改的文件你不想提交,比如 连接db的配置文件,你只是想在本机做测试而做的小修改</h2>
+<div class="outline-text-2" id="text-orgbcac17a">
 <p>
 GIT: ignoring changes in tracked files<br />
 </p>
@@ -362,13 +362,13 @@ git update-index --no-assume-unchanged &lt;file&gt;
 </div>
 </div>
 
-<div id="outline-container-org4bdbb2b" class="outline-2">
-<h2 id="org4bdbb2b">关于修改已经提交的信息 git filter-branch</h2>
-<div class="outline-text-2" id="text-org4bdbb2b">
+<div id="outline-container-orgecf6f67" class="outline-2">
+<h2 id="orgecf6f67">关于修改已经提交的信息 git filter-branch</h2>
+<div class="outline-text-2" id="text-orgecf6f67">
 </div>
-<div id="outline-container-orgb990b4b" class="outline-3">
-<h3 id="orgb990b4b">查找中文件中包含"密码"二字的文件列出来</h3>
-<div class="outline-text-3" id="text-orgb990b4b">
+<div id="outline-container-org54ce1db" class="outline-3">
+<h3 id="org54ce1db">查找中文件中包含"密码"二字的文件列出来</h3>
+<div class="outline-text-3" id="text-org54ce1db">
 <p>
 &#x2013;stat告诉 git 我希望看到文件列表，以确定敏感数据在哪个文件里<br />
 </p>
@@ -378,9 +378,9 @@ git update-index --no-assume-unchanged &lt;file&gt;
 </div>
 </div>
 </div>
-<div id="outline-container-org0cad3d5" class="outline-3">
-<h3 id="org0cad3d5">修改历史提交信息</h3>
-<div class="outline-text-3" id="text-org0cad3d5">
+<div id="outline-container-orgc1a6ff4" class="outline-3">
+<h3 id="orgc1a6ff4">修改历史提交信息</h3>
+<div class="outline-text-3" id="text-orgc1a6ff4">
 <div class="org-src-container">
 <pre class="src src-sh">&#23558;&#25552;&#20132;&#20449;&#24687;&#20013;&#25152;&#26377;oldpass&#26367;&#25442;&#20026;newpasswd
 git filter-branch --msg-filter  <span style="color: #ffa07a;">'sed s/oldpass/newpasswd/'</span> -f HEAD --all
@@ -391,9 +391,9 @@ git filter-branch --msg-filter <span style="color: #ffa07a;">'sed -e "/^git-svn-
 </div>
 </div>
 
-<div id="outline-container-org3c9172f" class="outline-3">
-<h3 id="org3c9172f">删除敏感文件</h3>
-<div class="outline-text-3" id="text-org3c9172f">
+<div id="outline-container-orgb428f82" class="outline-3">
+<h3 id="orgb428f82">删除敏感文件</h3>
+<div class="outline-text-3" id="text-orgb428f82">
 <div class="org-src-container">
 <pre class="src src-sh">git filter-branch --tree-filter <span style="color: #ffa07a;">'rm -rf files_to_remove'</span> --prune-empty -f HEAD --all
 <span style="color: #FF6400;">&#25110;&#32773;</span>(&#36739;&#24555;)
@@ -410,9 +410,9 @@ git filter-branch -f --index-filter <span style="color: #ffa07a;">'git rm --cach
 </div>
 </div>
 
-<div id="outline-container-org8706c1f" class="outline-3">
-<h3 id="org8706c1f">修改 commiter 的 name 和 email，</h3>
-<div class="outline-text-3" id="text-org8706c1f">
+<div id="outline-container-org73ae0b2" class="outline-3">
+<h3 id="org73ae0b2">修改 commiter 的 name 和 email，</h3>
+<div class="outline-text-3" id="text-org73ae0b2">
 <div class="org-src-container">
 <pre class="src src-sh">git filter-branch -f --env-filter <span style="color: #ffa07a;">"GIT_AUTHOR_NAME='Newname'; GIT_AUTHOR_EMAIL='newemail'; GIT_COMMITTER_NAME='Newname'; GIT_COMMITTER_EMAIL='newemail';"</span> HEAD
 </pre>
@@ -423,9 +423,9 @@ git filter-branch -f --index-filter <span style="color: #ffa07a;">'git rm --cach
 </p>
 </div>
 </div>
-<div id="outline-container-org42bce6c" class="outline-3">
-<h3 id="org42bce6c">把项目中的某个目录当作git 的新的根目录 ,除此目录中的文件都删掉</h3>
-<div class="outline-text-3" id="text-org42bce6c">
+<div id="outline-container-org43d9218" class="outline-3">
+<h3 id="org43d9218">把项目中的某个目录当作git 的新的根目录 ,除此目录中的文件都删掉</h3>
+<div class="outline-text-3" id="text-org43d9218">
 <p>
 相当于用某个子目录建一个新的git的仓库,不过,要注意,其他的文件都会被删了,<br />
 注意备份仓库<br />
@@ -436,9 +436,9 @@ git filter-branch -f --index-filter <span style="color: #ffa07a;">'git rm --cach
 </div>
 </div>
 </div>
-<div id="outline-container-orgfb9fc70" class="outline-3">
-<h3 id="orgfb9fc70">删除两次提交之间的提交log,但是提交的内容还在库里并没有丢失</h3>
-<div class="outline-text-3" id="text-orgfb9fc70">
+<div id="outline-container-org0c9a31f" class="outline-3">
+<h3 id="org0c9a31f">删除两次提交之间的提交log,但是提交的内容还在库里并没有丢失</h3>
+<div class="outline-text-3" id="text-org0c9a31f">
 <p>
 作用仅仅相当于合并了n次提交成为一次提交<br />
 之前<br />
@@ -468,9 +468,9 @@ git filter-branch 169849d727285e6d3b1ff7536a2d22033d2b8b10..HEAD
 </div>
 </div>
 </div>
-<div id="outline-container-org84ea72c" class="outline-2">
-<h2 id="org84ea72c">Links</h2>
-<div class="outline-text-2" id="text-org84ea72c">
+<div id="outline-container-org6153077" class="outline-2">
+<h2 id="org6153077">Links</h2>
+<div class="outline-text-2" id="text-org6153077">
 <p>
 很多git的小技巧<br />
 <a href="http://gitready.com/">http://gitready.com/</a><br />

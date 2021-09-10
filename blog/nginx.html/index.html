@@ -47,21 +47,21 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org7c1681b">nginx 做反向代理配置示例</a></li>
-<li><a href="#orgd89b8bd">利用nginx 做简单的认证</a></li>
-<li><a href="#orga91f164">利用nginx 404错误 下载某个文件</a></li>
-<li><a href="#org63f188b">nginx init.d script</a></li>
-<li><a href="#orgf0bcd1f">nginx 编译安装支持https(ssl)</a>
+<li><a href="#orgc431267">nginx 做反向代理配置示例</a></li>
+<li><a href="#orgd5a3607">利用nginx 做简单的认证</a></li>
+<li><a href="#org64ab552">利用nginx 404错误 下载某个文件</a></li>
+<li><a href="#org9b4cd3e">nginx init.d script</a></li>
+<li><a href="#orgb49366c">nginx 编译安装支持https(ssl)</a>
 <ul>
-<li><a href="#org9bce800">自己颁发证书给自己</a></li>
+<li><a href="#orgdef6b03">自己颁发证书给自己</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org7c1681b" class="outline-2">
-<h2 id="org7c1681b">nginx 做反向代理配置示例</h2>
-<div class="outline-text-2" id="text-org7c1681b">
+<div id="outline-container-orgc431267" class="outline-2">
+<h2 id="orgc431267">nginx 做反向代理配置示例</h2>
+<div class="outline-text-2" id="text-orgc431267">
 <p>
 /etc/nginx/conf.d/your.dns.com.conf<br />
 比如 tomcat 兼听127.0.1:10080端口，<br />
@@ -129,9 +129,9 @@ server {
 </div>
 </div>
 </div>
-<div id="outline-container-orgd89b8bd" class="outline-2">
-<h2 id="orgd89b8bd">利用nginx 做简单的认证</h2>
-<div class="outline-text-2" id="text-orgd89b8bd">
+<div id="outline-container-orgd5a3607" class="outline-2">
+<h2 id="orgd5a3607">利用nginx 做简单的认证</h2>
+<div class="outline-text-2" id="text-orgd5a3607">
 <p>
 开发了简单的网站 ，但是没有 认证功能。 又不想不加认证 暴露在外网环境下<br />
 可以用此方法进行 用户名密码认证<br />
@@ -171,9 +171,9 @@ chmod 755 htpasswd.py<br />
 </div>
 </div>
 </div>
-<div id="outline-container-orga91f164" class="outline-2">
-<h2 id="orga91f164">利用nginx 404错误 下载某个文件</h2>
-<div class="outline-text-2" id="text-orga91f164">
+<div id="outline-container-org64ab552" class="outline-2">
+<h2 id="org64ab552">利用nginx 404错误 下载某个文件</h2>
+<div class="outline-text-2" id="text-org64ab552">
 <p>
 随便访问一个不存在的路么， 会下载/tmp/static.txt 这个文件，<br />
 用于快速搭建一个web 服务器 传文件<br />
@@ -196,9 +196,9 @@ python -m SimpleHTTPServer 8888<br />
 </div>
 </div>
 </div>
-<div id="outline-container-org63f188b" class="outline-2">
-<h2 id="org63f188b">nginx init.d script</h2>
-<div class="outline-text-2" id="text-org63f188b">
+<div id="outline-container-org9b4cd3e" class="outline-2">
+<h2 id="org9b4cd3e">nginx init.d script</h2>
+<div class="outline-text-2" id="text-org9b4cd3e">
 <div class="org-src-container">
 <pre class="src src-sh"><span style="color: #AEAEAE;">#</span><span style="color: #AEAEAE;">!/bin/</span><span style="color: #FBDE2D;">sh</span>
 <span style="color: #AEAEAE;">#</span>
@@ -348,9 +348,9 @@ python -m SimpleHTTPServer 8888<br />
 </div>
 </div>
 </div>
-<div id="outline-container-orgf0bcd1f" class="outline-2">
-<h2 id="orgf0bcd1f">nginx 编译安装支持https(ssl)</h2>
-<div class="outline-text-2" id="text-orgf0bcd1f">
+<div id="outline-container-orgb49366c" class="outline-2">
+<h2 id="orgb49366c">nginx 编译安装支持https(ssl)</h2>
+<div class="outline-text-2" id="text-orgb49366c">
 <div class="org-src-container">
 <pre class="src src-sh"><span style="color: #AEAEAE;"># </span><span style="color: #AEAEAE;">yum install -y zsh</span>
 yum install -y gcc gcc-c++
@@ -387,9 +387,9 @@ ln -s /usr/local/nginx/sbin/nginx /usr/sbin/nginx
 </pre>
 </div>
 </div>
-<div id="outline-container-org9bce800" class="outline-3">
-<h3 id="org9bce800">自己颁发证书给自己</h3>
-<div class="outline-text-3" id="text-org9bce800">
+<div id="outline-container-orgdef6b03" class="outline-3">
+<h3 id="orgdef6b03">自己颁发证书给自己</h3>
+<div class="outline-text-3" id="text-orgdef6b03">
 <div class="org-src-container">
 <pre class="src src-sh"><span style="color: #F8F8F8;">cd</span> /usr/local/nginx/conf
 openssl genrsa -des3 -out server.key 1024

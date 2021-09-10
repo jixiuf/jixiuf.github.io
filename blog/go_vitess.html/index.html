@@ -47,29 +47,29 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orge6749d4">几种mysql 水平扩展架构比较</a></li>
-<li><a href="#org33d73bd">架构</a></li>
-<li><a href="#org5d040ec">vitess 与mysql 的对比</a></li>
-<li><a href="#orged9ea6a">vitess 与nosql对比</a></li>
-<li><a href="#org603663c">Keyspace</a></li>
-<li><a href="#orgb6f00b5">Keyspace Id</a></li>
-<li><a href="#org4e333b2">Shard</a></li>
-<li><a href="#org3027d9a">Tablet</a></li>
-<li><a href="#org628aee3">Shard graph</a></li>
-<li><a href="#org573d5dd">Replication graph</a></li>
-<li><a href="#org39da28f">Serving graph</a></li>
-<li><a href="#orgb593dcb">Topology Service(拓扑结构) etcd or zookeeper</a>
+<li><a href="#org791ecfc">几种mysql 水平扩展架构比较</a></li>
+<li><a href="#org8c36ee6">架构</a></li>
+<li><a href="#orge6e9607">vitess 与mysql 的对比</a></li>
+<li><a href="#orge793a22">vitess 与nosql对比</a></li>
+<li><a href="#org072e88f">Keyspace</a></li>
+<li><a href="#org138879c">Keyspace Id</a></li>
+<li><a href="#org0b1401a">Shard</a></li>
+<li><a href="#org51f9a8a">Tablet</a></li>
+<li><a href="#org1685a21">Shard graph</a></li>
+<li><a href="#orgbd55163">Replication graph</a></li>
+<li><a href="#orga5fe54e">Serving graph</a></li>
+<li><a href="#org79d4986">Topology Service(拓扑结构) etcd or zookeeper</a>
 <ul>
-<li><a href="#org43ce30a">etcd 相关</a></li>
+<li><a href="#org4e7f22e">etcd 相关</a></li>
 </ul>
 </li>
-<li><a href="#org829b527">Cell(data center)</a></li>
+<li><a href="#org5ac8f39">Cell(data center)</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orge6749d4" class="outline-2">
-<h2 id="orge6749d4">几种mysql 水平扩展架构比较</h2>
-<div class="outline-text-2" id="text-orge6749d4">
+<div id="outline-container-org791ecfc" class="outline-2">
+<h2 id="org791ecfc">几种mysql 水平扩展架构比较</h2>
+<div class="outline-text-2" id="text-org791ecfc">
 <p>
 <a href="http://songwie.com/articlelist/44">http://songwie.com/articlelist/44</a><br />
 <a href="http://www.tuicool.com/articles/miuq63E">http://www.tuicool.com/articles/miuq63E</a><br />
@@ -79,9 +79,9 @@
 </p>
 </div>
 </div>
-<div id="outline-container-org33d73bd" class="outline-2">
-<h2 id="org33d73bd">架构</h2>
-<div class="outline-text-2" id="text-org33d73bd">
+<div id="outline-container-org8c36ee6" class="outline-2">
+<h2 id="org8c36ee6">架构</h2>
+<div class="outline-text-2" id="text-org8c36ee6">
 <p>
 <img src="/assets/blog/go_vitess.html/VitessOverview.png" alt="VitessOverview.png" /><br />
 vtgate 可以认为是网关,client 只需要与vtgate 连接即可<br />
@@ -112,9 +112,9 @@ zk zkctl 管理zookeeper 的工具等<br />
 </div>
 </div>
 
-<div id="outline-container-org5d040ec" class="outline-2">
-<h2 id="org5d040ec">vitess 与mysql 的对比</h2>
-<div class="outline-text-2" id="text-org5d040ec">
+<div id="outline-container-orge6e9607" class="outline-2">
+<h2 id="orge6e9607">vitess 与mysql 的对比</h2>
+<div class="outline-text-2" id="text-orge6e9607">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -158,9 +158,9 @@ zk zkctl 管理zookeeper 的工具等<br />
 </table>
 </div>
 </div>
-<div id="outline-container-orged9ea6a" class="outline-2">
-<h2 id="orged9ea6a">vitess 与nosql对比</h2>
-<div class="outline-text-2" id="text-orged9ea6a">
+<div id="outline-container-orge793a22" class="outline-2">
+<h2 id="orge793a22">vitess 与nosql对比</h2>
+<div class="outline-text-2" id="text-orge793a22">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -199,9 +199,9 @@ zk zkctl 管理zookeeper 的工具等<br />
 </div>
 </div>
 
-<div id="outline-container-org603663c" class="outline-2">
-<h2 id="org603663c">Keyspace</h2>
-<div class="outline-text-2" id="text-org603663c">
+<div id="outline-container-org072e88f" class="outline-2">
+<h2 id="org072e88f">Keyspace</h2>
+<div class="outline-text-2" id="text-org072e88f">
 <p>
 一个keyspace 就是一个逻辑上的 mysql database 直接对应一个或多个mysql database名。<br />
 从一个keyspace 读取数据 就像从一个mysql database 一样，<br />
@@ -212,9 +212,9 @@ vitess 使你的代码简化到似乎跟从一个mysql database读取数据一�
 </p>
 </div>
 </div>
-<div id="outline-container-orgb6f00b5" class="outline-2">
-<h2 id="orgb6f00b5">Keyspace Id</h2>
-<div class="outline-text-2" id="text-orgb6f00b5">
+<div id="outline-container-org138879c" class="outline-2">
+<h2 id="org138879c">Keyspace Id</h2>
+<div class="outline-text-2" id="text-org138879c">
 <p>
 keyspace_id 是一个keyspace 的id列，它可以标志一个user,produce等。keyspace_id的类型有多种。<br />
 做sharding 时， 一个keyspace 的所有表都要包含keyspace_id列，vitess 根据keyspace_id做sharding<br />
@@ -256,9 +256,9 @@ func (rc *RowCache) Get(ctx context.Context, keys []string) (results map[string]
 </div>
 
 
-<div id="outline-container-org4e333b2" class="outline-2">
-<h2 id="org4e333b2">Shard</h2>
-<div class="outline-text-2" id="text-org4e333b2">
+<div id="outline-container-org0b1401a" class="outline-2">
+<h2 id="org0b1401a">Shard</h2>
+<div class="outline-text-2" id="text-org0b1401a">
 <p>
 一个Shard 就是一个分片， 某个keyspace的一部分，一个典型的shard ,包含一个master 和多个slaves.<br />
 同一个Shard里的mysql 实例包含的数据应该是相同的，除了有延迟从库，slave 从库可以分担一部分只读流量<br />
@@ -272,9 +272,9 @@ vitess 支持动态resharding,即将一个shard 分成多个shard,这个过程�
 </p>
 </div>
 </div>
-<div id="outline-container-org3027d9a" class="outline-2">
-<h2 id="org3027d9a">Tablet</h2>
-<div class="outline-text-2" id="text-org3027d9a">
+<div id="outline-container-org51f9a8a" class="outline-2">
+<h2 id="org51f9a8a">Tablet</h2>
+<div class="outline-text-2" id="text-org51f9a8a">
 <p>
 一个tablet 包含<br />
 </p>
@@ -296,9 +296,9 @@ vitess 支持动态resharding,即将一个shard 分成多个shard,这个过程�
 </ol>
 </div>
 </div>
-<div id="outline-container-org628aee3" class="outline-2">
-<h2 id="org628aee3">Shard graph</h2>
-<div class="outline-text-2" id="text-org628aee3">
+<div id="outline-container-org1685a21" class="outline-2">
+<h2 id="org1685a21">Shard graph</h2>
+<div class="outline-text-2" id="text-org1685a21">
 <p>
 Shard graph 的作用是 将keyspace_id map 到指定的shard 上。<br />
 vitess 使用 range-based sharding 策略。vitess 在内存中通过一个查询表（lookup）来定位shard<br />
@@ -306,26 +306,26 @@ vitess 使用 range-based sharding 策略。vitess 在内存中通过一个查�
 </p>
 </div>
 </div>
-<div id="outline-container-org573d5dd" class="outline-2">
-<h2 id="org573d5dd">Replication graph</h2>
-<div class="outline-text-2" id="text-org573d5dd">
+<div id="outline-container-orgbd55163" class="outline-2">
+<h2 id="orgbd55163">Replication graph</h2>
+<div class="outline-text-2" id="text-orgbd55163">
 <p>
 作用是 定位master 与相应slave 。如果master 当掉能够及时找到一个slave 来作为master<br />
 </p>
 </div>
 </div>
-<div id="outline-container-org39da28f" class="outline-2">
-<h2 id="org39da28f">Serving graph</h2>
-<div class="outline-text-2" id="text-org39da28f">
+<div id="outline-container-orga5fe54e" class="outline-2">
+<h2 id="orga5fe54e">Serving graph</h2>
+<div class="outline-text-2" id="text-orga5fe54e">
 <p>
 作用是 列出所有可用的server ,主要从Shard graph 与Replication graph 中获取相应的信息<br />
 VTGate 从Serving graph来决定从哪个server 执行相应的查询<br />
 </p>
 </div>
 </div>
-<div id="outline-container-orgb593dcb" class="outline-2">
-<h2 id="orgb593dcb">Topology Service(拓扑结构) etcd or zookeeper</h2>
-<div class="outline-text-2" id="text-orgb593dcb">
+<div id="outline-container-org79d4986" class="outline-2">
+<h2 id="org79d4986">Topology Service(拓扑结构) etcd or zookeeper</h2>
+<div class="outline-text-2" id="text-org79d4986">
 <p>
 提供 lockin service ,目前vitess 主要支持 etcd 和zookeeper 来作为Topology Service<br />
 并在其中存储 整个vitess 的拓扑结构信息<br />
@@ -352,9 +352,9 @@ vitess client 设计为 只要接触local 即可<br />
 local instance 必須正常运转，才能保证vitess 提供正常的服务。<br /></li>
 </ul>
 </div>
-<div id="outline-container-org43ce30a" class="outline-3">
-<h3 id="org43ce30a">etcd 相关</h3>
-<div class="outline-text-3" id="text-org43ce30a">
+<div id="outline-container-org4e7f22e" class="outline-3">
+<h3 id="org4e7f22e">etcd 相关</h3>
+<div class="outline-text-3" id="text-org4e7f22e">
 <p>
 需要在golbal topology 处注册某个cell 的local topology 在何处，<br />
 然后启动 vttablets 时 才能正常启动<br />
@@ -380,9 +380,9 @@ etcdctl get /vt/cells/test
 </div>
 
 
-<div id="outline-container-org829b527" class="outline-2">
-<h2 id="org829b527">Cell(data center)</h2>
-<div class="outline-text-2" id="text-org829b527">
+<div id="outline-container-org5ac8f39" class="outline-2">
+<h2 id="org5ac8f39">Cell(data center)</h2>
+<div class="outline-text-2" id="text-org5ac8f39">
 <p>
 一般指某一个区域内的 服务与网络基础设施集，<br />
 vitess 可以优雅的处理某一个cell 挂掉<br />

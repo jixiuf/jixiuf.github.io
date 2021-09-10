@@ -47,32 +47,32 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org4168fec">下载所需的文件</a></li>
-<li><a href="#org0214018">配置</a></li>
-<li><a href="#orgba23f25">csharp 代码补全， (补全类名， 函数名）</a>
+<li><a href="#org1de5807">下载所需的文件</a></li>
+<li><a href="#org6c0e7ae">配置</a></li>
+<li><a href="#orgd9d4164">csharp 代码补全， (补全类名， 函数名）</a>
 <ul>
-<li><a href="#orgbd9e850">用csharp-completion进行补全时，需要用到gacutil.exe 这个程序，</a></li>
+<li><a href="#org4a8cf06">用csharp-completion进行补全时，需要用到gacutil.exe 这个程序，</a></li>
 </ul>
 </li>
-<li><a href="#org1af9c23">Emacs配置csharp补全</a></li>
-<li><a href="#org09cd697">目前尚未实现的补全，</a></li>
-<li><a href="#org7bb244a">Links 我关于csharp 的配置</a></li>
-<li><a href="#orgcbb447f">另附截图一张</a></li>
+<li><a href="#orgb98e3de">Emacs配置csharp补全</a></li>
+<li><a href="#orgfa70a4b">目前尚未实现的补全，</a></li>
+<li><a href="#org41ee45f">Links 我关于csharp 的配置</a></li>
+<li><a href="#org10c716a">另附截图一张</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org4168fec" class="outline-2">
-<h2 id="org4168fec">下载所需的文件</h2>
-<div class="outline-text-2" id="text-org4168fec">
+<div id="outline-container-org1de5807" class="outline-2">
+<h2 id="org1de5807">下载所需的文件</h2>
+<div class="outline-text-2" id="text-org1de5807">
 <p>
 <a href="https://code.google.com/p/csharpmode/">https://code.google.com/p/csharpmode/</a><br />
 <a href="http://www.emacswiki.org/emacs/Powershell.el">http://www.emacswiki.org/emacs/Powershell.el</a><br />
 </p>
 </div>
 </div>
-<div id="outline-container-org0214018" class="outline-2">
-<h2 id="org0214018">配置</h2>
-<div class="outline-text-2" id="text-org0214018">
+<div id="outline-container-org6c0e7ae" class="outline-2">
+<h2 id="org6c0e7ae">配置</h2>
+<div class="outline-text-2" id="text-org6c0e7ae">
 <p>
 把csharpmode 整个目录加到你的load-path目录下<br />
 </p>
@@ -123,9 +123,9 @@
 </div>
 </div>
 </div>
-<div id="outline-container-orgba23f25" class="outline-2">
-<h2 id="orgba23f25">csharp 代码补全， (补全类名， 函数名）</h2>
-<div class="outline-text-2" id="text-orgba23f25">
+<div id="outline-container-orgd9d4164" class="outline-2">
+<h2 id="orgd9d4164">csharp 代码补全， (补全类名， 函数名）</h2>
+<div class="outline-text-2" id="text-orgd9d4164">
 <p>
 csharpmode 里提供了CscompUtilities.cs 文件文件， 以及编译好的<br />
 CscompUtilities.dll<br />
@@ -175,9 +175,9 @@ csc.exe  /target:library /R:ICSharpCode.NRefactory.dll   /platform:anycpu  /out:
 </div>
 
 
-<div id="outline-container-orgbd9e850" class="outline-3">
-<h3 id="orgbd9e850">用csharp-completion进行补全时，需要用到gacutil.exe 这个程序，</h3>
-<div class="outline-text-3" id="text-orgbd9e850">
+<div id="outline-container-org4a8cf06" class="outline-3">
+<h3 id="org4a8cf06">用csharp-completion进行补全时，需要用到gacutil.exe 这个程序，</h3>
+<div class="outline-text-3" id="text-org4a8cf06">
 <p>
  VS带的，<br />
 你到类似 C:\\Program Files (x86)\\Microsoft SDKs\\Windows\\v7.0A\\Bin目录下找<br />
@@ -188,9 +188,9 @@ csc.exe  /target:library /R:ICSharpCode.NRefactory.dll   /platform:anycpu  /out:
 </div>
 </div>
 </div>
-<div id="outline-container-org1af9c23" class="outline-2">
-<h2 id="org1af9c23">Emacs配置csharp补全</h2>
-<div class="outline-text-2" id="text-org1af9c23">
+<div id="outline-container-orgb98e3de" class="outline-2">
+<h2 id="orgb98e3de">Emacs配置csharp补全</h2>
+<div class="outline-text-2" id="text-orgb98e3de">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq-default</span> csharp-shell-location-of-util-dll (expand-file-name <span style="color: #ffa07a;">"~/.emacs.d/site-lisp/csharp-mode/"</span>))
 (<span style="color: #FBDE2D;">setq-default</span> cscomp-assembly-search-paths
@@ -260,9 +260,9 @@ helm可以受益于此，<br />
 </div>
 </div>
 
-<div id="outline-container-org09cd697" class="outline-2">
-<h2 id="org09cd697">目前尚未实现的补全，</h2>
-<div class="outline-text-2" id="text-org09cd697">
+<div id="outline-container-orgfa70a4b" class="outline-2">
+<h2 id="orgfa70a4b">目前尚未实现的补全，</h2>
+<div class="outline-text-2" id="text-orgfa70a4b">
 <div class="org-src-container">
 <pre class="src src-java"><span style="color: #8DA6CE;">using</span> <span style="color: #40E0D0;">UnityEngine</span>;
 <span style="color: #8DA6CE;">using</span> <span style="color: #40E0D0;">System</span>;
@@ -295,20 +295,20 @@ helm可以受益于此，<br />
 </div>
 </div>
 </div>
-<div id="outline-container-org7bb244a" class="outline-2">
-<h2 id="org7bb244a">Links 我关于csharp 的配置</h2>
-<div class="outline-text-2" id="text-org7bb244a">
+<div id="outline-container-org41ee45f" class="outline-2">
+<h2 id="org41ee45f">Links 我关于csharp 的配置</h2>
+<div class="outline-text-2" id="text-org41ee45f">
 <p>
 <a href="https://github.com/jixiuf/emacs_conf/blob/master/site-lisp/joseph/joseph-csharp.el">https://github.com/jixiuf/emacs_conf/blob/master/site-lisp/joseph/joseph-csharp.el</a><br />
 <a href="https://github.com/jixiuf/emacs_conf/blob/master/site-lisp/joseph/joseph-program.el">https://github.com/jixiuf/emacs_conf/blob/master/site-lisp/joseph/joseph-program.el</a><br />
 </p>
 </div>
 </div>
-<div id="outline-container-orgcbb447f" class="outline-2">
-<h2 id="orgcbb447f">另附截图一张</h2>
-<div class="outline-text-2" id="text-orgcbb447f">
+<div id="outline-container-org10c716a" class="outline-2">
+<h2 id="org10c716a">另附截图一张</h2>
+<div class="outline-text-2" id="text-org10c716a">
 
-<div id="orge4c3a01" class="figure">
+<div id="org71c7b87" class="figure">
 <p><img src="/assets/blog/csharp.html/csharp.png" alt="csharp.png" /><br />
 </p>
 </div>

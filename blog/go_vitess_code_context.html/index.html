@@ -47,16 +47,16 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc80b0c0">context之.context中.WithValue(ctx,key,value) 数据的存储与传递</a></li>
-<li><a href="#orgb18db5e">context 之 WithCancel 与 Done()</a></li>
-<li><a href="#orge13aa8f">context 之WithCancel 使用注意事项，</a></li>
-<li><a href="#org3babfef">withTimeout</a></li>
+<li><a href="#orge3f3dfb">context之.context中.WithValue(ctx,key,value) 数据的存储与传递</a></li>
+<li><a href="#orgf7e5001">context 之 WithCancel 与 Done()</a></li>
+<li><a href="#org292b8d8">context 之WithCancel 使用注意事项，</a></li>
+<li><a href="#org8effb2a">withTimeout</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgc80b0c0" class="outline-2">
-<h2 id="orgc80b0c0">context之.context中.WithValue(ctx,key,value) 数据的存储与传递</h2>
-<div class="outline-text-2" id="text-orgc80b0c0">
+<div id="outline-container-orge3f3dfb" class="outline-2">
+<h2 id="orge3f3dfb">context之.context中.WithValue(ctx,key,value) 数据的存储与传递</h2>
+<div class="outline-text-2" id="text-orge3f3dfb">
 <p>
 vitess 代码中到处充斥着它的身影,初读时颇为不解，<br />
 仔细看了下context 的代码 ，大概明白Context 设计的用意。<br />
@@ -167,9 +167,9 @@ func (c *valueCtx) Value(key interface{}) interface{} {
 </div>
 </div>
 </div>
-<div id="outline-container-orgb18db5e" class="outline-2">
-<h2 id="orgb18db5e">context 之 WithCancel 与 Done()</h2>
-<div class="outline-text-2" id="text-orgb18db5e">
+<div id="outline-container-orgf7e5001" class="outline-2">
+<h2 id="orgf7e5001">context 之 WithCancel 与 Done()</h2>
+<div class="outline-text-2" id="text-orgf7e5001">
 <p>
 提供一个如何使用 WithCancel() 与Done()的示例<br />
 当某个goroutine A 等待别的goroutine B返回结果给他的时候<br />
@@ -231,9 +231,9 @@ func main() {
 </div>
 </div>
 </div>
-<div id="outline-container-orge13aa8f" class="outline-2">
-<h2 id="orge13aa8f">context 之WithCancel 使用注意事项，</h2>
-<div class="outline-text-2" id="text-orge13aa8f">
+<div id="outline-container-org292b8d8" class="outline-2">
+<h2 id="org292b8d8">context 之WithCancel 使用注意事项，</h2>
+<div class="outline-text-2" id="text-org292b8d8">
 <p>
 假设有如下代码<br />
 </p>
@@ -493,9 +493,9 @@ func main() {
 </div>
 </div>
 
-<div id="outline-container-org3babfef" class="outline-2">
-<h2 id="org3babfef">withTimeout</h2>
-<div class="outline-text-2" id="text-org3babfef">
+<div id="outline-container-org8effb2a" class="outline-2">
+<h2 id="org8effb2a">withTimeout</h2>
+<div class="outline-text-2" id="text-org8effb2a">
 <div class="org-src-container">
 <pre class="src src-go">package main
 

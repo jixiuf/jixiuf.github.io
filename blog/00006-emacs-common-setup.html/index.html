@@ -45,48 +45,48 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org7b95784">不使用对话框进行（是，否 取消,打开文件） 的选择，而是用minibuffer</a></li>
-<li><a href="#org743e410">关闭scratch消息提示</a></li>
-<li><a href="#org663a843">隐藏启动显示画面</a></li>
-<li><a href="#orga08ee4a">设置窗口标题格式</a></li>
-<li><a href="#orgb4095ae">关闭烦人的出错时的提示声。</a></li>
-<li><a href="#org80fc3ac">输入括号时 自动添加半边括号的功能</a></li>
-<li><a href="#org9ef788a">隐藏菜单栏 工具栏 滚动条</a></li>
-<li><a href="#orgf486f30">鼠标粘贴相关</a></li>
-<li><a href="#org6bca10f">kill-ring 设置的大一些,默认60</a></li>
-<li><a href="#org244a79e">space vs tab  代码缩进</a></li>
-<li><a href="#org4cb9773">C-k kill-line 相关</a>
+<li><a href="#org5bb059c">不使用对话框进行（是，否 取消,打开文件） 的选择，而是用minibuffer</a></li>
+<li><a href="#org0b613eb">关闭scratch消息提示</a></li>
+<li><a href="#org458f6aa">隐藏启动显示画面</a></li>
+<li><a href="#orgc8e00a8">设置窗口标题格式</a></li>
+<li><a href="#org5afa932">关闭烦人的出错时的提示声。</a></li>
+<li><a href="#org87cacb8">输入括号时 自动添加半边括号的功能</a></li>
+<li><a href="#orgd889d72">隐藏菜单栏 工具栏 滚动条</a></li>
+<li><a href="#org346a79d">鼠标粘贴相关</a></li>
+<li><a href="#org8cfd0a1">kill-ring 设置的大一些,默认60</a></li>
+<li><a href="#org9f09723">space vs tab  代码缩进</a></li>
+<li><a href="#org4ace1e0">C-k kill-line 相关</a>
 <ul>
-<li><a href="#orge7393e5">C-k 的改进版</a></li>
+<li><a href="#orgea298d6">C-k 的改进版</a></li>
 </ul>
 </li>
-<li><a href="#org8c4df2b">kill 相关</a></li>
-<li><a href="#org32ad8f2">default-major-mode</a></li>
-<li><a href="#org3ab5ae8">自动备份相关</a></li>
-<li><a href="#org373dd90">打开大文件</a></li>
-<li><a href="#orgc6150b7">recentf  最近打开过的文件</a></li>
-<li><a href="#orge00f0c1">即便重新打开emacs 也要保存emacs 的某些变量 ，比如kill-ring</a></li>
-<li><a href="#orgbae14a0">记住上次打开某文件时光标所在的位置</a></li>
-<li><a href="#org0ef7085">个人信息</a></li>
-<li><a href="#org671f7b6">y-or-n-p</a></li>
-<li><a href="#org507336c">如果没选中区域，则默认选中当前行</a></li>
-<li><a href="#org605d5d6">minibuffer 相关配置(minibuffer文件名补全相关)</a></li>
-<li><a href="#org597bf65">fill-column 当某行的长度大于70个字符的时候，再次输入文字会自动添加到下一行</a></li>
+<li><a href="#org3431632">kill 相关</a></li>
+<li><a href="#org63f0c9a">default-major-mode</a></li>
+<li><a href="#org9f3ed79">自动备份相关</a></li>
+<li><a href="#orgd60955c">打开大文件</a></li>
+<li><a href="#org9d0717d">recentf  最近打开过的文件</a></li>
+<li><a href="#orgcfc4c4d">即便重新打开emacs 也要保存emacs 的某些变量 ，比如kill-ring</a></li>
+<li><a href="#orgd4b94c4">记住上次打开某文件时光标所在的位置</a></li>
+<li><a href="#orgd2390f0">个人信息</a></li>
+<li><a href="#orgf2713af">y-or-n-p</a></li>
+<li><a href="#org2d5ea8f">如果没选中区域，则默认选中当前行</a></li>
+<li><a href="#orga5fbe79">minibuffer 相关配置(minibuffer文件名补全相关)</a></li>
+<li><a href="#org16e93b4">fill-column 当某行的长度大于70个字符的时候，再次输入文字会自动添加到下一行</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org7b95784" class="outline-2">
-<h2 id="org7b95784">不使用对话框进行（是，否 取消,打开文件） 的选择，而是用minibuffer</h2>
-<div class="outline-text-2" id="text-org7b95784">
+<div id="outline-container-org5bb059c" class="outline-2">
+<h2 id="org5bb059c">不使用对话框进行（是，否 取消,打开文件） 的选择，而是用minibuffer</h2>
+<div class="outline-text-2" id="text-org5bb059c">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq-default</span>  use-dialog-box nil)
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org743e410" class="outline-2">
-<h2 id="org743e410">关闭scratch消息提示</h2>
-<div class="outline-text-2" id="text-org743e410">
+<div id="outline-container-org0b613eb" class="outline-2">
+<h2 id="org0b613eb">关闭scratch消息提示</h2>
+<div class="outline-text-2" id="text-org0b613eb">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp"># &#40664;&#35748;&#30340; *scratch* buffer &#37324;&#38754;&#20250;&#26377;&#19968;&#27573;&#19979;&#38754;&#30340;&#20869;&#23481;&#65292;
 <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">This buffer is for notes you don't want to save, and for Lisp evaluation.</span>
@@ -98,9 +98,9 @@
 </div>
 </div>
 </div>
-<div id="outline-container-org663a843" class="outline-2">
-<h2 id="org663a843">隐藏启动显示画面</h2>
-<div class="outline-text-2" id="text-org663a843">
+<div id="outline-container-org458f6aa" class="outline-2">
+<h2 id="org458f6aa">隐藏启动显示画面</h2>
+<div class="outline-text-2" id="text-org458f6aa">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq</span> inhibit-startup-screen t)
 </pre>
@@ -108,9 +108,9 @@
 </div>
 </div>
 
-<div id="outline-container-orga08ee4a" class="outline-2">
-<h2 id="orga08ee4a">设置窗口标题格式</h2>
-<div class="outline-text-2" id="text-orga08ee4a">
+<div id="outline-container-orgc8e00a8" class="outline-2">
+<h2 id="orgc8e00a8">设置窗口标题格式</h2>
+<div class="outline-text-2" id="text-orgc8e00a8">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp"> <span style="color: #AEAEAE;">;</span><span style="color: #AEAEAE;">&#26631;&#39064;&#26174;&#31034;&#25991;&#20214;&#21517;&#65292;&#32780;&#19981;&#26159;&#40664;&#35748;&#30340;username@localhost</span>
 (<span style="color: #FBDE2D;">setq</span> frame-title-format <span style="color: #ffa07a;">"%b  [%I] %f  GNU/Emacs"</span> )
@@ -118,9 +118,9 @@
 </div>
 </div>
 </div>
-<div id="outline-container-orgb4095ae" class="outline-2">
-<h2 id="orgb4095ae">关闭烦人的出错时的提示声。</h2>
-<div class="outline-text-2" id="text-orgb4095ae">
+<div id="outline-container-org5afa932" class="outline-2">
+<h2 id="org5afa932">关闭烦人的出错时的提示声。</h2>
+<div class="outline-text-2" id="text-org5afa932">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq</span> visible-bell t)
 (<span style="color: #FBDE2D;">setq</span>  ring-bell-function 'ignore)
@@ -128,18 +128,18 @@
 </div>
 </div>
 </div>
-<div id="outline-container-org80fc3ac" class="outline-2">
-<h2 id="org80fc3ac">输入括号时 自动添加半边括号的功能</h2>
-<div class="outline-text-2" id="text-org80fc3ac">
+<div id="outline-container-org87cacb8" class="outline-2">
+<h2 id="org87cacb8">输入括号时 自动添加半边括号的功能</h2>
+<div class="outline-text-2" id="text-org87cacb8">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(electric-pair-mode t)
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org9ef788a" class="outline-2">
-<h2 id="org9ef788a">隐藏菜单栏 工具栏 滚动条</h2>
-<div class="outline-text-2" id="text-org9ef788a">
+<div id="outline-container-orgd889d72" class="outline-2">
+<h2 id="orgd889d72">隐藏菜单栏 工具栏 滚动条</h2>
+<div class="outline-text-2" id="text-orgd889d72">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">require</span> '<span style="color: #D8FA3C;">menu-bar</span>)
 (menu-bar-mode nil)
@@ -151,9 +151,9 @@
 </div>
 </div>
 </div>
-<div id="outline-container-orgf486f30" class="outline-2">
-<h2 id="orgf486f30">鼠标粘贴相关</h2>
-<div class="outline-text-2" id="text-orgf486f30">
+<div id="outline-container-org346a79d" class="outline-2">
+<h2 id="org346a79d">鼠标粘贴相关</h2>
+<div class="outline-text-2" id="text-org346a79d">
 <p>
 不要在鼠标点击的那个地方插入剪贴板内容。我不喜欢那样，经常把 我的文档<br />
 搞的一团糟。我觉得先用光标定位，然后鼠标中键点击要好 的多。不管你的光<br />
@@ -166,9 +166,9 @@
 </div>
 </div>
 </div>
-<div id="outline-container-org6bca10f" class="outline-2">
-<h2 id="org6bca10f">kill-ring 设置的大一些,默认60</h2>
-<div class="outline-text-2" id="text-org6bca10f">
+<div id="outline-container-org8cfd0a1" class="outline-2">
+<h2 id="org8cfd0a1">kill-ring 设置的大一些,默认60</h2>
+<div class="outline-text-2" id="text-org8cfd0a1">
 <p>
 emacs 会维护一个 剪切环，所有你剪切 复制,kill掉的内容都会先放到这里<br />
 面你粘贴的时候 就是把这里面的内容粘贴到光标处,在windows 上你复制两个<br />
@@ -185,9 +185,9 @@ emacs 会维护一个 剪切环，所有你剪切 复制,kill掉的内容都会�
 </div>
 </div>
 </div>
-<div id="outline-container-org244a79e" class="outline-2">
-<h2 id="org244a79e">space vs tab  代码缩进</h2>
-<div class="outline-text-2" id="text-org244a79e">
+<div id="outline-container-org9f09723" class="outline-2">
+<h2 id="org9f09723">space vs tab  代码缩进</h2>
+<div class="outline-text-2" id="text-org9f09723">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">&#29992;&#31354;&#26684;&#20195;&#26367;tab&#26469;&#36827;&#34892;&#20195;&#30721;&#30340;&#32553;&#36827;
 (<span style="color: #FBDE2D;">setq-default</span> indent-tabs-mode nil)
@@ -195,9 +195,9 @@ emacs 会维护一个 剪切环，所有你剪切 复制,kill掉的内容都会�
 </div>
 </div>
 </div>
-<div id="outline-container-org4cb9773" class="outline-2">
-<h2 id="org4cb9773">C-k kill-line 相关</h2>
-<div class="outline-text-2" id="text-org4cb9773">
+<div id="outline-container-org4ace1e0" class="outline-2">
+<h2 id="org4ace1e0">C-k kill-line 相关</h2>
+<div class="outline-text-2" id="text-org4ace1e0">
 <p>
 默认C-k 绑定 kill-line 命令<br />
 这个命令的作用是 删除从光标到行末的内容<br />
@@ -210,9 +210,9 @@ C-u 0 C-k 则会删除从光标到行首的内容<br />
 </pre>
 </div>
 </div>
-<div id="outline-container-orge7393e5" class="outline-3">
-<h3 id="orge7393e5">C-k 的改进版</h3>
-<div class="outline-text-3" id="text-orge7393e5">
+<div id="outline-container-orgea298d6" class="outline-3">
+<h3 id="orgea298d6">C-k 的改进版</h3>
+<div class="outline-text-3" id="text-orgea298d6">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">&#25105;&#20889;&#30340;&#19968;&#20010;&#20989;&#25968;,&#22914;&#26524;&#26377;&#36873;&#20013;&#21306;&#22495;,&#21017;kill&#36873;&#21306;,&#21542;&#21017;&#21024;&#38500;&#24403;&#21069;&#34892;</span>
 <span style="color: #AEAEAE;">;;</span><span style="color: #AEAEAE;">&#27880;&#24847;&#24403;&#21069;&#34892;&#24182;&#19981;&#20195;&#34920;&#25972;&#34892;,&#23427;&#21482;&#21024;&#38500;&#20809;&#26631;&#21040;&#34892;&#23614;&#30340;&#20869;&#23481;,&#20063;&#23601;&#26159;&#40664;&#35748;&#24773;&#20917;&#19979;</span>
@@ -234,9 +234,9 @@ C-u 0 C-k 则会删除从光标到行首的内容<br />
 </div>
 </div>
 </div>
-<div id="outline-container-org8c4df2b" class="outline-2">
-<h2 id="org8c4df2b">kill 相关</h2>
-<div class="outline-text-2" id="text-org8c4df2b">
+<div id="outline-container-org3431632" class="outline-2">
+<h2 id="org3431632">kill 相关</h2>
+<div class="outline-text-2" id="text-org3431632">
 <p>
 如果在一些read-only 的buffer 中去kill (kill-line kill-region) 默认是<br />
 kill 不成功的会给出警告,如在dired-mode 中按C-k<br />
@@ -252,9 +252,9 @@ kill 不成功的会给出警告,如在dired-mode 中按C-k<br />
 </div>
 </div>
 </div>
-<div id="outline-container-org32ad8f2" class="outline-2">
-<h2 id="org32ad8f2">default-major-mode</h2>
-<div class="outline-text-2" id="text-org32ad8f2">
+<div id="outline-container-org63f0c9a" class="outline-2">
+<h2 id="org63f0c9a">default-major-mode</h2>
+<div class="outline-text-2" id="text-org63f0c9a">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">&#25226;&#32570;&#30465;&#30340; major mode &#35774;&#32622;&#20026; text-mode, &#32780;&#19981;&#26159;&#20960;&#20046;&#20160;&#20040;&#21151;&#33021;&#20063; &#27809;&#26377;&#30340; fundamental-mode.</span>
 (<span style="color: #FBDE2D;">setq</span> default-major-mode 'text-mode)
@@ -262,9 +262,9 @@ kill 不成功的会给出警告,如在dired-mode 中按C-k<br />
 </div>
 </div>
 </div>
-<div id="outline-container-org3ab5ae8" class="outline-2">
-<h2 id="org3ab5ae8">自动备份相关</h2>
-<div class="outline-text-2" id="text-org3ab5ae8">
+<div id="outline-container-org9f3ed79" class="outline-2">
+<h2 id="org9f3ed79">自动备份相关</h2>
+<div class="outline-text-2" id="text-org9f3ed79">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq</span>
  backup-by-copying t    <span style="color: #AEAEAE;">;</span><span style="color: #AEAEAE;">&#33258;&#21160;&#22791;&#20221;</span>
@@ -282,27 +282,27 @@ kill 不成功的会给出警告,如在dired-mode 中按C-k<br />
 </div>
 </div>
 </div>
-<div id="outline-container-org373dd90" class="outline-2">
-<h2 id="org373dd90">打开大文件</h2>
-<div class="outline-text-2" id="text-org373dd90">
+<div id="outline-container-orgd60955c" class="outline-2">
+<h2 id="orgd60955c">打开大文件</h2>
+<div class="outline-text-2" id="text-orgd60955c">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq</span>  large-file-warning-threshold nil)<span style="color: #AEAEAE;">;</span><span style="color: #AEAEAE;">&#25171;&#24320;&#22823;&#25991;&#20214;&#26102;&#19981;&#24517;&#35686;&#21578;</span>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orgc6150b7" class="outline-2">
-<h2 id="orgc6150b7">recentf  最近打开过的文件</h2>
-<div class="outline-text-2" id="text-orgc6150b7">
+<div id="outline-container-org9d0717d" class="outline-2">
+<h2 id="org9d0717d">recentf  最近打开过的文件</h2>
+<div class="outline-text-2" id="text-org9d0717d">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq</span> recentf-max-saved-items 500)
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orge00f0c1" class="outline-2">
-<h2 id="orge00f0c1">即便重新打开emacs 也要保存emacs 的某些变量 ，比如kill-ring</h2>
-<div class="outline-text-2" id="text-orge00f0c1">
+<div id="outline-container-orgcfc4c4d" class="outline-2">
+<h2 id="orgcfc4c4d">即便重新打开emacs 也要保存emacs 的某些变量 ，比如kill-ring</h2>
+<div class="outline-text-2" id="text-orgcfc4c4d">
 <p>
 即保存剪切板中的内容<br />
 </p>
@@ -314,9 +314,9 @@ kill 不成功的会给出警告,如在dired-mode 中按C-k<br />
 </div>
 </div>
 </div>
-<div id="outline-container-orgbae14a0" class="outline-2">
-<h2 id="orgbae14a0">记住上次打开某文件时光标所在的位置</h2>
-<div class="outline-text-2" id="text-orgbae14a0">
+<div id="outline-container-orgd4b94c4" class="outline-2">
+<h2 id="orgd4b94c4">记住上次打开某文件时光标所在的位置</h2>
+<div class="outline-text-2" id="text-orgd4b94c4">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq-default</span> save-place t)
 (<span style="color: #FBDE2D;">require</span> '<span style="color: #D8FA3C;">saveplace</span>)
@@ -325,9 +325,9 @@ kill 不成功的会给出警告,如在dired-mode 中按C-k<br />
 </div>
 </div>
 </div>
-<div id="outline-container-org0ef7085" class="outline-2">
-<h2 id="org0ef7085">个人信息</h2>
-<div class="outline-text-2" id="text-org0ef7085">
+<div id="outline-container-orgd2390f0" class="outline-2">
+<h2 id="orgd2390f0">个人信息</h2>
+<div class="outline-text-2" id="text-orgd2390f0">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq</span> user-full-name <span style="color: #ffa07a;">"myname"</span>)
 (<span style="color: #FBDE2D;">setq</span> user-mail-address <span style="color: #ffa07a;">"my@qq.com"</span>)
@@ -335,18 +335,18 @@ kill 不成功的会给出警告,如在dired-mode 中按C-k<br />
 </div>
 </div>
 </div>
-<div id="outline-container-org671f7b6" class="outline-2">
-<h2 id="org671f7b6">y-or-n-p</h2>
-<div class="outline-text-2" id="text-org671f7b6">
+<div id="outline-container-orgf2713af" class="outline-2">
+<h2 id="orgf2713af">y-or-n-p</h2>
+<div class="outline-text-2" id="text-orgf2713af">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(fset 'yes-or-no-p 'y-or-n-p) <span style="color: #AEAEAE;">;; </span><span style="color: #AEAEAE;">&#25226;Yes&#29992;y&#20195;&#26367;</span>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org507336c" class="outline-2">
-<h2 id="org507336c">如果没选中区域，则默认选中当前行</h2>
-<div class="outline-text-2" id="text-org507336c">
+<div id="outline-container-org2d5ea8f" class="outline-2">
+<h2 id="org2d5ea8f">如果没选中区域，则默认选中当前行</h2>
+<div class="outline-text-2" id="text-org2d5ea8f">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp"><span style="color: #AEAEAE;">;;; </span><span style="color: #AEAEAE;">&#20851;&#20110;&#27809;&#26377;&#36873;&#20013;&#21306;&#22495;,&#21017;&#40664;&#35748;&#20026;&#36873;&#20013;&#25972;&#34892;&#30340;advice</span>
 <span style="color: #AEAEAE;">;;;;</span><span style="color: #AEAEAE;">&#40664;&#35748;&#24773;&#20917;&#19979;M-w&#22797;&#21046;&#19968;&#20010;&#21306;&#22495;&#65292;&#20294;&#26159;&#22914;&#26524;&#27809;&#26377;&#21306;&#22495;&#34987;&#36873;&#20013;&#65292;&#21017;&#22797;&#21046;&#24403;&#21069;&#34892;</span>
@@ -361,9 +361,9 @@ kill 不成功的会给出警告,如在dired-mode 中按C-k<br />
 </div>
 </div>
 </div>
-<div id="outline-container-org605d5d6" class="outline-2">
-<h2 id="org605d5d6">minibuffer 相关配置(minibuffer文件名补全相关)</h2>
-<div class="outline-text-2" id="text-org605d5d6">
+<div id="outline-container-orga5fbe79" class="outline-2">
+<h2 id="orga5fbe79">minibuffer 相关配置(minibuffer文件名补全相关)</h2>
+<div class="outline-text-2" id="text-orga5fbe79">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq-default</span>
  enable-recursive-minibuffers t        <span style="color: #AEAEAE;">;</span><span style="color: #AEAEAE;">&#22312;minibuffer &#20013;&#20063;&#21487;&#20197;&#20877;&#27425;&#20351;&#29992;minibuffer</span>
@@ -377,9 +377,9 @@ kill 不成功的会给出警告,如在dired-mode 中按C-k<br />
 </div>
 </div>
 </div>
-<div id="outline-container-org597bf65" class="outline-2">
-<h2 id="org597bf65">fill-column 当某行的长度大于70个字符的时候，再次输入文字会自动添加到下一行</h2>
-<div class="outline-text-2" id="text-org597bf65">
+<div id="outline-container-org16e93b4" class="outline-2">
+<h2 id="org16e93b4">fill-column 当某行的长度大于70个字符的时候，再次输入文字会自动添加到下一行</h2>
+<div class="outline-text-2" id="text-org16e93b4">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #FBDE2D;">setq-default</span> fill-column 80)
 &#25110;&#32773;&#21487;&#20197; C-x f &#20132;&#20114;&#24335;&#30340;&#35774;&#32622;&#36825;&#20010;&#20540;

@@ -47,13 +47,13 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org0701041">下载trang.jar rngconv.jar</a></li>
-<li><a href="#orga414449">2找到这几个文件,放到同一个目录</a></li>
-<li><a href="#org6c29891">具体操作</a></li>
-<li><a href="#org88ecfc5">spring-beans-3.0.xsd 转换成spring-beans-3.0.rnc</a></li>
-<li><a href="#org2593957">如何编辑applicationContext.xml 文件时,自动用spring-beans-3.0.rnc 对其进行解析</a></li>
-<li><a href="#orgc4d9e16">spring-aop-3.0.xsd 转换成spring-aop-3.0.rnc</a></li>
-<li><a href="#org39ce63e">合并成一个spring.rnc</a></li>
+<li><a href="#orga596d76">下载trang.jar rngconv.jar</a></li>
+<li><a href="#org5ba877d">2找到这几个文件,放到同一个目录</a></li>
+<li><a href="#org4ad30c0">具体操作</a></li>
+<li><a href="#orgce37b08">spring-beans-3.0.xsd 转换成spring-beans-3.0.rnc</a></li>
+<li><a href="#orgf15d460">如何编辑applicationContext.xml 文件时,自动用spring-beans-3.0.rnc 对其进行解析</a></li>
+<li><a href="#org4e70f5e">spring-aop-3.0.xsd 转换成spring-aop-3.0.rnc</a></li>
+<li><a href="#org065eb69">合并成一个spring.rnc</a></li>
 </ul>
 </div>
 </div>
@@ -87,18 +87,18 @@ xsd  &#x2013;&gt; rng &#x2013;&gt;rnc<br />
 如果一切都正常的话,那面上面这些已经足够了,但是实际情况总是会出一些小问题<br />
 下面具体分说<br />
 </p>
-<div id="outline-container-org0701041" class="outline-2">
-<h2 id="org0701041">下载trang.jar rngconv.jar</h2>
-<div class="outline-text-2" id="text-org0701041">
+<div id="outline-container-orga596d76" class="outline-2">
+<h2 id="orga596d76">下载trang.jar rngconv.jar</h2>
+<div class="outline-text-2" id="text-orga596d76">
 <p>
 首先你先要下载trang.jar rngconv.jar 等几个jar 包,当然可能会有几个依赖的jar<br />
 会一起用到,分别下载两个压缩包解压开找到jar 即可.<br />
 </p>
 </div>
 </div>
-<div id="outline-container-orga414449" class="outline-2">
-<h2 id="orga414449">2找到这几个文件,放到同一个目录</h2>
-<div class="outline-text-2" id="text-orga414449">
+<div id="outline-container-org5ba877d" class="outline-2">
+<h2 id="org5ba877d">2找到这几个文件,放到同一个目录</h2>
+<div class="outline-text-2" id="text-org5ba877d">
 <div class="org-src-container">
 <pre class="src src-sh">spring-aop-3.0.xsd
 spring-beans-3.0.xsd
@@ -117,12 +117,12 @@ spring-util-3.0.xsd
 </div>
 </div>
 </div>
-<div id="outline-container-org6c29891" class="outline-2">
-<h2 id="org6c29891">具体操作</h2>
+<div id="outline-container-org4ad30c0" class="outline-2">
+<h2 id="org4ad30c0">具体操作</h2>
 </div>
-<div id="outline-container-org88ecfc5" class="outline-2">
-<h2 id="org88ecfc5">spring-beans-3.0.xsd 转换成spring-beans-3.0.rnc</h2>
-<div class="outline-text-2" id="text-org88ecfc5">
+<div id="outline-container-orgce37b08" class="outline-2">
+<h2 id="orgce37b08">spring-beans-3.0.xsd 转换成spring-beans-3.0.rnc</h2>
+<div class="outline-text-2" id="text-orgce37b08">
 <p>
 当运行这条命令时,<br />
 </p>
@@ -175,9 +175,9 @@ namespace指向<a href="http://www.w3.org/XML/1998/namespace%E5%9C%B0%E5%9D%80%E
 </div>
 </div>
 
-<div id="outline-container-org2593957" class="outline-2">
-<h2 id="org2593957">如何编辑applicationContext.xml 文件时,自动用spring-beans-3.0.rnc 对其进行解析</h2>
-<div class="outline-text-2" id="text-org2593957">
+<div id="outline-container-orgf15d460" class="outline-2">
+<h2 id="orgf15d460">如何编辑applicationContext.xml 文件时,自动用spring-beans-3.0.rnc 对其进行解析</h2>
+<div class="outline-text-2" id="text-orgf15d460">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(eval-after-load 'rng-loc
   '(<span style="color: #FBDE2D;">progn</span>
@@ -268,9 +268,9 @@ namespace指向<a href="http://www.w3.org/XML/1998/namespace%E5%9C%B0%E5%9D%80%E
 </p>
 </div>
 </div>
-<div id="outline-container-orgc4d9e16" class="outline-2">
-<h2 id="orgc4d9e16">spring-aop-3.0.xsd 转换成spring-aop-3.0.rnc</h2>
-<div class="outline-text-2" id="text-orgc4d9e16">
+<div id="outline-container-org4e70f5e" class="outline-2">
+<h2 id="org4e70f5e">spring-aop-3.0.xsd 转换成spring-aop-3.0.rnc</h2>
+<div class="outline-text-2" id="text-org4e70f5e">
 <p>
 spring-aop-3.0.xsd比 spring-beans-3.0.xsd的处理要复杂一点<br />
 </p>
@@ -350,9 +350,9 @@ failed to load the grammar
 </div>
 
 
-<div id="outline-container-org39ce63e" class="outline-2">
-<h2 id="org39ce63e">合并成一个spring.rnc</h2>
-<div class="outline-text-2" id="text-org39ce63e">
+<div id="outline-container-org065eb69" class="outline-2">
+<h2 id="org065eb69">合并成一个spring.rnc</h2>
+<div class="outline-text-2" id="text-org065eb69">
 <p>
 通过修改 spring-aop-3.0.xsd,来包含其他几个文件来实现,这样生成的<br />
 spring-aop-3.0.rnc 就包含了其他几个xsd文件中的内容<br />

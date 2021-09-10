@@ -46,27 +46,27 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgc357279">摘要（ SUMMARY ）</a></li>
-<li><a href="#org2573c74">基本的光标控制（ BASIC CURSOR CONTROL ）</a></li>
-<li><a href="#orgbc37b82">当 EMACS 发呆时（ WHEN EMACS IS HUNG ）</a></li>
-<li><a href="#org8a9797d">无效化的命令（ DISABLED COMMANDS ）</a></li>
-<li><a href="#orgead1203">窗口（ WINDOWS ）</a></li>
-<li><a href="#org43d5865">插入与删除（ INSERTING AND DELETING ）</a></li>
-<li><a href="#org6a96150">取消动作（ UNDO ）</a></li>
-<li><a href="#org1e432cd">文件（ FILE ）</a></li>
-<li><a href="#orgc90e00f">Buffer</a></li>
-<li><a href="#orgbc47529">扩充命令集（ EXTENDING THE COMMAND SET ）</a></li>
-<li><a href="#orgcdd0011">自动存档（ AUTO SAVE ）</a></li>
-<li><a href="#org6cc3933">回应区（ ECHO AREA ）</a></li>
-<li><a href="#org177edea">状态行（ MODE LINE ）</a></li>
-<li><a href="#org920cd68">搜寻（ SEARCHING ）</a></li>
-<li><a href="#org419309a">多重窗口（ MULTIPLE WINDOWS ）</a></li>
-<li><a href="#org9a64c87">递迴编辑阶层（ RECURSIVE EDITING LEVELS ）</a></li>
-<li><a href="#orgf5d6b77">取得更多的帮助（ GETTING MORE HELP ）</a></li>
-<li><a href="#org9648b91">更多功能特色（ MORE FEATURES ）</a></li>
-<li><a href="#org87722fd">结论（ CONCLUSION ）</a></li>
-<li><a href="#org3d2377f">翻译（ TRANSLATION ）</a></li>
-<li><a href="#org5acf3fd">复製（ COPYING ）</a></li>
+<li><a href="#orgccf614d">摘要（ SUMMARY ）</a></li>
+<li><a href="#org4b37d9a">基本的光标控制（ BASIC CURSOR CONTROL ）</a></li>
+<li><a href="#org0251d1a">当 EMACS 发呆时（ WHEN EMACS IS HUNG ）</a></li>
+<li><a href="#orgc7239ae">无效化的命令（ DISABLED COMMANDS ）</a></li>
+<li><a href="#org33a6a89">窗口（ WINDOWS ）</a></li>
+<li><a href="#org33523be">插入与删除（ INSERTING AND DELETING ）</a></li>
+<li><a href="#org1974cbc">取消动作（ UNDO ）</a></li>
+<li><a href="#orgaa3a128">文件（ FILE ）</a></li>
+<li><a href="#org6b0fac3">Buffer</a></li>
+<li><a href="#orgc968a0f">扩充命令集（ EXTENDING THE COMMAND SET ）</a></li>
+<li><a href="#org732c515">自动存档（ AUTO SAVE ）</a></li>
+<li><a href="#org8d8318d">回应区（ ECHO AREA ）</a></li>
+<li><a href="#org55fcb9a">状态行（ MODE LINE ）</a></li>
+<li><a href="#org63e9991">搜寻（ SEARCHING ）</a></li>
+<li><a href="#org169e300">多重窗口（ MULTIPLE WINDOWS ）</a></li>
+<li><a href="#orgacfce9b">递迴编辑阶层（ RECURSIVE EDITING LEVELS ）</a></li>
+<li><a href="#org7683a01">取得更多的帮助（ GETTING MORE HELP ）</a></li>
+<li><a href="#org7d372f2">更多功能特色（ MORE FEATURES ）</a></li>
+<li><a href="#org7f35e2b">结论（ CONCLUSION ）</a></li>
+<li><a href="#org11e59f4">翻译（ TRANSLATION ）</a></li>
+<li><a href="#org56dbc8d">复製（ COPYING ）</a></li>
 </ul>
 </div>
 </div>
@@ -124,9 +124,9 @@ M-&lt;chr&gt;  表示当键入字符 &lt;chr&gt; 时 按住 META 或 EDIT 或 AL
 </p>
 
 
-<div id="outline-container-orgc357279" class="outline-2">
-<h2 id="orgc357279">摘要（ SUMMARY ）</h2>
-<div class="outline-text-2" id="text-orgc357279">
+<div id="outline-container-orgccf614d" class="outline-2">
+<h2 id="orgccf614d">摘要（ SUMMARY ）</h2>
+<div class="outline-text-2" id="text-orgccf614d">
 <hr />
 
 <p>
@@ -158,9 +158,9 @@ C-l     清除屏幕／窗口，再重新显示所有文字，<br />
 </div>
 
 
-<div id="outline-container-org2573c74" class="outline-2">
-<h2 id="org2573c74">基本的光标控制（ BASIC CURSOR CONTROL ）</h2>
-<div class="outline-text-2" id="text-org2573c74">
+<div id="outline-container-org4b37d9a" class="outline-2">
+<h2 id="org4b37d9a">基本的光标控制（ BASIC CURSOR CONTROL ）</h2>
+<div class="outline-text-2" id="text-org4b37d9a">
 <hr />
 
 <p>
@@ -172,7 +172,7 @@ C-l     清除屏幕／窗口，再重新显示所有文字，<br />
 置，并且使用命令 C-p 、 C-b 、 C-f 和 C-n 将比较有效率。这些字符和四个<br />
 方向键〔的功能〕是同等的，如下所示：<br />
 </p>
-<div class="HTML" id="org056a93d">
+<div class="HTML" id="orgd1a4865">
 <p>
 &lt;pre&gt;<br />
                              前一行 C-p<br />
@@ -474,9 +474,9 @@ C-v 和 M-v 则是另一类的例外。当给定一个参数时，它们卷动�
 </div>
 
 
-<div id="outline-container-orgbc37b82" class="outline-2">
-<h2 id="orgbc37b82">当 EMACS 发呆时（ WHEN EMACS IS HUNG ）</h2>
-<div class="outline-text-2" id="text-orgbc37b82">
+<div id="outline-container-org0251d1a" class="outline-2">
+<h2 id="org0251d1a">当 EMACS 发呆时（ WHEN EMACS IS HUNG ）</h2>
+<div class="outline-text-2" id="text-org0251d1a">
 <hr />
 
 <p>
@@ -501,9 +501,9 @@ C-v 和 M-v 则是另一类的例外。当给定一个参数时，它们卷动�
 </div>
 
 
-<div id="outline-container-org8a9797d" class="outline-2">
-<h2 id="org8a9797d">无效化的命令（ DISABLED COMMANDS ）</h2>
-<div class="outline-text-2" id="text-org8a9797d">
+<div id="outline-container-orgc7239ae" class="outline-2">
+<h2 id="orgc7239ae">无效化的命令（ DISABLED COMMANDS ）</h2>
+<div class="outline-text-2" id="text-orgc7239ae">
 <hr />
 
 <p>
@@ -528,9 +528,9 @@ C-v 和 M-v 则是另一类的例外。当给定一个参数时，它们卷动�
 </div>
 
 
-<div id="outline-container-orgead1203" class="outline-2">
-<h2 id="orgead1203">窗口（ WINDOWS ）</h2>
-<div class="outline-text-2" id="text-orgead1203">
+<div id="outline-container-org33a6a89" class="outline-2">
+<h2 id="org33a6a89">窗口（ WINDOWS ）</h2>
+<div class="outline-text-2" id="text-org33a6a89">
 <hr />
 
 <p>
@@ -569,9 +569,9 @@ CONTROL-x 作为开始。有一整个系列的命令是以 CONTROL-x 作为开�
 </div>
 
 
-<div id="outline-container-org43d5865" class="outline-2">
-<h2 id="org43d5865">插入与删除（ INSERTING AND DELETING ）</h2>
-<div class="outline-text-2" id="text-org43d5865">
+<div id="outline-container-org33523be" class="outline-2">
+<h2 id="org33523be">插入与删除（ INSERTING AND DELETING ）</h2>
+<div class="outline-text-2" id="text-org33523be">
 <hr />
 
 <p>
@@ -764,9 +764,9 @@ C-y 会把最近杀掉的粘贴，但是先前的文字并没有消失，您可�
 </div>
 
 
-<div id="outline-container-org6a96150" class="outline-2">
-<h2 id="org6a96150">取消动作（ UNDO ）</h2>
-<div class="outline-text-2" id="text-org6a96150">
+<div id="outline-container-org1974cbc" class="outline-2">
+<h2 id="org1974cbc">取消动作（ UNDO ）</h2>
+<div class="outline-text-2" id="text-org1974cbc">
 <hr />
 
 <p>
@@ -801,9 +801,9 @@ C-_ 与 C-/ 跟 C-x u 都执行undo 命令<br />
 </div>
 
 
-<div id="outline-container-org1e432cd" class="outline-2">
-<h2 id="org1e432cd">文件（ FILE ）</h2>
-<div class="outline-text-2" id="text-org1e432cd">
+<div id="outline-container-orgaa3a128" class="outline-2">
+<h2 id="orgaa3a128">文件（ FILE ）</h2>
+<div class="outline-text-2" id="text-orgaa3a128">
 <hr />
 
 <p>
@@ -890,9 +890,9 @@ Incremental Search ）」这个主题，以取得处理这个「功能」的建�
 </div>
 
 
-<div id="outline-container-orgc90e00f" class="outline-2">
-<h2 id="orgc90e00f">Buffer</h2>
-<div class="outline-text-2" id="text-orgc90e00f">
+<div id="outline-container-org6b0fac3" class="outline-2">
+<h2 id="org6b0fac3">Buffer</h2>
+<div class="outline-text-2" id="text-org6b0fac3">
 <hr />
 
 <p>
@@ -989,9 +989,9 @@ C-x s 会询问您关于您已做出修改但还没保存的每一个Buffer。�
 </div>
 
 
-<div id="outline-container-orgbc47529" class="outline-2">
-<h2 id="orgbc47529">扩充命令集（ EXTENDING THE COMMAND SET ）</h2>
-<div class="outline-text-2" id="text-orgbc47529">
+<div id="outline-container-orgc968a0f" class="outline-2">
+<h2 id="orgc968a0f">扩充命令集（ EXTENDING THE COMMAND SET ）</h2>
+<div class="outline-text-2" id="text-orgc968a0f">
 <hr />
 
 <p>
@@ -1056,9 +1056,9 @@ Notice how this line has changed: you've replaced&#x2026; 】<br />
 </div>
 
 
-<div id="outline-container-orgcdd0011" class="outline-2">
-<h2 id="orgcdd0011">自动存档（ AUTO SAVE ）</h2>
-<div class="outline-text-2" id="text-orgcdd0011">
+<div id="outline-container-org732c515" class="outline-2">
+<h2 id="org732c515">自动存档（ AUTO SAVE ）</h2>
+<div class="outline-text-2" id="text-org732c515">
 <hr />
 
 <p>
@@ -1079,9 +1079,9 @@ Notice how this line has changed: you've replaced&#x2026; 】<br />
 </div>
 
 
-<div id="outline-container-org6cc3933" class="outline-2">
-<h2 id="org6cc3933">回应区（ ECHO AREA ）</h2>
-<div class="outline-text-2" id="text-org6cc3933">
+<div id="outline-container-org8d8318d" class="outline-2">
+<h2 id="org8d8318d">回应区（ ECHO AREA ）</h2>
+<div class="outline-text-2" id="text-org8d8318d">
 <hr />
 
 <p>
@@ -1092,9 +1092,9 @@ Notice how this line has changed: you've replaced&#x2026; 】<br />
 </div>
 
 
-<div id="outline-container-org177edea" class="outline-2">
-<h2 id="org177edea">状态行（ MODE LINE ）</h2>
-<div class="outline-text-2" id="text-org177edea">
+<div id="outline-container-org55fcb9a" class="outline-2">
+<h2 id="org55fcb9a">状态行（ MODE LINE ）</h2>
+<div class="outline-text-2" id="text-org55fcb9a">
 <hr />
 
 <p>
@@ -1232,9 +1232,9 @@ mode ）。次要的模式并不是主模式的其他选择，而只是次要的
 </div>
 
 
-<div id="outline-container-org920cd68" class="outline-2">
-<h2 id="org920cd68">搜寻（ SEARCHING ）</h2>
-<div class="outline-text-2" id="text-org920cd68">
+<div id="outline-container-org63e9991" class="outline-2">
+<h2 id="org63e9991">搜寻（ SEARCHING ）</h2>
+<div class="outline-text-2" id="text-org63e9991">
 <hr />
 
 <p>
@@ -1305,9 +1305,9 @@ C-s 会开始一个搜寻，它会寻找搜寻单词串在目前光标位置「�
 </div>
 
 
-<div id="outline-container-org419309a" class="outline-2">
-<h2 id="org419309a">多重窗口（ MULTIPLE WINDOWS ）</h2>
-<div class="outline-text-2" id="text-org419309a">
+<div id="outline-container-org169e300" class="outline-2">
+<h2 id="org169e300">多重窗口（ MULTIPLE WINDOWS ）</h2>
+<div class="outline-text-2" id="text-org169e300">
 <hr />
 
 <p>
@@ -1401,9 +1401,9 @@ C-M-v 是 CONTROL-META 字符的一个例子。如果您有一个真的 META 键
 </div>
 
 
-<div id="outline-container-org9a64c87" class="outline-2">
-<h2 id="org9a64c87">递迴编辑阶层（ RECURSIVE EDITING LEVELS ）</h2>
-<div class="outline-text-2" id="text-org9a64c87">
+<div id="outline-container-orgacfce9b" class="outline-2">
+<h2 id="orgacfce9b">递迴编辑阶层（ RECURSIVE EDITING LEVELS ）</h2>
+<div class="outline-text-2" id="text-orgacfce9b">
 <hr />
 
 <p>
@@ -1429,9 +1429,9 @@ C-M-v 是 CONTROL-META 字符的一个例子。如果您有一个真的 META 键
 </div>
 
 
-<div id="outline-container-orgf5d6b77" class="outline-2">
-<h2 id="orgf5d6b77">取得更多的帮助（ GETTING MORE HELP ）</h2>
-<div class="outline-text-2" id="text-orgf5d6b77">
+<div id="outline-container-org7683a01" class="outline-2">
+<h2 id="org7683a01">取得更多的帮助（ GETTING MORE HELP ）</h2>
+<div class="outline-text-2" id="text-org7683a01">
 <hr />
 
 <p>
@@ -1557,9 +1557,9 @@ C-h i        阅读线上使用手册（ a.k.a. Info ）。<br />
 </div>
 
 
-<div id="outline-container-org9648b91" class="outline-2">
-<h2 id="org9648b91">更多功能特色（ MORE FEATURES ）</h2>
-<div class="outline-text-2" id="text-org9648b91">
+<div id="outline-container-org7d372f2" class="outline-2">
+<h2 id="org7d372f2">更多功能特色（ MORE FEATURES ）</h2>
+<div class="outline-text-2" id="text-org7d372f2">
 <hr />
 
 <p>
@@ -1589,9 +1589,9 @@ Info 中，称为「Dired」的节点中所解释的。<br />
 </div>
 
 
-<div id="outline-container-org87722fd" class="outline-2">
-<h2 id="org87722fd">结论（ CONCLUSION ）</h2>
-<div class="outline-text-2" id="text-org87722fd">
+<div id="outline-container-org7f35e2b" class="outline-2">
+<h2 id="org7f35e2b">结论（ CONCLUSION ）</h2>
+<div class="outline-text-2" id="text-org7f35e2b">
 <hr />
 
 <p>
@@ -1607,9 +1607,9 @@ Emacs，请使用 C-z 。<br />
 </div>
 
 
-<div id="outline-container-org3d2377f" class="outline-2">
-<h2 id="org3d2377f">翻译（ TRANSLATION ）</h2>
-<div class="outline-text-2" id="text-org3d2377f">
+<div id="outline-container-org11e59f4" class="outline-2">
+<h2 id="org11e59f4">翻译（ TRANSLATION ）</h2>
+<div class="outline-text-2" id="text-org11e59f4">
 <hr />
 
 <p>
@@ -1711,9 +1711,9 @@ issue here&gt;」。<br />
 </div>
 
 
-<div id="outline-container-org5acf3fd" class="outline-2">
-<h2 id="org5acf3fd">复製（ COPYING ）</h2>
-<div class="outline-text-2" id="text-org5acf3fd">
+<div id="outline-container-org56dbc8d" class="outline-2">
+<h2 id="org56dbc8d">复製（ COPYING ）</h2>
+<div class="outline-text-2" id="text-org56dbc8d">
 <hr />
 
 <p>
