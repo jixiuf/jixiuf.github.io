@@ -13,11 +13,10 @@ jobs:
       uses: docker://iquiw/alpine-emacs
       if: github.event.deleted == false
       with:
-        args: sh -c "apk add git;git checkout master;git checkout source;emacs -nw  -q -l ./build/org-publish.el --batch --funcall toggle-debug-on-error  --funcall publish-my-note-all"
-    - name: deploy
-      uses: peaceiris/actions-gh-pages@v1.1.0
+        args: sh -c "apk add git;emacs -nw  -q -l ./build/org-publish.el --batch --funcall toggle-debug-on-error  --funcall publish-my-note-all"
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
       if: success()
-      env:
-        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-        PUBLISH_BRANCH: master
-        PUBLISH_DIR: ./
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./public

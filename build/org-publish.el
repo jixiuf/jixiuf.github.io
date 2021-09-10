@@ -75,6 +75,7 @@
 (setq op/site-domain "http://jixiuf.github.io")
 ;;; for commenting, you can choose either disqus or duoshuo
 (setq op/personal-disqus-shortname "jixiuf")
+(setq op/repository-html-branch "source")
 (setq op/personal-duoshuo-shortname "jixiuf")
 (setq op/theme-root-directory (expand-file-name "./build/org-page-themes" (vmacs-project-root)))
 (setq op/theme 'jixiuf_theme)
@@ -88,41 +89,6 @@
 (with-eval-after-load 'org-exp-blocks  (add-to-list 'org-babel-load-languages '(ditaa . t)))
 ;; (org-babel-do-load-languages 'org-babel-load-languages '((emacs-lisp . t)))
 
-
-;; (declare-function org-publish "ox-publish")
-;; (declare-function yas-global-mode "yasnippet")
-
-
-;;;###autoload
-(defun publish-my-note-recent(&optional n)
-  "发布我的`note'笔记"
-  (interactive "p")
-  (when (zerop n) (setq n 1))
-  (save-some-buffers)
-  ;; (dolist (b (buffer-list))
-  ;;   (when (and (buffer-file-name b)
-  ;;              (file-in-directory-p (buffer-file-name b) op/repository-directory))
-  ;;     (kill-buffer b)))
-  (op/do-publication nil (format "HEAD~%d" n) t nil)
-  ;; (publish-single-project "note-src")
-  ;; ;; (publish-my-note-html)
-  ;; (publish-single-project "note-html")
-  ;; (view-sitemap-html-in-brower)
-  (dired op/repository-directory))
-
-;;;###autoload
-(defun publish-my-note-local-preview()
-  "发布我的`note'笔记"
-  (interactive)
-  (save-some-buffers)
-  ;; (dolist (b (buffer-list))
-  ;;   (when (and (buffer-file-name b)
-  ;;              (file-in-directory-p (buffer-file-name b) op/repository-directory))
-  ;;     (kill-buffer b)))
-  (call-interactively 'op/do-publication-and-preview-site)
-  (dired op/repository-directory))
-;;;###autoload
-
 (defun publish-my-note-all()
   "发布我的`note'笔记"
   (interactive)
@@ -131,8 +97,7 @@
   ;;   (when (and (buffer-file-name b)
   ;;              (file-in-directory-p (buffer-file-name b) op/repository-directory))
   ;;     (kill-buffer b)))
-  (op/do-publication t nil t t)
-  (dired op/repository-directory))
+  (op/do-publication t nil  (expand-file-name  "./blog" (vmacs-project-root))))
 
 
 

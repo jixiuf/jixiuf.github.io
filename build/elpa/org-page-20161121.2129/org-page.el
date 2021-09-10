@@ -92,38 +92,10 @@ then the branch `op/repository-html-branch' will be pushed to remote repo."
          (store-dir (if to-repo "~/.op-tmp/" pub-base-dir)) ; TODO customization
          (store-dir-abs (file-name-as-directory (expand-file-name store-dir)))
          changed-files all-files remote-repos)
-    (op/git-change-branch op/repository-directory op/repository-org-branch)
     (op/prepare-theme store-dir)
     (setq all-files (op/git-all-files op/repository-directory))
-    (setq changed-files (if force-all
-                            `(:update ,all-files :delete nil)
-                          (op/git-files-changed op/repository-directory
-                                                (or base-git-commit "HEAD~1"))))
+    (setq changed-files `(:update ,all-files :delete nil))
     (op/publish-changes all-files changed-files store-dir-abs)
-    (when to-repo
-      (op/git-change-branch op/repository-directory op/repository-html-branch)
-      (copy-directory store-dir op/repository-directory t t t)
-      (delete-directory store-dir t))
-    (when (and to-repo auto-commit)
-      (op/git-commit-changes op/repository-directory "Update published html \
-files, committed by org-page.")
-      (when auto-push
-        (setq remote-repos (op/git-remote-name op/repository-directory))
-        (if (not remote-repos)
-            (message "No valid remote repository found.")
-          (let (repo)
-            (if (> (length remote-repos) 1)
-                (setq repo (read-string
-                            (format "Which repo to push %s: "
-                                    (prin1-to-string remote-repos))
-                            (car remote-repos)))
-              (setq repo (car remote-repos)))
-            (if (not (member repo remote-repos))
-                (message "Invalid remote repository '%s'." repo)
-              (op/git-push-remote op/repository-directory
-                                  repo
-                                  op/repository-html-branch)))))
-      (op/git-change-branch op/repository-directory orig-branch))
     (if to-repo
         (message "Publication finished: on branch '%s' of repository '%s'."
                  op/repository-html-branch op/repository-directory)
